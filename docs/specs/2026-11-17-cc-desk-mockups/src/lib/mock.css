@@ -1,0 +1,296 @@
+/* Rules the sketch adds to the queue's sheet. Every value is a Survey token. */
+:root {
+	--rail-width: 23rem;
+}
+.rail-section + .rail-section {
+	margin-top: var(--spacing-24px);
+}
+.rail-row .sub {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--spacing-12px);
+}
+
+/* The scale bar, after the bar scale on a quadrangle map. */
+.scale {
+	display: flex;
+	height: var(--spacing-9px);
+	margin-block: var(--spacing-6px) var(--spacing-5px);
+	border: var(--border) solid var(--site-field-border);
+	background-color: var(--site-field-bg);
+}
+.scale.slim {
+	height: var(--spacing-6px);
+}
+.scale .seg {
+	flex-basis: 0;
+}
+.scale .seg + .seg {
+	border-inline-start: var(--border) solid var(--site-field-border);
+}
+.scale .done {
+	background-color: var(--color-base-content);
+}
+.scale .now,
+.scale .review {
+	background-color: var(--color-primary);
+}
+.scale .stalled {
+	background-color: var(--color-error);
+}
+
+.figures {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--spacing-12px);
+	font-size: var(--text-step-4);
+	color: var(--color-muted);
+	font-variant-numeric: tabular-nums;
+}
+.round-state {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spacing-6px);
+	font-weight: 600;
+}
+.tone-primary {
+	color: var(--color-primary);
+}
+.tone-error {
+	color: var(--cairn-error-ink);
+}
+.tone-primary .status {
+	background-color: var(--color-primary);
+	color: var(--color-primary);
+}
+.tone-error .status {
+	background-color: var(--color-error);
+	color: var(--color-error);
+}
+
+/* A release in the sidebar, with its running rounds hung on a rule beneath it. */
+.release {
+	padding: var(--spacing-8px) var(--spacing-12px) var(--spacing-12px);
+}
+.release + .release {
+	margin-top: var(--spacing-12px);
+}
+.release-head {
+	font-size: var(--text-step-9);
+	line-height: 1.35;
+}
+.release-head strong {
+	font-weight: 600;
+}
+.branch {
+	margin-top: var(--spacing-12px);
+	margin-inline-start: var(--spacing-4px);
+	padding-inline-start: var(--spacing-14px);
+	border-inline-start: var(--border) solid var(--site-field-border);
+	display: grid;
+	gap: var(--spacing-12px);
+}
+.branch-title {
+	font-size: var(--text-step-9);
+	line-height: 1.35;
+}
+
+/* The front page. */
+.desk {
+	padding: 2.5rem 2.5rem 6rem;
+	max-width: 76rem;
+}
+.desk h2 {
+	font-family: var(--font-display);
+	font-weight: var(--font-weight-heading);
+	font-size: var(--text-step-12);
+}
+.desk .next {
+	max-width: var(--doc-measure);
+	margin-bottom: 3rem;
+}
+.front-row {
+	display: block;
+	padding: var(--spacing-14px) var(--spacing-16px);
+	border: var(--border) solid var(--color-base-300);
+	border-radius: var(--radius-box);
+}
+.front-row:hover {
+	border-color: var(--site-field-border);
+}
+.boards {
+	display: grid;
+	gap: var(--spacing-24px);
+	align-items: start;
+}
+@media (min-width: 80rem) {
+	.boards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+.board {
+	border: var(--border) solid var(--color-base-300);
+	border-radius: var(--radius-box);
+	padding: var(--spacing-20px);
+}
+.board-head h3 {
+	font-size: var(--text-step-11);
+}
+.board-head h3 strong {
+	font-weight: 600;
+}
+.board-head .muted {
+	font-size: var(--text-step-9);
+}
+.rounds {
+	margin-top: var(--spacing-16px);
+	font-size: var(--text-step-9);
+}
+.rounds > li {
+	display: grid;
+	grid-template-columns: 1.5rem minmax(0, 1fr);
+	gap: var(--spacing-8px);
+	padding-block: var(--spacing-4px);
+	color: var(--color-muted);
+}
+.rounds .n {
+	font-variant-numeric: tabular-nums;
+	color: var(--color-muted);
+}
+.round-line,
+.passes li {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--spacing-12px);
+}
+.rounds .s {
+	font-size: var(--text-step-4);
+	white-space: nowrap;
+}
+.rounds > li:is(.now, .review, .stalled) {
+	margin-block: var(--spacing-8px);
+	color: var(--color-base-content);
+}
+.rounds > li:is(.now, .review, .stalled) > div > .round-line .t {
+	font-weight: 600;
+}
+.rounds :is(.now, .review) > .s,
+.rounds :is(.now, .review) > div > .round-line .s {
+	color: var(--color-primary);
+	font-weight: 600;
+}
+.rounds .stalled > .s,
+.rounds .stalled > div > .round-line .s {
+	color: var(--cairn-error-ink);
+	font-weight: 600;
+}
+.passes {
+	margin-block: var(--spacing-6px);
+	padding-inline-start: var(--spacing-14px);
+	border-inline-start: var(--border) solid var(--site-field-border);
+}
+.passes li {
+	justify-content: flex-start;
+	padding-block: var(--spacing-2px);
+}
+.passes li.todo {
+	color: var(--color-muted);
+}
+.passes .t {
+	flex: 1;
+}
+.rounds .note {
+	font-size: var(--text-step-4);
+	color: var(--color-muted);
+}
+
+.calls li {
+	padding-inline-start: var(--spacing-4px);
+}
+.sketch-flag {
+	position: fixed;
+	inset-block-end: var(--spacing-12px);
+	inset-inline-end: var(--spacing-12px);
+	padding: var(--spacing-4px) var(--spacing-10px);
+	border: var(--border) dashed var(--color-secondary);
+	border-radius: var(--radius-box);
+	background-color: var(--color-base-100);
+	font-size: var(--text-step-4);
+	color: var(--color-secondary);
+}
+
+/* A round that will ask for an answer: a survey mark under its segment and beside its name. */
+.mark {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-inline: var(--spacing-4px) solid transparent;
+	border-bottom: var(--spacing-7px) solid var(--site-contour);
+	margin-inline-end: var(--spacing-6px);
+}
+.scale {
+	position: relative;
+}
+.scale .seg {
+	position: relative;
+}
+.scale .seg.asks::after {
+	content: '';
+	position: absolute;
+	inset-block-start: calc(100% + var(--spacing-3px));
+	inset-inline-start: calc(50% - var(--spacing-4px));
+	border-inline: var(--spacing-4px) solid transparent;
+	border-bottom: var(--spacing-6px) solid var(--site-contour);
+}
+.scale:has(.asks) {
+	margin-bottom: var(--spacing-12px);
+}
+.asks-line a,
+.rounds .needs {
+	color: var(--color-secondary);
+	font-weight: 600;
+}
+.rounds a.t:hover,
+.branch-title:hover,
+.asks-line a:hover,
+.ahead a:hover {
+	text-decoration: underline;
+}
+.ahead {
+	display: grid;
+	gap: var(--spacing-10px);
+	font-size: var(--text-step-9);
+}
+.ahead li {
+	display: grid;
+}
+.ahead strong {
+	font-weight: 600;
+}
+
+/* The sidebar's forecast of the next decision session. */
+.session {
+	display: grid;
+	gap: var(--spacing-2px);
+	margin-inline: var(--spacing-4px);
+	padding: var(--spacing-12px) var(--spacing-14px);
+	border: var(--border) solid var(--site-field-border);
+	border-radius: var(--radius-box);
+	background-color: var(--color-base-100);
+}
+.session:hover {
+	border-color: var(--color-primary);
+}
+.session-label,
+.session-sub {
+	font-size: var(--text-step-4);
+	color: var(--color-muted);
+}
+.session-time {
+	font-family: var(--font-display);
+	font-weight: var(--font-weight-heading);
+	font-size: var(--text-step-12);
+	line-height: 1.25;
+	margin-bottom: var(--spacing-3px);
+}
