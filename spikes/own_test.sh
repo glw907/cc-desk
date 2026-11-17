@@ -85,7 +85,18 @@ rows.append({'id': 'ssss0001', 'sessionId': 's', 'name': 'sup', 'pid': 100, 'cwd
 json.dump(rows, open('$FAKE_LIST', 'w'))"
 bash "$HERE/own.sh" kill ssss0001 2>/dev/null
 check "kill of the supervisor is refused" test $? -ne 0
+bash "$HERE/own.sh" resume aaaa1111 --dangerously-skip-permissions 2>/dev/null
+check "resume with a bypass flag is refused" test $? -ne 0
+printf '{"permissions": {"defaultMode": "bypassPermissions"}}\n' >"$T/bad-settings.json"
+bash "$HERE/own.sh" launch x "$T/wt" --settings "$T/bad-settings.json" 2>/dev/null
+check "launch with a bypass settings file is refused" test $? -ne 0
 check "no claude command ran for any refusal" test ! -s "$FAKE_CALLS"
+
+# A launch adopts only a row that is new, never a pre-existing row of the same name.
+bash "$HERE/own.sh" launch stranger "$T/wt" >/dev/null 2>&1
+check "launch does not adopt a pre-existing row of the same name" test $? -ne 0
+check "the pre-existing row is not in owned.tsv" bash -c "! grep -q ffff6666 '$T/state/owned.tsv'"
+: >"$FAKE_CALLS"
 
 # A good stop is logged and runs.
 bash "$HERE/own.sh" stop aaaa1111 >/dev/null

@@ -66,9 +66,9 @@ Fallback applies: the launch carries the narrowest allow list that works, and a 
 ## Proof 2
 
 Not attempted. Its live samples come from proofs 1 and 4, and the plan's source of the six states is
-`claude agents --json --all`, whose `status` field held only `busy`, `idle`, or nothing. Telling a
-lost connection from a permission prompt needs the reason text in a job file, which the docs tell
-scripts not to read.
+`claude agents --json --all`, whose `status` field held only `busy`, `idle`, or nothing. That field
+alone may not separate a lost connection from a permission prompt. The rerun tests whether
+`claude logs` does, before it falls back on the job files the docs tell scripts not to read.
 
 Fallback applies: a state it can't tell shows as Needs you now with the session's last line.
 
@@ -89,7 +89,8 @@ Fallback applies: sessions launch with every tool, at the token cost the prototy
 
 The second place the plan lists, `claude -p "/usage" --model haiku`, answers the question. Run with
 `--output-format json`, it returned a result with `num_turns` 0, `total_cost_usd` 0, `duration_api_ms`
-0, and every token count 0. The figure sits in its `result` text. `spikes/7-usage/run` reruns it and
+0, every token count 0, and `local_command` set to `usage`, which marks it as answered by the
+client with no model turn. The figure sits in its `result` text. `spikes/7-usage/run` reruns it and
 `spikes/7-usage/read.py` parses it:
 
 ```text

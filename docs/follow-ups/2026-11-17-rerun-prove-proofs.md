@@ -13,5 +13,6 @@ To rerun:
    `docs/research/2026-11-17-prove-findings.md`.
 4. Proof 4 is the goal Geoff set: zero prompts for a pass from worktree to merge.
 
-Proof 1's real-drop test also stays open: on the next real `API unavailable` block, try
-`own.sh respawn` and then `own.sh resume` on that session.
+Proof 1's real-drop test also stays open: on the next real `API unavailable` block, give
+the session a few minutes to retry by itself, then try `own.sh respawn` and then `own.sh resume`
+on that session.

@@ -27,7 +27,7 @@ def read(doc):
     if not m:
         raise ValueError("no 'Current week (all models)' line")
     usage = doc.get("usage", {})
-    tokens = usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
+    tokens = sum(usage.get(k, 0) for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
     return int(m.group(1)), m.group(2).strip(), tokens, doc.get("total_cost_usd", 0)
 
 

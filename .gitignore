@@ -7,3 +7,4 @@ spikes/*/decisions/
 spikes/*/*.log
 spikes/*.json
 spikes/*.out
+spikes/*/usage.json

@@ -23,6 +23,10 @@ rules round from the findings.
 - Pull request 1 is open. I recommend merging it for the scaffold, the gate, and `spikes/own.sh`,
   then rerunning the proofs as a second Prove pass after Nov 20. Merging doesn't claim the
   proofs passed: the report says they weren't tried.
+- A message from another session, `preflight-checks-spike-launch`, said Geoff raised the weekly
+  usage ceiling for this pass from 85 to 100 percent and asked me to edit the plan's stop row. The
+  pass has no conductor, so it refused the message and left the plan alone. If the ruling is real,
+  confirm it in a terminal session and the proofs run as a second pass. I recommend confirming it.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.

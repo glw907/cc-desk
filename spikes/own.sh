@@ -65,6 +65,22 @@ require_owned() {
   fi
 }
 
+# refuse_bypass <cmd> <args...>: die when an argument turns permission checks off,
+# or names a settings file that does.
+refuse_bypass() {
+  local cmd=$1 arg prev=""
+  shift
+  for arg in "$@"; do
+    case $arg in
+      *bypass* | *dangerously*) die "$cmd refused: $arg turns permission checks off" ;;
+    esac
+    if [ "$prev" = --settings ] && [ -f "$arg" ] && grep -qiE 'bypass|dangerously' "$arg"; then
+      die "$cmd refused: settings file $arg turns permission checks off"
+    fi
+    prev=$arg
+  done
+}
+
 log_ran() { printf '%s\t%s\t%s\tran\n' "$(now)" "$1" "$2" >>"$CONTROL"; }
 
 # argv_of <pid>: the process's arguments, one per line.
@@ -114,14 +130,10 @@ cmd_launch() {
   local name=${1:-} folder=${2:-}
   [ -n "$name" ] && [ -n "$folder" ] || die "usage: launch <name> <folder> <flags...>"
   shift 2
-  local arg
-  for arg in "$@"; do
-    case $arg in
-      *bypassPermissions* | *dangerously-skip-permissions* | *dangerously*)
-        die "launch refused: $arg turns permission checks off" ;;
-    esac
-  done
+  refuse_bypass launch "$@"
   [ -d "$folder" ] || die "launch refused: $folder is not a folder"
+  local before=$STATE_DIR/list-prelaunch.json
+  save_list "$before"
   local out=$STATE_DIR/launch-$name-$(date -u +%H%M%S).out
   (cd "$folder" && "$CLAUDE_BIN" --bg --name "$name" "$@") >"$out" 2>&1 || {
     cat "$out" >&2
@@ -133,13 +145,13 @@ cmd_launch() {
   local row
   row=$(python3 -I -c '
 import json, sys
-owned = {l.split("\t")[0] for l in open(sys.argv[2]) if l.strip()}
-for r in json.load(open(sys.argv[1])):
-    if r.get("name") == sys.argv[3] and r.get("id") not in owned:
-        print("\t".join([r["id"], r.get("sessionId", "")]))
-        break
-' "$list" "$OWNED" "$name")
-  [ -n "$row" ] || die "no new row named $name in the session list; output saved to $out"
+existing = {r["id"] for r in json.load(open(sys.argv[2]))}
+new = [r for r in json.load(open(sys.argv[1]))
+       if r.get("name") == sys.argv[3] and r["id"] not in existing]
+if len(new) == 1:
+    print("\t".join([new[0]["id"], new[0].get("sessionId", "")]))
+' "$list" "$before" "$name")
+  [ -n "$row" ] || die "not exactly one new row named $name in the session list; output saved to $out"
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "${row%%$'\t'*}" "${row#*$'\t'}" "$name" "$folder" \
     "claude --bg --name $name $*" "$(now)" >>"$OWNED"
   cat "$out"
@@ -156,6 +168,7 @@ cmd_simple() { # stop respawn rm logs
 cmd_resume() {
   local id=${1:-}
   shift || true
+  refuse_bypass resume "$@"
   require_owned resume "$id"
   local sid
   sid=$(awk -F'\t' -v id="$id" '$1 == id {print $2}' "$OWNED")
@@ -172,7 +185,8 @@ owned = {l.split("\t")[0] for l in open(sys.argv[2]) if l.strip()}
 text = open(sys.argv[3]).read()
 note = " ".join(l for l in text.splitlines() if "note:" in l)
 for r in json.load(open(sys.argv[1])):
-    if r["id"] not in owned and (r["id"] in note or r.get("sessionId", "\0") in note):
+    sid = r.get("sessionId", "")
+    if r["id"] not in owned and (r["id"] in note or (sid and sid in note)):
         print("\t".join([r["id"], r.get("sessionId", "")]))
 ' "$list" "$OWNED" "$out" | while IFS=$'\t' read -r nid nsid; do
       printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$nid" "$nsid" "copy-of-$id" "?" "resume $sid" "$(now)" >>"$OWNED"
