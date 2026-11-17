@@ -16,17 +16,13 @@
 
 ## Next action
 
-Finish the Prove plan's pre-flight, then launch the executor from the main checkout:
+The Prove pass is running as the background session `cc-desk-prove`, launched on 2026-11-17 from
+the main checkout with `docs/plans/2026-11-17-prove-executor-prompt.txt`. It closes the pass
+itself and rewrites this file at close.
 
-```
-claude --bg --model sonnet --effort medium --advisor fable --name cc-desk-prove \
-  "$(cat docs/plans/2026-11-17-prove-executor-prompt.txt)"
-```
-
-Pre-flight has two steps only Geoff can do, both in the plan under "Steps for Geoff": accept the
-workspace trust prompt in this folder, and approve the text of the `cc-desk-prove-owned:` auto mode
-entry. The launching session then runs the plan's checks 3 to 7, which include creating the
-private scratch repo `glw907/cc-desk-scratch`.
+Pre-flight finished on 2026-11-17. Geoff accepted the workspace trust prompt and approved the
+`cc-desk-prove-owned:` auto mode entry, which landed in the dotfiles as `0a41854`. Checks 3 to 7
+passed, and the private scratch repo `glw907/cc-desk-scratch` exists with its gate workflow.
 
 The later rounds are designed after the Prove round's findings report lands.
 
