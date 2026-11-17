@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "gate: gofmt"
-unformatted=$(gofmt -l .)
+unformatted=$(git ls-files "*.go" | xargs -r gofmt -l)
 if [ -n "$unformatted" ]; then
   echo "gofmt: these files need formatting:" >&2
   echo "$unformatted" >&2
