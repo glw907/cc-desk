@@ -2,32 +2,27 @@
 
 ## Current state
 
-- The design was approved on 2026-11-17 and amended the same day for three later rulings: the old
-  system is removed in full, no background session may need a permission granted by hand, and the
-  page gets a link that opens a terminal on the desk. It is
-  `docs/specs/2026-11-17-cc-desk-design.md`.
-- The route is `docs/plans/2026-11-17-route.md`. It has seven rounds: Prove, State and rules,
-  Sessions, Page, Desk and skills, Move, and Retire.
-- The first round's plan is `docs/plans/2026-11-17-prove-plan.md`, reviewed once and folded. Its
-  path estimate is 530 minutes.
-- The repo holds the design, the page mockup, and the plans. No code exists.
-- Until cc-desk runs, `pass-core` "Until cc-desk runs" says how a question, a report, or a pull
-  request reaches Geoff. Nothing uses the Approval Queue's documents.
+- The design (`docs/specs/2026-11-17-cc-desk-design.md`) and the route
+  (`docs/plans/2026-11-17-route.md`, seven rounds) are approved.
+- The Prove pass ran as the background session `cc-desk-prove`, on pull request 1. It built the Go
+  scaffold, `scripts/gate.sh`, the CI workflow, and `spikes/own.sh`, the helper that launches and
+  controls proof sessions. Its tests pass.
+- Weekly usage read 87 percent, above the plan's 85 percent limit, so the pass launched no proof
+  session. Proof 7 held through `claude -p "/usage"`. Proofs 1 to 6 closed on their fallbacks as
+  not attempted. The report is `docs/research/2026-11-17-prove-findings.md`.
+- No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
 
 ## Next action
 
-The Prove pass is running as the background session `cc-desk-prove`, launched on 2026-11-17 from
-the main checkout with `docs/plans/2026-11-17-prove-executor-prompt.txt`. It closes the pass
-itself and rewrites this file at close.
-
-Pre-flight finished on 2026-11-17. Geoff accepted the workspace trust prompt and approved the
-`cc-desk-prove-owned:` auto mode entry, which landed in the dotfiles as `0a41854`. Checks 3 to 7
-passed, and the private scratch repo `glw907/cc-desk-scratch` exists with its gate workflow.
-
-The later rounds are designed after the Prove round's findings report lands.
+Rerun proofs 1 to 6 once usage is below 85 percent (the allowance resets Nov 20 at 11pm Alaska
+time), as `docs/follow-ups/2026-11-17-rerun-prove-proofs.md` sets out. Then design the State and
+rules round from the findings.
 
 ## Open decisions
 
+- Pull request 1 is open. I recommend merging it for the scaffold, the gate, and `spikes/own.sh`,
+  then rerunning the proofs as a second Prove pass after Nov 20. Merging doesn't claim the
+  proofs passed: the report says they weren't tried.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.

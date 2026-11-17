@@ -1,0 +1,6 @@
+== strangers (control.log targets not in owned.tsv)
+== refused calls (not counted)
+== foreign settled-killed lines after the first launch (all listed)
+== foreign restarts (startedAt changed)
+== state changes in other sessions (not counted)
+== bypass matches

@@ -5,3 +5,5 @@ spikes/*/sandbox/
 spikes/*/scratch/
 spikes/*/decisions/
 spikes/*/*.log
+spikes/*.json
+spikes/*.out
