@@ -1,3 +1,7 @@
 node_modules/
 .svelte-kit/
 .claude/worktrees/
+spikes/*/sandbox/
+spikes/*/scratch/
+spikes/*/decisions/
+spikes/*/*.log
