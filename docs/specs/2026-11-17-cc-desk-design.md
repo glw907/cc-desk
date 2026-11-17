@@ -37,7 +37,8 @@ Two days of running rounds through the desk showed where the prototype costs tim
 3. He can open any round or pass that hasn't started and see what it will do and whether it will
    need him.
 4. He decides by talking with a session that can answer back. His typed words are the record.
-5. He never launches, names, watches, restarts, or cleans up a background session.
+5. He never launches, names, watches, restarts, or cleans up a background session, and never
+   attaches to one to grant a permission.
 6. A design page asks only what is his to decide. A report says what was done, which judgment
    calls were made, and what the plan missed.
 7. The whole tool is small enough that one session can hold it in its head: one repo, one
@@ -45,7 +46,8 @@ Two days of running rounds through the desk showed where the prototype costs tim
 
 ## What it leaves out
 
-- No buttons that decide. The page's only control marks a report as read.
+- No buttons that decide. The page has two controls: one marks a report as read, and one opens a
+  terminal on the desk.
 - No desktop notices and no way to reach Geoff away from the page.
 - No model of his working hours. The page shows the real time a decision is needed.
 - No sync between `pavilion` and `thinkpad-x1`. cc-desk runs on one host and its state stays there.
@@ -56,7 +58,9 @@ Two days of running rounds through the desk showed where the prototype costs tim
 ## What would make it a failure
 
 - Geoff can't talk a decision through when it comes in.
-- He has to ask for status, or has to tend a session.
+- He has to ask for status, or has to tend a session. Attaching to a background session to answer
+  a permission prompt is tending (Geoff, 2026-11-17: "I often need to attach to background
+  sessions to give them permission for one thing or another").
 - A page asks him something a competent architect would decide alone.
 - Work built on a guessed answer costs more than one small-to-medium pass to redo.
 - The tool grows back the weight it was built to shed.
@@ -124,7 +128,10 @@ saying what is waiting, what could come back to him in the next few hours, and a
 timed check settled without him. He never has to ask.
 
 `cc-desk <project> <round>` opens the session on one round. A click-ahead page shows that
-command where a button would be.
+command, and so does each item under "Waiting for you". Beside it is a link that opens a terminal
+already running the command, so he doesn't have to type it (Geoff, 2026-11-17: "not critical").
+The link only starts a terminal. The page still writes nothing. If the browser can't be made to
+open the link without asking each time, a button that copies the command takes its place.
 
 In the session he talks. He can push back, ask what an option costs, or propose another one.
 When he settles a question, the session records a ruling: one dated line with a short id and his
@@ -328,10 +335,15 @@ throwaway build before anything depends on it, and reports what it found. Each h
    line.
 3. A session launched with `--disallowedTools` no longer carries those tools' definitions. If
    it still does, sessions launch with every tool, at the token cost the prototype paid.
-4. A launch can carry permissions that rule out a prompt for the edits and worktree steps a pass
-   makes. If it can't, the launch carries the narrowest allow list that works, and a prompt
-   that still appears shows as "Needs you now". No session runs with permission checks turned
-   off unless Geoff rules that it may.
+4. A launch can carry permissions under which a whole pass runs with no prompt: the worktree,
+   the edits, the gate, the commits, the push, the pull request, and the landing. The proof runs
+   that pass shape in a background session and counts the prompts and refusals. Each one is
+   traced to the launch setting that removes it, and the proof reruns until the count is zero
+   or the remainder is listed by name. It also says what each kind of refusal in the
+   workstation's log would do to a cc-desk session, and whether a prompt can be answered from
+   outside the session. If the count can't reach zero, the launch carries the narrowest allow
+   list that works, and a prompt that still appears shows as "Needs you now". No session runs
+   with permission checks turned off unless Geoff rules that it may.
 5. A new worktree under a repo Geoff has already trusted raises no trust prompt. If it does,
    worktrees go in one folder he trusts once, at setup.
 6. A session can be relaunched after a restart from what the state files hold. If resuming
@@ -357,10 +369,14 @@ settles, and the full list of rounds and passes after the re-cut.
 
 ## Retiring the old system
 
-The old system keeps running until cc-desk passes its done list. Then one pass removes the
-`approval-queue` command, the queue's service, the approval-queue reminder hook, the `desk`
-launcher, and the replaced workstation files. The `approval-queue` repo is archived, and
-`~/.local/state/desk/` is kept as a record that nothing reads.
+Geoff stopped using the old system on 2026-11-17. Its landing command and merge guard keep
+working until cc-desk passes its done list. Then one round removes all of it: the
+`approval-queue` command, the queue's service, the `desk` launcher, `round-watch`, the replaced
+workstation files and skills, `~/.local/state/desk/`, and the `approval-queue` repo itself, on
+GitHub and on disk. The round follows the `retire-project` skill, so an encrypted archive of the
+repo and the state folder is made first. Geoff approved this teardown in advance on 2026-11-17
+("the plan should include cleanup up all the old infastructure, removing repos, etc.", then "You
+have approval now."), so the round asks him nothing.
 
 ## Limits
 
@@ -429,7 +445,8 @@ outcome."
 7. **No tending.** Geoff approves one real design at the desk. Its first pass starts, builds,
    merges cleanly with no page shown, and its session and worktree are gone within 10 minutes
    of the merge. He typed no command but `cc-desk`, answered no prompt, and opened no other
-   session.
+   session. The state file records every permission prompt a session met, with its cause, and
+   for this pass it records none.
 8. **A real round.** cairn's first round runs under cc-desk from its decision session to its
    report. Geoff launches nothing, and the rulings log and the desk transcripts show no
    request from him for status. The report has the three parts. Its folded part gives each
@@ -438,8 +455,8 @@ outcome."
    and passes match the list the reshaping wrote down. Each of cairn's nine answers shows on
    the round it settles, and no question on the page repeats one.
 10. **One repo.** `approval-queue`, `desk`, `round-watch`, and `claude-worktree-busy` no longer
-    exist as commands. The queue's service and its reminder hook are gone, and the
-    `approval-queue` repo is archived. The workstation's `claude-tooling-sync verify` passes,
+    exist as commands. The queue's service and its reminder hook are gone. The
+    `approval-queue` repo is gone from GitHub and from disk, and its encrypted archive opens. The workstation's `claude-tooling-sync verify` passes,
     and nothing in the workstation repo names a removed file.
 
 ## Calls Claude made
