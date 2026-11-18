@@ -11,3 +11,5 @@ What you write for a person follows `~/.claude/docs/voice/written-for-people.md`
 When the design is written, finish with this command:
 {{range .Verbs}}- `{{.}}`
 {{end}}
+
+To file a follow-up, write its body to a file in the job `tmp` folder first, then run `{{.FollowUp}} <title> --body-file <path>`.
