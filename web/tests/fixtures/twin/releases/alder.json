@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "project": "alder",
+  "name": "v1",
+  "repo": "glw907/alder",
+  "rounds": [
+    {"name": "r1", "summary": "Alder's first round.", "needs_geoff": false, "no_need_reason": "Routine upkeep.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "a-one", "summary": "Alder pass one.", "round": "r1", "planned_minutes": 60, "state": "not_started"},
+    {"name": "a-two", "summary": "Alder pass two.", "round": "r1", "planned_minutes": 40, "state": "not_started", "after": ["a-one"]}
+  ]
+}
