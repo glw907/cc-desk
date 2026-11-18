@@ -47,6 +47,9 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
   Its follow-ups: `merge-question-answer.md`, `ready-verb-service-start.md`,
   `pull-request-closed-without-merge.md`, `cleanup-of-a-release-marked-done.md`.
 
+- Pass 5 (sessions-timer), pull request 16, session `cc-desk-sessions-timer`, id
+  `fc9b74c0-290a-43ec-94ad-314cb35eb89d`, installs the timer and ran items 6 and 7 live.
+
 ## Next action
 
 The conductor runs in Geoff's terminal. After a crash, any session can resume it from

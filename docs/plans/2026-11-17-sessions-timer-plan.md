@@ -132,7 +132,7 @@ them.
 
 - `Type=oneshot`
 - `ExecStart=%h/.local/share/cc-desk/bin/cc-desk --state-dir %h/.local/state/cc-desk check`
-- `Environment=PATH=%h/.local/share/cc-desk/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin`
+- `Environment=PATH=%h/.local/share/cc-desk/bin:%h/.local/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin`
 - `KillMode=process`
 
 `cc-desk-check.timer` has `OnStartupSec=1min`, `OnUnitActiveSec=5min`, and `AccuracySec=1s`, and installs into
