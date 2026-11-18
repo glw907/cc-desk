@@ -87,6 +87,20 @@ func TestNeedsYouNowOlderStopHasNoSession(t *testing.T) {
 	}
 }
 
+func TestNeedsYouNowFailedLaunchShowsItsError(t *testing.T) {
+	now := clock
+	rf := asking("a", 0, true)
+	b := building("w", "r1", 10, now.Add(-20*time.Minute))
+	b.State, b.StopReason, b.StopDetail = state.Stopped, state.StopLaunchFailed, "claude --bg: exit status 1"
+	b.Stops = []state.StopInterval{{Start: now.Add(-10 * time.Minute)}}
+	rf.Passes = append(rf.Passes, b)
+	snap := Build(&state.State{Releases: []*state.ReleaseFile{rf}}, now)
+
+	if len(snap.NeedsYouNow) != 1 || snap.NeedsYouNow[0].Cause != "claude --bg: exit status 1" {
+		t.Fatalf("needs_you_now = %+v, want the launch error as the cause", snap.NeedsYouNow)
+	}
+}
+
 func TestNeedsYouNowListFailures(t *testing.T) {
 	rf := asking("a", 0, true)
 	for n, want := range map[int]string{2: "nothing_waiting", 3: "needs_you_now"} {
