@@ -12,4 +12,6 @@ Report a stop with one of these commands, and nothing else:
 {{range .Verbs}}- `{{.}}`
 {{end}}
 
+Once the pull request is ready and reviewed, report it with `{{.Ready}} --pr <number> --commit <sha> --verdict <accept|fix> --design <inside|outside>`, naming the pull request, its last commit, the review's verdict, and whether the change stays inside the approved design.
+
 To file a follow-up, write its body to a file in the job `tmp` folder first, then run `{{.FollowUp}} <title> --body-file <path>`.
