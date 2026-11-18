@@ -6,3 +6,8 @@ replanned
 replans
 Geoff
 Geoff.s
+goldens
+gofmt
+subtest
+todo
+heredoc

@@ -3,6 +3,7 @@ package state
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strings"
 )
@@ -15,7 +16,7 @@ func validPassState(s PassState) bool {
 	return false
 }
 
-// ValidStopReason reports whether r is one of the five stop reasons.
+// ValidStopReason reports whether r is a stop reason.
 func ValidStopReason(r StopReason) bool { return slices.Contains(StopReasons, r) }
 
 // validateRelease checks one release on its own: required fields, names
@@ -94,6 +95,9 @@ func validateRelease(r *Release) error {
 		if err := validatePass(&r.Passes[i], rounds, passes, questions); err != nil {
 			return err
 		}
+	}
+	if err := validateReleaseSessions(r); err != nil {
+		return err
 	}
 	return findLoop(r)
 }
@@ -179,11 +183,96 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	if p.State == Stopped && len(p.Stops) == 0 {
 		return fmt.Errorf("pass %q is stopped and needs an open stop interval", p.Name)
 	}
+	if err := validatePassSession(p); err != nil {
+		return err
+	}
 	if p.State == Stopped && !ValidStopReason(p.StopReason) {
-		return fmt.Errorf("pass %q is stopped with reason %q, which is not one of the five", p.Name, p.StopReason)
+		return fmt.Errorf("pass %q is stopped with reason %q, which is not a stop reason", p.Name, p.StopReason)
 	}
 	if p.StopReason != "" && !ValidStopReason(p.StopReason) {
-		return fmt.Errorf("pass %q has stop reason %q, which is not one of the five", p.Name, p.StopReason)
+		return fmt.Errorf("pass %q has stop reason %q, which is not a stop reason", p.Name, p.StopReason)
+	}
+	return nil
+}
+
+func validatePassSession(p *Pass) error {
+	if s := p.Session; s != nil {
+		if p.State != Building && p.State != Stopped && p.State != Done {
+			return fmt.Errorf("pass %q is %s but carries a session record", p.Name, p.State)
+		}
+		if err := validateSession(s, KindPass, fmt.Sprintf("pass %q", p.Name)); err != nil {
+			return err
+		}
+		if s.StopReason != "" || s.Stopped != nil {
+			return fmt.Errorf("pass %q: a pass's stop stays on the pass, not on its session record", p.Name)
+		}
+	}
+	if pr := p.PullRequest; pr != nil && pr.Number <= 0 {
+		return fmt.Errorf(`pass %q: pull_request needs a "number" above 0`, p.Name)
+	}
+	return nil
+}
+
+// validateSession checks one session record: its kind matches where it sits,
+// its identity fields are set, its counts are in range, and a stop reason is
+// one of the ten and comes with its time. place names the record in an error.
+func validateSession(s *Session, want SessionKind, place string) error {
+	if s.Kind != want {
+		return fmt.Errorf("%s: session kind %q, want %q", place, s.Kind, want)
+	}
+	for _, f := range []struct{ name, val string }{
+		{"name", s.Name}, {"short_id", s.ShortID}, {"session_id", s.SessionID}, {"branch", s.Branch},
+	} {
+		if f.val == "" {
+			return fmt.Errorf(`%s: session record is missing "%s"`, place, f.name)
+		}
+	}
+	if !filepath.IsAbs(s.Worktree) {
+		return fmt.Errorf(`%s: session "worktree" %q is not an absolute path`, place, s.Worktree)
+	}
+	if s.Launched.IsZero() {
+		return fmt.Errorf(`%s: session record is missing "launched"`, place)
+	}
+	if s.LaunchTries < 1 || s.LaunchTries > 2 {
+		return fmt.Errorf(`%s: "launch_tries" %d is not 1 or 2`, place, s.LaunchTries)
+	}
+	for i, r := range s.Relaunches {
+		if r.Time.IsZero() || r.Cause == "" {
+			return fmt.Errorf(`%s: relaunch %d needs "time" and "cause"`, place, i+1)
+		}
+	}
+	for i, p := range s.Prompts {
+		if p.Time.IsZero() || p.Tool == "" {
+			return fmt.Errorf(`%s: prompt %d needs "time" and "tool"`, place, i+1)
+		}
+	}
+	if (s.StopReason == "") != (s.Stopped == nil) {
+		return fmt.Errorf(`%s: "stop_reason" and "stopped" are set together`, place)
+	}
+	if s.StopReason != "" && !ValidStopReason(s.StopReason) {
+		return fmt.Errorf("%s: session stop reason %q is not a stop reason", place, s.StopReason)
+	}
+	return nil
+}
+
+func validateReleaseSessions(r *Release) error {
+	if (r.Checkout == "") != (r.DefaultBranch == "") {
+		return errors.New(`"checkout" and "default_branch" are set together`)
+	}
+	if r.Checkout != "" && !filepath.IsAbs(r.Checkout) {
+		return fmt.Errorf(`"checkout" %q is not an absolute path`, r.Checkout)
+	}
+	if c := r.Conductor; c != nil {
+		if err := validateSession(c, KindConductor, "conductor"); err != nil {
+			return err
+		}
+	}
+	for i := range r.Rounds {
+		if s := r.Rounds[i].Session; s != nil {
+			if err := validateSession(s, KindDesign, fmt.Sprintf("round %q", r.Rounds[i].Name)); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -300,5 +389,54 @@ func Check(s *State) error {
 			return &FileError{File: rf.Path, Err: err}
 		}
 	}
-	return nil
+	return checkSessionsUnique(s)
+}
+
+// LiveSessions calls f for each live session record of each live release,
+// with the name of the record's place: pass:<name>, round:<name>, or
+// conductor.
+func (s *State) LiveSessions(f func(rf *ReleaseFile, record string, sess *Session)) {
+	for _, rf := range s.Releases {
+		if rf.Done {
+			continue
+		}
+		if c := rf.Conductor; c != nil {
+			f(rf, "conductor", c)
+		}
+		for i := range rf.Rounds {
+			if sess := rf.Rounds[i].Session; sess != nil {
+				f(rf, "round:"+rf.Rounds[i].Name, sess)
+			}
+		}
+		for i := range rf.Passes {
+			if sess := rf.Passes[i].Session; sess != nil {
+				f(rf, "pass:"+rf.Passes[i].Name, sess)
+			}
+		}
+	}
+}
+
+// checkSessionsUnique refuses two live records that name one worktree or
+// one session name, across every live release. The error names both.
+func checkSessionsUnique(s *State) error {
+	type seen struct{ file, place string }
+	worktrees := map[string]seen{}
+	names := map[string]seen{}
+	var err error
+	s.LiveSessions(func(rf *ReleaseFile, record string, sess *Session) {
+		if err != nil || sess.Ended != nil {
+			return
+		}
+		here := seen{rf.Path, rf.Project + "/" + record}
+		if prev, ok := worktrees[sess.Worktree]; ok {
+			err = &FileError{File: rf.Path, Err: fmt.Errorf("%s and %s name one worktree, %s", prev.place, here.place, sess.Worktree)}
+			return
+		}
+		if prev, ok := names[sess.Name]; ok {
+			err = &FileError{File: rf.Path, Err: fmt.Errorf("%s and %s name one session, %s", prev.place, here.place, sess.Name)}
+			return
+		}
+		worktrees[sess.Worktree], names[sess.Name] = here, here
+	})
+	return err
 }

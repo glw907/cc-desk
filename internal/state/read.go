@@ -164,7 +164,7 @@ func loadReleases(dir, rel string, done bool) ([]*ReleaseFile, error) {
 }
 
 // Load reads every state file under dir, strictly, in a fixed order:
-// releases, done releases, desks, settings, usage, rulings, forecasts. It
+// releases, done releases, desks, settings, usage, check, rulings, forecasts. It
 // then runs the checks across files. The first failure wins and is a
 // *FileError. An absent optional file loads as empty.
 func Load(dir string) (*State, error) {
@@ -230,6 +230,23 @@ func Load(dir string) (*State, error) {
 			return nil, &FileError{File: "usage.json", Err: errors.New(`needs "reset_text", or "error" for a reading that failed`)}
 		}
 		s.Usage = &usage
+	}
+
+	s.Check = CheckFile{Format: Format, Decisions: []Decision{}}
+	var check CheckFile
+	if found, err := readJSON(dir, CheckStateFile, &check); err != nil {
+		return nil, err
+	} else if found {
+		if err := checkFormat(check.Format); err != nil {
+			return nil, &FileError{File: CheckStateFile, Err: err}
+		}
+		if check.ListFailures < 0 {
+			return nil, &FileError{File: CheckStateFile, Err: fmt.Errorf(`"list_failures" %d is below 0`, check.ListFailures)}
+		}
+		if check.Decisions == nil {
+			check.Decisions = []Decision{}
+		}
+		s.Check = check
 	}
 
 	if s.Rulings, err = readJSONL(dir, "rulings.jsonl", func(r *Ruling) int { return r.Format }); err != nil {

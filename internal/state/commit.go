@@ -32,6 +32,9 @@ const (
 	DesksFile    = "desks.json"
 )
 
+// CheckStateFile is check.json, which the session check writes.
+const CheckStateFile = "check.json"
+
 // Render turns the state into the bytes of snapshot.json and the forecast
 // line the same build gives for the next session. Commit stamps the line's
 // format and time made.
@@ -80,7 +83,9 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 			return nil, err
 		}
 	}
-	settle(s, now)
+	if !s.noSettle {
+		settle(s, now)
+	}
 
 	// The ruling line goes first: a crash before the release write leaves a
 	// ruling no question points at, which loads, never an answer that
@@ -115,6 +120,16 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		}
 		if err := atomicfile.WriteFile(filepath.Join(dir, UsageFile), data, 0o644); err != nil {
 			return nil, fmt.Errorf("write %s: %w", UsageFile, err)
+		}
+	}
+
+	if s.checkDirty {
+		data, err := marshal(s.Check)
+		if err != nil {
+			return nil, fmt.Errorf("encode %s: %w", CheckStateFile, err)
+		}
+		if err := atomicfile.WriteFile(filepath.Join(dir, CheckStateFile), data, 0o644); err != nil {
+			return nil, fmt.Errorf("write %s: %w", CheckStateFile, err)
 		}
 	}
 
