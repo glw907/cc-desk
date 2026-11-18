@@ -25,8 +25,9 @@ It doesn't mean the behavior failed in every form: each section says what was tr
 
 The weekly figure read 86 percent at proof 1 and 87 percent at proofs 4, 2, 6, and 3, under the
 pass's ceiling of 100 percent (raised from 85 on 2026-11-17). No proof was cut short or marked on the
-figure. Every proof session launched and stopped through `bash spikes/own.sh`. The closing audit
-numbers are in the pull request.
+figure. Every proof session launched and stopped through `bash spikes/own.sh`. Its closing audit
+printed `strangers: 0`, `foreign kills: 0`, `foreign restarts: 0`, `bypass: 0`, and one allow hook,
+`spikes/4-permissions/decide-hook.py`, the hook proof 4 used.
 
 Three things happened outside the plan, and each is recorded here:
 
