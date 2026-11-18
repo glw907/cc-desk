@@ -1,0 +1,222 @@
+[
+ {
+  "name": "working, proof 1 cut1",
+  "row": {
+   "pid": 2930080,
+   "id": "5305f47d",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+   "kind": "background",
+   "startedAt": 1794971323490,
+   "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+   "name": "ccd-spike-1-wake",
+   "status": "busy",
+   "state": "working"
+  },
+  "expect": "working"
+ },
+ {
+  "name": "working, proof 1 cut2 (60 s later)",
+  "row": {
+   "pid": 2930080,
+   "id": "5305f47d",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+   "kind": "background",
+   "startedAt": 1794971323490,
+   "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+   "name": "ccd-spike-1-wake",
+   "status": "busy",
+   "state": "working"
+  },
+  "expect": "working"
+ },
+ {
+  "name": "idle, own run save 1",
+  "row": {
+   "pid": 2953370,
+   "id": "0c026eb1",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-idle",
+   "kind": "background",
+   "startedAt": 1794972886321,
+   "sessionId": "0c026eb1-740c-486f-80ee-6c26ec6ecd6e",
+   "name": "ccd-spike-2-idle",
+   "status": "idle",
+   "state": "done"
+  },
+  "logs": "\u001b7\u001b8 ▐ ▛███▛█ Claude Code v2.1.326 ▝▜ █████ █▀ Sonnet 5.5 with low effort · Claude Ultra ▝▝ ▝▝ ~/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-idle ❯ Reply with the single word done and run nothing. · Brewing… ○ low · /effort ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ccd-spike-2-idle ─ ❯ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ⏸ manual mode on (running SessionStart hook · 0s) ❯ · ← 1 agent · esc to interrupt ✢ * ✶ (running UserPromptSubmit hook · 0s) ✻ ○ low · /effort · Update available · run brew upgrade claude-code@latest ✽ ✻ ✶ * ● done ✢ Brewing… (1s · ↓ 2 tokens) Brewing… 3 · Brewing… Brewing… Brewing… ✢ Brewing… 2 Brewing… * ✶ ✻ Brewing… ✽ Brewing… Brewing… Brewing… Brewing… ✻ Brewing… 3 Brewing… ✶ * ✢ Brewing… · Brewing… Brewing… Brewing… Brewing… ✢ Brewing… 4 ✻ Crunched for 4s · done 6:34 PM ❯ You've used 87% of your weekly limit · resets Nov 20, 11pm (America/Anchorage) 2 s 2",
+  "expect": "idle"
+ },
+ {
+  "name": "idle, own run save 2 (60 s later)",
+  "row": {
+   "pid": 2953370,
+   "id": "0c026eb1",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-idle",
+   "kind": "background",
+   "startedAt": 1794972886321,
+   "sessionId": "0c026eb1-740c-486f-80ee-6c26ec6ecd6e",
+   "name": "ccd-spike-2-idle",
+   "status": "idle",
+   "state": "done"
+  },
+  "logs": "\u001b7\u001b8 ▐ ▛███▛█ Claude Code v2.1.326 ▝▜ █████ █▀ Sonnet 5.5 with low effort · Claude Ultra ▝▝ ▝▝ ~/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-idle ❯ Reply with the single word done and run nothing. · Brewing… ○ low · /effort ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ccd-spike-2-idle ─ ❯ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ⏸ manual mode on (running SessionStart hook · 0s) ❯ · ← 1 agent · esc to interrupt ✢ * ✶ (running UserPromptSubmit hook · 0s) ✻ ○ low · /effort · Update available · run brew upgrade claude-code@latest ✽ ✻ ✶ * ● done ✢ Brewing… (1s · ↓ 2 tokens) Brewing… 3 · Brewing… Brewing… Brewing… ✢ Brewing… 2 Brewing… * ✶ ✻ Brewing… ✽ Brewing… Brewing… Brewing… Brewing… ✻ Brewing… 3 Brewing… ✶ * ✢ Brewing… · Brewing… Brewing… Brewing… Brewing… ✢ Brewing… 4 ✻ Crunched for 4s · done 6:34 PM ❯ You've used 87% of your weekly limit · resets Nov 20, 11pm (America/Anchorage) 2 s 2",
+  "expect": "idle"
+ },
+ {
+  "name": "permission prompt, save 1",
+  "row": {
+   "pid": 2955776,
+   "id": "85b9dc54",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-prompt",
+   "kind": "background",
+   "startedAt": 1794972890338,
+   "sessionId": "85b9dc54-3b40-4893-9141-8955bdbf276b",
+   "name": "ccd-spike-2-prompt",
+   "status": "waiting",
+   "waitingFor": "permission prompt",
+   "state": "blocked"
+  },
+  "logs": "t ✢ 1 agent · esc to interrupt * ✶ (running UserPromptSubmit hook · 0s) ✻ ✽ ✻ ✶ * ● Running 1 shell command… ✢ · ⎿ $ date -u +%s > probe.txt Slithering… (running PreToolUse hooks… 0/7 · 1s) 6 Slithering… · ↓ 7 tokens) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Bash command Tip: auto mode handles these prompts for you — choose \"switch to auto mode\" below Write timestamp to probe file ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ date -u +%s > probe.txt ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ Do you want to proceed? ❯ 1. Yes 2. Yes, and always allow access to /var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-prompt from this project 3. Yes, and switch to auto mode · auto mode handles these prompts for you 4. No Esc to cancel · Tab to amend ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ccd-spike-2-prompt ─ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ●",
+  "expect": "permission prompt"
+ },
+ {
+  "name": "permission prompt, save 2 (60 s later)",
+  "row": {
+   "pid": 2955776,
+   "id": "85b9dc54",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-prompt",
+   "kind": "background",
+   "startedAt": 1794972890338,
+   "sessionId": "85b9dc54-3b40-4893-9141-8955bdbf276b",
+   "name": "ccd-spike-2-prompt",
+   "status": "waiting",
+   "waitingFor": "permission prompt",
+   "state": "blocked"
+  },
+  "logs": "command… ✢ · ⎿ $ date -u +%s > probe.txt Slithering… (running PreToolUse hooks… 0/7 · 1s) 6 Slithering… · ↓ 7 tokens) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Bash command Tip: auto mode handles these prompts for you — choose \"switch to auto mode\" below Write timestamp to probe file ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ date -u +%s > probe.txt ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ Do you want to proceed? ❯ 1. Yes 2. Yes, and always allow access to /var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-prompt from this project 3. Yes, and switch to auto mode · auto mode handles these prompts for you 4. No Esc to cancel · Tab to amend ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ccd-spike-2-prompt ─ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ●",
+  "expect": "permission prompt"
+ },
+ {
+  "name": "lost connection, proof 1 at the block",
+  "row": {
+   "pid": 2930080,
+   "id": "5305f47d",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+   "kind": "background",
+   "startedAt": 1794971323490,
+   "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+   "name": "ccd-spike-1-wake",
+   "status": "idle",
+   "state": "blocked"
+  },
+  "logs": "● 6 ● 5 ● 4 ● 3 2 ● 1 ● 0 19 ● 8 ● 7 ● 6 ● 5 4 ● 3 ● 2 ● 1 ● 0 ● 9s · at empt 8/10 8 ● 7 ● 6 ● 5 ● 4 ● 3 2 ● 1 ● 40s · a tempt 9/10 39 ● 8 ● 7 6 ● 5 ● 4 ● 3 ● 2 ● 1 0 ● 29 ● 8 ● 7 ● 6 ● 5 4 ● 3 ● 2 ● 1 ● 0 19 ● 8 ● 7 ● 6 ● 5 4 ● 3 ● 2 ● 1 0 ● 9s · at empt 9/10 ● 8 ● 7 ● 6 5 ● 4 ● 3 ● 2 ● 1 ● 36s · a tempt 10/10 5 ● 4 ● 3 2 ● 1 ● 0 ● 29 ● 8 ● 7 6 ● 5 ● 4 ● 3 ● 2 ● 1 0 ● 19 ● 8 ● 7 ● 6 5 ● 4 ● 3 ● 2 ● 1 ● 0 9s · at empt 10/10 ● 8 ● 7 ● 6 ● 5 4 ● 3 ● 2 1 ● Ran 1 shell command ● API Error: Couldn't connect through your proxy (ERR_PROXY_TUNNEL) — the proxy refused the tunnel: check its credentials and that it allows this host * Beami g… (7m 40s · ↓ 417 tokens) ❯ Resend your message to try again",
+  "expect": "lost connection"
+ },
+ {
+  "name": "lost connection, proof 1 ten minutes later",
+  "row": {
+   "pid": 2932574,
+   "id": "5305f47d",
+   "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+   "kind": "background",
+   "startedAt": 1794972009611,
+   "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+   "name": "ccd-spike-1-wake",
+   "status": "idle",
+   "state": "blocked"
+  },
+  "logs": "e proxy refused the tunnel: check its credentials and that it allows this host ○ low · /effort ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ccd-spike-1-wake ─ ❯ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── ⏵⏵ auto mode on (shift+tab to cycle) · ← 1 agent ○ low · /effort · Update available · run brew upgrade claude-code@latest You've used 86% of your weekly limit · resets Nov 20, 11pm (America/Anchorage)",
+  "expect": "lost connection"
+ },
+ {
+  "name": "recorded text: EAI_AGAIN, 2026-11-14",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "state_json": {
+   "detail": "API Error: Can't reach the API server — check your internet or DNS (EAI_AGAIN)"
+  },
+  "expect": "lost connection"
+ },
+ {
+  "name": "same row, no state.json: EAI_AGAIN, 2026-11-14",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "expect": "can't tell"
+ },
+ {
+  "name": "recorded text: expired sign-in, 2026-11-17",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "state_json": {
+   "detail": "Login expired"
+  },
+  "expect": "expired sign-in"
+ },
+ {
+  "name": "same row, no state.json: expired sign-in, 2026-11-17",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "expect": "can't tell"
+ },
+ {
+  "name": "recorded text: weekly limit",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "state_json": {
+   "detail": "You've hit your weekly limit · resets Nov 6, 11pm (America/Anchorage)"
+  },
+  "expect": "usage limit"
+ },
+ {
+  "name": "same row, no state.json: weekly limit",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "expect": "can't tell"
+ },
+ {
+  "name": "recorded text: Fable limit",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "state_json": {
+   "detail": "You've hit your Fable limit · resets Nov 20, 11pm (America/Anchorage)"
+  },
+  "expect": "usage limit"
+ },
+ {
+  "name": "same row, no state.json: Fable limit",
+  "row": {
+   "id": "fixture",
+   "kind": "background",
+   "state": "blocked",
+   "status": "idle"
+  },
+  "expect": "can't tell"
+ }
+]
