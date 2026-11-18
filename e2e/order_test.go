@@ -148,6 +148,21 @@ func TestWaitingOrder(t *testing.T) {
 		if got := readOrderSnap(t, a, at(t, 11)).stateOf(t, "north", "n-guess"); got != "building" {
 			t.Fatalf("n-guess is %s, want building", got)
 		}
+		var open struct {
+			OpenGuesses []struct {
+				Project  string `json:"project"`
+				Pass     string `json:"pass"`
+				Question string `json:"question"`
+				Minutes  int    `json:"minutes"`
+			} `json:"open_guesses"`
+			Total int `json:"guess_minutes_total"`
+		}
+		if err := json.Unmarshal([]byte(run(t, a, at(t, 11), "snapshot").stdout), &open); err != nil {
+			t.Fatal(err)
+		}
+		if len(open.OpenGuesses) != 1 || open.OpenGuesses[0].Pass != "n-guess" || open.OpenGuesses[0].Question != "north-q2" || open.Total != 200 {
+			t.Errorf("open_guesses %+v total %d, want n-guess on north-q2 and 200", open.OpenGuesses, open.Total)
+		}
 		var rel struct {
 			Passes []struct {
 				Name  string `json:"name"`

@@ -267,7 +267,7 @@
               "questions": [],
               "minutes_before": 0,
               "needed_time": "2026-11-20T23:00:00Z",
-              "free": null,
+              "free": true,
               "why_not": [],
               "guess_outcome": null
             },
@@ -283,8 +283,10 @@
               "questions": [],
               "minutes_before": 100,
               "needed_time": "2026-11-21T01:00:00Z",
-              "free": null,
-              "why_not": [],
+              "free": false,
+              "why_not": [
+                "unfinished work before it"
+              ],
               "guess_outcome": null
             },
             {
@@ -311,8 +313,11 @@
               ],
               "minutes_before": 300,
               "needed_time": "2026-11-21T05:00:00Z",
-              "free": null,
-              "why_not": [],
+              "free": false,
+              "why_not": [
+                "unfinished work before it",
+                "an unanswered question"
+              ],
               "guess_outcome": null
             }
           ]
@@ -458,7 +463,7 @@
               ],
               "minutes_before": 0,
               "needed_time": "2026-11-20T23:00:00Z",
-              "free": null,
+              "free": true,
               "why_not": [],
               "guess_outcome": null
             }
@@ -519,7 +524,8 @@
     "not_designed": [
       "beta/b3"
     ],
-    "waiting_on_design": []
+    "waiting_on_design": [],
+    "reasons": []
   },
   "waits_for_geoff": [],
   "waiting": [],

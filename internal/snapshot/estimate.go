@@ -355,7 +355,7 @@ func (c *relCtx) questionItem(q *state.Question, now time.Time) item {
 
 // fillSession sets next_session and waits_for_geoff from every live
 // release, and returns the item that sets the session's time, or nil.
-func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time) *item {
+func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time, unreadable bool) *item {
 	var items, questions, rounds []item
 	var onDesign []string
 	stopped := false
@@ -425,8 +425,11 @@ func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time) *item {
 	count := len(questions)
 	next.QuestionCount = &count
 	set := func(s string) { next.State = &s }
+	if unreadable {
+		next.Reasons = append(next.Reasons, state.UsageUnreadable)
+	}
 	switch {
-	case stopped:
+	case stopped || unreadable:
 		set("needs_you_now")
 	case setter != nil && setter.kind == kindQuestion && !setter.time.After(now):
 		set("ready_now")
