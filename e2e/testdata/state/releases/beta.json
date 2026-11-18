@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "project": "beta",
+  "name": "v2",
+  "repo": "glw907/beta",
+  "rounds": [
+    {"name": "b1", "summary": "Two finished passes.", "needs_geoff": false, "no_need_reason": "Routine cleanup.", "design_written": true},
+    {"name": "b2", "summary": "A pass needed later.", "needs_geoff": true, "after": ["b1"], "design_written": true},
+    {"name": "b3", "summary": "A round with no design yet.", "needs_geoff": true, "after": ["b2"], "planned_minutes": 90}
+  ],
+  "passes": [
+    {"name": "b-one", "summary": "Cleanup one.", "round": "b1", "planned_minutes": 40, "state": "done", "started": "2026-11-16T18:00:00Z", "finished": "2026-11-16T18:45:00Z", "actual_minutes": 45},
+    {"name": "b-two", "summary": "Cleanup two.", "round": "b1", "planned_minutes": 50, "state": "done", "started": "2026-11-17T18:00:00Z", "finished": "2026-11-17T18:55:00Z", "actual_minutes": 55},
+    {"name": "b-three", "summary": "Needed later.", "round": "b2", "planned_minutes": 60, "state": "not_started", "after": ["b-two"], "questions": ["beta-q1", "beta-q2"]}
+  ],
+  "questions": [
+    {"id": "beta-q1", "text": "Keep the old format?", "options": ["keep", "drop"], "recommended": "drop", "answer": {"ruling": "r-0001"}},
+    {"id": "beta-q2", "text": "Name the tool?", "options": ["desk", "cc-desk"], "recommended": "cc-desk", "answer": {"carried": {"words": "Call it cc-desk.", "date": "2026-11-14", "source": "chat"}}}
+  ]
+}

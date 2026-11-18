@@ -1,0 +1,519 @@
+{
+  "format": 1,
+  "generated_at": "2026-11-20T23:00:00Z",
+  "releases": [
+    {
+      "project": "alpha",
+      "name": "v1",
+      "repo": "glw907/alpha",
+      "pace": null,
+      "pace_low": null,
+      "pace_high": null,
+      "rough": null,
+      "rounds": [
+        {
+          "name": "r1",
+          "summary": "The first twelve passes.",
+          "state": "done",
+          "after": [],
+          "planned_minutes": 1200,
+          "actual_minutes": 1800,
+          "started": "2026-11-08T17:00:00Z",
+          "finished": "2026-11-19T22:00:00Z",
+          "needs": {
+            "kind": "nothing",
+            "reason": null,
+            "questions": []
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": [
+            {
+              "name": "p01",
+              "summary": "Pass one.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 300,
+              "started": "2026-11-08T17:00:00Z",
+              "finished": "2026-11-08T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p02",
+              "summary": "Pass two.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 300,
+              "started": "2026-11-09T17:00:00Z",
+              "finished": "2026-11-09T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p03",
+              "summary": "Pass three.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 150,
+              "started": "2026-11-10T19:30:00Z",
+              "finished": "2026-11-10T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p04",
+              "summary": "Pass four.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 80,
+              "started": "2026-11-11T20:40:00Z",
+              "finished": "2026-11-11T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p05",
+              "summary": "Pass five.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-12T20:00:00Z",
+              "finished": "2026-11-12T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p06",
+              "summary": "Pass six.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-13T20:00:00Z",
+              "finished": "2026-11-13T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p07",
+              "summary": "Pass seven.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-14T20:00:00Z",
+              "finished": "2026-11-14T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p08",
+              "summary": "Pass eight.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-15T20:00:00Z",
+              "finished": "2026-11-15T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p09",
+              "summary": "Pass nine.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-16T20:00:00Z",
+              "finished": "2026-11-16T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p10",
+              "summary": "Pass ten.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 120,
+              "started": "2026-11-17T20:00:00Z",
+              "finished": "2026-11-17T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p11",
+              "summary": "Pass eleven.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 125,
+              "started": "2026-11-18T19:55:00Z",
+              "finished": "2026-11-18T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p12",
+              "summary": "Pass twelve.",
+              "state": "done",
+              "planned_minutes": 100,
+              "actual_minutes": 125,
+              "started": "2026-11-19T19:55:00Z",
+              "finished": "2026-11-19T22:00:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            }
+          ]
+        },
+        {
+          "name": "r2",
+          "summary": "The next three passes.",
+          "state": "not_started",
+          "after": [
+            "r1"
+          ],
+          "planned_minutes": 360,
+          "actual_minutes": null,
+          "started": null,
+          "finished": null,
+          "needs": {
+            "kind": "questions",
+            "reason": null,
+            "questions": [
+              {
+                "id": "alpha-q1",
+                "text": "Which storage should the report use?",
+                "options": [
+                  "files",
+                  "database"
+                ],
+                "recommended": "files",
+                "answered": false,
+                "answer_kind": null
+              }
+            ]
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": [
+            {
+              "name": "p13",
+              "summary": "The first unfinished pass.",
+              "state": "not_started",
+              "planned_minutes": 100,
+              "actual_minutes": null,
+              "started": null,
+              "finished": null,
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p14",
+              "summary": "The second unfinished pass.",
+              "state": "not_started",
+              "planned_minutes": 200,
+              "actual_minutes": null,
+              "started": null,
+              "finished": null,
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "p15",
+              "summary": "The pass the question rests on.",
+              "state": "not_started",
+              "planned_minutes": 60,
+              "actual_minutes": null,
+              "started": null,
+              "finished": null,
+              "stop_reason": null,
+              "questions": [
+                {
+                  "id": "alpha-q1",
+                  "text": "Which storage should the report use?",
+                  "options": [
+                    "files",
+                    "database"
+                  ],
+                  "recommended": "files",
+                  "answered": false,
+                  "answer_kind": null
+                }
+              ],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "beta",
+      "name": "v2",
+      "repo": "glw907/beta",
+      "pace": null,
+      "pace_low": null,
+      "pace_high": null,
+      "rough": null,
+      "rounds": [
+        {
+          "name": "b1",
+          "summary": "Two finished passes.",
+          "state": "done",
+          "after": [],
+          "planned_minutes": 90,
+          "actual_minutes": 100,
+          "started": "2026-11-16T18:00:00Z",
+          "finished": "2026-11-17T18:55:00Z",
+          "needs": {
+            "kind": "nothing",
+            "reason": "Routine cleanup.",
+            "questions": []
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": [
+            {
+              "name": "b-one",
+              "summary": "Cleanup one.",
+              "state": "done",
+              "planned_minutes": 40,
+              "actual_minutes": 45,
+              "started": "2026-11-16T18:00:00Z",
+              "finished": "2026-11-16T18:45:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "b-two",
+              "summary": "Cleanup two.",
+              "state": "done",
+              "planned_minutes": 50,
+              "actual_minutes": 55,
+              "started": "2026-11-17T18:00:00Z",
+              "finished": "2026-11-17T18:55:00Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            }
+          ]
+        },
+        {
+          "name": "b2",
+          "summary": "A pass needed later.",
+          "state": "not_started",
+          "after": [
+            "b1"
+          ],
+          "planned_minutes": 60,
+          "actual_minutes": null,
+          "started": null,
+          "finished": null,
+          "needs": {
+            "kind": "questions",
+            "reason": null,
+            "questions": [
+              {
+                "id": "beta-q1",
+                "text": "Keep the old format?",
+                "options": [
+                  "keep",
+                  "drop"
+                ],
+                "recommended": "drop",
+                "answered": true,
+                "answer_kind": "ruling"
+              },
+              {
+                "id": "beta-q2",
+                "text": "Name the tool?",
+                "options": [
+                  "desk",
+                  "cc-desk"
+                ],
+                "recommended": "cc-desk",
+                "answered": true,
+                "answer_kind": "carried"
+              }
+            ]
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": [
+            {
+              "name": "b-three",
+              "summary": "Needed later.",
+              "state": "not_started",
+              "planned_minutes": 60,
+              "actual_minutes": null,
+              "started": null,
+              "finished": null,
+              "stop_reason": null,
+              "questions": [
+                {
+                  "id": "beta-q1",
+                  "text": "Keep the old format?",
+                  "options": [
+                    "keep",
+                    "drop"
+                  ],
+                  "recommended": "drop",
+                  "answered": true,
+                  "answer_kind": "ruling"
+                },
+                {
+                  "id": "beta-q2",
+                  "text": "Name the tool?",
+                  "options": [
+                    "desk",
+                    "cc-desk"
+                  ],
+                  "recommended": "cc-desk",
+                  "answered": true,
+                  "answer_kind": "carried"
+                }
+              ],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            }
+          ]
+        },
+        {
+          "name": "b3",
+          "summary": "A round with no design yet.",
+          "state": "not_designed",
+          "after": [
+            "b2"
+          ],
+          "planned_minutes": 90,
+          "actual_minutes": null,
+          "started": null,
+          "finished": null,
+          "needs": {
+            "kind": "not_designed",
+            "reason": null,
+            "questions": []
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": []
+        }
+      ]
+    }
+  ],
+  "rulings": [
+    {
+      "format": 1,
+      "id": "r-0001",
+      "time": "2026-11-18T16:00:00Z",
+      "desk": "desk-1",
+      "words": "Drop the old format.",
+      "project": "beta",
+      "round": "b2",
+      "question": "beta-q1",
+      "option": "drop"
+    }
+  ],
+  "next_session": {
+    "state": null,
+    "time": null,
+    "range": null,
+    "rough": null,
+    "question_count": null,
+    "rounds": [],
+    "projects": [],
+    "not_designed": []
+  },
+  "waits_for_geoff": [],
+  "waiting": [],
+  "open_guesses": [],
+  "guess_minutes_total": 0,
+  "guess_minutes_limit": 300
+}

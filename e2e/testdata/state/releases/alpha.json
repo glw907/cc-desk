@@ -1,0 +1,30 @@
+{
+  "format": 1,
+  "project": "alpha",
+  "name": "v1",
+  "repo": "glw907/alpha",
+  "rounds": [
+    {"name": "r1", "summary": "The first twelve passes.", "needs_geoff": true, "design_written": true},
+    {"name": "r2", "summary": "The next three passes.", "needs_geoff": true, "after": ["r1"], "design_written": true}
+  ],
+  "passes": [
+    {"name": "p01", "summary": "Pass one.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-08T17:00:00Z", "finished": "2026-11-08T22:00:00Z", "actual_minutes": 300},
+    {"name": "p02", "summary": "Pass two.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-09T17:00:00Z", "finished": "2026-11-09T22:00:00Z", "actual_minutes": 300},
+    {"name": "p03", "summary": "Pass three.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-10T19:30:00Z", "finished": "2026-11-10T22:00:00Z", "actual_minutes": 150},
+    {"name": "p04", "summary": "Pass four.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-11T20:40:00Z", "finished": "2026-11-11T22:00:00Z", "actual_minutes": 80},
+    {"name": "p05", "summary": "Pass five.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-12T20:00:00Z", "finished": "2026-11-12T22:00:00Z", "actual_minutes": 120},
+    {"name": "p06", "summary": "Pass six.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-13T20:00:00Z", "finished": "2026-11-13T22:00:00Z", "actual_minutes": 120},
+    {"name": "p07", "summary": "Pass seven.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-14T20:00:00Z", "finished": "2026-11-14T22:00:00Z", "actual_minutes": 120},
+    {"name": "p08", "summary": "Pass eight.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-15T20:00:00Z", "finished": "2026-11-15T22:00:00Z", "actual_minutes": 120},
+    {"name": "p09", "summary": "Pass nine.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-16T20:00:00Z", "finished": "2026-11-16T22:00:00Z", "actual_minutes": 120},
+    {"name": "p10", "summary": "Pass ten.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-17T20:00:00Z", "finished": "2026-11-17T22:00:00Z", "actual_minutes": 120},
+    {"name": "p11", "summary": "Pass eleven.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-18T19:55:00Z", "finished": "2026-11-18T22:00:00Z", "actual_minutes": 125},
+    {"name": "p12", "summary": "Pass twelve.", "round": "r1", "planned_minutes": 100, "state": "done", "started": "2026-11-19T19:55:00Z", "finished": "2026-11-19T22:00:00Z", "actual_minutes": 125},
+    {"name": "p13", "summary": "The first unfinished pass.", "round": "r2", "planned_minutes": 100, "state": "not_started"},
+    {"name": "p14", "summary": "The second unfinished pass.", "round": "r2", "planned_minutes": 200, "state": "not_started", "after": ["p13"]},
+    {"name": "p15", "summary": "The pass the question rests on.", "round": "r2", "planned_minutes": 60, "state": "not_started", "after": ["p14"], "questions": ["alpha-q1"]}
+  ],
+  "questions": [
+    {"id": "alpha-q1", "text": "Which storage should the report use?", "options": ["files", "database"], "recommended": "files"}
+  ]
+}
