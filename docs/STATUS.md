@@ -17,10 +17,10 @@
 
 ## Next action
 
-The second run, proofs 1 to 6, runs as the background session `cc-desk-prove`, launched from the
-main checkout with `docs/plans/2026-11-17-prove-rerun-executor-prompt.txt`. It closes the pass
-itself and rewrites this file at close. If it pauses at the usage limit, wake it after Geoff's
-reset. Then design the State and rules round from the findings.
+The second run (session `cc-desk-prove`, branch `worktree-cc-desk-prove-run2`) is in progress.
+Proof 5 held. Proof 1 is next or in flight; then proofs 4, 2, 6, and 3 in that order. If it paused
+at the usage limit, wake it after Geoff's reset. When the proofs close, design the State and
+rules round from the findings.
 
 ## Open decisions
 
