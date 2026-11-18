@@ -18,7 +18,7 @@
 ## Next action
 
 The second run (session `cc-desk-prove`, branch `worktree-cc-desk-prove-run2`) is in progress.
-Proof 5 held. Proof 1 is next or in flight; then proofs 4, 2, 6, and 3 in that order. If it paused
+Proofs 5 and 4 held; proof 1's fallback applies. Proof 2 is next or in flight; then proofs 6 and 3. If it paused
 at the usage limit, wake it after Geoff's reset. When the proofs close, design the State and
 rules round from the findings.
 

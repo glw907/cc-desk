@@ -32,8 +32,8 @@ SID=$(awk -F'\t' -v id="$ID" '$1 == id {print $2}' "$HERE/../owned.tsv")
 ev "launched $ID ($SID)"
 
 blocked=0
-for i in $(seq 1 25); do
-  sleep 60
+for i in $(seq 1 150); do
+  sleep 10
   claude agents --json --all >"$OUT/list.json"
   python3 -I -c '
 import json, sys
@@ -42,7 +42,7 @@ for r in json.load(open(sys.argv[1])):
         print(json.dumps(r))
 ' "$OUT/list.json" "$ID" >>"$OUT/rows.jsonl"
   s=$(tail -1 "$OUT/rows.jsonl" | python3 -I -c 'import json,sys; print(json.loads(sys.stdin.read() or "{}").get("state",""))')
-  ev "min $i: state=$s"
+  ev "poll $i: state=$s"
   case $s in
     blocked)
       blocked=$((blocked + 1))
@@ -54,7 +54,7 @@ print(re.sub(r"\s+", " ", t)[-900:])
       ;;
     done | failed | stopped | "") break ;;
   esac
-  [ $blocked -ge 3 ] && { ev "blocked for 3 polls: stopping"; break; }
+  [ $blocked -ge 6 ] && { ev "blocked for 3 polls: stopping"; break; }
 done
 bash "$OWN" logs "$ID" 2>&1 | python3 -I -c '
 import re, sys

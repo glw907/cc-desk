@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Proof 4: the prompt session and the answer session.
+# Usage: prompt-run prompt | answer
+# prompt: default mode, no hook, one command outside any allow list. It must block.
+# answer: default mode with answer-settings.json. The hook waits for a decision file,
+#   which this script writes 30 seconds after hook.log shows the request.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+KIND=${1:?prompt or answer}
+OUT=$HERE/out/$KIND
+SB=$HERE/sandbox-$KIND
+rm -rf "$OUT" "$SB" "$HERE/decisions"
+mkdir -p "$OUT" "$SB" "$HERE/decisions"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+PROMPT='Run exactly this one Bash command and nothing else: `date -u +%s > probe.txt`. Then reply with the word done.'
+ARGS=(--model sonnet --effort low --permission-mode default)
+[ "$KIND" = answer ] && ARGS+=(--settings "$HERE/answer-settings.json")
+bash "$OWN" launch ccd-spike-4-$KIND "$SB" "${ARGS[@]}" "$PROMPT" >"$OUT/launch.txt" 2>&1 || {
+  ev "launch failed"; cat "$OUT/launch.txt"; exit 1; }
+ID=$(tail -1 "$OUT/launch.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/')
+ev "launched $ID"
+wrote=
+for i in $(seq 1 30); do
+  sleep 10
+  claude agents --json --all >"$OUT/list.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("id") == sys.argv[2]:
+        print(json.dumps(r))
+' "$OUT/list.json" "$ID" >>"$OUT/rows.jsonl"
+  s=$(tail -1 "$OUT/rows.jsonl" | python3 -I -c 'import json,sys; r=json.loads(sys.stdin.read() or "{}"); print(r.get("state",""), r.get("status",""))')
+  ev "poll $i: row=[$s] probe.txt=$([ -e "$SB/probe.txt" ] && echo yes || echo no)"
+  if [ "$KIND" = answer ] && [ -z "$wrote" ] && [ -s "$HERE/hook.log" ]; then
+    ev "hook.log: $(wc -l <"$HERE/hook.log") line(s)"
+    sleep 30
+    python3 -I -c '
+import ast, hashlib, sys
+line = open(sys.argv[1]).read().splitlines()[-1]
+m = line.split(" request ", 1)[1]
+tool, rest = m.split(" ", 1)
+cmd = ast.literal_eval(rest)
+open(sys.argv[2] + "/" + hashlib.sha1(f"{tool}\n{cmd}".encode()).hexdigest() + ".txt", "w").write("allow\n")
+print(tool, repr(cmd))
+' "$HERE/hook.log" "$HERE/decisions" >>"$OUT/write.txt" 2>&1
+    ev "decision file written: $(ls "$HERE/decisions" | tr '\n' ' ')"
+    wrote=1
+  fi
+  case $s in done*|failed*|stopped*|"") break ;; esac
+  if [ "$KIND" = prompt ] && [[ $s == blocked* ]]; then break; fi
+done
+bash "$OWN" logs "$ID" 2>&1 | python3 -I -c '
+import re, sys
+t = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", " ", sys.stdin.read())
+print(re.sub(r"\s+", " ", t)[-1800:])
+' >"$OUT/final-screen.txt"
+ev "end; ID=$ID probe.txt=$([ -e "$SB/probe.txt" ] && echo yes || echo no)"

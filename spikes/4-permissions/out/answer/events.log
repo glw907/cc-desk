@@ -1,0 +1,6 @@
+03:31:36 launched dc0b2f97
+03:31:46 poll 1: row=[blocked waiting] probe.txt=no
+03:31:46 hook.log: 1 line(s)
+03:32:16 decision file written: 07375feda4b11e9427fec1646fde81838595fa80.txt 
+03:32:27 poll 2: row=[done idle] probe.txt=yes
+03:32:27 end; ID=dc0b2f97 probe.txt=yes

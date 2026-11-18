@@ -98,13 +98,78 @@ Fallback applies: the check ends the session and relaunches it from the files.
 
 ## Proof 4
 
-This is the goal Geoff set on 2026-11-17, and no run of the pass shape was made. The scratch repo
-`glw907/cc-desk-scratch` and its gate workflow exist, so the rerun can start at once. The prompt
-count, the denial table, and whether a prompt can be answered from outside the session are all
-open. Until a rerun measures them, the later rounds assume the narrowest allow list and show any
-remaining prompt as Needs you now.
+This is the goal Geoff set on 2026-11-17: a small pass runs from worktree to merge with no
+permission prompt. Two runs of the eight-step pass shape on `glw907/cc-desk-scratch` each counted
+zero prompts and zero denials. Usage read 87 percent before each launch.
 
-Fallback applies: the launch carries the narrowest allow list that works, and a prompt that still appears shows as Needs you now.
+| Run | Launch line | Prompts | Denials | Result |
+| --- | --- | --- | --- | --- |
+| 1 | `claude --bg --name ccd-spike-4-main-1 --worktree ccd-spike-4-1 --permission-mode auto --settings spikes/4-permissions/settings.json --model sonnet --effort low` | 0 | 0 | Scratch PR 1 merged at 03:28:32 UTC, 32 seconds after the launch |
+| 2 | The same with `-2` in both names | 0 | 0 | Scratch PR 2 merged; the row read `working` at six polls 10 seconds apart, then `done` |
+
+The settings file holds five exact allow rules: `git clone` of the scratch repo, `git -C scratch *`,
+`bash scratch/scripts/gate.sh`, `gh pr create -R glw907/cc-desk-scratch *`, and
+`gh pr ready * -R glw907/cc-desk-scratch`. It has no rule for `approval-queue land`, and step 7
+ran anyway: the session reported "returned with no output and no error", and PR 1 and PR 2 show
+`MERGED` with a green check. Auto mode allowed the landing command without a rule, and every
+screen line for an edit or a write reads "Allowed by auto mode". Run 1 polled every 60 seconds and
+the session finished inside one poll, so run 1 alone would miss a short block. Run 2 polled every
+10 seconds and saw none. The tally also reads the denials log by session id, and it found none for
+either session. `dontAsk` was not tried: the goal was met with `auto`, so the plan's condition for
+trying it did not arise.
+
+**Where the session works.** A nested `git init` folder under the worktree raised "Workspace not
+trusted" in proof 1's first attempt, and a clone of the scratch repo is the same case. The pass
+shape therefore launches with `--worktree` from a cc-desk worktree, which inherits trust, and the
+prompt has the session clone the scratch repo into a plain `scratch/` folder inside it and work
+there with `git -C scratch`. The shell's directory moved into `scratch/` after step 1 in run 2, and
+the session corrected for it. A later round that runs a pass in a repo of its own should launch from
+a worktree of that repo, the case proof 5 held.
+
+**Answering a prompt from outside.** A prompt can be answered without attaching, through a
+`PermissionRequest` hook in the launch settings.
+
+- `claude --help` names no command that answers a prompt. `--permission-prompts none` is tied to
+  `--print`: a `--bg` session launched with it in `default` mode still blocked on the prompt.
+- `ccd-spike-4-prompt` ran `date -u +%s > probe.txt` in `default` mode with no hook. Its row read
+  `state: blocked`, `status: waiting`, `waitingFor: "permission prompt"` 11 seconds after launch,
+  and `claude logs` showed the command and "Do you want to proceed?". That is the sample proof 2
+  uses.
+- `ccd-spike-4-answer` ran the same command with `answer-settings.json`, whose hook runs
+  `decide-hook.py`. The hook fired in the background session and logged the request to `hook.log`.
+  The row stayed `blocked waiting` while it waited. Thirty seconds after the log line a script wrote
+  `decisions/<sha1>.txt`, and the next poll read `done idle` with `probe.txt` written. The screen
+  said "Allowed by PermissionRequest hook".
+
+So the desk can clear one prompt on Geoff's word by writing a decision file the hook looks for,
+provided the session launched with that hook. A session launched without it can be answered only by
+attaching. The hook waits up to 120 seconds, then denies, so the desk has two minutes to write the
+file. I did not drive `claude attach`, the control socket, or anything under `~/.claude/daemon/`.
+
+**Denials by class.** The log held 129 rows on 2026-11-18, 2 more than the plan read. The two are
+this pass's own: proof 1's first session had `sleep 90 && echo step1 >> progress.txt` refused as
+Destructive or Unwanted Actions (the later runs use a `step.sh` script instead), and my write of
+proof 4's settings file with an `approval-queue land` allow rule was refused as Self-Modification.
+`denials.py` gives the same classes as the plan's table, and the lines below confirm or correct each.
+
+| Class | Rows | Session kind that hits it | What removes it |
+| --- | --- | --- | --- |
+| Classifier unavailable | 47 | Every kind, in an outage | No setting. 13 sessions: 8 later settled `killed`, 3 `done`, 1 `claimed-spare`, 1 not named in `daemon.log`. An exact allow rule did not come into play: the runs above hit no outage, so whether a rule skips the classifier is untested. A bounded retry after 60 seconds is the plan's rule |
+| No explanation from the server-side classifier | 10 | Every kind | Mostly matched another class on the target; the answer is the same rule as the matching class |
+| Destructive or Unwanted Actions | 14 | Pass executor, Retire round | A gate script that cleans up what it starts, with an exact allow rule |
+| Self-Modification | 11 | Desk session; a pass that changes its own launch | Launch settings in a file the `cc-desk` command writes. Confirmed this pass: a write of an allow rule for `approval-queue land` into a spike settings file was refused with this class, and the same file without that rule went through |
+| Interfere With Workloads | 11 | Pass executor, conductor | The gate script, and session control in the `cc-desk` command |
+| Undermining Oversight | 4 | Conductor, desk session | Session control in the `cc-desk` command |
+| Unauthorized Access | 4 | Desk session, executor | Each session gets the paths it needs and reads no other session's files |
+| Merge Without Review | 3 | Pass executor at a merge | `approval-queue land`. Step 7 ran it with no rule and the PRs merged |
+| Auto-Mode Bypass | 3 | Pass executor | CI runs on push and PR, so no pass dispatches a workflow |
+| 16 classes of one or two rows | 26 | Mostly the Retire round | Listed in `denials.py`'s output, each with its session kind |
+
+A `cc-desk check` could not wake or relaunch a `Classifier unavailable` session without Geoff by
+proof 1's method: the wakes there did not bring a blocked row back. Relaunching from the files is
+proof 6's question.
+
+Held.
 
 ## Proof 2
 

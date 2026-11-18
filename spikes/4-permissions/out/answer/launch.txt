@@ -1,0 +1,6 @@
+backgrounded · dc0b2f97 · ccd-spike-4-answer
+  claude agents             list sessions
+  claude attach dc0b2f97    open in this terminal
+  claude logs dc0b2f97      show recent output
+  claude stop dc0b2f97      stop this session
+own.sh: owned dc0b2f97 (ccd-spike-4-answer)

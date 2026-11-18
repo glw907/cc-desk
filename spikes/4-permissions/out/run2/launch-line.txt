@@ -1,0 +1,1 @@
+claude --bg --name ccd-spike-4-main-2 --worktree ccd-spike-4-2 --permission-mode auto --settings /var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/4-permissions/settings.json --model sonnet --effort low
