@@ -40,6 +40,22 @@ function alaskaDate(d: Date): string {
 	return day.format(d);
 }
 
+const dateWords = new Intl.DateTimeFormat('en-US', {
+	timeZone: ZONE,
+	weekday: 'short',
+	month: 'short',
+	day: 'numeric'
+});
+
+/**
+ * A time with its day: "Today, 2:00 pm", or "Tomorrow, about 9:30 am" when `about` is set. A day
+ * past tomorrow shows its date, as in "Mon, Nov 23, 8:00 pm".
+ */
+export function formatWhen(iso: string, now: Date, about = false): string {
+	const day = dayWord(iso, now) ?? dateWords.format(new Date(iso));
+	return `${day}, ${about ? 'about ' : ''}${formatTime(iso)}`;
+}
+
 /** "Today" or "Tomorrow" when the time's Alaska date is the clock's or the next one; else null. */
 export function dayWord(iso: string, now: Date): 'Today' | 'Tomorrow' | null {
 	const date = alaskaDate(new Date(iso));

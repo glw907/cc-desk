@@ -76,59 +76,92 @@ export function writeAtomic(dir: string, name: string, text: string): void {
 /** Fills `dir` with the `state` fixture, beta's b3 designed and alpha's p13 started, both at 23:00Z. */
 export function started(dir: string): string {
 	copyFixture('state', dir);
+	return startVerbs(dir);
+}
+
+/** The two verbs of `started`, for a state whose fixture copy a test has edited first. */
+function startVerbs(dir: string): string {
 	run(dir, '2026-11-20T23:00:00Z', 'round', 'design', 'beta', 'b3', input('design-b3.json'));
 	run(dir, '2026-11-20T23:00:00Z', 'pass', 'start', 'alpha', 'p13');
 	return dir;
 }
 
-/** The usual clock for the second pass-start verb in a state. */
+/** A clock on 2026-11-20 at the given UTC hour and minute. */
 const T = (hhmm: string) => `2026-11-20T${hhmm}:00Z`;
 
+/** A state the tests draw: fills a folder with verbs and returns the clock of the last one. */
+type Builder = (dir: string) => string;
+
+const builders: Record<string, Builder> = {
+	started(dir) {
+		started(dir);
+		return T('23:00');
+	},
+	fast(dir) {
+		started(dir);
+		run(dir, T('23:50'), 'pass', 'finish', 'alpha', 'p13');
+		return T('23:50');
+	},
+	slow(dir) {
+		started(dir);
+		run(dir, '2026-11-21T02:20:00Z', 'pass', 'finish', 'alpha', 'p13');
+		return '2026-11-21T02:20:00Z';
+	},
+	variant(dir) {
+		copyFixture('state', dir);
+		const beta = path.join(dir, 'releases', 'beta.json');
+		writeFileSync(beta, readFileSync(beta, 'utf8').replace('"planned_minutes": 480', '"planned_minutes": 60'));
+		startVerbs(dir);
+		return T('23:00');
+	},
+	big(dir) {
+		copyFixture('order', dir);
+		return T('23:00');
+	},
+	guess(dir) {
+		copyFixture('order', dir);
+		run(dir, T('23:00'), 'pass', 'start', 'north', 'n-free');
+		run(dir, T('23:10'), 'pass', 'start', 'north', 'n-guess', '--guess', 'north-q2');
+		return T('23:10');
+	},
+	two(dir) {
+		copyFixture('order', dir);
+		run(dir, T('23:00'), 'pass', 'start', 'north', 'n-free');
+		run(dir, T('23:01'), 'pass', 'start', 'south', 's-free');
+		runFailing(dir, T('23:02'), 'pass', 'start', 'north', 'n-two');
+		runFailing(dir, T('23:03'), 'pass', 'start', 'south', 's-two');
+		return T('23:03');
+	},
+	redraw(dir) {
+		copyFixture('state', dir);
+		run(dir, T('23:05'), 'pass', 'start', 'alpha', 'p13');
+		return T('23:05');
+	},
+	stopped(dir) {
+		started(dir);
+		run(dir, T('23:10'), 'pass', 'stop', 'alpha', 'p13', '--reason', 'scope');
+		return T('23:10');
+	}
+};
+
 /**
- * Every state the tests draw, each printed by the real binary from a fresh copy of a fixture,
- * with the verbs the plan's table lists. Each is a snapshot at the clock of its last verb.
+ * Fills `dir` with a named state: a fixture copy with the real binary's verbs run on it, and
+ * `snapshot.json` set to what the binary prints at the last verb's clock. Returns that clock,
+ * which is what a test pins the browser to.
  */
+export function buildState(name: string, dir: string): string {
+	const clock = builders[name](dir);
+	writeAtomic(dir, 'snapshot.json', run(dir, clock, 'snapshot'));
+	return clock;
+}
+
+/** Every state the tests draw, each as the snapshot the binary prints for it. */
 export function allStates(): Record<string, Snapshot> {
 	const out: Record<string, Snapshot> = {};
-
-	const base = started(copyFixture('state'));
-	out.started = snapshotAt(base, T('23:00'));
-
-	const fast = started(copyFixture('state'));
-	run(fast, T('23:50'), 'pass', 'finish', 'alpha', 'p13');
-	out.fast = snapshotAt(fast, T('23:50'));
-
-	const slow = started(copyFixture('state'));
-	run(slow, '2026-11-21T02:20:00Z', 'pass', 'finish', 'alpha', 'p13');
-	out.slow = snapshotAt(slow, '2026-11-21T02:20:00Z');
-
-	const variant = copyFixture('state');
-	const beta = path.join(variant, 'releases', 'beta.json');
-	writeFileSync(beta, readFileSync(beta, 'utf8').replace('"planned_minutes": 480', '"planned_minutes": 60'));
-	started(variant);
-	out.variant = snapshotAt(variant, T('23:00'));
-
-	out.big = snapshotAt(copyFixture('order'), T('23:00'));
-
-	const guess = copyFixture('order');
-	run(guess, T('23:00'), 'pass', 'start', 'north', 'n-free');
-	run(guess, T('23:10'), 'pass', 'start', 'north', 'n-guess', '--guess', 'north-q2');
-	out.guess = snapshotAt(guess, T('23:10'));
-
-	const two = copyFixture('order');
-	run(two, T('23:00'), 'pass', 'start', 'north', 'n-free');
-	run(two, T('23:01'), 'pass', 'start', 'south', 's-free');
-	runFailing(two, T('23:02'), 'pass', 'start', 'north', 'n-two');
-	runFailing(two, T('23:03'), 'pass', 'start', 'south', 's-two');
-	out.two = snapshotAt(two, T('23:03'));
-
-	const redraw = copyFixture('state');
-	run(redraw, T('23:05'), 'pass', 'start', 'alpha', 'p13');
-	out.redraw = snapshotAt(redraw, T('23:05'));
-
-	const stopped = started(copyFixture('state'));
-	run(stopped, T('23:10'), 'pass', 'stop', 'alpha', 'p13', '--reason', 'scope');
-	out.stopped = snapshotAt(stopped, T('23:10'));
-
+	for (const name of Object.keys(builders)) {
+		const dir = path.join(mkdtempSync(path.join(tmpdir(), 'cc-desk-state-')), 'state');
+		const clock = builders[name](dir);
+		out[name] = snapshotAt(dir, clock);
+	}
 	return out;
 }
