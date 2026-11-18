@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "project": "birch",
+  "name": "v1",
+  "repo": "glw907/birch",
+  "rounds": [
+    {"name": "r0", "summary": "Birch's opening round.", "needs_geoff": false, "no_need_reason": "Setup only.", "design_written": true},
+    {"name": "r1", "summary": "Birch's first round.", "needs_geoff": true, "after": ["r0"], "design_written": true},
+    {"name": "r2", "summary": "Birch's round with no design yet.", "needs_geoff": true, "after": ["r1"], "planned_minutes": 30}
+  ],
+  "passes": [
+    {"name": "b-zero", "summary": "Birch pass zero.", "round": "r0", "planned_minutes": 120, "state": "not_started", "questions": ["birch-q0"]},
+    {"name": "b-one", "summary": "Birch pass one.", "round": "r1", "planned_minutes": 90, "state": "not_started", "after": ["b-zero"], "questions": ["birch-q1"]}
+  ],
+  "questions": [
+    {"id": "birch-q0", "text": "Start with the setup round?", "options": ["yes", "no"], "recommended": "yes", "answer": {"ruling": "r-0001"}},
+    {"id": "birch-q1", "text": "Keep the long names?", "options": ["keep", "shorten"], "recommended": "keep"}
+  ]
+}

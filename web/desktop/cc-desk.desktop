@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=cc-desk terminal link
+NoDisplay=true
+Exec=@HANDLER@ %u
+MimeType=x-scheme-handler/cc-desk;
