@@ -266,8 +266,18 @@ phase_abort() {
 
 # ---- evidence --------------------------------------------------------------
 
+# phase_evidence runs the readings with errexit off, so a failed reading never
+# keeps the timer enabled; the switch and the disable always run.
 phase_evidence() {
-  show cc timer status
+  evidence_readings || say "evidence: a reading failed; the rest ran"
+  say
+  try git -C "$SCRATCH" switch main
+  try systemctl --user disable --now cc-desk-check.timer
+  try systemctl --user is-enabled cc-desk-check.timer
+}
+
+evidence_readings() {
+  try cc timer status
 
   say
   say "item 7: the units verify"
@@ -299,9 +309,14 @@ phase_evidence() {
 
   say
   say "item 6: the denials log"
-  find "$HOME/.claude" "$STATE" -maxdepth 3 -iname '*denial*' 2>/dev/null | while read -r f; do
-    say "  $f: $(grep -c "cc-desk-scratch-timer-live" "$f" 2>/dev/null || true) row(s) naming a fixture pass"
-  done
+  local denials=$HOME/.local/state/claude-denials.jsonl started
+  started=$(cat "$RUN/start-time" 2>/dev/null || echo 9999)
+  if [ -f "$denials" ]; then
+    say "  rows under cc-desk-scratch/.claude/worktrees/ after $started: $(jq -R --arg s "$started" \
+      'fromjson? | select((.cwd // "" | contains("cc-desk-scratch/.claude/worktrees/")) and .ts > $s)' "$denials" | jq -s length)"
+  else
+    say "  $denials is absent, so no row can be counted"
+  fi
 
   say
   say "item 6: relaunch of timer-live-b"
@@ -309,7 +324,7 @@ phase_evidence() {
 
   say
   say "item 6: gone, one command per item"
-  show claude agents --json --all >"$RUN/agents.json" || true
+  claude agents --json --all >"$RUN/agents.json" || true
   local wt name
   for p in "${PASSES[@]}"; do
     name=$PROJECT-$p
@@ -324,9 +339,6 @@ phase_evidence() {
   done
   say "(the worktree and branch are gone when the first two read no rows and exit 0, and show-ref exits 128)"
 
-  say
-  show git -C "$SCRATCH" switch main
-  show systemctl --user disable --now cc-desk-check.timer
 }
 
 # ---- main ------------------------------------------------------------------
