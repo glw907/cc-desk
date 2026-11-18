@@ -40,8 +40,9 @@ the desktop database. It leaves `~/.config/mimeapps.list` alone. Then run
 `bash web/scripts/check-link.sh` to confirm that `xdg-open` reaches the handler.
 
 The handler takes an address only when the project and the round each start with a lower-case
-letter or a digit and hold only those and `-`. It refuses every other address and runs nothing.
-A project whose name holds `.` or `_` shows the command and the button, and no link.
+letter or a digit and hold only those, `.`, `_`, and `-`, which is the rule for a project's name in the
+state. It refuses every other address and runs nothing. A name that breaks the rule shows the
+command and the button, and no link.
 
 The handler looks for `cc-desk` on the `PATH` it starts with. It runs nothing until `cc-desk` is on a `PATH`
 that Chromium's session sees. The Desk and skills round puts it there. Chromium asks before it
