@@ -27,5 +27,8 @@ The choice is Geoff's. There are three options:
 Recommended: option 1, as a later pass. It keeps item 6's intent, which is to show the record
 fires before trusting a zero count, and it keeps the sessions unattended.
 
-Pass 5's live run adds its result below: whether the left-out rule raised a prompt, and any
-denial row a fixture session caused.
+Pass 5's live run, on 2026-11-18, adds its result. `Bash(sleep 240)` was left out of the allow rules
+for the second fixture pass, and that pass ran `sleep 240` at 15:13:19Z. The release file records
+0 prompts for it, and the denials log holds no row for either fixture session's worktree. Auto mode
+ran the unlisted command with no prompt and no denial, which matches the probe. A zero prompt count
+from either fixture pass says only that no session stopped on a prompt.

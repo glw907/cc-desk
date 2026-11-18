@@ -1,5 +1,7 @@
 # Check that the follow-up rule stands under auto mode
 
+Closed by pass 5 (sessions-timer), and the rule stands. In the live run of 2026-11-18 `timer-live-b` filed a follow-up with the allowed `followup` command at 15:19:15Z, under `--permission-mode auto`. The release file records 0 prompts for it, the denials log holds no row for the scratch worktrees, and the file reached `origin/live-2026-11-18`.
+
 Every launched session's settings file allows `Bash(<binary> --state-dir <dir> followup <project>
 <record> *)`. The permission-modes page says auto mode drops broad allow rules that grant arbitrary
 code execution, and some wildcarded paths. This rule has a like shape, and no run has shown whether

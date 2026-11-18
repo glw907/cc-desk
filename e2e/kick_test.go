@@ -20,7 +20,7 @@ import (
 const kickLine = "--user start --no-block cc-desk-check.service"
 
 // kickStandIn writes a systemctl stand-in that logs each call's arguments and
-// whether the release file already holds a building pass, so a test can see
+// whether the release file already holds a building pass and a pull request, so a test can see
 // the kick came after the commit. It returns the script's folder, its path,
 // and its log's path.
 func kickStandIn(t *testing.T, stateDir string, fail bool) (dir, script, log string) {
@@ -28,7 +28,7 @@ func kickStandIn(t *testing.T, stateDir string, fail bool) (dir, script, log str
 	dir = t.TempDir()
 	script = filepath.Join(dir, "systemctl")
 	log = filepath.Join(dir, "calls.log")
-	body := "#!/bin/sh\necho \"$* building=$(grep -c building " + filepath.Join(stateDir, "releases", "proj.json") + " 2>/dev/null)\" >> " + log + "\n"
+	body := "#!/bin/sh\necho \"$* building=$(grep -c building " + filepath.Join(stateDir, "releases", "proj.json") + " 2>/dev/null) pr=$(grep -c pull_request " + filepath.Join(stateDir, "releases", "proj.json") + " 2>/dev/null)\" >> " + log + "\n"
 	if fail {
 		body += "echo 'no bus' >&2\nexit 1\n"
 	}
@@ -131,7 +131,7 @@ func TestKick(t *testing.T) {
 			t.Fatalf("start: exit %d: %s", got.code, got.stderr)
 		}
 		lines := logLines(t, log)
-		if len(lines) != 1 || lines[0] != kickLine+" building=1" {
+		if len(lines) != 1 || lines[0] != kickLine+" building=1 pr=0" {
 			t.Fatalf("the log is %q, want one kick after the event", lines)
 		}
 	})
@@ -144,7 +144,7 @@ func TestKick(t *testing.T) {
 		if got.code != 0 {
 			t.Fatalf("ready: exit %d: %s", got.code, got.stderr)
 		}
-		if lines := logLines(t, log); len(lines) != 1 || !strings.HasPrefix(lines[0], kickLine) {
+		if lines := logLines(t, log); len(lines) != 1 || lines[0] != kickLine+" building=1 pr=1" {
 			t.Fatalf("the log is %q, want one kick", lines)
 		}
 		if pr := m.passRecord(t, "a")["pull_request"]; pr == nil {

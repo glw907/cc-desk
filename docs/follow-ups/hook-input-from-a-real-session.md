@@ -1,5 +1,7 @@
 # Record a real hook input and check its `session_id`
 
+Closed by pass 5 (sessions-timer). The auto-mode hook probe of 2026-11-18 (`docs/research/2026-11-18-auto-mode-hook-probe/`) recorded one real input and showed its `session_id` equals the session row's `sessionId` and the job's `state.json` `sessionId`. The input is now `e2e/testdata/prompts/hook-add-directories.json`, read by a new case in `parseHookPrompt`'s table test and by `TestPromptHookRealInput`.
+
 The prompt hook's tests read `e2e/testdata/prompts/hook-bash.json`, the example in the hooks
 reference. No live session has fed `cc-desk prompt hook` yet, so two things rest on the
 documentation alone.
