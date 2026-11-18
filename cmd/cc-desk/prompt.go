@@ -20,7 +20,7 @@ func newPromptCmd(f *rootFlags) *cobra.Command {
 		Use:   "prompt",
 		Short: "Handle the permission prompts a session raises",
 	})
-	cmd.AddCommand(newPromptHookCmd(f))
+	cmd.AddCommand(newPromptHookCmd(f), newAnswerCmd(f, state.AnswerYes), newAnswerCmd(f, state.AnswerNo))
 	return cmd
 }
 
