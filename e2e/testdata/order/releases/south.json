@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "project": "south",
+  "name": "v1",
+  "repo": "glw907/south",
+  "rounds": [
+    {"name": "s1", "summary": "Three passes in a second project.", "needs_geoff": true, "design_written": true}
+  ],
+  "passes": [
+    {"name": "s-free", "summary": "Free to start.", "round": "s1", "planned_minutes": 45, "state": "not_started"},
+    {"name": "s-two", "summary": "A second free pass.", "round": "s1", "planned_minutes": 30, "state": "not_started"},
+    {"name": "s-guess", "summary": "Rests on a question.", "round": "s1", "planned_minutes": 150, "state": "not_started", "questions": ["south-q1"]}
+  ],
+  "questions": [
+    {"id": "south-q1", "text": "Keep the old name?", "options": ["yes", "no"], "recommended": "yes"}
+  ]
+}

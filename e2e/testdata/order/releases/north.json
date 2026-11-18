@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "project": "north",
+  "name": "v1",
+  "repo": "glw907/north",
+  "rounds": [
+    {"name": "n1", "summary": "Five passes to start in order.", "needs_geoff": true, "design_written": true}
+  ],
+  "passes": [
+    {"name": "n-free", "summary": "Free to start.", "round": "n1", "planned_minutes": 60, "state": "not_started"},
+    {"name": "n-two", "summary": "A second free pass.", "round": "n1", "planned_minutes": 30, "state": "not_started"},
+    {"name": "n-big", "summary": "Too big to guess.", "round": "n1", "planned_minutes": 400, "state": "not_started", "questions": ["north-q1"]},
+    {"name": "n-guess", "summary": "Rests on a question.", "round": "n1", "planned_minutes": 200, "state": "not_started", "questions": ["north-q2"]},
+    {"name": "n-after", "summary": "Comes after the guess.", "round": "n1", "planned_minutes": 50, "state": "not_started", "after": ["n-guess"]}
+  ],
+  "questions": [
+    {"id": "north-q1", "text": "Split the big pass?", "options": ["yes", "no"], "recommended": "yes"},
+    {"id": "north-q2", "text": "Use the short form?", "options": ["yes", "no"], "recommended": "yes"}
+  ]
+}

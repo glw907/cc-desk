@@ -153,6 +153,17 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 			return fmt.Errorf("pass %q is done and needs start, finish, and actual minutes", p.Name)
 		}
 	}
+	if err := validateWait(p); err != nil {
+		return err
+	}
+	if g := p.Guess; g != nil {
+		if p.State == NotStarted {
+			return fmt.Errorf("pass %q has a guess but has not started", p.Name)
+		}
+		if !slices.Contains(p.Questions, g.Question) {
+			return fmt.Errorf("pass %q guesses on question %q, which it does not rest on", p.Name, g.Question)
+		}
+	}
 	for i, st := range p.Stops {
 		open := st.End == nil
 		if open != (p.State == Stopped && i == len(p.Stops)-1) {
@@ -173,6 +184,24 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	}
 	if p.StopReason != "" && !ValidStopReason(p.StopReason) {
 		return fmt.Errorf("pass %q has stop reason %q, which is not one of the five", p.Name, p.StopReason)
+	}
+	return nil
+}
+
+func validateWait(p *Pass) error {
+	if p.State != Waiting {
+		if p.Wait != nil {
+			return fmt.Errorf("pass %q is %s but carries a wait", p.Name, p.State)
+		}
+		return nil
+	}
+	if p.Wait == nil || p.Wait.Since.IsZero() || len(p.Wait.Limits) == 0 {
+		return fmt.Errorf(`pass %q is waiting and needs a "wait" with "since" and "limits"`, p.Name)
+	}
+	for _, l := range p.Wait.Limits {
+		if !knownLimit(l) {
+			return fmt.Errorf("pass %q waits on limit %q, which is not two_pass_limit or usage", p.Name, l)
+		}
 	}
 	return nil
 }

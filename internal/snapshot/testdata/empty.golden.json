@@ -12,7 +12,8 @@
     "rounds": [],
     "projects": [],
     "not_designed": [],
-    "waiting_on_design": []
+    "waiting_on_design": [],
+    "reasons": []
   },
   "waits_for_geoff": [],
   "waiting": [],

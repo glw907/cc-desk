@@ -19,6 +19,8 @@ var verbs = []verb{
 	{"pass start", func(*testing.T) []string { return []string{"pass", "start", "alpha", "p13"} }},
 	{"pass finish", func(*testing.T) []string { return []string{"pass", "finish", "alpha", "p13"} }},
 	{"pass stop", func(*testing.T) []string { return []string{"pass", "stop", "alpha", "p13", "--reason", "scope"} }},
+	{"usage", func(*testing.T) []string { return []string{"usage"} }},
+	{"free", func(*testing.T) []string { return []string{"free"} }},
 	{"release add", func(t *testing.T) []string { return []string{"release", "add", input(t, "gamma.json")} }},
 	{"round design", func(t *testing.T) []string {
 		return []string{"round", "design", "beta", "b3", input(t, "design-b3.json")}

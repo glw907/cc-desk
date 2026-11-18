@@ -33,8 +33,13 @@ Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 
 Passes 1 and 2 have landed. The snapshot holds each release's pace and range, each pass's and
 round's needed time, and the next session with `waits_for_geoff`. Each pass event appends a line
-to `forecasts.jsonl`. `settle` in `internal/state/commit.go` is still empty for pass 3, which also
-adds the unreadable usage figure to "Needs you now".
+to `forecasts.jsonl`.
+
+Pass 3 (`state-rules-order`) is built and in pull request 5, waiting on its merge. A start now
+follows the rules for what is free to start: it begins, waits on the two-pass limit or on usage, or
+is refused with every broken rule named. `cc-desk usage` and `cc-desk free` are new, and the snapshot
+carries `free`, `why_not`, `waiting`, `open_guesses`, and the unreadable usage figure under "Needs
+you now". One call waits for Geoff: `docs/follow-ups/resume-skips-the-limits.md`.
 
 ## Next action
 

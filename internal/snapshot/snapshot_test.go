@@ -138,6 +138,106 @@ func TestSnapshotRounds(t *testing.T) {
 	}
 }
 
+// ordered is a release with a free pass, a pass behind unfinished work and
+// an unanswered question, a waiting pass on both limits, and a building and
+// a waiting pass that each carry an open guess.
+func ordered(t *testing.T) *state.ReleaseFile {
+	return mustRelease(t, `{"format":1,"project":"p","name":"v1","repo":"r",
+	  "rounds":[{"name":"r1","summary":"s","needs_geoff":true,"design_written":true}],
+	  "passes":[
+	    {"name":"free","summary":"s","round":"r1","planned_minutes":30,"state":"not_started"},
+	    {"name":"late","summary":"s","round":"r1","planned_minutes":30,"state":"not_started","after":["free"],"questions":["q1"]},
+	    {"name":"held","summary":"s","round":"r1","planned_minutes":40,"state":"waiting",
+	     "wait":{"since":"2026-11-20T22:00:00Z","limits":["two_pass_limit","usage"]}},
+	    {"name":"g1","summary":"s","round":"r1","planned_minutes":200,"state":"building","started":"2026-11-20T22:30:00Z",
+	     "questions":["q2"],"guess":{"question":"q2","recommendation":"x","at":"2026-11-20T22:30:00Z"}},
+	    {"name":"g2","summary":"s","round":"r1","planned_minutes":90,"state":"waiting",
+	     "wait":{"since":"2026-11-20T21:00:00Z","limits":["two_pass_limit"]},
+	     "questions":["q3"],"guess":{"question":"q3","recommendation":"x","at":"2026-11-20T21:00:00Z"}}],
+	  "questions":[
+	    {"id":"q1","text":"t","options":["x","y"],"recommended":"x"},
+	    {"id":"q2","text":"t","options":["x","y"],"recommended":"x"},
+	    {"id":"q3","text":"t","options":["x","y"],"recommended":"x"}]}`)
+}
+
+func passNamed(t *testing.T, s *Snapshot, name string) Pass {
+	t.Helper()
+	for _, p := range s.Releases[0].Rounds[0].Passes {
+		if p.Name == name {
+			return p
+		}
+	}
+	t.Fatalf("no pass %s", name)
+	return Pass{}
+}
+
+func TestSnapshotFree(t *testing.T) {
+	st := &state.State{
+		Releases: []*state.ReleaseFile{ordered(t)},
+		Usage:    &state.Usage{Format: 1, Percent: 100, ResetText: "Nov 20, 10:59pm", ReadAt: clock},
+	}
+	snap := Build(st, clock)
+
+	if p := passNamed(t, snap, "free"); p.Free == nil || !*p.Free || len(p.WhyNot) != 0 {
+		t.Errorf("free pass: free %v why_not %v", p.Free, p.WhyNot)
+	}
+	p := passNamed(t, snap, "late")
+	want := []string{"unfinished work before it", "an unanswered question"}
+	if p.Free == nil || *p.Free || strings.Join(p.WhyNot, "|") != strings.Join(want, "|") {
+		t.Errorf("late pass: free %v why_not %v, want %v", p.Free, p.WhyNot, want)
+	}
+	if p := passNamed(t, snap, "held"); p.Free != nil {
+		t.Errorf("a waiting pass reads free %v, want null", *p.Free)
+	}
+
+	if len(snap.Waiting) != 2 {
+		t.Fatalf("waiting = %+v", snap.Waiting)
+	}
+	if w := snap.Waiting[0]; w.Pass != "g2" || w.ResetText != nil || strings.Join(w.Limits, ",") != "two_pass_limit" {
+		t.Errorf("oldest waiting pass = %+v", w)
+	}
+	w := snap.Waiting[1]
+	if w.Pass != "held" || w.ResetText == nil || *w.ResetText != "Nov 20, 10:59pm" ||
+		strings.Join(w.Limits, ",") != "two_pass_limit,usage" || !w.Since.Equal(clock.Add(-time.Hour)) {
+		t.Errorf("held waiting entry = %+v", w)
+	}
+}
+
+func TestSnapshotUsageUnreadable(t *testing.T) {
+	st := &state.State{
+		Releases: []*state.ReleaseFile{ordered(t)},
+		Usage:    &state.Usage{Format: 1, Error: "no line", ReadAt: clock},
+	}
+	snap := Build(st, clock)
+	n := snap.NextSession
+	if n.State == nil || *n.State != "needs_you_now" || len(n.Reasons) != 1 || n.Reasons[0] != "the usage figure can't be read" {
+		t.Errorf("next_session = state %v reasons %v", n.State, n.Reasons)
+	}
+	for _, w := range snap.Waiting {
+		if w.ResetText != nil {
+			t.Errorf("%s has reset text %q on an unreadable reading", w.Pass, *w.ResetText)
+		}
+	}
+
+	none := Build(&state.State{Releases: []*state.ReleaseFile{ordered(t)}}, clock)
+	if len(none.NextSession.Reasons) != 0 || none.NextSession.Reasons == nil {
+		t.Errorf("a missing reading gives reasons %v, want []", none.NextSession.Reasons)
+	}
+}
+
+func TestSnapshotOpenGuesses(t *testing.T) {
+	snap := Build(&state.State{Releases: []*state.ReleaseFile{ordered(t)}}, clock)
+	if len(snap.OpenGuesses) != 2 || snap.GuessMinutesTotal != 290 {
+		t.Fatalf("open_guesses %+v total %d, want two entries and 290", snap.OpenGuesses, snap.GuessMinutesTotal)
+	}
+	if g := snap.OpenGuesses[0]; g != (OpenGuess{Project: "p", Pass: "g1", Question: "q2", Minutes: 200}) {
+		t.Errorf("first guess = %+v", g)
+	}
+	if g := snap.OpenGuesses[1]; g != (OpenGuess{Project: "p", Pass: "g2", Question: "q3", Minutes: 90}) {
+		t.Errorf("second guess = %+v", g)
+	}
+}
+
 func TestSnapshotLeavesOutDoneReleases(t *testing.T) {
 	rf := mustRelease(t, `{"format":1,"project":"p","name":"v1","repo":"r"}`)
 	rf.Done = true

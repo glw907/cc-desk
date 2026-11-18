@@ -64,7 +64,8 @@ func TestCommitForecast(t *testing.T) {
 
 	t.Run("pass event appends one line", func(t *testing.T) {
 		dir := t.TempDir()
-		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, "releases/alpha.json", startRelease)
+		writeReading(t, dir, 40)
 		if _, err := Commit(dir, testClock, time.Second, start, forecastRender("alpha", "r1", forecast, true)); err != nil {
 			t.Fatal(err)
 		}
@@ -76,7 +77,8 @@ func TestCommitForecast(t *testing.T) {
 
 	t.Run("no time writes null and no names", func(t *testing.T) {
 		dir := t.TempDir()
-		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, "releases/alpha.json", startRelease)
+		writeReading(t, dir, 40)
 		if _, err := Commit(dir, testClock, time.Second, start, forecastRender("", "", forecast, false)); err != nil {
 			t.Fatal(err)
 		}
@@ -91,7 +93,8 @@ func TestCommitForecast(t *testing.T) {
 
 	t.Run("other verbs append nothing", func(t *testing.T) {
 		dir := t.TempDir()
-		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, "releases/alpha.json", startRelease)
+		writeReading(t, dir, 40)
 		if _, err := Commit(dir, testClock, time.Second, nothing, forecastRender("alpha", "r1", forecast, true)); err != nil {
 			t.Fatal(err)
 		}
@@ -102,7 +105,8 @@ func TestCommitForecast(t *testing.T) {
 
 	t.Run("a refusal appends nothing", func(t *testing.T) {
 		dir := t.TempDir()
-		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, "releases/alpha.json", startRelease)
+		writeReading(t, dir, 40)
 		if _, err := Commit(dir, testClock, time.Second, FinishPass("alpha", "p1"), forecastRender("alpha", "r1", forecast, true)); err == nil {
 			t.Fatal("finishing a pass that has not started succeeded")
 		}
@@ -113,7 +117,8 @@ func TestCommitForecast(t *testing.T) {
 
 	t.Run("a missing final newline is added", func(t *testing.T) {
 		dir := t.TempDir()
-		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, "releases/alpha.json", startRelease)
+		writeReading(t, dir, 40)
 		first := `{"format":1,"made":"2026-11-19T23:00:00Z","time":null}`
 		writeFile(t, dir, ForecastFile, first)
 		if _, err := Commit(dir, testClock, time.Second, start, forecastRender("alpha", "r1", forecast, true)); err != nil {

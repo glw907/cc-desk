@@ -16,7 +16,7 @@ import (
 )
 
 // GuessMinutesLimit is the cap on work resting on open guesses.
-const GuessMinutesLimit = 300
+const GuessMinutesLimit = state.GuessMinutesCap
 
 // Snapshot is the content of snapshot.json.
 type Snapshot struct {
@@ -112,6 +112,7 @@ type NextSession struct {
 	Projects        []string   `json:"projects"`
 	NotDesigned     []string   `json:"not_designed"`
 	WaitingOnDesign []string   `json:"waiting_on_design"`
+	Reasons         []string   `json:"reasons"`
 }
 
 // Range is the low and high ends of a forecast time.
@@ -127,15 +128,18 @@ type WaitEntry struct {
 	Questions int    `json:"questions"`
 }
 
-// WaitingPass is a pass waiting on a limit. Pass 3 fills it.
+// WaitingPass is a pass waiting on its limits, listed oldest request
+// first. ResetText is the reading's reset text when usage is among the
+// limits and the reading is readable, and null otherwise.
 type WaitingPass struct {
-	Project   string `json:"project"`
-	Pass      string `json:"pass"`
-	Limit     string `json:"limit"`
-	ResetText string `json:"reset_text"`
+	Project   string    `json:"project"`
+	Pass      string    `json:"pass"`
+	Limits    []string  `json:"limits"`
+	Since     time.Time `json:"since"`
+	ResetText *string   `json:"reset_text"`
 }
 
-// OpenGuess is a pass started on a guess. Pass 3 fills it.
+// OpenGuess is a pass carrying a guess whose question has no answer.
 type OpenGuess struct {
 	Project  string `json:"project"`
 	Pass     string `json:"pass"`
@@ -174,20 +178,21 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		GeneratedAt:       now.UTC(),
 		Releases:          []Release{},
 		Rulings:           []state.Ruling{},
-		NextSession:       NextSession{Rounds: []string{}, Projects: []string{}, NotDesigned: []string{}, WaitingOnDesign: []string{}},
+		NextSession:       NextSession{Rounds: []string{}, Projects: []string{}, NotDesigned: []string{}, WaitingOnDesign: []string{}, Reasons: []string{}},
 		WaitsForGeoff:     []WaitEntry{},
 		Waiting:           []WaitingPass{},
 		OpenGuesses:       []OpenGuess{},
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	snap.GuessMinutesTotal = s.OpenGuessMinutes()
 	pcs := paces(s)
 	var ctxs []*relCtx
 	for _, rf := range s.Releases {
 		if rf.Done {
 			continue
 		}
-		out := buildRelease(&rf.Release)
+		out := buildRelease(s, rf)
 		pc, ok := pcs[rf.Project]
 		if !ok {
 			pc = roughPace
@@ -196,23 +201,71 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		times := fillRelease(&out, v, pc, now)
 		ctxs = append(ctxs, &relCtx{idx: len(snap.Releases), rf: rf, v: v, pc: pc, times: times})
 		snap.Releases = append(snap.Releases, out)
+		snap.OpenGuesses = append(snap.OpenGuesses, openGuesses(rf)...)
 	}
-	return snap, fillSession(snap, ctxs, now)
+	snap.Waiting = waitingPasses(s)
+	return snap, fillSession(snap, ctxs, now, usageUnreadable(s))
 }
 
-func buildRelease(r *state.Release) Release {
+// usageUnreadable reports whether the kept reading carries an error. A
+// missing reading is a stop in the rules but adds no reason here.
+func usageUnreadable(s *state.State) bool {
+	return s.Usage != nil && s.Usage.Error != ""
+}
+
+func openGuesses(rf *state.ReleaseFile) []OpenGuess {
+	var out []OpenGuess
+	for i := range rf.Passes {
+		if p := &rf.Passes[i]; rf.OpenGuess(p) {
+			out = append(out, OpenGuess{Project: rf.Project, Pass: p.Name, Question: p.Guess.Question, Minutes: p.PlannedMinutes})
+		}
+	}
+	return out
+}
+
+// waitingPasses lists the waiting passes of live releases in the order
+// settling starts them: oldest request first, ties by release then pass.
+func waitingPasses(s *state.State) []WaitingPass {
+	out := []WaitingPass{}
+	var reset *string
+	if u := s.Usage; u != nil && u.Error == "" && u.ResetText != "" {
+		reset = &u.ResetText
+	}
+	for _, rf := range s.Releases {
+		if rf.Done {
+			continue
+		}
+		for i := range rf.Passes {
+			p := &rf.Passes[i]
+			if p.State != state.Waiting || p.Wait == nil {
+				continue
+			}
+			w := WaitingPass{Project: rf.Project, Pass: p.Name, Limits: append([]string{}, p.Wait.Limits...), Since: p.Wait.Since.UTC()}
+			if reset != nil && slices.Contains(w.Limits, state.LimitUsage) {
+				w.ResetText = reset
+			}
+			out = append(out, w)
+		}
+	}
+	slices.SortStableFunc(out, func(a, b WaitingPass) int { return a.Since.Compare(b.Since) })
+	return out
+}
+
+func buildRelease(s *state.State, rf *state.ReleaseFile) Release {
+	r := &rf.Release
 	out := Release{Project: r.Project, Name: r.Name, Repo: r.Repo, Rounds: []Round{}}
 	questions := map[string]*state.Question{}
 	for i := range r.Questions {
 		questions[r.Questions[i].ID] = &r.Questions[i]
 	}
 	for i := range r.Rounds {
-		out.Rounds = append(out.Rounds, buildRound(r, &r.Rounds[i], questions))
+		out.Rounds = append(out.Rounds, buildRound(s, rf, &r.Rounds[i], questions))
 	}
 	return out
 }
 
-func buildRound(r *state.Release, rd *state.Round, questions map[string]*state.Question) Round {
+func buildRound(s *state.State, rf *state.ReleaseFile, rd *state.Round, questions map[string]*state.Question) Round {
+	r := &rf.Release
 	out := Round{
 		Name:           rd.Name,
 		Summary:        rd.Summary,
@@ -228,7 +281,7 @@ func buildRound(r *state.Release, rd *state.Round, questions map[string]*state.Q
 		if p.Round != rd.Name {
 			continue
 		}
-		out.Passes = append(out.Passes, buildPass(p, questions))
+		out.Passes = append(out.Passes, buildPass(s, rf, p, questions))
 		for _, id := range p.Questions {
 			if !slices.Contains(ids, id) {
 				ids = append(ids, id)
@@ -289,7 +342,7 @@ func buildRound(r *state.Release, rd *state.Round, questions map[string]*state.Q
 	return out
 }
 
-func buildPass(p *state.Pass, questions map[string]*state.Question) Pass {
+func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions map[string]*state.Question) Pass {
 	out := Pass{
 		Name:           p.Name,
 		Summary:        p.Summary,
@@ -307,6 +360,14 @@ func buildPass(p *state.Pass, questions map[string]*state.Question) Pass {
 	}
 	for _, id := range p.Questions {
 		out.Questions = append(out.Questions, buildQuestion(questions[id]))
+	}
+	if p.State == state.NotStarted {
+		broken := s.Breaks(rf, p, "")
+		free := len(broken) == 0
+		out.Free = &free
+		for _, b := range broken {
+			out.WhyNot = append(out.WhyNot, b.Name)
+		}
 	}
 	return out
 }
