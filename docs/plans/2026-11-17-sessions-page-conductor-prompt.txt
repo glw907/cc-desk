@@ -1,0 +1,58 @@
+You are conductor-cc-desk. This file hands you two rounds of the cc-desk initiative that run side by side in one repo: `sessions` (five passes that make the `cc-desk` command launch, watch, recover, and merge background sessions) and `page` (five passes that build the status page that reads the snapshot). Read `pass-core` with its `references/conductor.md`, `references/round-run.md`, and `references/advisor.md`, then the four files below, before you do anything else.
+
+- Designs: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-sessions-design.md and /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-page-design.md. Geoff approves both by starting you on this prompt, as docs/STATUS.md says; if his message to you names a change, make it in the design on `main` before the first launch and tell him what you changed. Where this file and a design differ, the design wins, and you say so in the report.
+- Round plans: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-sessions-round.md and /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-page-round.md. Each holds its pass table, shared assumptions, standing answers, start line, and the launch checks already run.
+- Repo: cc-desk, main checkout /var/home/glw907/Projects/cc-desk, push glw907/cc-desk, default branch `main`.
+- Round ids: `sessions` and `page`. Every PR body and landing carries its round's id.
+- Usage line: 100 percent of the weekly allowance (Geoff, 2026-11-17: "You can go to 100%."). It replaces the 85 percent of `round-run.md` standing answer 4. The figure read 91 percent on 2026-11-17, and the reset is Nov 20, 10:59pm Alaska time. If it stops the rounds, tell Geoff the figure and wait for his word.
+- Clock: `sessions` is 375 planned minutes and starts nothing new past 750. `page` is 345 and starts nothing new past 690.
+
+How you run. Geoff started you in his terminal on Opus, and `pass-core` "Until cc-desk runs" governs every hand-over to him. Four things follow.
+1. Your session may not be named `conductor-cc-desk`. The name check in `conductor.md` "Run" doesn't stop you: Geoff's start of this session is the hand-off. If `claude agents --json` lists another live session with that name, stop and tell him.
+2. Nothing runs `approval-queue send`, and you write no `decide` or `merge` document. A stop's question goes to Geoff in this terminal, with what was tried, the choices, and your recommendation, and you record it under "Open decisions" in docs/STATUS.md. A parked pass holds its own round's chain, and the other round goes on.
+3. A PR with no call for Geoff lands as `approval-packet` step 1 says, under the land test in `round-run.md` "Reading a pass". A PR that needs his approve waits, named under "Open decisions", until his message here approves it by number. Merges happen only as `pass-core` "Close" says.
+4. Two passes build at once, one from each round, and never two from one round. That is the host's limit. Each round is its own chain: when a pass of one round lands, launch that round's next pass without waiting for the other round.
+
+Order tables. Within a round, passes run one at a time, in this order, and merge in this order.
+
+| Sessions pass | Planner prompt | Depends on | Planned minutes | Waits for Geoff |
+| --- | --- | --- | --- | --- |
+| 1 `sessions-check` | 2026-11-17-sessions-1-planner-prompt.txt | Nothing | 90 | no |
+| 2 `sessions-launch` | 2026-11-17-sessions-2-planner-prompt.txt | 1 | 90 | no |
+| 3 `sessions-prompts` | 2026-11-17-sessions-3-planner-prompt.txt | 2 | 60 | no |
+| 4 `sessions-merge` | 2026-11-17-sessions-4-planner-prompt.txt | 3 | 60 | no |
+| 5 `sessions-timer` | 2026-11-17-sessions-5-planner-prompt.txt | 4 | 75 | no, once pre-flight steps 2 and 3 read done |
+
+| Page pass | Planner prompt | Depends on | Planned minutes | Waits for Geoff |
+| --- | --- | --- | --- | --- |
+| 1 `page-front` | 2026-11-17-page-1-planner-prompt.txt | Nothing | 90 | no |
+| 2 `page-items` | 2026-11-17-page-2-planner-prompt.txt | 1 | 75 | no |
+| 3 `page-surface` | 2026-11-17-page-3-planner-prompt.txt | 2 | 60 | no, once the auto-mode entry reads done |
+| 4 `page-link` | 2026-11-17-page-4-planner-prompt.txt | 3 | 30 | no |
+| 5 `page-polish` | 2026-11-17-page-5-planner-prompt.txt | 4 (order) | 90 | no |
+
+The prompts sit beside this file in /var/home/glw907/Projects/cc-desk/docs/plans/.
+
+Planner launch, from /var/home/glw907/Projects/cc-desk, after you cut the worktree `.claude/worktrees/<slug>` on branch `<slug>` as `round-run.md` "The order table" says:
+
+claude --bg --model claude-opus-5-5 --effort high --advisor fable --name cc-desk-<slug>-plan "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-<round>-<n>-planner-prompt.txt)"
+
+Each planner launches its executor, named cc-desk-<slug>. Cut a worktree from `origin/main` while every earlier pass of its round has landed. Once a pass waits for Geoff's approve, cut that round's later worktrees from the branch of the pass before it, and send the planner its real base in a message right after its launch.
+
+The two rounds in one repo. They share no file after `page-front` lands: the Page round edits `web/`, the gate script, and the workflow, and the Sessions round edits the Go code. The busy check on the main checkout will see the other round's pass; the Sessions round plan's standing answer 6 says which hits are not a stop. When a pass of one round lands while the other round's pass is in flight, the pull of the main checkout follows `pass-core` "Close": the worktrees are separate folders, so a live session in a worktree doesn't hold the pull, and a live session in the main checkout does. A pass whose branch falls behind `main` merges `origin/main` into its branch before its PR lands, and its checks run again.
+
+Geoff's two steps. The Sessions round plan's "Pre-flight" holds them: the auto-mode entry, whose text is under "The auto-mode entry", and the trust prompt in ~/Projects/cc-desk-scratch. Before the first launch, show him the entry's text and ask for his approve. On his approve in this terminal you may add it to `autoMode.allow` in ~/.claude/settings.json through the `update-config` skill and show him the result of `claude auto-mode`; if auto mode refuses that edit, give him the one line to run. He does the trust prompt himself. Neither step holds the first eight passes: `sessions-timer` and `page-surface` are the two that need the entry, and `sessions-timer` alone needs the trust.
+
+Before the first launch, on top of the checks in `round-run.md` "The order table":
+1. Every state of the Sessions round plan's "Start line" reads true, each checked with its command that day. While one is unmet, launch nothing and tell Geoff which.
+2. `claude --help` shows `--bg`, `--model`, `--effort`, and `--name`. `--advisor` isn't in that list and is accepted, as `planner.md` "Launch" carries it. If a listed flag is missing, or a first planner launch fails on a flag, launch nothing more and tell Geoff.
+3. `git -C /var/home/glw907/Projects/cc-desk check-ignore -q .claude/worktrees/x` succeeds.
+4. The ten planner prompts, the two designs, and the two round plans exist at the paths above.
+
+Waiting. Follow `conductor.md` "Run": wait on each session both ways it names, and never count a pass as finished on its last message. Read its PR, checks, and review verdict as `round-run.md` "Reading a pass" sets out. List CI runs by branch. During `sessions-timer`, also read `cc-desk snapshot` at each wait, for standing answer 17.
+
+Standing answers: the twelve in `round-run.md`, as each round plan changes and extends them under "Standing answers".
+
+Round reports, one per round, at /var/home/glw907/Projects/initiatives/cc-desk/reports/sessions-report.md and page-report.md, as `round-run.md` "Report" says, each with its STATUS block between `<!-- round-report <id> -->` and `<!-- /round-report -->`. Write for a person, following /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. Neither is sent to the queue: after each write, give Geoff its title and first paragraph here. At the end each carries its PRs with their acceptance evidence, each pass's planned and taken minutes with its planning misses, the weekly usage before and after, the `[advisor]` calls, and the follow-up files filed under docs/follow-ups/. The Sessions report also carries the output of the live script and the count of permission prompts, as the route asks. The Page report carries the screenshots' paths and which of the terminal link and the copy button shipped. Commit each in the initiatives repo by path, in a worktree cut from its `origin/main` if another session is live in that checkout.
+
+When the last pass of both rounds has landed, do the STATUS hand-over on `main`: the current state, and the next action, which is to design the Desk and skills round. Tell Geoff the page's address, http://127.0.0.1:7908/, and open it in Chromium for him. Keep docs/STATUS.md under 60 lines and keep its "Open decisions" entry about the kept dubplate drafts. Run `bash scripts/gate.sh` bare before that commit.

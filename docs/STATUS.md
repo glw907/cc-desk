@@ -4,19 +4,19 @@
 
 - The design (`docs/specs/2026-11-17-cc-desk-design.md`) and the route
   (`docs/plans/2026-11-17-route.md`, seven rounds) are approved.
-- The Prove pass's first run is merged as pull request 1. It holds the Go scaffold, `scripts/gate.sh`,
-  the CI workflow, and `spikes/own.sh`, the helper that launches and controls proof sessions.
-- The first run stopped on the plan's old 85 percent usage limit and launched no proof session.
-  The ceiling is 100 percent since 2026-11-17, and the second run ran all six proofs.
-- The report is `docs/research/2026-11-17-prove-findings.md`. Proofs 5, 4, 2, 3, and 7 held. Proofs 1
-  and 6 fall back: the check restarts a blocked or killed session from the files, and a fresh
-  session starts from the plan and branch. A pass runs with zero prompts under five allow rules.
-- Open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
-- No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
+- The Prove round is merged as pull request 1. Its report is
+  `docs/research/2026-11-17-prove-findings.md`: five proofs held, and two fall back to a restart
+  from the files. Open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
 - The State and rules round has landed (pull requests 3 to 6, 2026-11-18). Its design is
   `docs/specs/2026-11-17-state-and-rules-design.md`, and its report is
   `~/Projects/initiatives/cc-desk/reports/state-rules-report.md`.
-- The usage stop is 100 percent of the week. The figure read 91 percent on 2026-11-18.
+- The Sessions round and the Page round are designed and planned, and nothing of them is
+  built. The designs are `docs/specs/2026-11-17-sessions-design.md` and
+  `docs/specs/2026-11-17-page-design.md`. Each has a round plan and five planner prompts in
+  `docs/plans/`. Geoff has read neither design yet.
+- No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
+- The usage stop is 100 percent of the week. The figure read 91 percent on 2026-11-17, and
+  the reset is Nov 20, 10:59pm Alaska time.
 
 <!-- round-report state-rules -->
 **The State and rules round has landed all four passes.** They are pull requests 3 to 6. The
@@ -39,15 +39,17 @@ record` appends Geoff's words and frees what waited. Eight follow-ups from the r
 
 ## Next action
 
-Design the Sessions round and the Page round. The route (`docs/plans/2026-11-17-route.md`) lets
-them run side by side, since both rest only on the state files. Geoff starts a fresh Opus session
-in his terminal, from `~/Projects/cc-desk`, with this prompt:
+Run the Sessions round and the Page round side by side, one pass of each at a time. Geoff
+starts a fresh Opus session in his terminal, from `~/Projects/cc-desk`, with the line below.
+Starting it is his approval of both designs. A change he wants goes in his first message.
 
 ```text
-Design the cc-desk Sessions round and the Page round. Read docs/STATUS.md, the route
-(docs/plans/2026-11-17-route.md), and the State and rules design, then follow pass-core
-to design each round with me, one question at a time.
+claude --model claude-opus-5-5 --effort high "$(cat docs/plans/2026-11-17-sessions-page-conductor-prompt.txt)"
 ```
+
+Two steps are his, and neither holds the first eight passes. The conductor shows him an
+auto-mode entry to approve (its text is in `docs/plans/2026-11-17-sessions-round.md`). He
+accepts Claude Code's trust prompt once in `~/Projects/cc-desk-scratch`, which is cloned.
 
 ## Open decisions
 
