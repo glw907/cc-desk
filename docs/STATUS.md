@@ -40,8 +40,11 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 
 ## Running
 
-- Pass 1 of the Sessions round (sessions-check) runs as the background session
-  `cc-desk-sessions-check`, id `2bebdd44-27d8-46a2-99b1-58f6a44fda36`, on branch `sessions-check`.
+- Pass 1 of the Sessions round (sessions-check) is built and in draft pull request 8, on branch
+  `sessions-check`. `cc-desk check` records sessions, reads the session list, runs the probe, and
+  decides what each session needs. Pass 2 carries out the launches, ends, and relaunches.
+- Its one call for Geoff: whether a usage-limit relaunch waits for the reset time
+  (`docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md`). The conductor lands the pull request.
 
 ## Next action
 

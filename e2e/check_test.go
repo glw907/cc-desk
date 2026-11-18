@@ -199,11 +199,30 @@ func TestCheckStops(t *testing.T) {
 		}
 	}
 
+	// stopped checks the snapshot's needs_you_now entry for a session and
+	// the pass state the release file holds.
+	stopped := func(t *testing.T, dir, pass, session, reason, todo string) need {
+		t.Helper()
+		n, ok := snapshotNeeds(t, dir)[session]
+		if !ok {
+			t.Fatalf("needs_you_now names no %s", session)
+		}
+		if n.Reason != reason || n.Todo != todo {
+			t.Errorf("%s: reason %q, todo %q, want %q and %q", session, n.Reason, n.Todo, reason, todo)
+		}
+		if got := passState(t, dir, pass); got != "stopped" {
+			t.Errorf("%s reads %s, want stopped", pass, got)
+		}
+		return n
+	}
+
 	t.Run("1 a permission prompt", func(t *testing.T) {
 		stop(t, b["pass:s01"], "permission_prompt")
+		stopped(t, dirB, "s01", "chk-s01", "permission_prompt", "answer it at the desk")
 	})
 	t.Run("2 login expired", func(t *testing.T) {
 		stop(t, b["pass:s02"], "sign_in_expired")
+		stopped(t, dirB, "s02", "chk-s02", "sign_in_expired", "sign in to Claude Code")
 	})
 	t.Run("3 a usage limit", func(t *testing.T) {
 		d := b["pass:s03"]
@@ -211,12 +230,20 @@ func TestCheckStops(t *testing.T) {
 		if !strings.Contains(d.Detail, "You've hit your weekly limit") || !strings.Contains(d.Detail, "resets Nov 6, 11pm (America/Anchorage)") {
 			t.Errorf("detail = %q, want the limit and its reset time", d.Detail)
 		}
+		n := stopped(t, dirB, "s03", "chk-s03", "usage", "wait for the reset, or reset early")
+		if n.Cause != d.Detail {
+			t.Errorf("cause = %q, want %q", n.Cause, d.Detail)
+		}
 	})
 	t.Run("4 an unreadable block", func(t *testing.T) {
 		d := b["pass:s04"]
 		stop(t, d, "unreadable_stop")
-		if d.Detail == "" || d.Detail == "no text" || len([]rune(d.Detail)) > 200 {
-			t.Errorf("detail = %q, want the last 200 runes of the screen at most", d.Detail)
+		if d.Detail != unreadableCause {
+			t.Errorf("detail = %q, want the last 200 runes of the screen, %q", d.Detail, unreadableCause)
+		}
+		n := stopped(t, dirB, "s04", "chk-s04", "unreadable_stop", "read the session's log, then start the pass again")
+		if n.Cause != unreadableCause {
+			t.Errorf("cause = %q", n.Cause)
 		}
 	})
 	t.Run("5 lost connection, probe failing", func(t *testing.T) {
@@ -230,6 +257,11 @@ func TestCheckStops(t *testing.T) {
 		}
 		if got := readFileIn(t, dirA, "releases/chk.json"); strings.Contains(got, `"relaunches"`) {
 			t.Error("a waiting link counted a relaunch")
+		}
+		for _, p := range []string{"s05", "s06"} {
+			if got := passState(t, dirA, p); got != "building" {
+				t.Errorf("%s reads %s, want building", p, got)
+			}
 		}
 	})
 	t.Run("6 lost connection, probe answering", func(t *testing.T) {
@@ -276,6 +308,13 @@ func TestCheckStops(t *testing.T) {
 		if d := held["pass:s04"]; d.Decision != "none" || d.Reason != "unreadable_stop" {
 			t.Errorf("s04 at 100 percent = %+v, want its cause to stand", d)
 		}
+		held3, held4 := snapshotNeeds(t, dirB)["chk-s03"], snapshotNeeds(t, dirB)["chk-s04"]
+		if held3.Reason != "usage" || !strings.Contains(held3.Cause, "You've hit your weekly limit") {
+			t.Errorf("needs_you_now for s03 = %+v, want its cause to stand", held3)
+		}
+		if held4.Reason != "unreadable_stop" || held4.Cause != unreadableCause {
+			t.Errorf("needs_you_now for s04 = %+v, want its cause to stand", held4)
+		}
 
 		lifted := newStandIn(t, 0, usageResult(40))
 		second := runWith(t, lifted.path, dirB, "2026-11-20T23:10:00Z", rigB.flags()...)
@@ -293,6 +332,58 @@ func TestCheckStops(t *testing.T) {
 		}
 	})
 	launchClauses(t)
+}
+
+// unreadableCause is the last 200 runes of the screen in
+// evidence/screens/c0000004.txt, a copy of spikes/2-states/out/logs-idle-1.txt.
+// It reads "used", so the usage-limit pattern does not match it.
+const unreadableCause = "ng… 3 Brewing… ✶ * ✢ Brewing… · Brewing… Brewing… Brewing… Brewing… ✢ Brewing… 4 ✻ Crunched for 4s · done 6:34 PM ❯ You've used 87% of your weekly limit · resets Nov 20, 11pm (America/Anchorage) 2 s 2"
+
+// need is one entry of the snapshot's needs_you_now.
+type need struct {
+	Session *string `json:"session"`
+	Reason  string  `json:"reason"`
+	Cause   string  `json:"cause"`
+	Todo    string  `json:"todo"`
+}
+
+// snapshotNeeds reads needs_you_now from the folder's snapshot, by session.
+func snapshotNeeds(t *testing.T, dir string) map[string]need {
+	t.Helper()
+	var snap struct {
+		NeedsYouNow []need `json:"needs_you_now"`
+	}
+	if err := json.Unmarshal([]byte(readFileIn(t, dir, "snapshot.json")), &snap); err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]need{}
+	for _, n := range snap.NeedsYouNow {
+		if n.Session != nil {
+			got[*n.Session] = n
+		}
+	}
+	return got
+}
+
+// passState is the state the release file holds for a pass of chk.
+func passState(t *testing.T, dir, pass string) string {
+	t.Helper()
+	var rel struct {
+		Passes []struct {
+			Name  string `json:"name"`
+			State string `json:"state"`
+		} `json:"passes"`
+	}
+	if err := json.Unmarshal([]byte(readFileIn(t, dir, "releases/chk.json")), &rel); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range rel.Passes {
+		if p.Name == pass {
+			return p.State
+		}
+	}
+	t.Fatalf("no pass %s", pass)
+	return ""
 }
 
 func readFileIn(t *testing.T, dir, rel string) string {
