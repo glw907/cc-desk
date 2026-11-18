@@ -11,3 +11,8 @@ gofmt
 subtest
 todo
 heredoc
+unallowed
+unprobed
+wildcarded
+cmd
+mtime
