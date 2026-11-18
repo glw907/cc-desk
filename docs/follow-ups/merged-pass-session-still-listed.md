@@ -11,3 +11,9 @@ Two readings fit the evidence. The check's cleanup may not stop the session at a
 records `ended`. Or a finished session leaves the list after a delay longer than the run watched.
 Settle it by merging a fixture pass with the timer on and listing the sessions every minute for 10
 minutes without stopping any. If the session stays, the cleanup needs a stop step.
+
+## Geoff's ruling
+
+On 2026-11-18 Geoff accepted item 6 of the Sessions round without showing the sessions gone when
+he approved pull request 16. The next pass that merges with the timer on runs the 10-minute
+listing above, and adds a stop step to the cleanup if the session stays.

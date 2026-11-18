@@ -32,3 +32,9 @@ for the second fixture pass, and that pass ran `sleep 240` at 15:13:19Z. The rel
 0 prompts for it, and the denials log holds no row for either fixture session's worktree. Auto mode
 ran the unlisted command with no prompt and no denial, which matches the probe. A zero prompt count
 from either fixture pass says only that no session stopped on a prompt.
+
+## Geoff's ruling
+
+On 2026-11-18 Geoff accepted item 6 of the Sessions round without the hook clause when he
+approved pull request 16. A later pass records each auto-mode refusal through the
+`PermissionDenied` hook, the way a prompt is recorded now.

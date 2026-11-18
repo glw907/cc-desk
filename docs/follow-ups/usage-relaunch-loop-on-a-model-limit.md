@@ -23,3 +23,9 @@ natural one is option 3.
 
 Geoff's call, since it sets when a stopped pass runs again. The pull request for the check carries
 it as its one call, and the design stands until he rules.
+
+## Geoff's ruling
+
+On 2026-11-18 Geoff chose option 2 when he approved pull request 8: hold the relaunch until the
+reset time in the stop's text. Pull request 8 landed with the designed behavior, so a later pass
+builds option 2, with option 3 as the fallback for a stop that has no readable reset time.

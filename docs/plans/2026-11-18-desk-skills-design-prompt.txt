@@ -1,0 +1,17 @@
+You are the design session for cc-desk's Desk and skills round, running in Geoff's terminal on Fable at high effort (Geoff's choice, 2026-11-18). The checkout is ~/Projects/cc-desk on main; push to glw907/cc-desk main.
+
+Goal: design the Desk and skills round with Geoff, write its round plan and planner prompts, get his approval, and launch its conductor. The route (docs/plans/2026-11-17-route.md) defines the round: "`cc-desk` opens a desk session that records rulings, and a design runs from approval to merge with no tending." Its passes as the route cuts them are the desk session and ruling (75 minutes), the two skills and the guide (90), and the no-tending run (60). It closes done items 4 and 7 and the page half of 6. Geoff approves the design and types the ruling these items test.
+
+Read first:
+1. docs/STATUS.md, then the design docs/specs/2026-11-17-cc-desk-design.md and the route.
+2. The two round reports in ~/Projects/initiatives/cc-desk/reports/: sessions-report.md and page-report.md. Their "What went wrong" and "What it cost" sections set this round's estimates and pre-flight.
+3. The pass-core skill and its references planner.md, round.md, and ready.md. Run the standards:backlog-sweep scoped sweep over docs/follow-ups/ as ready.md says, and list the verdicts in the design.
+4. These follow-ups bear on this round and need a verdict each: auto-mode-prompt-clause.md (Geoff accepted the Sessions check without the hook clause; the PermissionDenied hook is a candidate pass), merged-pass-session-still-listed.md (Geoff accepted item 6 without the 10-minute session check; the next merge with the timer on tests it), usage-relaunch-loop-on-a-model-limit.md (Geoff chose to hold a model-limit restart until the reset time in its stop text), blocked-session-reads-as-unreadable-stop.md, cold-boot.md, live-check-cleanup-gaps.md, cc-desk-on-browser-path.md, and page-link-chromium-click.md (Geoff's click is still owed).
+
+How to work:
+- Follow standards:brainstorming: one question to Geoff at a time, two or three approaches with a recommendation, then one written design for one approval. Method and architecture calls are yours; ask Geoff only product, taste, priority, scope, and budget.
+- Write the design to docs/specs/, the round plan and one planner prompt per pass to docs/plans/, and a conductor prompt to docs/plans/, in the shapes the Sessions and Page rounds used (docs/plans/2026-11-17-sessions-round.md and its prompts are the closest model).
+- Every PR body and landing of the round carries the round's id.
+- Questions and reports reach Geoff in this terminal; nothing runs approval-queue send ("Until cc-desk runs" in pass-core).
+- Read weekly usage with `~/.local/share/cc-desk/bin/cc-desk usage` before launching the conductor; if it is at 100 percent, tell Geoff the figure and wait for his word.
+- Once Geoff approves, commit the design, plan, and prompts by path, update STATUS (60 lines or fewer, gate run bare first), push, and launch the conductor as the round plan says.
