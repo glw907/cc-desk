@@ -38,6 +38,11 @@ Open documents: none.
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
+## Running
+
+- Pass 1 of the Sessions round (sessions-check) runs as the background session
+  `cc-desk-sessions-check`, id `2bebdd44-27d8-46a2-99b1-58f6a44fda36`, on branch `sessions-check`.
+
 ## Next action
 
 The conductor runs in Geoff's terminal. After a crash, any session can resume it from
