@@ -229,6 +229,7 @@ a.rail-row:hover {
 }
 .desk h2 {
 	font-size: var(--text-step-12);
+	text-wrap: balance;
 }
 .desk .next {
 	max-width: var(--doc-measure);
@@ -266,6 +267,7 @@ a.rail-row:hover {
 }
 .board-head h3 {
 	font-size: var(--text-step-11);
+	text-wrap: balance;
 }
 .board-head .muted {
 	font-size: var(--text-step-9);
@@ -358,6 +360,9 @@ a.rail-row:hover {
 .table :is(th, td):first-child {
 	padding-inline-start: 0;
 }
+.table td:first-child {
+	font-variant-numeric: tabular-nums;
+}
 
 /* An item's page: one reading column. Ported from the mockup's copy of Survey's sheet, which
    defines these classes where Survey v1.7.0 has none. */
@@ -400,6 +405,7 @@ a.rail-row:hover {
 	font-family: var(--font-display);
 	font-weight: var(--font-weight-heading);
 	font-size: var(--text-step-12);
+	line-height: 1.25;
 	padding-top: var(--spacing-16px);
 	border-top: var(--border) dashed var(--site-rule-color);
 	text-wrap: balance;
