@@ -1,0 +1,8 @@
+[Unit]
+Description=cc-desk check: read the sessions, launch or relaunch work, merge ready pull requests
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/cc-desk/bin/cc-desk --state-dir %h/.local/state/cc-desk check
+Environment=PATH=%h/.local/share/cc-desk/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin
+KillMode=process

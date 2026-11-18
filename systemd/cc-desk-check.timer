@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the cc-desk check every 5 minutes
+
+[Timer]
+OnStartupSec=1min
+OnUnitActiveSec=5min
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target
