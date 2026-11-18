@@ -120,6 +120,9 @@ func TestDecide(t *testing.T) {
 		{name: "row 5 design writer stopped", kind: "design", usage: 40, mod: stoppedRecord(state.StopPermissionPrompt), want: None, reason: "permission_prompt"},
 		{name: "row 6 working", kind: "pass", usage: 40, ev: found(rowWorking), want: None, seen: Observed{State: "working", Seen: true, Working: true}},
 		{name: "row 7 permission prompt", kind: "pass", usage: 40, ev: found(rowPrompt), want: Stop, reason: "permission_prompt", seen: Observed{State: "blocked", Seen: true}},
+		{name: "row 7 permission prompt with an unanswered prompt", kind: "pass", usage: 40, mod: func(_ *state.ReleaseFile, s *state.Session, _ *state.Pass) {
+			s.Prompts = []state.Prompt{{Time: *ago(2 * time.Minute), Tool: "Read", Answer: "yes"}, {Time: *ago(time.Minute), Tool: "Bash", Command: "rm -rf node_modules"}}
+		}, ev: found(rowPrompt), want: Stop, reason: "permission_prompt", detail: "Bash: rm -rf node_modules", seen: Observed{State: "blocked", Seen: true}},
 		{name: "row 8 sign-in expired", kind: "pass", usage: 40, ev: RecordEvidence{Row: rowBlocked, HasRow: true, Job: Job{Detail: "Login expired"}}, want: Stop, reason: "sign_in_expired"},
 		{name: "row 9 usage limit", kind: "pass", usage: 40, ev: RecordEvidence{Row: rowBlocked, HasRow: true, Job: Job{Detail: limitDetail}}, want: Stop, reason: "usage", detail: limitDetail},
 		{name: "row 10 lost connection at the limit", kind: "pass", usage: 40, mod: counted2, ev: RecordEvidence{Row: rowBlocked, HasRow: true, Screen: lostScreen}, probe: ProbeUp, want: Stop, reason: "relaunch_limit"},

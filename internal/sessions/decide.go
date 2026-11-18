@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -294,10 +295,27 @@ func doneRow(res func(string, string) Result, counted func(Result) Result, sess 
 	return counted(res(EndAndRelaunch, ReasonIdle))
 }
 
+// lastPrompt reads the record's last unanswered prompt as "<tool>: <command>",
+// or the tool alone when it has no command. It is empty when none is open.
+func lastPrompt(sess *state.Session) string {
+	for _, p := range slices.Backward(sess.Prompts) {
+		if p.Answer != "" {
+			continue
+		}
+		if p.Command == "" {
+			return p.Tool
+		}
+		return p.Tool + ": " + p.Command
+	}
+	return ""
+}
+
 func blockedRow(res func(string, string) Result, counted func(Result) Result, sess *state.Session, e RecordEvidence, row Row, atLimit, hold bool, probe ProbeResult) Result {
 	switch Classify(row, e.Job, e.Screen) {
 	case LabelPermissionPrompt:
-		return res(Stop, string(state.StopPermissionPrompt))
+		r := res(Stop, string(state.StopPermissionPrompt))
+		r.Detail = lastPrompt(sess)
+		return r
 	case LabelSignInExpired:
 		return res(Stop, string(state.StopSignInExpired))
 	case LabelUsageLimit:

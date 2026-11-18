@@ -13,9 +13,16 @@ import (
 const (
 	rulingPrefix = "cannot record the ruling: "
 
-	RefuseNotDesk      = rulingPrefix + "this session isn't a registered desk"
-	RefuseNotUnderDesk = rulingPrefix + "this command isn't running under the desk's process"
-	RefuseNoTerminal   = rulingPrefix + "the desk's process has no terminal"
+	RefuseNotDesk      = rulingPrefix + reasonNotDesk
+	RefuseNotUnderDesk = rulingPrefix + reasonNotUnderDesk
+	RefuseNoTerminal   = rulingPrefix + reasonNoTerminal
+)
+
+// The reasons a guard refusal gives. A verb adds its own prefix.
+const (
+	reasonNotDesk      = "this session isn't a registered desk"
+	reasonNotUnderDesk = "this command isn't running under the desk's process"
+	reasonNoTerminal   = "the desk's process has no terminal"
 )
 
 // RulingRequest is what a desk session types: Geoff's words, and the
@@ -33,21 +40,23 @@ func SameStart(a, b time.Time) bool {
 	return d > -2*time.Second && d < 2*time.Second
 }
 
-// guard runs the three tests in order and returns the first refusal. Test 3
-// reads the terminal of the desk's process, never the caller's own: a desk
-// session's commands have none.
-func (s *State) guard(c Caller) error {
+// Guard runs the three tests in order and returns the first refusal, which
+// starts with prefix. Test 3 reads the terminal of the desk's process, never
+// the caller's own: a desk session's commands have none. A verb calls it
+// before any side effect to refuse early, and its event calls it again
+// inside the lock.
+func (s *State) Guard(c Caller, prefix string) error {
 	i := slices.IndexFunc(s.Desks.Desks, func(d Desk) bool { return c.SessionID != "" && d.SessionID == c.SessionID })
 	if i < 0 {
-		return Refuse(RefuseNotDesk)
+		return Refuse(prefix + reasonNotDesk)
 	}
 	desk := s.Desks.Desks[i]
 	j := slices.IndexFunc(c.Chain, func(p Proc) bool { return p.PID == desk.PID && SameStart(p.Started, desk.Started) })
 	if j < 0 {
-		return Refuse(RefuseNotUnderDesk)
+		return Refuse(prefix + reasonNotUnderDesk)
 	}
 	if c.Chain[j].TTY == 0 {
-		return Refuse(RefuseNoTerminal)
+		return Refuse(prefix + reasonNoTerminal)
 	}
 	return nil
 }
@@ -69,7 +78,7 @@ func (s *State) nextRulingID() string {
 // a question answers it, which closes any guess on it and frees what waited.
 func RecordRuling(c Caller, r RulingRequest) Event {
 	return func(s *State, now time.Time) error {
-		if err := s.guard(c); err != nil {
+		if err := s.Guard(c, rulingPrefix); err != nil {
 			return err
 		}
 		if r.Words == "" || !utf8.ValidString(r.Words) {

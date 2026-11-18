@@ -40,7 +40,8 @@ func TestArgs(t *testing.T) {
 func TestWriteSettings(t *testing.T) {
 	state := t.TempDir()
 	verbs := Verbs("/bin/cc-desk", state, "pass", "p", "w", "r")
-	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, verbs)
+	followRule := "Bash(" + FollowUpCommand("/bin/cc-desk", state, "p", "pass:w") + " *)"
+	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, verbs, followRule)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,11 +56,14 @@ func TestWriteSettings(t *testing.T) {
 	if err := json.Unmarshal(data, &s); err != nil {
 		t.Fatal(err)
 	}
-	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 1+len(SessionReasons) {
+	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 2+len(SessionReasons) {
 		t.Errorf("allow = %v", s.Permissions.Allow)
 	}
 	if want := "Bash(/bin/cc-desk --state-dir " + state + " pass stop p w --reason usage)"; !slices.Contains(s.Permissions.Allow, want) {
 		t.Errorf("allow lacks %q: %v", want, s.Permissions.Allow)
+	}
+	if !slices.Contains(s.Permissions.Allow, "Bash(/bin/cc-desk --state-dir "+state+" followup p pass:w *)") {
+		t.Errorf("allow lacks the follow-up rule: %v", s.Permissions.Allow)
 	}
 	if !slices.Equal(s.Permissions.Deny, []string{"Bash(gh pr merge *)", "Bash(approval-queue land *)"}) {
 		t.Errorf("deny = %v", s.Permissions.Deny)
@@ -72,7 +76,7 @@ func TestWriteSettings(t *testing.T) {
 	if strings.Contains(string(data), "matcher") {
 		t.Error("the hook has no matcher")
 	}
-	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil); err == nil {
+	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, ""); err == nil {
 		t.Error("a relative state folder must be refused")
 	}
 }
@@ -82,7 +86,8 @@ func TestTemplates(t *testing.T) {
 		p := Prompt{
 			Kind: kind, Name: "proj-x", Project: "proj", Round: "rnd", Pass: "x", Checkout: "/c",
 			Worktree: "/c/.claude/worktrees/x", Branch: "x-branch", Base: "main",
-			Verbs: Verbs("/b/cc-desk", "/st", kind, "proj", "x", "rnd"),
+			Verbs:    Verbs("/b/cc-desk", "/st", kind, "proj", "x", "rnd"),
+			FollowUp: FollowUpCommand("/b/cc-desk", "/st", "proj", "pass:x"),
 		}
 		got, err := Fill(p)
 		if err != nil {
@@ -90,6 +95,7 @@ func TestTemplates(t *testing.T) {
 		}
 		for _, want := range []string{
 			"proj-x", "/c/.claude/worktrees/x", "x-branch", "git push origin x-branch", "`pass-core`",
+			"/b/cc-desk --state-dir /st followup proj pass:x <title> --body-file <path>", "job `tmp` folder",
 			"references/round-run.md", "pass-core", "/b/cc-desk --state-dir /st", "## Stop", "approval-queue send",
 		} {
 			if !strings.Contains(got, want) {
@@ -108,6 +114,39 @@ func TestTemplates(t *testing.T) {
 	want := "This is relaunch 2 of 2, after a lost connection. Carry on from the branch as it stands; the commits on it are yours."
 	if !strings.Contains(got, want) {
 		t.Errorf("relaunch paragraph missing:\n%s", got)
+	}
+}
+
+func TestAnswerNotes(t *testing.T) {
+	base := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b"}
+	for _, tc := range []struct {
+		name string
+		note AnswerNote
+		want []string
+	}{
+		{"yes", AnswerNote{Yes: true, Rule: "Bash(rm x)"}, []string{"Bash(rm x)", "doesn't count toward the two", "Carry on from the branch"}},
+		{"no", AnswerNote{Command: "rm -rf x"}, []string{"rm -rf x", "Do not run it again"}},
+	} {
+		p := base
+		p.Answer = &tc.note
+		got, err := Fill(p)
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		for _, w := range tc.want {
+			if !strings.Contains(got, w) {
+				t.Errorf("%s answer lacks %q:\n%s", tc.name, w, got)
+			}
+		}
+		if strings.Contains(got, "This is relaunch") {
+			t.Errorf("%s answer holds the relaunch wording", tc.name)
+		}
+	}
+	p := base
+	p.Answer = &AnswerNote{Yes: true}
+	p.Relaunch = &RelaunchNote{Count: 1}
+	if _, err := Fill(p); err == nil {
+		t.Error("a prompt with both a relaunch and an answer must be refused")
 	}
 }
 
