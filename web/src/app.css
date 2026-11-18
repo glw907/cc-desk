@@ -60,6 +60,21 @@
 a.rail-row:hover {
 	background-color: var(--color-base-300);
 }
+.waiting-row {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8px);
+	padding: 0;
+}
+.waiting-row > a:first-child {
+	flex: 1;
+	min-inline-size: 0;
+	padding: var(--spacing-9px) var(--spacing-12px);
+	border-radius: var(--radius-box);
+}
+.waiting-row > a:first-child:hover {
+	background-color: var(--color-base-300);
+}
 .rail-row .sub {
 	display: block;
 	margin-top: var(--spacing-3px);
@@ -298,9 +313,28 @@ a.rail-row:hover {
 	font-size: var(--text-step-4);
 	color: var(--color-muted);
 }
+/* The command's link and its button sit on one line. */
+.command-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--spacing-12px);
+}
+/* The waiting line's terminal link is a small target at the row's end. */
+.waiting-row .term-link {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: var(--spacing-24px);
+	min-inline-size: var(--spacing-24px);
+	padding-inline-end: var(--spacing-12px);
+	font-size: var(--text-step-4);
+	color: var(--color-muted);
+}
 /* A link must be 24px by 24px to press (WCAG 2.2 target size). */
 .rounds a.t,
-.pass-links a {
+.pass-links a,
+.command-actions .term-link,
+.command-actions .btn {
 	display: inline-flex;
 	align-items: center;
 	min-block-size: var(--spacing-24px);
