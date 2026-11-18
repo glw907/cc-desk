@@ -136,6 +136,23 @@ func TestEvents(t *testing.T) {
 	}
 }
 
+func TestBadUsage(t *testing.T) {
+	for _, args := range [][]string{
+		{"pass"}, {"pass", "bogus", "alpha", "p13"}, {"round", "bogus"}, {"release"}, {"bogus"},
+		{"pass", "start", "alpha"}, {"pass", "stop", "alpha", "p13"},
+	} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			dir := newState(t)
+			before := folder(t, dir)
+			requireSnapshot(t, before)
+			if got := run(t, dir, workedClock, args...); got.code != 1 {
+				t.Fatalf("exit %d, want 1; stdout: %s stderr: %s", got.code, got.stdout, got.stderr)
+			}
+			sameFolder(t, before, folder(t, dir))
+		})
+	}
+}
+
 func TestBadRequests(t *testing.T) {
 	t.Run("finish twice", func(t *testing.T) {
 		dir := newState(t)

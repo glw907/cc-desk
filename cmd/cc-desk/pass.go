@@ -8,10 +8,10 @@ import (
 )
 
 func newPassCmd(f *rootFlags) *cobra.Command {
-	cmd := &cobra.Command{
+	cmd := group(&cobra.Command{
 		Use:   "pass",
 		Short: "Record a pass's start, finish, or stop",
-	}
+	})
 
 	cmd.AddCommand(&cobra.Command{
 		Use:   "start <project> <pass>",

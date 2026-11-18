@@ -9,10 +9,10 @@ import (
 )
 
 func newReleaseCmd(f *rootFlags) *cobra.Command {
-	cmd := &cobra.Command{
+	cmd := group(&cobra.Command{
 		Use:   "release",
 		Short: "Add a release",
-	}
+	})
 	cmd.AddCommand(&cobra.Command{
 		Use:   "add <file>",
 		Short: "Validate the release in <file> and install it as releases/<project>.json",

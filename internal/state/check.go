@@ -158,6 +158,12 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 		if open != (p.State == Stopped && i == len(p.Stops)-1) {
 			return fmt.Errorf("pass %q: only the last stop of a stopped pass may be open", p.Name)
 		}
+		if started && st.Start.Before(*p.Started) {
+			return fmt.Errorf("pass %q: a stop starts before the pass did", p.Name)
+		}
+		if !open && st.End.Before(st.Start) {
+			return fmt.Errorf("pass %q: a stop ends before it starts", p.Name)
+		}
 	}
 	if p.State == Stopped && len(p.Stops) == 0 {
 		return fmt.Errorf("pass %q is stopped and needs an open stop interval", p.Name)

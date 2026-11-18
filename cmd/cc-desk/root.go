@@ -63,6 +63,16 @@ func (f *rootFlags) commit(ev state.Event) ([]byte, error) {
 	return state.Commit(dir, now, state.LockWait, ev, snapshot.Render)
 }
 
+// group makes a command that only holds subcommands. Without a RunE, cobra
+// prints help and exits 0 on an unknown child.
+func group(cmd *cobra.Command) *cobra.Command {
+	cmd.Args = cobra.NoArgs
+	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		return fmt.Errorf("%s needs a subcommand; run it with --help", cmd.CommandPath())
+	}
+	return cmd
+}
+
 func newRootCmd() *cobra.Command {
 	var f rootFlags
 	cmd := &cobra.Command{

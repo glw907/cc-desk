@@ -160,6 +160,9 @@ func StartPass(project, pass string) Event {
 			p.Started = &t
 		case Stopped:
 			last := &p.Stops[len(p.Stops)-1]
+			if t.Before(last.Start) {
+				return fmt.Errorf("the clock %s is before pass %q stopped at %s", t.Format(time.RFC3339), pass, last.Start.Format(time.RFC3339))
+			}
 			last.End = &t
 			p.StopReason = ""
 		default:
@@ -219,6 +222,9 @@ func StopPass(project, pass string, reason StopReason) Event {
 		}
 		if p.State != Building {
 			return Refuse(fmt.Sprintf("pass %q is %s and cannot stop", pass, p.State))
+		}
+		if now.Before(*p.Started) {
+			return fmt.Errorf("the clock %s is before pass %q started at %s", now.UTC().Format(time.RFC3339), pass, p.Started.Format(time.RFC3339))
 		}
 		p.Stops = append(p.Stops, StopInterval{Start: now.UTC()})
 		p.StopReason = reason

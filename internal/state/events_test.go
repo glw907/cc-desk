@@ -169,6 +169,73 @@ func TestPassEventErrors(t *testing.T) {
 	}
 }
 
+func TestBackwardClock(t *testing.T) {
+	tests := []struct {
+		name string
+		do   func(t *testing.T, s *State) error
+		want string
+	}{
+		{"stop before the start", func(t *testing.T, s *State) error {
+			if err := StartPass("alpha", "p1")(s, at(10, 0)); err != nil {
+				t.Fatal(err)
+			}
+			return StopPass("alpha", "p1", StopScope)(s, at(9, 0))
+		}, "is before pass"},
+		{"resume before the stop", func(t *testing.T, s *State) error {
+			for _, step := range []struct {
+				ev  Event
+				now time.Time
+			}{{StartPass("alpha", "p1"), at(10, 0)}, {StopPass("alpha", "p1", StopScope), at(10, 30)}} {
+				if err := step.ev(s, step.now); err != nil {
+					t.Fatal(err)
+				}
+			}
+			return StartPass("alpha", "p1")(s, at(10, 10))
+		}, "is before pass"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := loaded(t)
+			err := tt.do(t, s)
+			if err == nil || isRefusal(err) || !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("error = %v, want a plain error holding %q", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestCheckStopTimes(t *testing.T) {
+	tests := []struct {
+		name  string
+		stops []StopInterval
+		want  string
+	}{
+		{"before the start", []StopInterval{{Start: at(8, 0), End: new(at(8, 30))}}, "starts before the pass did"},
+		{"ends before it starts", []StopInterval{{Start: at(10, 30), End: new(at(10, 10))}}, "ends before it starts"},
+		{"fine", []StopInterval{{Start: at(10, 10), End: new(at(10, 30))}}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := DecodeRelease([]byte(goodRelease))
+			if err != nil {
+				t.Fatal(err)
+			}
+			p := &r.Passes[0]
+			p.State, p.Started, p.Stops = Building, new(at(10, 0)), tt.stops
+			err = validateRelease(r)
+			if tt.want == "" {
+				if err != nil {
+					t.Fatal(err)
+				}
+				return
+			}
+			if err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Errorf("error = %v, want %q", err, tt.want)
+			}
+		})
+	}
+}
+
 func TestAddRelease(t *testing.T) {
 	newRel := func(project string) *Release {
 		r, err := DecodeRelease([]byte(strings.Replace(goodRelease, `"alpha"`, `"`+project+`"`, 1)))

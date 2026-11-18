@@ -9,10 +9,10 @@ import (
 )
 
 func newRoundCmd(f *rootFlags) *cobra.Command {
-	cmd := &cobra.Command{
+	cmd := group(&cobra.Command{
 		Use:   "round",
 		Short: "Record a round's design",
-	}
+	})
 	cmd.AddCommand(&cobra.Command{
 		Use:   "design <project> <round> <file>",
 		Short: "Add the passes and questions in <file> to the round and mark its design written",
