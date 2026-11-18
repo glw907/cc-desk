@@ -20,13 +20,12 @@
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 <!-- round-report state-rules -->
-**The cc-desk command now forecasts the next session, and the third pass is starting.** Two of
-the round's four passes have landed, as pull requests 3 and 4. The command keeps the state files
-and prints a snapshot that carries each release's pace and the time of the next session with
-Geoff. A planner session is writing the plan for the third pass, which adds the start rules and
-the usage read. Weekly usage read 89 percent, under the 100 percent stop. Nothing waits for Geoff.
+**The start rules are built and wait on one question for Geoff, and the last pass is starting.**
+Passes 1 and 2 have landed as pull requests 3 and 4. Pass 3 is ready as pull request 5 and waits
+for Geoff's answer under "Open decisions". Pass 4, which records rulings, is starting from pass
+3's branch. Weekly usage read 90 percent, under the 100 percent stop.
 
-Open documents: none.
+Open documents: none. Pull request 5 waits for Geoff's answer in his terminal session.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
@@ -49,6 +48,10 @@ docs/plans/2026-11-17-state-rules-conductor-prompt.txt and follow it from its fi
 
 ## Open decisions
 
+- Pull request 5 (the start rules) waits for Geoff's answer: should a stopped pass that resumes
+  skip the limit of two passes building at once? Recommended: yes, as built. See
+  `docs/follow-ups/resume-skips-the-limits.md` on its branch. Pass 4 builds on its branch and
+  lands after it.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
