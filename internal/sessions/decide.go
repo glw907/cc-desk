@@ -67,6 +67,8 @@ const (
 type Evidence struct {
 	Records map[Key]RecordEvidence
 	Probe   ProbeResult
+	// Pulls holds the pull request read of each pass that had one.
+	Pulls map[Key]PullRead
 }
 
 // Observed is what a decision asks the record to remember of what the check
