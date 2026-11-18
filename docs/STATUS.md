@@ -11,13 +11,14 @@
   `docs/specs/2026-11-17-sessions-design.md` and `docs/specs/2026-11-17-page-design.md`. Each
   round plan sits beside its planner prompts in `docs/plans/`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
-- The usage stop is 100 percent of the week. The figure read 97 percent on 2026-11-18, and
+- The usage stop is 100 percent of the week. The figure read 98 percent on 2026-11-18, and
   the reset is Nov 20, 11pm Alaska time.
 
 <!-- round-report sessions -->
-**The Sessions round's first pass waits for Geoff's approval, and two more are ready behind
-it.** Pull request 8 records sessions and asks one call; pull requests 10 and 12 start them and
-answer their prompts, ask nothing, and land in order after 8. The fourth pass has started.
+**The Sessions round's first pass waits for Geoff's approval, and three more are ready behind
+it.** Pull request 8 records sessions and asks one call. Pull requests 10, 12, and 14 start
+sessions, answer their prompts, and merge their work; they ask nothing and land in order after 8.
+The fifth pass has started.
 
 Open documents: none. Pull request 8 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
@@ -26,7 +27,7 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- round-report page -->
 **The Page round's first four passes wait for Geoff's approval.** Pull requests 7, 9, 11, and 13
 build the page, its item pages, its service at http://127.0.0.1:7908/, and its terminal link.
-Each asks a choice of Geoff. The fifth pass has started. Usage read 97 percent.
+Each asks a choice of Geoff. The fifth pass has started.
 
 Open documents: none. Pull requests 7, 9, 11, and 13 wait under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
