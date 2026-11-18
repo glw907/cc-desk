@@ -31,8 +31,8 @@ No step in this pass needs Geoff. Every write is inside the worktree, a test's `
   1; Shared Scratch Sweep 1; Safety Bypass Flag 1; Out-of-Place Publication 1; PII Data Handling
   1; Modify Shared Resources 1. This pass adds no dependency and runs `go build`, `go test`,
   `gofmt`, `go vet`, `vale`, `bash scripts/gate.sh`, `git push origin state-rules-estimate`, `gh
-  pr create`, `gh pr ready`, `gh pr checks`, and `gh run view`. No row refuses any of them. The
-  rows near them are in the table below.
+  pr create`, `gh pr ready`, `gh pr checks`, and `gh run view`. No row refuses any of them; the one row that names `vale` is a classifier outage on a `grep`
+  in another repo, and no row names `gh pr ready`. The rows near them are in the table below.
 - Reviewed: one `standards:plan-reviewer` read (Opus, medium effort) of this plan. Its verdict
   was "ready after fixes"; all fifteen findings are folded, as `## Decisions` lists. The class
   needs none before code; the launch prompt asked for one.
@@ -269,7 +269,8 @@ Test, as `TestNextSession<Case>` in `estimate_test.go`, one case per row of the 
 - `TestNextSessionScheduled`: the range and rough mark come from the setting item's project
   only.
 - `TestNextSessionNotDesignedSets`: a `not_designed` round whose start is ahead is the earliest
-  item; the state is `scheduled`, the time is its start, and the forecast names that round.
+  item; the state is `scheduled`, the time is its start, and the setting item is that round's
+  project and round. (Task 3 checks the forecast line that follows from it.)
 - `TestNextSessionWaitingOnDesign`: a `not_designed` round whose start has arrived moves to
   `waiting_on_design`, and the time comes from the next item. With no item left, the state is
   `ready_now` with a null time and a count of 0.
@@ -309,12 +310,14 @@ The mechanism, all of it fixed here:
 Test: `TestCommitForecast` in `commit_test.go`, whose stub returns a fixed forecast: a marked
 event appends one line and keeps the earlier lines byte for byte; an unmarked one and a refused
 one append nothing; a file with no final newline gains one before the new line.
+`TestRenderForecast` in `snapshot_test.go`: a `not_designed` round that sets the time gives a
+forecast naming its project and round, and an empty state gives a forecast with a null time.
 `read_test.go`'s table adds "forecast project without time" and "forecast time without round",
 each refused with the file and line. `TestPassEventMark` in `events_test.go` checks the mark
 after each of the three events and its absence after a refusal.
 
-Acceptance check: `go test ./internal/... -run 'TestCommitForecast|TestPassEventMark|TestRead' -v`
-prints `--- PASS` for each, and `go test ./internal/...` passes.
+Acceptance check: `go test ./internal/... -run 'TestCommitForecast|TestPassEventMark|TestRenderForecast|TestRead' -v`
+prints `--- PASS` for each of the three new tests and the `TestRead` ones, and `go test ./internal/...` passes.
 
 ### Task 4: done item 1 end to end (25 minutes)
 
@@ -423,7 +426,7 @@ This pass adds:
   forecasts skips lines with no time.
 - [advisor] The forecast file is rewritten through `atomicfile.WriteFile`, so no torn line can
   break the strict reader.
-- [advisor] For Geoff at the close: a round that needs Geoff is waiting on its design and no item
+- [advisor] For Geoff at the close, and the PR's one call under `## Calls for Geoff`: a round that needs Geoff is waiting on its design and no item
   is left. The design's four states leave this case open: "Nothing waiting" requires that no
   such round lacks a design, and "Ready now" names a question. It reads `ready_now` with a null
   time, because the overdue design is work Geoff's session should take up, and "it stops setting

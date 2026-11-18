@@ -29,7 +29,7 @@ The PR: open it as a draft early, as executor.md "Work" says. Its body carries:
 Round: state-rules
 Pass: state-rules-estimate
 Review: <accept|fix|escalate>, open findings <n>
-Calls: none (or Calls: <n>, each under ## Calls for Geoff)
+Calls: <n>, each under ## Calls for Geoff. The plan already carries one: its [advisor] Decisions line "For Geoff at the close" (ready_now with no question). List it there, so Calls is at least 1.
 and ## Acceptance with both items word for word from the plan and their evidence (the command and its output), plus ## Decisions (carry the plan's lines, then add your own), ## Planning misses, and the score, per round-run.md "Evidence" and pass-core "Close". At close, get one whole-branch standards:diff-reviewer read and fold it.
 
 Hand-over: when every acceptance item shows its evidence, CI is green on the last commit, and the review is in, mark the PR ready. That hands it to conductor-cc-desk, which reads it as round-run.md "Reading a pass" says and lands it. Merge nothing; never run gh pr merge.
