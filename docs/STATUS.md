@@ -18,9 +18,9 @@
   the reset is Nov 20, 10:59pm Alaska time.
 
 <!-- round-report sessions -->
-**The Sessions round's first pass waits for Geoff's approval, and the second is ready behind
-it.** Pull request 8 records sessions and asks one call; pull request 10 starts them, asks
-nothing, and lands right after 8. The third pass has started. Usage read 95 percent.
+**The Sessions round's first pass waits for Geoff's approval, and two more are ready behind
+it.** Pull request 8 records sessions and asks one call; pull requests 10 and 12 start them and
+answer their prompts, ask nothing, and land in order after 8. The fourth pass has started.
 
 Open documents: none. Pull request 8 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
