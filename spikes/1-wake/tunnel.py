@@ -55,8 +55,8 @@ async def handle(reader, writer, args):
         log.write(f"{stamp()} tunnel {host}\n")
     writer.write(b"HTTP/1.1 200 Connection Established\r\n\r\n")
     await writer.drain()
-    tasks = [asyncio.ensure_future(pipe(reader, up_w)),
-             asyncio.ensure_future(pipe(up_r, writer))]
+    tasks = (asyncio.ensure_future(pipe(reader, up_w)),
+             asyncio.ensure_future(pipe(up_r, writer)))
     entry = (tasks, up_w, writer)
     open_tunnels.add(entry)
     await asyncio.wait(tasks)

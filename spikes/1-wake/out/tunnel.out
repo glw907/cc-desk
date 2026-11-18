@@ -1,0 +1,585 @@
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=11 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=11 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=10 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=10 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=12 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=8 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=13 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=15 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=19 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=17 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=13 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=21 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=8 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=12 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')
+Unhandled exception in client_connected_cb
+transport: <_SelectorSocketTransport fd=7 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 86, in cb
+    await handle(r, w, args)
+  File "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/tunnel.py", line 61, in handle
+    open_tunnels.add(entry)
+    ~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: cannot use 'tuple' as a set element (unhashable type: 'list')

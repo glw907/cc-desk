@@ -42,7 +42,7 @@ print(re.sub(r"\s+", " ", t)[-700:])
 # 1. Sandbox, tunnel.
 rm -rf "$SB" "$OUT/block" "$OUT/tunnel.log" "$OUT/rows.txt"
 mkdir -p "$SB"
-(cd "$SB" && git init -q && : >progress.txt)
+: >"$SB/progress.txt"
 nohup python3 -I "$HERE/tunnel.py" --port "$PORT" --log "$OUT/tunnel.log" --block "$OUT/block" \
   >"$OUT/tunnel.out" 2>&1 &
 echo $! >"$OUT/tunnel.pid"

@@ -98,6 +98,11 @@ argv_of() {
 runs() {
   local a0 a1 a2
   mapfile -t a < <(argv_of "$1")
+  # A bg-spare process retitles itself, so its first argument is "claude bg-spare".
+  if [[ ${a[0]:-} == *" "* ]]; then
+    read -r -a head <<<"${a[0]}"
+    a=("${head[@]}" "${a[@]:1}")
+  fi
   a0=${a[0]:-}
   a1=${a[1]:-}
   a2=${a[2]:-}
