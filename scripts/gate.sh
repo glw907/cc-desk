@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# gate.sh: the cc-desk gate. Runs gofmt, go vet, go test, and vale over docs/.
-# It fails when any Go test reports a skip. The page mock-ups under
-# docs/specs/2026-11-17-cc-desk-mockups/ are left out of the vale run.
+# gate.sh: the cc-desk gate. Runs gofmt, go vet, go test, and vale over docs/,
+# then the page's steps when web/package.json is tracked: npm ci, type check,
+# build, and the Playwright suite. It fails when any Go test reports a skip, and
+# when the Playwright run skips a test, finds no browser, or runs fewer tests than
+# the suite lists. The page mock-ups under docs/specs/2026-11-17-cc-desk-mockups/
+# are left out of the vale run.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -53,5 +56,24 @@ if ! command -v vale >/dev/null 2>&1; then
 fi
 mapfile -t docs < <(git ls-files 'docs/*.md' | grep -v '^docs/specs/2026-11-17-cc-desk-mockups/')
 vale --minAlertLevel=error --output=line "${docs[@]}"
+
+if git ls-files --error-unmatch web/package.json >/dev/null 2>&1; then
+  echo "gate: web install"
+  (cd web && npm ci)
+
+  echo "gate: web check"
+  (cd web && npm run check)
+
+  echo "gate: web build"
+  (cd web && npm run build)
+
+  echo "gate: web tests"
+  # --reporter=list matters: a plain --list rewrites the JSON report with every
+  # test skipped.
+  listing=$(cd web && npx playwright test --list --reporter=list)
+  count=$(printf '%s\n' "$listing" | sed -n 's/^Total: \([0-9]\{1,\}\) tests\{0,1\} in .*/\1/p')
+  (cd web && npx playwright test)
+  bash web/scripts/check-playwright-report.sh web/test-results/report.json "$count"
+fi
 
 echo "gate: ok"
