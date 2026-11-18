@@ -207,7 +207,7 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		snap.OpenGuesses = append(snap.OpenGuesses, openGuesses(rf)...)
 	}
 	snap.Waiting = waitingPasses(s)
-	fillSessions(snap, s)
+	fillSessions(snap, s, now)
 	return snap, fillSession(snap, ctxs, now, usageUnreadable(s))
 }
 

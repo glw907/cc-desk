@@ -195,6 +195,9 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	if err := validatePassSession(p); err != nil {
 		return err
 	}
+	if err := validatePullRequest(p, questions); err != nil {
+		return err
+	}
 	if p.Model != "" && !ValidModel(p.Model) {
 		return fmt.Errorf("pass %q: model %q is not opus, sonnet, fable, haiku, or a claude-* id", p.Name, p.Model)
 	}
@@ -225,8 +228,28 @@ func validatePassSession(p *Pass) error {
 			return fmt.Errorf("pass %q: a pass's stop stays on the pass, not on its session record", p.Name)
 		}
 	}
-	if pr := p.PullRequest; pr != nil && pr.Number <= 0 {
+	return nil
+}
+
+// validatePullRequest checks a pass's pull request record. A ready time with
+// no commit or verdict is allowed: records written before the ready verb
+// existed hold one.
+func validatePullRequest(p *Pass, questions map[string]bool) error {
+	pr := p.PullRequest
+	if pr == nil {
+		return nil
+	}
+	switch {
+	case pr.Number <= 0:
 		return fmt.Errorf(`pass %q: pull_request needs a "number" above 0`, p.Name)
+	case pr.Verdict != "" && pr.Verdict != VerdictAccept && pr.Verdict != VerdictFix:
+		return fmt.Errorf("pass %q: pull_request verdict %q is not accept or fix", p.Name, pr.Verdict)
+	case pr.Wait != "" && !slices.Contains(PRWaits, pr.Wait):
+		return fmt.Errorf("pass %q: pull_request wait %q is not one of %v", p.Name, pr.Wait, PRWaits)
+	case pr.Merged != nil && p.State != Done:
+		return fmt.Errorf("pass %q is %s but its pull_request is merged", p.Name, p.State)
+	case pr.Question != "" && !questions[pr.Question]:
+		return fmt.Errorf("pass %q: pull_request asks question %q, which does not exist", p.Name, pr.Question)
 	}
 	return nil
 }

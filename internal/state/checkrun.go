@@ -17,6 +17,9 @@ type Recorded struct {
 	// Stop, when set, stops the record for that reason, with the decision's
 	// detail as the stop detail.
 	Stop StopReason
+	// PRWait, when set, is the wait to write to the pass's pull request,
+	// and an empty string clears it. A nil pointer leaves it alone.
+	PRWait *string
 }
 
 // RecordCheck writes a run's decisions to check.json and, for each record,
@@ -66,6 +69,14 @@ func applyRecorded(s *State, r Recorded, now time.Time) error {
 	if r.Working {
 		sess.LastWorking = &now
 		rf.Dirty = true
+	}
+	if r.PRWait != nil {
+		if name, ok := strings.CutPrefix(r.Decision.Record, "pass:"); ok {
+			if _, p, err := findPass(s, r.Decision.Project, name); err == nil && p.PullRequest != nil && p.PullRequest.Wait != *r.PRWait {
+				p.PullRequest.Wait = *r.PRWait
+				rf.Dirty = true
+			}
+		}
 	}
 	if r.Stop == "" {
 		return nil

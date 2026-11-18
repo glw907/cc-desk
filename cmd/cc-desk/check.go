@@ -23,6 +23,7 @@ type checkFlags struct {
 	launchFlags
 	dryRun   bool
 	probeURL string
+	ghCmd    string
 }
 
 func newCheckCmd(f *rootFlags) *cobra.Command {
@@ -41,6 +42,8 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 	cmd.Flags().BoolVar(&cf.dryRun, "dry-run", false, "print the decisions and write nothing")
 	cmd.Flags().StringVar(&cf.probeURL, "probe-url", "https://api.anthropic.com/", "the address the network probe asks")
 	_ = cmd.Flags().MarkHidden("probe-url")
+	cmd.Flags().StringVar(&cf.ghCmd, "gh-command", "gh", "the gh command the pull request read runs")
+	_ = cmd.Flags().MarkHidden("gh-command")
 	cf.register(cmd)
 	return cmd
 }
@@ -116,7 +119,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 			}
 			recs := make([]state.Recorded, len(results))
 			for i, r := range results {
-				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working}
+				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working, PRWait: r.Merge.Wait}
 				if r.Decision.Decision == sessions.Stop {
 					recs[i].Stop = state.StopReason(r.Reason)
 				}
@@ -135,6 +138,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 		if err != nil {
 			return err
 		}
+		l.gh = cf.ghCmd
 		outcomes, err := l.carryOut(ctx, results)
 		if outcomes == nil {
 			return err
@@ -198,6 +202,7 @@ func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessio
 		}
 		ev.Records[t.Key] = re
 	}
+	ev.Pulls = readPulls(ctx, s, cf.ghCmd)
 	if probe {
 		ev.Probe = sessions.ProbeDown
 		if sessions.Probe(ctx, cf.probeURL) {
@@ -205,6 +210,32 @@ func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessio
 		}
 	}
 	return ev, nil
+}
+
+// readPulls makes the one pull request read for each pass that is building or
+// stopped, has a session record with a branch, and has no recorded merge, on a
+// live release with a repo and a checkout.
+func readPulls(ctx context.Context, s *state.State, gh string) map[sessions.Key]sessions.PullRead {
+	var out map[sessions.Key]sessions.PullRead
+	for _, rf := range s.Releases {
+		if rf.Done || rf.Repo == "" || rf.Checkout == "" {
+			continue
+		}
+		for i := range rf.Passes {
+			p := &rf.Passes[i]
+			if p.State != state.Building && p.State != state.Stopped {
+				continue
+			}
+			if p.Session == nil || p.Session.Branch == "" || (p.PullRequest != nil && p.PullRequest.Merged != nil) {
+				continue
+			}
+			if out == nil {
+				out = map[sessions.Key]sessions.PullRead{}
+			}
+			out[sessions.Key{Project: rf.Project, Record: "pass:" + p.Name}] = sessions.ReadPulls(ctx, gh, rf.Repo, p.Session.Branch)
+		}
+	}
+	return out
 }
 
 // anyMissing reports whether a record that needs a row has none.

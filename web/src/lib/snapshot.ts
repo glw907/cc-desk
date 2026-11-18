@@ -138,6 +138,8 @@ export interface SessionEntry {
 	relaunches: number;
 	stop_reason: string | null;
 	prompts: Prompt[];
+	/** The note a merged pass's cleanup left: what stayed in place. */
+	cleanup?: string;
 }
 
 /** One cause that needs Geoff now. */

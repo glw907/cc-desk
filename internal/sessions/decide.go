@@ -67,6 +67,8 @@ const (
 type Evidence struct {
 	Records map[Key]RecordEvidence
 	Probe   ProbeResult
+	// Pulls holds the pull request read of each pass that had one.
+	Pulls map[Key]PullRead
 }
 
 // Observed is what a decision asks the record to remember of what the check
@@ -82,6 +84,9 @@ type Observed struct {
 type Result struct {
 	state.Decision
 	Observed Observed
+	// Merge is what carrying out a merge decision reads, and the wait to
+	// record beside any decision for a pass with a pull request read.
+	Merge MergeInfo
 }
 
 // Target is a record whose decision needs a row from the list.
@@ -110,19 +115,42 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 	hold := s.UsageStop()
 	s.LiveSessions(func(rf *state.ReleaseFile, record string, sess *state.Session) {
 		key := Key{rf.Project, record}
-		if r, decided := early(rf, record, sess, hold); decided {
+		base := state.Decision{Project: rf.Project, Record: record, Session: sess.Name}
+		pass := findPass(rf, record)
+		if r, decided := cleanupRow(rf, record, sess); decided {
 			out = append(out, r)
 			return
 		}
-		base := state.Decision{Project: rf.Project, Record: record, Session: sess.Name}
+		mr, decided, info, held := decideMerge(base, sess, pass, ev, key)
+		if decided && hold && mr.Decision.Decision == Fix {
+			// A fix relaunches the session, so the usage hold waits it out
+			// with no attempt spent.
+			base.Decision, base.Detail = WaitUsage, mr.Decision.Detail
+			out = append(out, Result{Decision: base})
+			return
+		}
+		if decided {
+			out = append(out, mr)
+			return
+		}
+		if r, decided := early(rf, record, sess, hold); decided {
+			r.Merge = info
+			out = append(out, r)
+			return
+		}
 		e, ok := ev.Records[key]
 		if !ok {
 			base.Decision = None
 			base.Detail = "no evidence gathered this run"
-			out = append(out, Result{Decision: base})
+			out = append(out, Result{Decision: base, Merge: info})
 			return
 		}
-		out = append(out, decideRead(base, sess, e, readyStands(findPass(rf, record)), ev.Probe, hold, now))
+		r := decideRead(base, sess, e, readyStands(pass), ev.Probe, hold, now)
+		r.Merge = info
+		if held != "" && r.Decision.Decision == None && r.Detail == "" {
+			r.Detail = held
+		}
+		out = append(out, r)
 	})
 	return out
 }
@@ -173,6 +201,18 @@ func hasCheckout(s *state.State, project string) bool {
 		}
 	}
 	return false
+}
+
+// cleanupRow decides cleanup for a done pass whose pull request merged and
+// has not been cleaned up. It runs before every other row, the ended-session
+// test included, so a cleanup that failed part way runs again.
+func cleanupRow(rf *state.ReleaseFile, record string, sess *state.Session) (Result, bool) {
+	p := findPass(rf, record)
+	if p == nil || p.State != state.Done || p.PullRequest == nil || p.PullRequest.Merged == nil || p.PullRequest.Cleaned != nil {
+		return Result{}, false
+	}
+	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name, Decision: Cleanup}
+	return Result{Decision: d}, true
 }
 
 // early applies rows 1 to 5, which need no row from the list and write

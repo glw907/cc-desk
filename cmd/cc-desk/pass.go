@@ -80,5 +80,34 @@ func newPassCmd(f *rootFlags) *cobra.Command {
 	stop.Flags().StringVar(&reason, "reason", "", "why the pass stopped: usage, irreversible, secret, auth_data, scope, permission_prompt, sign_in_expired, unreadable_stop, relaunch_limit, or launch_failed")
 	_ = stop.MarkFlagRequired("reason")
 	cmd.AddCommand(stop)
+
+	var rd struct {
+		pr                      int
+		commit, verdict, design string
+	}
+	ready := &cobra.Command{
+		Use:   "ready <project> <pass> --pr <n> --commit <sha> --verdict accept|fix --design inside|outside",
+		Short: "Report a pass's pull request ready for the check",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if rd.design != "inside" && rd.design != "outside" {
+				return fmt.Errorf("--design must be inside or outside, got %q", rd.design)
+			}
+			ev := state.ReportReady(args[0], args[1], rd.pr, rd.commit, rd.verdict, rd.design == "inside")
+			if _, err := f.commit(ev); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "ready %s/%s: pull request %d at %s\n", args[0], args[1], rd.pr, rd.commit)
+			return nil
+		},
+	}
+	ready.Flags().IntVar(&rd.pr, "pr", 0, "the pull request number")
+	ready.Flags().StringVar(&rd.commit, "commit", "", "the pull request's last commit")
+	ready.Flags().StringVar(&rd.verdict, "verdict", "", "the review's verdict: accept or fix")
+	ready.Flags().StringVar(&rd.design, "design", "", "whether the change stays inside the approved design: inside or outside")
+	for _, name := range []string{"pr", "commit", "verdict", "design"} {
+		_ = ready.MarkFlagRequired(name)
+	}
+	cmd.AddCommand(ready)
 	return cmd
 }

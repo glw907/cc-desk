@@ -125,6 +125,66 @@ func TestNeedsYouNowListFailures(t *testing.T) {
 	}
 }
 
+func TestNoCheckEntry(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		ago  time.Duration
+		want bool
+	}{{"29 minutes", 29 * time.Minute, false}, {"30 minutes", 30 * time.Minute, true}, {"31 minutes", 31 * time.Minute, true}} {
+		t.Run(tc.name, func(t *testing.T) {
+			ready := clock.Add(-tc.ago)
+			b := building("w", "r1", 30, clock.Add(-2*time.Hour))
+			b.Session = sessionOn(state.KindPass, "a-w")
+			b.PullRequest = &state.PullRequest{Number: 7, Commit: "abc", Ready: &ready, Wait: state.WaitNoCheck}
+			rf := releaseOf("a", []state.Round{{Name: "r1", DesignWritten: true}}, b)
+			snap := Build(&state.State{Releases: []*state.ReleaseFile{rf}}, clock)
+			if !tc.want {
+				if len(snap.NeedsYouNow) != 0 || needsState(t, snap) == "needs_you_now" {
+					t.Errorf("entries = %+v, state = %s, want none", snap.NeedsYouNow, needsState(t, snap))
+				}
+				return
+			}
+			if len(snap.NeedsYouNow) != 1 {
+				t.Fatalf("needs_you_now = %+v, want one entry", snap.NeedsYouNow)
+			}
+			e := snap.NeedsYouNow[0]
+			if e.Reason != "no_check_registered" || e.Cause != "7" || e.Todo != "See why no check has started on pull request 7" ||
+				e.Session == nil || *e.Session != "a-w" || e.Round == nil || *e.Round != "r1" {
+				t.Errorf("entry = %+v", e)
+			}
+			if got := needsState(t, snap); got != "needs_you_now" {
+				t.Errorf("next_session.state = %s, want needs_you_now", got)
+			}
+		})
+	}
+}
+
+func TestNoCheckEntryNeedsTheNoCheckWait(t *testing.T) {
+	ready := clock.Add(-time.Hour)
+	b := building("w", "r1", 30, clock.Add(-2*time.Hour))
+	b.PullRequest = &state.PullRequest{Number: 7, Commit: "abc", Ready: &ready, Wait: state.WaitCheckRunning}
+	rf := releaseOf("a", []state.Round{{Name: "r1", DesignWritten: true}}, b)
+	if snap := Build(&state.State{Releases: []*state.ReleaseFile{rf}}, clock); len(snap.NeedsYouNow) != 0 {
+		t.Errorf("needs_you_now = %+v, want none while a check runs", snap.NeedsYouNow)
+	}
+}
+
+func TestCleanupNote(t *testing.T) {
+	merged := clock.Add(-time.Hour)
+	for _, tc := range []struct{ note, want string }{{"", ""}, {"branch left: not fully merged", "branch left: not fully merged"}} {
+		b := building("w", "r1", 30, clock.Add(-3*time.Hour))
+		minutes := 120
+		b.State, b.Finished, b.ActualMinutes = state.Done, &merged, &minutes
+		b.Session = sessionOn(state.KindPass, "a-w")
+		b.PullRequest = &state.PullRequest{Number: 7, Merged: &merged, CleanupNote: tc.note}
+		rf := releaseOf("a", []state.Round{{Name: "r1", DesignWritten: true}}, b)
+		snap := Build(&state.State{Releases: []*state.ReleaseFile{rf}}, clock)
+		if len(snap.Sessions) != 1 || snap.Sessions[0].Cleanup != tc.want {
+			t.Errorf("sessions = %+v, want cleanup %q", snap.Sessions, tc.want)
+		}
+	}
+}
+
 func TestLastCheck(t *testing.T) {
 	if got := Build(&state.State{}, clock).LastCheck; got != nil {
 		t.Errorf("last_check = %+v, want null before any run", got)

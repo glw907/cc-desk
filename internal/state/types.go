@@ -126,7 +126,27 @@ type Prompt struct {
 	Answer        string    `json:"answer,omitempty"`
 }
 
-// PullRequest is the pull request a pass's session opened.
+// The waits a pull request can be in while the check holds its merge back.
+const (
+	WaitCommitMoved  = "commit_moved"
+	WaitNoCheck      = "no_check"
+	WaitCheckRunning = "check_running"
+	WaitUnreachable  = "unreachable"
+)
+
+// PRWaits lists the four waits.
+var PRWaits = []string{WaitCommitMoved, WaitNoCheck, WaitCheckRunning, WaitUnreachable}
+
+// The reviewer verdicts a ready report carries.
+const (
+	VerdictAccept = "accept"
+	VerdictFix    = "fix"
+)
+
+// PullRequest is the pull request a pass's session opened and reported
+// ready. Ready is the time of the report and starts the wait for a first
+// check. Wait, Failures, and Question belong to the current report: a new
+// report clears them, and a fix relaunch clears Ready.
 type PullRequest struct {
 	Number      int        `json:"number"`
 	Commit      string     `json:"commit,omitempty"`
@@ -134,6 +154,20 @@ type PullRequest struct {
 	FixAttempts int        `json:"fix_attempts,omitempty"`
 	Ready       *time.Time `json:"ready,omitempty"`
 	Merged      *time.Time `json:"merged,omitempty"`
+	// InsideDesign is what the report said of the change. Absent reads as
+	// outside the approved design.
+	InsideDesign bool     `json:"inside_design,omitempty"`
+	Wait         string   `json:"wait,omitempty"`
+	Failures     []string `json:"failures,omitempty"`
+	// Question is the id of the merge question asked under the current
+	// report. It holds every later merge decision until a new report.
+	Question string `json:"question,omitempty"`
+	// MergeCalled is when the check committed to calling the merge, before
+	// it ran. It tells the check's own merge from one by another hand.
+	MergeCalled   *time.Time `json:"merge_called,omitempty"`
+	MergedOutside bool       `json:"merged_outside,omitempty"`
+	Cleaned       *time.Time `json:"cleaned,omitempty"`
+	CleanupNote   string     `json:"cleanup_note,omitempty"`
 }
 
 // Release is one live release of a project: its rounds, passes, and the

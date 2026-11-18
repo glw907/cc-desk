@@ -2,6 +2,7 @@ package snapshot
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/glw907/cc-desk/internal/state"
@@ -10,6 +11,14 @@ import (
 // ListFailureLimit is the count of failed session-list reads in a row that
 // puts an entry in needs_you_now.
 const ListFailureLimit = 3
+
+// NoCheckAfter is how long a pull request reported ready may have no check
+// registered before the snapshot asks Geoff to look.
+const NoCheckAfter = 30 * time.Minute
+
+// NoCheckRegistered is the reason of the needs_you_now entry for a pull
+// request whose checks never started.
+const NoCheckRegistered = "no_check_registered"
 
 // ListUnreadable is the reason of the needs_you_now entry for failed list
 // reads. It is not a stop reason and sits on no record.
@@ -30,6 +39,8 @@ type SessionEntry struct {
 	Relaunches  int            `json:"relaunches"`
 	StopReason  *string        `json:"stop_reason"`
 	Prompts     []state.Prompt `json:"prompts"`
+	// Cleanup is the note a merged pass's cleanup left: what stayed in place.
+	Cleanup string `json:"cleanup,omitempty"`
 }
 
 // NeedEntry is one cause that needs Geoff now. Session and Round are null
@@ -76,20 +87,20 @@ func strp(s string) *string {
 
 // fillSessions sets sessions, needs_you_now, and last_check from the live
 // releases and check.json.
-func fillSessions(snap *Snapshot, s *state.State) {
+func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 	snap.Sessions = []SessionEntry{}
 	snap.NeedsYouNow = []NeedEntry{}
 	for _, rf := range s.Releases {
 		if rf.Done {
 			continue
 		}
-		add := func(round, pass string, sess *state.Session, stop state.StopReason) {
+		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string) {
 			e := SessionEntry{
 				Project: rf.Project, Round: strp(round), Pass: strp(pass),
 				Kind: string(sess.Kind), Name: sess.Name, ShortID: sess.ShortID,
 				LastState: strp(sess.LastState), LastSeen: utc(sess.LastSeen), LastWorking: utc(sess.LastWorking),
 				Relaunches: sess.Counted(), StopReason: strp(string(stop)),
-				Prompts: append([]state.Prompt{}, sess.Prompts...),
+				Prompts: append([]state.Prompt{}, sess.Prompts...), Cleanup: cleanup,
 			}
 			snap.Sessions = append(snap.Sessions, e)
 			if stop != "" {
@@ -100,17 +111,31 @@ func fillSessions(snap *Snapshot, s *state.State) {
 			}
 		}
 		if c := rf.Conductor; c != nil {
-			add("", "", c, c.StopReason)
+			add("", "", c, c.StopReason, "")
 		}
 		for i := range rf.Rounds {
 			if sess := rf.Rounds[i].Session; sess != nil {
-				add(rf.Rounds[i].Name, "", sess, sess.StopReason)
+				add(rf.Rounds[i].Name, "", sess, sess.StopReason, "")
 			}
 		}
 		for i := range rf.Passes {
 			p := &rf.Passes[i]
+			if pr := p.PullRequest; pr != nil && p.State == state.Building && pr.Wait == state.WaitNoCheck && pr.Ready != nil && now.Sub(*pr.Ready) >= NoCheckAfter {
+				e := NeedEntry{
+					Project: rf.Project, Round: strp(p.Round), Reason: NoCheckRegistered, Cause: strconv.Itoa(pr.Number),
+					Todo: fmt.Sprintf("See why no check has started on pull request %d", pr.Number),
+				}
+				if p.Session != nil {
+					e.Session = strp(p.Session.Name)
+				}
+				snap.NeedsYouNow = append(snap.NeedsYouNow, e)
+			}
 			if p.Session != nil {
-				add(p.Round, p.Name, p.Session, p.StopReason)
+				cleanup := ""
+				if p.PullRequest != nil {
+					cleanup = p.PullRequest.CleanupNote
+				}
+				add(p.Round, p.Name, p.Session, p.StopReason, cleanup)
 				continue
 			}
 			if p.State == state.Stopped {

@@ -51,6 +51,8 @@ type launcher struct {
 	binary string
 	now    time.Time
 	runner launch.Runner
+	// gh is the command that calls the pull request merge.
+	gh string
 }
 
 // newLauncher resolves the absolute state folder, the running binary, and
@@ -79,7 +81,7 @@ func newLauncher(f *rootFlags, lf *launchFlags) (*launcher, error) {
 		lf.jobsDir = filepath.Join(home, ".claude", "jobs")
 	}
 	return &launcher{
-		dir: dir, binary: binary, now: now,
+		dir: dir, binary: binary, now: now, gh: "gh",
 		runner: launch.Runner{Claude: lf.claude, SystemdRun: lf.systemdRun, JobsDir: lf.jobsDir, RowWait: lf.rowWait},
 	}, nil
 }
@@ -170,6 +172,11 @@ type launchRequest struct {
 	// Answer is set on the relaunch after an answered permission prompt, and
 	// replaces the relaunch note in the prompt.
 	Answer *launch.AnswerNote
+	// Fix is set on the relaunch that sends a pull request back, and replaces
+	// the relaunch note in the prompt.
+	Fix *launch.FixNote
+	// Also is an event committed with the launch, in the same commit.
+	Also state.Event
 }
 
 // Launch carries out one launch, in the design's order: refuse before any
@@ -223,14 +230,19 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 
 	verbs := launch.Verbs(l.binary, l.dir, pl.promptKind, project, pl.pass, pl.round)
 	followUp := launch.FollowUpCommand(l.binary, l.dir, project, record)
-	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs,
-		"Bash("+followUp+" *)")
+	rules := []string{"Bash(" + followUp + " *)"}
+	var ready string
+	if pl.promptKind == "pass" {
+		ready = launch.ReadyCommand(l.binary, l.dir, project, pl.pass)
+		rules = append(rules, "Bash("+ready+" *)")
+	}
+	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs, rules)
 	if err != nil {
 		return "", err
 	}
 	p := launch.Prompt{
 		Kind: pl.promptKind, Name: pl.name, Project: project, Round: pl.round, Pass: pl.pass,
-		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp,
+		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp, Ready: ready,
 	}
 	var known []string
 	if old != nil {
@@ -244,9 +256,12 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 				count = old.Counted() + 1
 			}
 		}
-		if req.Answer != nil {
+		switch {
+		case req.Answer != nil:
 			p.Answer = req.Answer
-		} else {
+		case req.Fix != nil:
+			p.Fix = req.Fix
+		default:
 			p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause)}
 		}
 	}
@@ -260,13 +275,17 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	if err != nil {
 		return "", err
 	}
-	_, err = state.Commit(l.dir, l.now, state.LockWait, state.RecordLaunch(project, record, state.Launch{
+	recordLaunch := state.RecordLaunch(project, record, state.Launch{
 		Kind: req.Kind, Replaces: req.Replaces, Cause: req.Cause, Counted: req.Counted,
 		Session: state.Session{
 			Name: pl.name, Kind: pl.sessionKind, ShortID: got.ShortID, SessionID: got.SessionID,
 			Worktree: pl.worktree, Branch: pl.branch,
 		},
-	}), snapshot.Render)
+	})
+	if req.Also != nil {
+		recordLaunch = state.Sequence(req.Also, recordLaunch)
+	}
+	_, err = state.Commit(l.dir, l.now, state.LockWait, recordLaunch, snapshot.Render)
 	if err != nil {
 		return "", errors.Join(err, l.runner.Stop(ctx, got.ShortID))
 	}
