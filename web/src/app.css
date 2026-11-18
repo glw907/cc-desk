@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@import "survey/theme/fonts.css";
+@import "survey/theme/survey.css";
+@import "survey/theme/components.css";
+
+/* Tailwind scans the app's own sources only; Survey's sheets are imported above. */
+@source "./";

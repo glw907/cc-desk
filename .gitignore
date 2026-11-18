@@ -1,5 +1,8 @@
 node_modules/
 .svelte-kit/
+web/build/
+web/test-results/
+web/playwright-report/
 .claude/worktrees/
 spikes/*/sandbox/
 spikes/*/scratch/
