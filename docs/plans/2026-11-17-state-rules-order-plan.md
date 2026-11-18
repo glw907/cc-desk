@@ -91,8 +91,8 @@ Each ran with `git grep -n -E '<pattern>' -- '*.go' e2e/testdata/README.md` at `
 
 | Pattern | Hits | Each hit |
 | --- | --- | --- |
-| `exec\.Command\(binary` | 1 | `e2e/main_test.go:52` (task 5 adds `--usage-command`) |
-| `"pass", "start"` | 17 | `e2e/broken_test.go:19`; `e2e/estimate_test.go:162`, `:205`, `:254`, `:266`, `:292`, `:305`, `:312`, `:314`; `e2e/events_test.go:108`, `:110`, `:142`, `:159`, `:177`, `:206`, `:207`; `e2e/lock_test.go:28`. All stay legal; none changes |
+| `exec\.Command\(binary` | 1 | `e2e/main_test.go:52` (task 4 adds `--usage-command` and the `PATH`) |
+| `"pass", "start"` | 17 | `e2e/broken_test.go:19`; `e2e/estimate_test.go:162`, `:205`, `:254`, `:266`, `:292`, `:305`, `:312`, `:314`; `e2e/events_test.go:108`, `:110`, `:142`, `:159`, `:177`, `:206`, `:207`; `e2e/lock_test.go:28`. All stay legal; none changes. Each target is free under the new rules: p13 and g-one sit in designed rounds with nothing before them, b-three's questions are answered, and p14 starts after p13 finishes. No folder ever holds more than one building pass, and the worked fixture's `usage.json` reads 40, so task 3's rules pass these before task 4 takes readings |
 | `settle\(` | 2 | `internal/state/commit.go:76` (call), `:113` (empty body). Task 3 fills it |
 | `\bLimit\b\|\bGuess\b\|OpenGuess\|GuessMinutes` | 20 | `internal/snapshot/snapshot.go:18-19` (the constant moves to `state`, task 1), `:30-32`, `:134`, `:138-139`, `:180-181` (task 6); `internal/state/events.go:44`, `:116` (task 1, `Limit` becomes `Wait`); `internal/state/types.go:75-79`, `:89-90`, `:95-97` (task 1) |
 | `Free\b\|WhyNot\|why_not` | 5 | `internal/snapshot/snapshot.go:86-87`, `:302` (task 6); `internal/snapshot/snapshot_test.go:128` (the done pass, whose `free` stays null), `:136` (no list encodes as null); both hold |
@@ -104,7 +104,7 @@ Each ran with `git grep -n -E '<pattern>' -- '*.go' e2e/testdata/README.md` at `
 | `testdata/state` | 5 | `e2e/events_test.go:74`, `:79` (the fixture golden, regenerated in task 6); `e2e/main_test.go:2`, `:71`, `:75` (task 5: `newState` takes the fixture name) |
 | `StartPass\(` | 15 | `cmd/cc-desk/pass.go:21` (task 4 adds `--guess`); `internal/state/events.go:151` (task 3); `internal/state/events_test.go:75`, `:107`, `:119`, `:140`, `:158`, `:179`, `:188`, `:193`; `internal/state/forecast_test.go:20`, `:26`, `:27`, `:47`, `:62`. The signature stays; these tests need a readable usage reading in their state (task 3) |
 | `newState\(` | 16 | `e2e/main_test.go:68` (definition, task 5) and 15 callers in `broken_test.go`, `estimate_test.go`, `events_test.go`, `lock_test.go` (unchanged if `newState` keeps its one-argument form; see task 5) |
-| `func run\(` | 1 | `e2e/main_test.go:49` (task 5) |
+| `func run\(` | 1 | `e2e/main_test.go:49` (task 4; task 5 adds the per-test variant) |
 
 Golden files that change: `internal/snapshot/testdata/empty.golden.json` (task 6, the new
 `reasons` list) and `e2e/testdata/state/snapshot.json` (task 6, the `free` and `why_not` values
@@ -359,7 +359,7 @@ Outcome: `internal/usage` holds `Parse(raw []byte) (percent int, resetText strin
 which decodes the result loosely and reads the first "Current week (all models)" line with the
 spike's pattern, and `Read(ctx, command string)`, which runs the command with no arguments, or,
 when `command` is empty, `claude -p "/usage" --model haiku --output-format json` with stdin from
-the null device and a 60-second timeout. It sets `cmd.WaitDelay` (5 seconds) beside the
+the null device and a 60-second timeout. It sets `cmd.WaitDelay` (1 second, well under any stand-in's sleep) beside the
 context's timeout: a probe showed a killed shell's child holds stdout open, so without it a
 500 ms timeout on a script that sleeps 4 seconds returned after 4 seconds. The cache decision ("The reading") also lives here, so
 `cmd` stays wiring. In `cmd/cc-desk`:
@@ -465,7 +465,7 @@ Outcome: the snapshot carries `free`, `why_not`, `waiting`, `open_guesses`,
 `guess_minutes_total`, and `next_session.reasons` by "The snapshot". `WaitingPass` becomes
 `Project`, `Pass`, `Limits []string`, `Since`, `ResetText *string`. Files:
 `internal/snapshot/snapshot.go`, `estimate.go`, `snapshot_test.go`, `nextsession_test.go`,
-`testdata/empty.golden.json`, `e2e/testdata/state/snapshot.json`. Class `ordinary`.
+`testdata/empty.golden.json`, `e2e/testdata/state/snapshot.json`, `e2e/order_test.go`. Class `ordinary`.
 
 Test: `TestSnapshotFree` builds a state with a free pass, a pass behind unfinished work and a
 question (two names, in table order), and a waiting pass with both limits and a readable
