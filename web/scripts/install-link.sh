@@ -2,7 +2,8 @@
 # Registers the cc-desk:// link on this workstation: copies the handler, writes the .desktop file,
 # validates it, and rebuilds the desktop database. Safe to run again.
 #
-# It writes ~/.local/share/cc-desk/link/ and ~/.local/share/applications/cc-desk.desktop only.
+# It writes ~/.local/share/cc-desk/link/ and ~/.local/share/applications/cc-desk.desktop, and
+# update-desktop-database rewrites the cache beside that file.
 # It never runs `xdg-mime default`, since update-desktop-database alone makes the file the
 # scheme's default and `xdg-mime default` would write ~/.config/mimeapps.list.
 set -euo pipefail

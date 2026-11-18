@@ -2,7 +2,7 @@
 @component
 The terminal command that opens a desk on an item, as text, with a link that opens it in a terminal
 and a button that copies it. The link is left out when the handler would refuse a name. A copy that
-the browser refuses leaves the button as it was and says nothing.
+the browser refuses says nothing.
 -->
 <script lang="ts">
 	import { terminalLink } from './link';
@@ -21,11 +21,12 @@ the browser refuses leaves the button as it was and says nothing.
 	const href = $derived(terminalLink(project, round));
 
 	async function copy() {
+		copied = false;
 		try {
 			await navigator.clipboard.writeText(command);
 			copied = true;
 		} catch {
-			copied = false;
+			// A refused copy says nothing.
 		}
 	}
 </script>
