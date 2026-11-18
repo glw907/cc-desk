@@ -22,8 +22,11 @@ const (
 type Launch struct {
 	Kind    LaunchKind
 	Session Session
-	Cause   string
-	Counted bool
+	// Replaces is the short id of the record an again or a relaunch
+	// replaces. The event refuses when the record now holds another.
+	Replaces string
+	Cause    string
+	Counted  bool
 }
 
 // sessionAt finds where a record sits: the release, a pointer to the
@@ -50,6 +53,17 @@ func sessionAt(s *State, project, record string) (*ReleaseFile, **Session, *Pass
 		return rf, &p.Session, p, nil
 	}
 	return nil, nil, nil, fmt.Errorf("no record %s in project %q", record, project)
+}
+
+// recordKind gives the session kind a record's place holds.
+func recordKind(record string) SessionKind {
+	switch {
+	case record == "conductor":
+		return KindConductor
+	case strings.HasPrefix(record, "round:"):
+		return KindDesign
+	}
+	return KindPass
 }
 
 // RecordLaunch writes the session record a launch made, in one commit. A
@@ -82,10 +96,10 @@ func RecordLaunch(project, record string, l Launch) Event {
 			}
 			next.LaunchTries = 1
 		default:
-			if old == nil {
-				return Refuse(fmt.Sprintf("%s/%s has no session record to launch again", project, record))
+			if old == nil || old.Ended != nil || old.ShortID != l.Replaces {
+				return Refuse(fmt.Sprintf("%s/%s is no longer the live record %q this launch replaces", project, record, l.Replaces))
 			}
-			next.Prompts = old.Prompts
+			next.Prompts, next.Finished = old.Prompts, old.Finished
 			next.Relaunches = append([]Relaunch(nil), old.Relaunches...)
 			next.LaunchTries = 2
 			if l.Kind == LaunchRelaunch {
@@ -93,7 +107,7 @@ func RecordLaunch(project, record string, l Launch) Event {
 				next.LaunchTries = 1
 			}
 		}
-		if err := validateSession(&next, next.Kind, project+"/"+record); err != nil {
+		if err := validateSession(&next, recordKind(record), project+"/"+record); err != nil {
 			return err
 		}
 		*slot = &next

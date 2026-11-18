@@ -16,25 +16,25 @@
   `docs/specs/2026-11-17-sessions-design.md` and `docs/specs/2026-11-17-page-design.md`, and
   each round plan sits beside its planner prompts in `docs/plans/`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
-- The usage stop is 100 percent of the week. The figure read 92 percent on 2026-11-18, and
+- The usage stop is 100 percent of the week. The figure read 93 percent on 2026-11-18, and
   the reset is Nov 20, 10:59pm Alaska time.
 
 <!-- round-report sessions -->
-**The Sessions round has started.** Its first pass teaches the `cc-desk` command to read the
-session list and decide what each session needs. Nothing has landed yet. Weekly usage read 92
-percent before the first launch. One thing waits for Geoff: his approve of the auto-mode entry
-in the round plan, which the fifth pass needs.
+**The Sessions round's first pass waits for Geoff's approval.** Pull request 8 teaches the
+`cc-desk` command to record sessions and decide what each needs. Its review accepted it, and its
+check passed. It waits on one question: what a session should do after a one-model limit. The
+second pass has started from its branch. Weekly usage read 93 percent.
 
-Open documents: none.
+Open documents: none. Pull request 8 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
 <!-- round-report page -->
-**The Page round has started.** Its first pass builds the status page's app, its sidebar, and
-its front page. Nothing has landed yet. Weekly usage read 92 percent before the first launch.
-One thing waits for Geoff: the same auto-mode entry, which the third pass needs.
+**The Page round's first pass waits for Geoff's approval.** Pull request 7 builds the status
+page's app, sidebar, and front page. Its tests and check pass, and it asks two choices of Geoff.
+The second pass has started from its branch. Weekly usage read 93 percent.
 
-Open documents: none.
+Open documents: none. Pull request 7 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
@@ -54,7 +54,12 @@ claude --model claude-opus-5-5 --effort high "$(cat docs/plans/2026-11-17-sessio
 
 ## Open decisions
 
-- Pull request 8 needs his call on usage relaunches: `docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md`.
+- Pull request 8 (`sessions-check`) waits for Geoff's approve and one call: when a session
+  stopped by a one-model limit restarts. Recommended: at the reset time in its stop text
+  (`docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md` on the branch).
+- Pull request 7 (`page-front`) waits for Geoff's approve; its review escalated two calls
+  (recommended: approve both). The page sets `trustedOrigins: ['*']` so a write gets 405, and
+  a missing `snapshot.json` reads "No state yet". Five open test gaps become follow-ups.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.

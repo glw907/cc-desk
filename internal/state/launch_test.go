@@ -87,7 +87,7 @@ func TestRecordLaunch(t *testing.T) {
 	})
 
 	t.Run("a launch again", func(t *testing.T) {
-		s, err := run(t, withSession, RecordLaunch("p", "pass:x", Launch{Kind: LaunchAgain, Session: bareSession("p-one", "/w/one")}))
+		s, err := run(t, withSession, RecordLaunch("p", "pass:x", Launch{Kind: LaunchAgain, Replaces: "ab12", Session: bareSession("p-one", "/w/one")}))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -100,7 +100,7 @@ func TestRecordLaunch(t *testing.T) {
 	t.Run("a relaunch resets the tries and what the check saw", func(t *testing.T) {
 		seen := strings.Replace(goodSession, `"launch_tries":1`, `"launch_tries":2,"last_seen":"2026-11-20T10:05:00Z","last_state":"blocked"`, 1)
 		s, err := run(t, sessionRelease("building", seen, ""), RecordLaunch("p", "pass:x", Launch{
-			Kind: LaunchRelaunch, Session: bareSession("p-one", "/w/one"), Cause: "idle", Counted: true,
+			Kind: LaunchRelaunch, Replaces: "ab12", Session: bareSession("p-one", "/w/one"), Cause: "idle", Counted: true,
 		}))
 		if err != nil {
 			t.Fatal(err)
@@ -124,7 +124,11 @@ func TestRecordLaunch(t *testing.T) {
 		{"a live record", withSession,
 			RecordLaunch("p", "pass:x", Launch{Kind: LaunchFirst, Session: bareSession("p-x", "/w/two")}), "already has a live session record"},
 		{"a launch again with no record", building,
-			RecordLaunch("p", "pass:x", Launch{Kind: LaunchAgain, Session: bareSession("p-x", "/w/one")}), "no session record"},
+			RecordLaunch("p", "pass:x", Launch{Kind: LaunchAgain, Replaces: "ab12", Session: bareSession("p-x", "/w/one")}), "no longer the live record"},
+		{"a relaunch of a record another launch replaced", withSession,
+			RecordLaunch("p", "pass:x", Launch{Kind: LaunchRelaunch, Replaces: "zz99", Session: bareSession("p-one", "/w/one")}), "no longer the live record"},
+		{"a design record on a pass", building,
+			RecordLaunch("p", "pass:x", Launch{Kind: LaunchFirst, Session: func() Session { s := bareSession("p-x", "/w/one"); s.Kind = KindDesign; return s }()}), `session kind "design"`},
 		{"a record that fails validation", building,
 			RecordLaunch("p", "pass:x", Launch{Kind: LaunchFirst, Session: bareSession("p-x", "relative")}), "not an absolute path"},
 		{"an unknown record", building,
