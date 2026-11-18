@@ -168,6 +168,21 @@ type Desk struct {
 	Started   time.Time `json:"started"`
 }
 
+// Proc is one process as the guard sees it. TTY is tty_nr from
+// /proc/<pid>/stat, which is 0 for a process with no controlling terminal.
+type Proc struct {
+	PID     int
+	Started time.Time
+	TTY     int
+}
+
+// Caller is who runs a verb: the session id from the environment and the
+// calling process's chain of parents. Chain[0] is the calling process.
+type Caller struct {
+	SessionID string
+	Chain     []Proc
+}
+
 // Usage is usage.json: the last usage reading. A reading that could not
 // be parsed carries Error, with no percent and no reset text.
 type Usage struct {
