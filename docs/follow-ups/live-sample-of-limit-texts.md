@@ -1,7 +1,7 @@
 # A live sample of the sign-in and limit texts
 
-The classifier reads a blocked row from the job state file's `detail`, then from the last lines of
-`claude logs`. Its patterns for "Login expired" and for a usage limit ("You've hit your weekly
+The classifier reads a blocked row from the job state file's `detail`, then from the whole
+`claude logs` screen. Its patterns for "Login expired" and for a usage limit ("You've hit your weekly
 limit · resets ...") come from the spike captures in `spikes/2-states/` and from the job file the
 fixtures copy. None came from a live session at the moment it stopped.
 
