@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # gate.sh: the cc-desk gate. Runs gofmt, go vet, go test, and vale over docs/.
-# The page mock-ups under docs/specs/2026-11-17-cc-desk-mockups/ are left out.
+# It fails when any Go test reports a skip. The page mock-ups under
+# docs/specs/2026-11-17-cc-desk-mockups/ are left out of the vale run.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -16,7 +17,34 @@ echo "gate: go vet"
 go vet ./...
 
 echo "gate: go test"
-go test ./...
+if ! command -v jq >/dev/null 2>&1; then
+  echo "gate: jq is not installed; install it, do not skip the gate" >&2
+  exit 1
+fi
+events=$(mktemp)
+trap 'rm -f "$events"' EXIT
+# -count=1 because the e2e package builds the binary itself, and go test
+# does not see the binary's source as an input of the e2e package, so a
+# cached e2e result can pass on a stale build.
+status=0
+go test -count=1 -json ./... >"$events" || status=$?
+jq -rj 'select(.Action == "build-output") | .Output' "$events"
+jq -r 'select(.Action == "pass" and .Test == null and .Package != null) | "ok  \t\(.Package)\t\(.Elapsed)s"' "$events"
+failed=$(jq -sc '[.[] | select(.Action == "fail" and .Package != null) | .Package] | unique' "$events")
+jq -rj --argjson failed "$failed" \
+  'select(.Action == "output" and (.Package as $p | $failed | index($p))) | .Output' "$events"
+if [ "$status" -ne 0 ]; then
+  echo "gate: go test failed (exit $status)" >&2
+  exit 1
+fi
+# A package with no test files reports a skip with no Test key; only a
+# skipped test counts.
+skipped=$(jq -r 'select(.Action == "skip" and .Test != null) | "\(.Package) \(.Test)"' "$events")
+if [ -n "$skipped" ]; then
+  echo "gate: these tests were skipped; no test may skip:" >&2
+  echo "$skipped" >&2
+  exit 1
+fi
 
 echo "gate: vale"
 if ! command -v vale >/dev/null 2>&1; then

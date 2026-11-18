@@ -29,6 +29,12 @@ Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
+## Pass state-rules-files
+
+All eight tasks are built and pushed on `state-rules-files`; pull request 3 carries the evidence.
+The pass fills the snapshot's pass 1 fields only, and `settle` in `internal/state/commit.go` is an
+empty function for pass 3. Pass 2 adds its builder in `internal/snapshot/estimate.go`.
+
 ## Next action
 
 Run the State and rules round. Geoff starts the conductor in a fresh Opus session in his

@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "project": "gamma",
+  "name": "v1",
+  "repo": "glw907/gamma",
+  "rounds": [
+    {"name": "g1", "summary": "The first round.", "needs_geoff": false, "no_need_reason": "Routine.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "g-one", "summary": "First pass.", "round": "g1", "planned_minutes": 30, "state": "not_started"},
+    {"name": "g-two", "summary": "Second pass.", "round": "g1", "planned_minutes": 45, "state": "not_started", "after": ["g-one"]}
+  ]
+}

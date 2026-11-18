@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "generated_at": "2026-11-20T23:00:00Z",
+  "releases": [],
+  "rulings": [],
+  "next_session": {
+    "state": null,
+    "time": null,
+    "range": null,
+    "rough": null,
+    "question_count": null,
+    "rounds": [],
+    "projects": [],
+    "not_designed": []
+  },
+  "waits_for_geoff": [],
+  "waiting": [],
+  "open_guesses": [],
+  "guess_minutes_total": 0,
+  "guess_minutes_limit": 300
+}

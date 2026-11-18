@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "passes": [
+    {"name": "b-four", "summary": "The first pass of round b3.", "round": "b3", "planned_minutes": 90, "state": "not_started", "questions": ["beta-q3"]}
+  ],
+  "questions": [
+    {"id": "beta-q3", "text": "Ship it?", "options": ["yes", "no"], "recommended": "yes"}
+  ]
+}
