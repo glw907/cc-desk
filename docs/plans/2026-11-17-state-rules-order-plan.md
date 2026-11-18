@@ -4,7 +4,7 @@ Initiative: cc-desk
 Round: state-rules
 Pass: state-rules-order
 
-Class `ordinary`. Planned 90 minutes; the path below is 170, under the round's 180-minute park
+Class `ordinary`. Planned 90 minutes; the path below is 175, under the round's 180-minute park
 line. Pass 2's path was 115 and it ran in about 17 minutes of wall clock (plan commit 21:16,
 last code commit 21:32 on 2026-11-17), so these minutes sit on the same scale as pass 2's.
 Design: `docs/specs/2026-11-17-state-and-rules-design.md` (approved 2026-11-17), sections
@@ -38,8 +38,9 @@ No step in this pass needs Geoff. Every write is inside the worktree, a test's `
   ready`, `gh pr checks`, `gh run view`, and once, `cc-desk usage --raw`, which runs `claude -p
   "/usage" --model haiku --output-format json`. No row refuses any of them. The rows near them
   are in the table below.
-- Reviewed: one `standards:plan-reviewer` read (Opus, medium effort) of this plan; its verdict
-  and folds are under `## Decisions`. The class needs none before code; the launch prompt asked
+- Reviewed: one `standards:plan-reviewer` read (Opus, medium effort) of this plan at `439de32`,
+  verdict "ready after folds", 2 blockers and 13 other findings, all folded; the `[review]` line
+  under `## Decisions` lists them. The class needs none before code; the launch prompt asked
   for one.
 - Evidence: the mechanism table and the recorded searches below. Each acceptance check was run
   on today's code before any code was written; the outputs are under `## Acceptance`.
@@ -81,7 +82,7 @@ No step in this pass needs Geoff. Every write is inside the worktree, a test's `
 | The e2e test setup | `e2e/main_test.go`: `TestMain` builds the binary into a temp folder; `run(t, dir, now, args...)` at `:49` prepends `--state-dir` and `--now`, and its `exec.Command(binary, ...)` at `:52` is the only exec of the binary; `newState(t)` at `:68` copies the hard-coded `testdata/state` (`:71`, `:75`); `folder` and `sameFolder` compare a whole folder |
 | The fixture's usage | `e2e/testdata/state/usage.json` holds 40 percent read at 22:30Z, 30 minutes before `workedClock` (`2026-11-20T23:00:00Z`), so every existing e2e verb reads usage once this pass lands. `settings.json` holds stop 90 |
 | Existing starts stay legal | The 17 existing `"pass", "start"` calls start p13, b-three, p14 after p13, gamma's g-one (start, stop, resume), or are refusals. At most two passes build at once in any test, and every pass started is free under the new rules |
-| Unit-test states | `internal/state/events_test.go:10` `loaded` writes one release and runs `Load`, so `s.Usage` is nil. `internal/snapshot` tests build `&state.State{Releases: ...}` by hand (`nextsession_test.go:31` `sessionOf`, `estimate_test.go`), and `snapshot_test.go:20`, `:49` render `&state.State{}` against `testdata/empty.golden.json` |
+| Unit-test states | `internal/state/events_test.go:10` `loaded` writes one release and runs `Load`, so `s.Usage` is nil. That release, `goodRelease` (`internal/state/read_test.go:10-14`), has round `r1` with no `design_written`, so its pass breaks "unfinished work before it". `forecast_test.go`'s `TestPassEventMark` and `TestCommitForecast` use it too and write no `usage.json`. `internal/snapshot` tests build `&state.State{Releases: ...}` by hand (`nextsession_test.go:31` `sessionOf`, `estimate_test.go`), and `snapshot_test.go:20`, `:49` render `&state.State{}` against `testdata/empty.golden.json` |
 | Label wording | The Survey prose standard (`/var/home/glw907/Projects/survey/skills/survey/writing/editor.md`, 99 lines) holds no rule on CLI labels, so the refusal names and the snapshot's reason text are the design's words, verbatim |
 
 ## Recorded searches
@@ -94,7 +95,7 @@ Each ran with `git grep -n -E '<pattern>' -- '*.go' e2e/testdata/README.md` at `
 | `"pass", "start"` | 17 | `e2e/broken_test.go:19`; `e2e/estimate_test.go:162`, `:205`, `:254`, `:266`, `:292`, `:305`, `:312`, `:314`; `e2e/events_test.go:108`, `:110`, `:142`, `:159`, `:177`, `:206`, `:207`; `e2e/lock_test.go:28`. All stay legal; none changes |
 | `settle\(` | 2 | `internal/state/commit.go:76` (call), `:113` (empty body). Task 3 fills it |
 | `\bLimit\b\|\bGuess\b\|OpenGuess\|GuessMinutes` | 20 | `internal/snapshot/snapshot.go:18-19` (the constant moves to `state`, task 1), `:30-32`, `:134`, `:138-139`, `:180-181` (task 6); `internal/state/events.go:44`, `:116` (task 1, `Limit` becomes `Wait`); `internal/state/types.go:75-79`, `:89-90`, `:95-97` (task 1) |
-| `Free\b\|WhyNot\|why_not` | 5 | `internal/snapshot/snapshot.go:86-87`, `:302` (task 6); `internal/snapshot/snapshot_test.go:128`, `:136` (task 6: a pass's `free` is no longer null) |
+| `Free\b\|WhyNot\|why_not` | 5 | `internal/snapshot/snapshot.go:86-87`, `:302` (task 6); `internal/snapshot/snapshot_test.go:128` (the done pass, whose `free` stays null), `:136` (no list encodes as null); both hold |
 | `Usage\|usage\.json\|UsageStop\|usage_stop` | 30 | `cmd/cc-desk/root.go:82` (`SilenceUsage`, unrelated); `e2e/events_test.go:139` (`TestBadUsage`, command-line usage, unrelated); `internal/state/events_test.go:113`, `:116` (`StopUsage`, unchanged); `internal/state/read.go:173`, `:207-211` (unchanged), `:216-226` (task 2: the `error` form); `internal/state/read_test.go:32-36`, `:43`, `:52-53`, `:80` (unchanged), `:81` (task 2 adds cases); `internal/state/types.go:25`, `:33` (`StopUsage`, unchanged), `:163-178` (task 2), `:197` (unchanged) |
 | `needs_you_now` | 6 | `e2e/estimate_test.go:307-308`, `internal/snapshot/nextsession_test.go:122-123` (unchanged); `internal/snapshot/estimate.go:430` (task 6 adds the usage reason); `internal/snapshot/snapshot.go:102` (comment, task 6) |
 | `Pass 3\|pass 3` | 5 | `internal/snapshot/snapshot.go:130`, `:138`; `internal/state/commit.go:111`; `internal/state/types.go:75`, `:77`. Each comment is rewritten where its code changes |
@@ -125,10 +126,12 @@ and `reasons`). Each is regenerated by the command the task gives and read by ey
 | `cmd/cc-desk/pass.go` | `pass start --guess QUESTION`; the wait line | 4 |
 | `cmd/cc-desk/usage.go`, `cmd/cc-desk/free.go` | New: the `usage` and `free` verbs | 4 |
 | `internal/snapshot/snapshot.go`, `estimate.go`, `snapshot_test.go`, `nextsession_test.go`, `testdata/empty.golden.json` | `free`, `why_not`, `waiting`, `open_guesses`, `guess_minutes_total`, and `next_session.reasons` | 6 |
-| `e2e/main_test.go` | The default usage stand-in (task 4), the per-test stand-in helper, and a second fixture (task 5) | 4, 5 |
+| `e2e/main_test.go` | `run` passes the default stand-in and runs the binary with a `PATH` that holds no `claude` (task 4); the per-test stand-in helper and a second fixture (task 5) | 4, 5 |
+| `e2e/testdata/usage40.sh` | New, executable: the default stand-in, a 40 percent result in the live shape | 4 |
+| `e2e/broken_test.go` | The `verbs` list gains `usage` and `free` (its comment at `:10-11` asks each pass to add its verbs) | 4 |
 | `e2e/testdata/order/releases/north.json`, `south.json`, `e2e/testdata/README.md` | New fixture; the README names it | 5 |
 | `e2e/testdata/state/snapshot.json` | Regenerated golden | 6 |
-| `e2e/order_test.go` | New: done items 2 and 3 | 5, 7 |
+| `e2e/order_test.go` | New: done items 2 and 3, a guess start that waits, and the `free` verb | 5, 6, 7 |
 | `e2e/usage_test.go` | New: done item 7's recorded result and the cache | 7 |
 | `docs/STATUS.md`, `docs/follow-ups/*.md` | The pass's STATUS lines and follow-ups | 8 |
 
@@ -198,8 +201,10 @@ before the clock, when `read_at` is after the clock, or when the verb forces one
 --raw`). A fresh reading is `{percent, reset_text, read_at: now}`, or `{error, read_at: now}`
 when the command exits non-zero, times out after 60 seconds, prints JSON it can't decode,
 reports `is_error`, or has no "Current week (all models)" line. Inside the lock,
-`state.WithReading(u, ev)` keeps the newer of the loaded and the fresh reading, marks
-`usage.json` dirty when the fresh one wins, settles, and runs `ev`. So a waiting pass that now
+`state.WithReading(u, forced, ev)` keeps one reading and marks `usage.json` dirty when the fresh
+one wins. A forced reading always wins. Otherwise the fresh one wins when the loaded `read_at`
+is older, or after the clock (a reading from the future counts as older than any). On a tie the
+loaded one stays. It then settles and runs `ev`. So a waiting pass that now
 fits starts before a new request can take its place. `Commit` writes `usage.json` atomically
 after the releases and before the forecast and `snapshot.json`, and only once the event has
 succeeded: a refusal writes nothing. A broken `usage.json` still fails the strict `Load`, as any
@@ -257,13 +262,12 @@ Every check below that runs `go test -run` names the new tests, so today's tree 
 task's commit runs `bash scripts/gate.sh` bare first, so the gate stays green at every commit.
 
 To regenerate the fixture golden, run these from the worktree, with a new folder name each time
-(`fx1`, `fx2`). The `--usage-command` flag exists from task 4; point it at a copy of the 40 percent stand-in
-that task 4 writes for `TestMain`:
+(`fx1`, `fx2`). The `--usage-command` flag and `e2e/testdata/usage40.sh` exist from task 4:
 
 ```bash
 go build -o "$CLAUDE_JOB_DIR/tmp/cc-desk" ./cmd/cc-desk
 cp -r e2e/testdata/state "$CLAUDE_JOB_DIR/tmp/fx1"
-"$CLAUDE_JOB_DIR/tmp/cc-desk" --state-dir "$CLAUDE_JOB_DIR/tmp/fx1" --now 2026-11-20T23:00:00Z --usage-command "$CLAUDE_JOB_DIR/tmp/usage40.sh" snapshot > e2e/testdata/state/snapshot.json
+"$CLAUDE_JOB_DIR/tmp/cc-desk" --state-dir "$CLAUDE_JOB_DIR/tmp/fx1" --now 2026-11-20T23:00:00Z --usage-command "$PWD/e2e/testdata/usage40.sh" snapshot > e2e/testdata/state/snapshot.json
 ```
 
 Then read `git diff e2e/testdata/state/snapshot.json` by eye.
@@ -275,8 +279,9 @@ guess start breaks, whether the pass is free, the open-guess minutes, the buildi
 whether the usage limit holds, all by "The rules this pass builds". `Pass.Limit` is `Pass.Wait`
 (JSON `wait`: `since`, `limits`). The four names and the 300-minute cap are exported constants
 in `state`; `snapshot.GuessMinutesLimit` refers to the cap. `validatePass` requires a `Wait`
-with at least one known limit on a `waiting` pass and none on any other; a `Guess` only on a
-pass that has started, naming a question the pass rests on. `events.go:44` and `:116` reject a
+with at least one known limit on a `waiting` pass and none on any other; a `Guess` on any
+state but `not_started` (a guess start that waits carries one), naming a question the pass rests
+on. `events.go:44` and `:116` reject a
 new pass carrying `Wait` or `Guess`. Files: `internal/state/types.go`, `check.go`, `rules.go`,
 `rules_test.go`, `events.go`, `events_test.go` (`:43`'s hand-set waiting pass gains a `Wait`),
 `internal/snapshot/snapshot.go` (the constant). Class `ordinary`.
@@ -293,7 +298,8 @@ Test, as `TestRules<Case>` in `rules_test.go`, on states the test builds:
   start counts, and a plain start never breaks the 300-minute rule.
 - `TestRulesLimits`: two building passes hold the two-pass limit and a stopped one doesn't; a
   nil, an error, a 99, and a 100 reading under the default stop, and 87 under a stop of 85.
-- `TestCheckWait`: the strict checks above, one table row each.
+- `TestCheckWait`: the strict checks above, one table row each, including a `waiting` pass that
+  carries a `Guess` (it loads) and a `not_started` pass that carries one (it doesn't).
 
 Acceptance check: `go test ./internal/state/ -run 'TestRules|TestCheckWait' -v` prints `--- PASS`
 for each of the six, and `go test ./internal/...` passes.
@@ -302,7 +308,7 @@ for each of the six, and `go test ./internal/...` passes.
 
 Outcome: `Usage` gains `Error string` (`error`, omitted when empty). The strict reader takes a
 `usage.json` with `read_at` and either an error with no percent and no reset text, or a reset
-text and no error; anything else names the file. `state.WithReading(u Usage, ev Event) Event`
+text and no error; anything else names the file. `state.WithReading(u Usage, forced bool, ev Event) Event`
 works as "The reading" says, and `Commit` writes `usage.json` when it is dirty, in the order
 releases, `usage.json`, forecast, snapshot. Its signature stays. Files: `internal/state/types.go`,
 `read.go`, `read_test.go`, `commit.go`, `commit_test.go`. Class `ordinary`.
@@ -322,9 +328,13 @@ Outcome: `StartPass(project, pass)` and the new `StartOnGuess(project, pass, que
 `internal/state/events.go`, `events_test.go`, `commit.go`, `commit_test.go`, `forecast_test.go`.
 Class `ordinary`.
 
-The unit tests of `StartPass` (15 hits) run on states with a nil `Usage`, which now counts as a
-stop. Give those states a readable reading (the `loaded` helper writes a fresh `usage.json`, and
-`forecast_test.go`'s states the same) and leave the rule as it is (standing answer 28).
+The unit tests of `StartPass` (15 hits) now fail for two reasons. Their states have a nil
+`Usage`, which counts as a stop, and their release, `goodRelease`, has a round with no written
+design, which breaks "unfinished work before it". Give the start tests a release with
+`"design_written": true` (a start-test copy of `goodRelease`, or the constant itself if no
+read test depends on its absence) and a readable reading: the `loaded` helper writes a fresh
+`usage.json`, and so do `forecast_test.go`'s `TestPassEventMark` and `TestCommitForecast`. Leave
+the rules as they are (standing answer 28).
 
 Test, in `events_test.go`:
 
@@ -349,16 +359,21 @@ Outcome: `internal/usage` holds `Parse(raw []byte) (percent int, resetText strin
 which decodes the result loosely and reads the first "Current week (all models)" line with the
 spike's pattern, and `Read(ctx, command string)`, which runs the command with no arguments, or,
 when `command` is empty, `claude -p "/usage" --model haiku --output-format json` with stdin from
-the null device and a 60-second timeout. The cache decision ("The reading") also lives here, so
+the null device and a 60-second timeout. It sets `cmd.WaitDelay` (5 seconds) beside the
+context's timeout: a probe showed a killed shell's child holds stdout open, so without it a
+500 ms timeout on a script that sleeps 4 seconds returned after 4 seconds. The cache decision ("The reading") also lives here, so
 `cmd` stays wiring. In `cmd/cc-desk`:
 
 - A hidden persistent `--usage-command PATH` flag beside `--now`.
-- `rootFlags.commit` takes the reading before the lock and wraps the event in
-  `state.WithReading`, for every verb.
+- `rootFlags.commit` takes the reading before the lock, wraps the event in
+  `state.WithReading`, for every verb, and returns the reading it kept beside the snapshot's
+  bytes.
 - `pass start <project> <pass> [--guess QUESTION]` prints `started <project>/<pass>` as today,
-  or `waiting <project>/<pass> on <limits>` on the same stream, exit 0.
+  or `waiting <project>/<pass> on <limits>` on the same stream, exit 0. It tells them apart by
+  P's state and `waiting` entry in the snapshot `commit` returns.
 - `usage [--raw FILE]` forces a fresh reading when `--raw` is given and saves the raw bytes to
-  FILE, commits through `commit(nil)`, and prints `<n>% used, resets <reset text>` on stdout.
+  FILE, commits through `commit(nil)`, and prints `<n>% used, resets <reset text>` on stdout
+  from the reading `commit` returns.
   An unreadable reading is still committed, prints its reason on stderr, and exits 1.
 - `free` runs through `commit(nil)`, decodes the snapshot it returns, and prints one line per
   live pass that is `not_started` or `waiting`: `free <project>/<pass>`, `waiting
@@ -366,19 +381,24 @@ the null device and a 60-second timeout. The cache decision ("The reading") also
 
 The same task gives the e2e suite its default stand-in, because from this commit every verb
 takes a reading and the fixture's `usage.json` is 30 minutes old at the worked clock. Without
-it, `go test ./e2e/...` would run the real `claude` (standing answer 32). `TestMain` writes a
-shell script into its temp folder that prints a 40 percent result in the live shape, and
-`run` always passes `--usage-command` with it.
+it, `go test ./e2e/...` would run the real `claude` (standing answer 32). Commit the stand-in as
+`e2e/testdata/usage40.sh`, executable, printing a 40 percent result in the live shape. `run`
+always passes `--usage-command` with its absolute path, and sets `cmd.Env` to the test's
+environment with `PATH` replaced by `/usr/bin:/bin`. The binary needs no other tool, so a run
+that misses the flag finds no `claude`, reads an error, and fails its test where you see it.
+`e2e/broken_test.go`'s `verbs` list gains `{"usage"}` and `{"free"}`. Each takes its reading
+before the lock, then the strict `Load` fails, so nothing is written and the existing checks
+hold.
 
 Files: `internal/usage/usage.go`, `usage_test.go`, `cmd/cc-desk/root.go`, `pass.go`, `usage.go`,
-`free.go`, `e2e/main_test.go`. Class `ordinary`.
+`free.go`, `e2e/main_test.go`, `e2e/testdata/usage40.sh`, `e2e/broken_test.go`. Class `ordinary`.
 
 Test, in `usage_test.go`: `TestParse` with a result trimmed from the live shape (the all-models
 line first), a built result whose earlier lines carry the Fable percent and a "96%" contribution
 line before the all-models line, and one case for each unreadable kind: bad JSON, `is_error`
 true, and no matching line. `TestRead` runs a stand-in script from `t.TempDir()`: it returns its
-output, reports a non-zero exit as an error, and times out (with a short timeout set by the
-test). `TestFresh` covers the cache: absent, broken, aged 4 and 5 minutes, and in the future.
+output, reports a non-zero exit as an error, and times out: with a 500 ms timeout on a stand-in
+that sleeps 4 seconds, it returns an error in under 4 seconds. `TestFresh` covers the cache: absent, broken, aged 4 and 5 minutes, and in the future.
 
 Acceptance check: `go test ./internal/usage/ -run 'TestParse|TestRead|TestFresh' -v` prints
 `--- PASS` for each of the three, and the e2e suite passes with no `claude` on the `PATH`. `claude`
@@ -430,7 +450,7 @@ Outcome: each test can set its own reading, and `TestWaitingOrder` passes. Files
    | --- | --- | --- | --- |
    | `free_and_question` | A | `pass start north n-free`; then `pass start north n-guess` | Exit 0, n-free `building`; then exit 2, set {"an unanswered question"}, folder unchanged |
    | `too_big` | B, fresh | `pass start north n-big --guess north-q1`; then `snapshot` | Exit 2, set {"the 300-minute rule"}, folder unchanged; no pass `building`; `next_session.state` `ready_now` |
-   | `guess_starts` | A | `pass start north n-guess --guess north-q2` | Exit 0, n-guess `building`; `north.json` holds `guess` with `question` `north-q2`, `recommendation` `yes`, `at` the clock; `open_guesses` one entry, `guess_minutes_total` 200 |
+   | `guess_starts` | A | `pass start north n-guess --guess north-q2` | Exit 0, n-guess `building`; `north.json` holds `guess` with `question` `north-q2`, `recommendation` `yes`, `at` the clock (task 6 adds the `open_guesses` check) |
    | `other_project` | A | `pass start south s-guess --guess south-q1` | Exit 2, set {"the 300-minute rule"}, folder unchanged |
    | `one_pass` | A | `pass finish north n-guess`; then `pass start north n-after` | Exit 0; then exit 2, set {"the one-pass rule"}, folder unchanged |
 
@@ -451,18 +471,22 @@ Test: `TestSnapshotFree` builds a state with a free pass, a pass behind unfinish
 question (two names, in table order), and a waiting pass with both limits and a readable
 reading (its reset text shows); `TestSnapshotUsageUnreadable` gives `needs_you_now` with the
 one reason and a null reset text; `TestSnapshotOpenGuesses` sums a building and a waiting
-guess. `snapshot_test.go:128` and `:136` now expect `free` set on a not-started pass.
+guess. `snapshot_test.go:128` checks the done pass, whose `free` stays null, and `:136` checks
+only that no list encodes as null, so both hold. Its not-started pass `b` sits in the undesigned
+round `ask` and now reads `free: false` with `["unfinished work before it"]`. Task 6 also adds
+to `TestWaitingOrder`'s `guess_starts` case: `open_guesses` holds one entry and
+`guess_minutes_total` reads 200.
 Regenerate `empty.golden.json` with `go test ./internal/snapshot/ -update` and the fixture golden
 as above, and read both diffs: p13 and b-three read `free: true`; p14 reads `why_not`
 ["unfinished work before it"]; p15 reads both names.
 
 Acceptance check: `go test ./internal/snapshot/ -run 'TestSnapshot' -v` prints `--- PASS` for
-the three new tests and the existing ones, and `go test ./e2e/ -run TestFixtureSnapshotIsCurrent`
-passes.
+the three new tests and the existing ones, and `go test ./e2e/ -run 'TestFixtureSnapshotIsCurrent|TestWaitingOrder' -v`
+prints `--- PASS` for both.
 
-### Task 7: done items 3 and 7 end to end (20 minutes)
+### Task 7: done items 3 and 7 end to end (25 minutes)
 
-Outcome: `TestLimits` and `TestUsageReader` pass. Every reading goes through a stand-in; no test
+Outcome: `TestLimits`, `TestGuessWaits`, `TestFreeVerb`, and `TestUsageReader` pass. Every reading goes through a stand-in; no test
 writes `usage.json` by hand. Files: `e2e/order_test.go`, `e2e/usage_test.go`. Class `ordinary`.
 
 `TestLimits`, six `t.Run` cases, each on a fresh copy of the order fixture:
@@ -474,14 +498,24 @@ writes `usage.json` by hand. Files: `e2e/order_test.go`, `e2e/usage_test.go`. Cl
 | `usage_100_then_99` | Stand-in reads 100; start n-free; `snapshot`; at least 5 minutes later the stand-in reads 99; `snapshot` | `waiting` with `["usage"]`, its `reset_text` equal to the stand-in's text; after the later snapshot, `building` |
 | `stop_85` | A `settings.json` with `usage_stop_percent` 85; stand-in reads 87; start n-free | `waiting` with `["usage"]` |
 | `unparseable` | Stand-in prints text that isn't a result; start n-free; `snapshot` | `waiting` with `["usage"]`, `reset_text` null; `next_session.state` `needs_you_now`, `reasons` `["the usage figure can't be read"]` |
-| `cache` | A logging stand-in; two verbs 1 minute apart; one more 5 minutes after the first | The log holds one call after the first two verbs and two after the third |
+| `cache` | A logging stand-in; `snapshot` twice, 1 minute apart; `snapshot` again 5 minutes after the first | The log holds one call after the first two verbs and two after the third |
+
+`TestGuessWaits`: start n-free and s-free, then `pass start north n-guess --guess north-q2`. It
+exits 0 and waits on `["two_pass_limit"]` with its `guess` recorded. A following `snapshot`
+exits 0 (the release still loads), `open_guesses` holds n-guess, and `guess_minutes_total`
+reads 200.
+
+`TestFreeVerb`: start n-free and s-free, request n-two, then run `free`. Its lines include
+`free south/s-two`, `waiting north/n-two on two_pass_limit`,
+and `not free north/n-big: an unanswered question`.
 
 `TestUsageReader`: a stand-in prints the built result from task 4 with the all-models line at 61
 percent after a Fable line and a "96%" line. `cc-desk usage` prints `61% used, resets <its reset
 text>`.
 
-Acceptance check: `go test ./e2e/ -run 'TestLimits|TestUsageReader' -v` prints `--- PASS` for
-both tests and each of `TestLimits`'s six cases.
+Acceptance check: `go test ./e2e/ -run 'TestLimits|TestGuessWaits|TestFreeVerb|TestUsageReader' -v`
+prints `--- PASS` for the four tests and each of `TestLimits`'s six cases. Then rerun task 4's
+suite command with no `claude` on the `PATH`.
 
 ### Task 8: the live read, gate, pull request, and close (10 minutes)
 
@@ -499,7 +533,7 @@ and CI pass on the final head; the PR is ready; STATUS carries the pass's lines.
    Use a fresh `live` folder; never point `--state-dir` at a real state folder. The PR body
    quotes the verb's line and the three printed lines, and nothing else from the raw result.
    The percent the verb prints must equal the line percent, the cost must be 0, and the turns 0.
-   If they differ, that is a stop under standing answer 30.
+   A difference goes by standing answer 30.
 2. Open the PR as `round-run.md` "Evidence" says, and run the whole-branch
    `standards:diff-reviewer` read the class calls for. Fold its findings once. A delta review
    after the fold has its Low findings folded once and checked by your own diff read and CI, or
@@ -511,7 +545,7 @@ and CI pass on the final head; the PR is ready; STATUS carries the pass's lines.
 Acceptance check: `bash scripts/gate.sh` prints `gate: ok` on the final head; the PR's `gate`
 check on that head is `pass`; the PR body holds the live read's four lines.
 
-The tasks sum to 170 minutes: 25, 15, 30, 30, 25, 15, 20, and 10.
+The tasks sum to 175 minutes: 25, 15, 30, 30, 25, 15, 25, and 10.
 
 ## What pass 4 adds
 
@@ -537,12 +571,15 @@ pass 1's 18 to 22 (in `docs/plans/2026-11-17-state-rules-files-plan.md`), and pa
   write a unit test for it in `rules_test.go` or `events_test.go`, and list it under
   `## Decisions`.
 - **28. A rule breaks a hand-built test state.** Fix the test's state (give it a readable
-  reading, a `Wait`, or a started time), never the rule. List the tests changed in the PR body.
+  reading, a written design, a `Wait`, or a started time), never the rule. List the tests changed in the PR body.
 - **29. A signature change breaks a caller this plan didn't list.** Fix the caller in this pass
   and add it to the PR body's file list.
-- **30. The live read disagrees with the reader, costs anything, or takes a model turn.** Stop.
-  Commit and push what you have, write the stop with the four printed lines, and end. The
-  conductor takes it to Geoff. Never retry it in a loop: one more run is allowed if the first
+- **30. The live read disagrees with the reader, costs anything, or takes a model turn.** A cost
+  above zero is spend: stop, commit and push what you have, write the stop with the four printed
+  lines, and end. A percent that differs with a traced cause (the line's wording changed) gets a
+  fix to `Parse` and its test, one more live run, and a `## Decisions` line. A difference with no
+  traced cause, or a model turn at zero cost, goes under `## Calls for Geoff` with the four
+  lines, and the close goes on. Never retry in a loop: one more run is allowed if the first
   timed out.
 - **31. The path runs past 180 minutes.** This is round standing answer 14 applied to this
   pass's 90 planned minutes. Finish the task in flight, push, and write the stop.
@@ -596,6 +633,18 @@ pass 1's 18 to 22 (in `docs/plans/2026-11-17-state-rules-files-plan.md`), and pa
 - The labels are the design's words. The Survey prose standard
   (`/var/home/glw907/Projects/survey/skills/survey/writing/editor.md`) holds no rule for CLI
   labels.
+- [review] One `standards:plan-reviewer` read at `439de32` gave "ready after folds". Folded: the
+  `open_guesses` check moved from task 5 to task 6; a waiting guess start may carry a `Guess`,
+  with `TestCheckWait` rows and `TestGuessWaits`; task 3 names `goodRelease`'s undesigned round
+  beside the nil reading; `e2e/broken_test.go` joins the file list; `Read` sets `WaitDelay`,
+  confirmed by a probe; `TestFreeVerb` covers the `free` verb; "The reading" states which
+  reading wins; `commit` returns its reading; the `cache` case names its verbs; the default
+  stand-in is committed as `e2e/testdata/usage40.sh`; standing answer 30 now stops only on
+  spend, as `planner.md` "Stops" says; the `snapshot_test.go` sentence is corrected; `run`
+  hides `claude` from the binary's `PATH`; and the executor prompt opens the draft PR before
+  task 1's push, because CI runs only on pull requests. Task 7 grew to 25 minutes.
+- The executor runs on Sonnet at medium effort, as the round's launch line names it. Each
+  task's rules are spelled out here, and the pass carries no novel design call.
 
 ## Executor decisions
 
