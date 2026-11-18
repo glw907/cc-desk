@@ -20,9 +20,8 @@ import (
 // the real claude command, its jobs folder, the network probe, and the wait
 // between the two list reads, so a test never reaches them.
 type checkFlags struct {
+	launchFlags
 	dryRun     bool
-	claude     string
-	jobsDir    string
 	probeURL   string
 	secondWait time.Duration
 }
@@ -33,19 +32,20 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 		Use:   "check",
 		Short: "Decide what each session the state files name needs",
 		Long: "Read the session list and the state files, decide what each session record needs, and\n" +
-			"record the decisions in check.json. A launch, an end, or a relaunch is decided and\n" +
-			"printed, never carried out. With --dry-run, print the decisions and write nothing.",
+			"record the decisions in check.json. Then carry them out in the order end, confirm,\n" +
+			"launch: an ended session is stopped, a relaunch waits for the old session to leave\n" +
+			"the list, and a launch makes its worktree and starts claude. Each outcome is written\n" +
+			"back to check.json. With --dry-run, print the decisions and write or start nothing.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error { return runCheck(cmd, f, &cf) },
 	}
 	cmd.Flags().BoolVar(&cf.dryRun, "dry-run", false, "print the decisions and write nothing")
-	cmd.Flags().StringVar(&cf.claude, "claude-command", "claude", "the command that runs claude")
-	cmd.Flags().StringVar(&cf.jobsDir, "jobs-dir", "", "the folder of Claude Code's job state (default ~/.claude/jobs)")
 	cmd.Flags().StringVar(&cf.probeURL, "probe-url", "https://api.anthropic.com/", "the address the network probe asks")
 	cmd.Flags().DurationVar(&cf.secondWait, "second-read-wait", 30*time.Second, "the wait before the second list read")
-	for _, name := range []string{"claude-command", "jobs-dir", "probe-url", "second-read-wait"} {
+	for _, name := range []string{"probe-url", "second-read-wait"} {
 		_ = cmd.Flags().MarkHidden(name)
 	}
+	cf.register(cmd)
 	return cmd
 }
 
@@ -109,10 +109,15 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 	// Steps 9 and 10: decide, record, and print.
 	var results []sessions.Result
 	if cf.dryRun {
-		results = sessions.Decide(s, ev, now)
+		if results, err = sessions.Plan(s, ev, now); err != nil {
+			return err
+		}
 	} else {
 		record := func(s *state.State, now time.Time) error {
-			results = sessions.Decide(s, ev, now)
+			var err error
+			if results, err = sessions.Plan(s, ev, now); err != nil {
+				return err
+			}
 			recs := make([]state.Recorded, len(results))
 			for i, r := range results {
 				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working}
@@ -126,6 +131,26 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 			return err
 		}
 	}
+
+	// Carry the decisions out, then write what happened beside each one.
+	var carryErr error
+	if !cf.dryRun {
+		l, err := newLauncher(f, &cf.launchFlags)
+		if err != nil {
+			return err
+		}
+		outcomes, err := l.carryOut(ctx, results)
+		if outcomes == nil {
+			return err
+		}
+		carryErr = err
+		for i := range results {
+			results[i].Decision.Outcome = outcomes[i]
+		}
+		if err := l.recordOutcomes(outcomes); err != nil {
+			return errors.Join(carryErr, err)
+		}
+	}
 	out := cmd.OutOrStdout()
 	for _, r := range results {
 		line, err := json.Marshal(r.Decision)
@@ -134,7 +159,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 		}
 		fmt.Fprintf(out, "%s\n", line)
 	}
-	return nil
+	return carryErr
 }
 
 // gatherEvidence reads the session list, and the second list when a record

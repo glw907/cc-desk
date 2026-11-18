@@ -158,6 +158,47 @@ func FinishSession(project, record string) Event {
 	}
 }
 
+// StopSessionOnLaunchFailure ends a conductor's or design writer's record
+// when a launch that replaced it failed. The record carries launch_failed and
+// the error, so the next check does not retry it and the snapshot names it.
+// A later session start replaces the ended record.
+func StopSessionOnLaunchFailure(project, record, detail string) Event {
+	return func(s *State, now time.Time) error {
+		rf, slot, p, err := sessionAt(s, project, record)
+		if err != nil {
+			return err
+		}
+		if p != nil {
+			return fmt.Errorf("%s/%s is a pass; stop the pass instead", project, record)
+		}
+		if *slot == nil {
+			return fmt.Errorf("%s/%s has no session record to stop", project, record)
+		}
+		t := now.UTC()
+		sess := *slot
+		sess.StopReason, sess.Stopped, sess.StopDetail, sess.Ended = StopLaunchFailed, &t, detail, &t
+		rf.Dirty = true
+		return nil
+	}
+}
+
+// RecordOutcomes writes what the check carried out into check.json, one
+// outcome for each decision of the last run, in the order they were
+// recorded. A count that differs from the decisions' means another run wrote
+// check.json in between, and the event refuses.
+func RecordOutcomes(outcomes []string) Event {
+	return func(s *State, now time.Time) error {
+		if len(outcomes) != len(s.Check.Decisions) {
+			return fmt.Errorf("check.json holds %d decisions, not the %d this run recorded", len(s.Check.Decisions), len(outcomes))
+		}
+		for i := range s.Check.Decisions {
+			s.Check.Decisions[i].Outcome = outcomes[i]
+		}
+		s.checkDirty = true
+		return nil
+	}
+}
+
 // StopOnLaunchFailure stops a building pass as launch_failed with the error
 // as its stop_detail, and as its record's when it has one.
 func StopOnLaunchFailure(project, pass, detail string) Event {

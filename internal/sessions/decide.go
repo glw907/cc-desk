@@ -16,6 +16,7 @@ const (
 	Relaunch       = "relaunch"
 	EndAndRelaunch = "end_and_relaunch"
 	LaunchAgain    = "launch_again"
+	Launch         = "launch"
 	Stop           = "stop"
 	WaitUsage      = "wait_usage"
 	WaitLink       = "wait_link"
@@ -123,6 +124,54 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 		out = append(out, decideRead(base, sess, e, readyStands(findPass(rf, record)), ev.Probe, hold, now))
 	})
 	return out
+}
+
+// Plan runs the record steps of a check on s, in this order: Decide on the
+// folded state before any settle, a resume through StartPass for each
+// uncounted usage relaunch on a release with a checkout, settle, then one
+// launch decision for each building pass with no session record (wait_usage
+// under the usage hold). The caller folds the usage reading into s first and
+// records the results. The dry run calls Plan on its in-memory copy.
+func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
+	results := Decide(s, ev, now)
+	for _, r := range results {
+		name, isPass := strings.CutPrefix(r.Record, "pass:")
+		if r.Decision.Decision != Relaunch || r.Reason != string(state.StopUsage) || !isPass || !hasCheckout(s, r.Project) {
+			continue
+		}
+		if err := state.StartPass(r.Project, name)(s, now); err != nil {
+			return nil, err
+		}
+	}
+	s.Settle(now)
+	hold := s.UsageStop()
+	for _, rf := range s.Releases {
+		if rf.Done {
+			continue
+		}
+		for i := range rf.Passes {
+			p := &rf.Passes[i]
+			if p.State != state.Building || p.Session != nil {
+				continue
+			}
+			d := state.Decision{Project: rf.Project, Record: "pass:" + p.Name, Session: rf.Project + "-" + p.Name, Decision: Launch}
+			if hold {
+				d.Decision = WaitUsage
+			}
+			results = append(results, Result{Decision: d})
+		}
+	}
+	return results, nil
+}
+
+// hasCheckout reports whether the project's live release records a checkout.
+func hasCheckout(s *state.State, project string) bool {
+	for _, rf := range s.Releases {
+		if !rf.Done && rf.Project == project {
+			return rf.Checkout != ""
+		}
+	}
+	return false
 }
 
 // early applies rows 1 to 5, which need no row from the list and write
