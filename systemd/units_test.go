@@ -21,7 +21,7 @@ func TestUnits(t *testing.T) {
 		file []byte
 		line string
 	}{
-		{"path", service, "Environment=PATH=%h/.local/share/cc-desk/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin"},
+		{"path", service, "Environment=PATH=%h/.local/share/cc-desk/bin:%h/.local/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin"},
 		{"kill mode", service, "KillMode=process"},
 		{"type", service, "Type=oneshot"},
 		{"exec", service, "ExecStart=%h/.local/share/cc-desk/bin/cc-desk --state-dir %h/.local/state/cc-desk check"},
