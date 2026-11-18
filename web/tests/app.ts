@@ -1,12 +1,14 @@
 // The test fixture: one built app per test, on a free port, reading a state folder of its own.
 import { test as base, expect, type Page } from '@playwright/test';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const buildDir = path.resolve(import.meta.dirname, '..', 'build');
+import { removeState } from './state';
+
+const buildDir =path.resolve(import.meta.dirname, '..', 'build');
 
 export interface App {
 	/** The state folder the server reads. The test fills it before `start()`. */
@@ -94,7 +96,7 @@ export const test = base.extend<{ app: App }>({
 		};
 		await use(app);
 		await app.stop();
-		rmSync(stateDir, { recursive: true, force: true });
+		removeState(stateDir);
 	}
 });
 

@@ -22,7 +22,38 @@ const stopReasons: Record<string, string> = {
 	irreversible: 'An irreversible step',
 	secret: 'A secret is needed',
 	auth_data: 'A sign-in or data change',
-	scope: 'A change of scope'
+	scope: 'A change of scope',
+	permission_prompt: 'A permission prompt',
+	sign_in_expired: 'The sign-in ran out',
+	unreadable_stop: 'The stop could not be read',
+	relaunch_limit: 'Restarted twice already',
+	launch_failed: 'The session would not start'
+};
+
+const sessionStates: Record<string, string> = {
+	working: 'Working',
+	blocked: 'Waiting on a prompt',
+	idle: 'Idle',
+	missing: 'Not in the session list'
+};
+
+const checkDecisions: Record<string, string> = {
+	none: 'did nothing',
+	end: 'ended the session',
+	relaunch: 'restarted the session',
+	end_and_relaunch: 'ended the session and restarted it',
+	launch_again: 'tried the launch again',
+	launch: 'started a session',
+	stop: 'stopped the pass',
+	wait_usage: 'waited for the usage limit',
+	wait_link: 'waited for a terminal link'
+};
+
+const checkReasons: Record<string, string> = {
+	lost_connection: 'the connection was lost',
+	idle: 'the session was idle',
+	missing: 'the session was not in the list',
+	...Object.fromEntries(Object.entries(stopReasons).map(([code, text]) => [code, text.toLowerCase()]))
 };
 
 const limits: Record<string, string> = {
@@ -58,6 +89,9 @@ export const tables = {
 	passState: passStates,
 	roundState: roundStates,
 	stopReason: stopReasons,
+	sessionState: sessionStates,
+	checkDecision: checkDecisions,
+	checkReason: checkReasons,
 	limit: limits,
 	needsKind: needsKinds,
 	guessOutcome: guessOutcomes,
