@@ -40,8 +40,10 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 
 ## Running
 
-- Pass 1 (sessions-check), pull request 8, built `cc-desk check`. Pass 2 carries out its decisions.
-  Round items 6 and 7 are not Go tests; they belong to pass 5, and its script output goes there.
+- Pass 1 (sessions-check), pull request 8, built `cc-desk check`. Pass 2 (sessions-launch), pull
+  request 10, carries out its decisions: a launch in a worktree the command makes, and the check's
+  end, confirm, and relaunch. Round items 6 and 7 are not Go tests; they belong to pass 5, and its
+  script output goes there.
 
 ## Next action
 
