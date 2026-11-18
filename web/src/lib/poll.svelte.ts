@@ -8,10 +8,18 @@ const ANSWER_TIMEOUT_MS = 5000;
 
 /**
  * The page's copy of the state. The page is browser-only, so one shared instance is safe.
- * Task 5 adds the connection state; this holds the answer and the browser's clock.
  */
 class Poll {
 	answer = $state<StateAnswer | null>(null);
+
+	/**
+	 * Whether the last request got an answer. It comes from the request's outcome, never from
+	 * comparing dates: a pinned test clock freezes `Date.now()` while the timers still run.
+	 */
+	connected = $state(true);
+
+	/** The browser's clock when the last good answer arrived. */
+	answeredAt = $state<Date | null>(null);
 
 	/** The browser's clock at the last tick. "Today" and "20 minutes ago" are measured from it. */
 	now = $state(new Date());
@@ -30,9 +38,12 @@ class Poll {
 		this.now = new Date();
 		try {
 			const res = await fetch('/api/state', { signal: AbortSignal.timeout(ANSWER_TIMEOUT_MS) });
-			if (res.ok) this.answer = (await res.json()) as StateAnswer;
+			if (!res.ok) throw new Error(`state answered ${res.status}`);
+			this.answer = (await res.json()) as StateAnswer;
+			this.answeredAt = this.now;
+			this.connected = true;
 		} catch {
-			// Not connected is Task 5's banner; until then the last answer stays on the page.
+			this.connected = false;
 		}
 	}
 }

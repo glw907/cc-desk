@@ -172,6 +172,20 @@ a.rail-row:hover {
 	gap: var(--spacing-12px);
 }
 
+/* A notice above the page: stale, no state yet, or not connected. */
+.banner {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-8px);
+	margin: var(--spacing-16px) var(--spacing-24px) 0;
+	padding: var(--spacing-8px) var(--spacing-14px);
+	border: var(--border) solid var(--color-error);
+	border-radius: var(--radius-box);
+	background-color: var(--color-base-200);
+	color: var(--cairn-error-ink);
+	font-size: var(--text-step-4);
+}
+
 /* The front page. */
 .desk {
 	padding: var(--spacing-24px);

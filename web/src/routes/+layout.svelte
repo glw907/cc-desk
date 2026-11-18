@@ -8,6 +8,7 @@ poll that keeps the state fresh.
 	import '../app.css';
 	import { poll } from '#lib/poll.svelte.ts';
 	import { tabTitle } from '#lib/session.ts';
+	import Banners from '#lib/Banners.svelte';
 	import Sidebar from '#lib/Sidebar.svelte';
 
 	let { children } = $props();
@@ -21,7 +22,15 @@ poll that keeps the state fresh.
 
 <div class="drawer drawer-open">
 	<input id="rail" type="checkbox" class="drawer-toggle" />
-	<div class="drawer-content">{@render children()}</div>
+	<div class="drawer-content">
+		<Banners
+			answer={poll.answer}
+			connected={poll.connected}
+			answeredAt={poll.answeredAt}
+			now={poll.now}
+		/>
+		{@render children()}
+	</div>
 	<div class="drawer-side">
 		<nav class="rail min-h-full p-4" aria-label="Status">
 			<a href="/" class="wordmark block px-3 pb-6 pt-2 text-xl">cc-desk</a>
