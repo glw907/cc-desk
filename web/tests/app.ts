@@ -13,8 +13,15 @@ export interface App {
 	stateDir: string;
 	/** The address of the running server, set by `start()`. */
 	url: string;
-	/** Starts the built app. A taken port moves the app to a fresh one once. */
-	start(): Promise<void>;
+	/** What the server has written to stdout so far, since the last start. */
+	stdout: string;
+	/** What the server has written to stderr so far, since the last start. */
+	stderr: string;
+	/**
+	 * Starts the built app, from `web/build` unless `appDir` names another copy of it. A taken port
+	 * moves the app to a fresh one once.
+	 */
+	start(appDir?: string): Promise<void>;
 	/** Stops the server and waits for it to exit. */
 	stop(): Promise<void>;
 }
@@ -51,13 +58,19 @@ export const test = base.extend<{ app: App }>({
 		const app: App = {
 			stateDir,
 			url: '',
-			async start() {
+			stdout: '',
+			stderr: '',
+			async start(appDir = buildDir) {
 				for (const attempt of [0, 1]) {
 					const wanted = attempt === 0 && port !== 0 ? port : await freePort();
-					child = spawn('node', [buildDir], {
+					app.stdout = '';
+					app.stderr = '';
+					child = spawn('node', [appDir], {
 						env: { ...process.env, HOST: '127.0.0.1', PORT: String(wanted), CC_DESK_STATE_DIR: stateDir, SHUTDOWN_TIMEOUT: '1' },
-						stdio: 'ignore'
+						stdio: ['ignore', 'pipe', 'pipe']
 					});
+					child.stdout?.on('data', (chunk: Buffer) => (app.stdout += chunk.toString()));
+					child.stderr?.on('data', (chunk: Buffer) => (app.stderr += chunk.toString()));
 					const url = `http://127.0.0.1:${wanted}`;
 					if (await answers(url, child)) {
 						const moved = port !== 0 && wanted !== port;

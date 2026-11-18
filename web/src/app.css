@@ -27,8 +27,22 @@
 	font-weight: var(--font-weight-heading);
 }
 
+/* The rail beside the page: a plain grid, with no toggle for a reader to press. */
+.frame {
+	display: grid;
+	grid-template-columns: var(--rail-width) minmax(0, 1fr);
+	min-height: 100vh;
+}
+.frame-content {
+	min-width: 0;
+}
 .rail {
-	width: var(--rail-width);
+	position: sticky;
+	inset-block-start: 0;
+	box-sizing: border-box;
+	height: 100vh;
+	overflow-y: auto;
+	padding: var(--spacing-16px);
 	background-color: var(--color-base-200);
 	border-inline-end: var(--border) solid var(--color-base-300);
 }
