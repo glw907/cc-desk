@@ -1,7 +1,7 @@
 <!--
 @component
 A round's page at `/<project>/<round>`: its name, summary, state, figures, what it needs from
-Geoff, its passes as links, and the command that opens it. It draws nothing until the first good
+Geoff, its passes as links, its reports read or not, and the command that opens it. It draws nothing until the first good
 snapshot arrives, then the not-found view when the address names no round.
 -->
 <script lang="ts">
@@ -18,6 +18,11 @@ snapshot arrives, then the not-found view when the address names no round.
 	const snapshot = $derived(poll.answer?.snapshot ?? null);
 	const found = $derived(
 		snapshot ? findRoundAt(snapshot, page.params.project ?? '', page.params.round ?? '') : undefined
+	);
+	const reports = $derived(
+		(snapshot?.reports ?? [])
+			.filter((r) => r.project === page.params.project && r.round === page.params.round)
+			.toReversed()
 	);
 	const minutes = (n: number | null) => (n === null ? null : formatMinutes(n));
 	const when = (iso: string | null, about = false) =>
@@ -78,7 +83,21 @@ snapshot arrives, then the not-found view when the address names no round.
 					<p class="muted">No passes are written yet.</p>
 				{/if}
 
-				<Command project={release.project} round={round.name} />
+					{#if reports.length > 0}
+						<h2>Its reports</h2>
+						<ul>
+							{#each reports as report (report.id)}
+								<li>
+									<a href="/reports/{report.id}">{report.title}</a>
+									<span class="muted">
+										{report.read === null ? 'Not read yet' : `Read ${when(report.read)}`}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+
+					<Command project={release.project} round={round.name} />
 			</div>
 		</div>
 	</main>
