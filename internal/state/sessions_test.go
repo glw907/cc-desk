@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 const goodSession = `{"name":"p-one","kind":"pass","short_id":"ab12","session_id":"s-1","worktree":"/w/one","branch":"one","launched":"2026-11-20T10:00:00Z","launch_tries":1}`
@@ -99,6 +100,108 @@ func TestLoadSessionsUnique(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "name one worktree") {
 		t.Fatalf("error = %v, want two records on one worktree", err)
 	}
+}
+
+func TestNameUniqueAndEndedExempt(t *testing.T) {
+	second := strings.Replace(strings.Replace(goodSession, "/w/one", "/w/two", 1), `"branch":"one"`, `"branch":"two"`, 1)
+	tests := []struct {
+		name string
+		edit func(string) string
+		want string
+	}{
+		{"one session name", func(s string) string { return s }, "name one session"},
+		{"ended record is exempt", func(s string) string {
+			return strings.Replace(s, `"launch_tries":1`, `"launch_tries":1,"ended":"2026-11-20T11:00:00Z"`, 1)
+		}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := writeRelease(t, "p", sessionRelease("building", tt.edit(goodSession), ""))
+			other := strings.Replace(sessionRelease("building", second, ""), `"project":"p"`, `"project":"q"`, 1)
+			if err := os.WriteFile(filepath.Join(dir, "releases", "q.json"), []byte(other), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			_, err := Load(dir)
+			switch {
+			case tt.want == "" && err != nil:
+				t.Fatalf("unexpected error: %v", err)
+			case tt.want != "" && (err == nil || !strings.Contains(err.Error(), tt.want)):
+				t.Fatalf("error = %v, want it to hold %q", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestConductorAndDesignRecords(t *testing.T) {
+	conductor := strings.Replace(goodSession, `"kind":"pass"`, `"kind":"conductor"`, 1)
+	design := strings.Replace(goodSession, `"kind":"pass"`, `"kind":"design"`, 1)
+	stopped := `,"stop_reason":"scope","stopped":"2026-11-20T11:00:00Z"`
+	tests := []struct {
+		name string
+		json string
+		want string
+	}{
+		{"conductor", sessionRelease("not_started", "", `,"conductor":`+conductor), ""},
+		{"conductor with a stop", sessionRelease("not_started", "", `,"conductor":`+strings.Replace(conductor, `"launch_tries":1`, `"launch_tries":1`+stopped, 1)), ""},
+		{"conductor of the wrong kind", sessionRelease("not_started", "", `,"conductor":`+goodSession), `session kind "pass"`},
+		{"design writer", strings.Replace(sessionRelease("not_started", "", ""), `"needs_geoff":true`, `"needs_geoff":true,"session":`+design, 1), ""},
+		{"design writer of the wrong kind", strings.Replace(sessionRelease("not_started", "", ""), `"needs_geoff":true`, `"needs_geoff":true,"session":`+conductor, 1), `session kind "conductor"`},
+		{"unknown stop reason", sessionRelease("not_started", "", `,"conductor":`+strings.Replace(conductor, `"launch_tries":1`, `"launch_tries":1,"stop_reason":"bored","stopped":"2026-11-20T11:00:00Z"`, 1)), "not a stop reason"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := DecodeRelease([]byte(tt.json))
+			switch {
+			case tt.want == "" && err != nil:
+				t.Fatalf("unexpected error: %v", err)
+			case tt.want != "" && (err == nil || !strings.Contains(err.Error(), tt.want)):
+				t.Fatalf("error = %v, want it to hold %q", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewReleaseCarriesNoSessionFields(t *testing.T) {
+	conductor := strings.Replace(goodSession, `"kind":"pass"`, `"kind":"conductor"`, 1)
+	tests := []struct {
+		name  string
+		extra string
+	}{
+		{"checkout", `,"checkout":"/c","default_branch":"main"`},
+		{"conductor", `,"conductor":` + conductor},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, err := DecodeRelease([]byte(sessionRelease("not_started", "", tt.extra)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = AddRelease(r)(&State{}, time.Now())
+			if err == nil || !strings.Contains(err.Error(), "carries no checkout") {
+				t.Fatalf("error = %v, want a refusal", err)
+			}
+		})
+	}
+	t.Run("a pass with a session record", func(t *testing.T) {
+		r, err := DecodeRelease([]byte(sessionRelease("building", goodSession, "")))
+		if err != nil {
+			t.Fatal(err)
+		}
+		r.Passes[0].State, r.Passes[0].Started = NotStarted, nil
+		err = AddRelease(r)(&State{}, time.Now())
+		if err == nil || !strings.Contains(err.Error(), "not_started with no events") {
+			t.Fatalf("error = %v, want a refusal", err)
+		}
+	})
+	t.Run("a designed pass with a pull request", func(t *testing.T) {
+		rf := &ReleaseFile{Release: Release{Project: "p", Rounds: []Round{{Name: "a"}}}}
+		s := &State{Releases: []*ReleaseFile{rf}}
+		d := &Design{Passes: []Pass{{Name: "y", Round: "a", State: NotStarted, PullRequest: &PullRequest{Number: 1}}}}
+		err := DesignRound("p", "a", d)(s, time.Now())
+		if err == nil || !strings.Contains(err.Error(), "not_started with no events") {
+			t.Fatalf("error = %v, want a refusal", err)
+		}
+	})
 }
 
 func TestLoadCheckFile(t *testing.T) {

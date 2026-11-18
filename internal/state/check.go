@@ -392,9 +392,9 @@ func Check(s *State) error {
 	return checkSessionsUnique(s)
 }
 
-// LiveSessions calls f for each live session record of each live release,
-// with the name of the record's place: pass:<name>, round:<name>, or
-// conductor.
+// LiveSessions calls f for each session record of each live release, ended
+// ones included, with the name of the record's place: pass:<name>,
+// round:<name>, or conductor.
 func (s *State) LiveSessions(f func(rf *ReleaseFile, record string, sess *Session)) {
 	for _, rf := range s.Releases {
 		if rf.Done {
