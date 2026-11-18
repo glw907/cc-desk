@@ -2,23 +2,25 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"io"
 	"os"
+
+	"github.com/glw907/cc-desk/internal/state"
 )
 
-// version is the release this build reports.
-const version = "0.0.0-prove"
-
-// run writes the version line to w.
-func run(w io.Writer) error {
-	_, err := fmt.Fprintf(w, "cc-desk %s\n", version)
-	return err
+// exitCode maps an error to the process exit code: 2 for a refusal, 1 for
+// any other error.
+func exitCode(err error) int {
+	if _, ok := errors.AsType[*state.RefusedError](err); ok {
+		return 2
+	}
+	return 1
 }
 
 func main() {
-	if err := run(os.Stdout); err != nil {
-		fmt.Fprintln(os.Stderr, "cc-desk:", err)
-		os.Exit(1)
+	if err := newRootCmd().Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(exitCode(err))
 	}
 }
