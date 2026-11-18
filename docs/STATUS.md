@@ -20,25 +20,22 @@
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 <!-- round-report state-rules -->
-**The cc-desk command now keeps the state files, and the second pass is starting.** The first of
-the round's four passes has landed as pull request 3. The command reads, checks, and writes every
-state file, records pass events, and prints a snapshot, and the gate fails on a skipped test. A
-planner session is writing the plan for the second pass, which adds the time forecast. Weekly
-usage read 89 percent, under the 100 percent stop. Nothing waits for Geoff.
+**The cc-desk command now forecasts the next session, and the third pass is starting.** Two of
+the round's four passes have landed, as pull requests 3 and 4. The command keeps the state files
+and prints a snapshot that carries each release's pace and the time of the next session with
+Geoff. A planner session is writing the plan for the third pass, which adds the start rules and
+the usage read. Weekly usage read 89 percent, under the 100 percent stop. Nothing waits for Geoff.
 
 Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
-## Pass state-rules-estimate
+## State and rules passes
 
-All five tasks are built and pushed on `state-rules-estimate`; pull request 4 carries the evidence.
-The snapshot now holds each release's pace, range, and rough mark, the minutes before and needed
-time of each pass and round, and the next session with `waits_for_geoff`. Each pass start, finish,
-or stop appends a line to `forecasts.jsonl`. `internal/snapshot/estimate.go` holds the pace, the
-needed times, and `fillSession`, which builds the next session. `settle` in
-`internal/state/commit.go` is still empty for pass 3, which also adds the unreadable usage figure
-to "Needs you now".
+Passes 1 and 2 have landed. The snapshot holds each release's pace and range, each pass's and
+round's needed time, and the next session with `waits_for_geoff`. Each pass event appends a line
+to `forecasts.jsonl`. `settle` in `internal/state/commit.go` is still empty for pass 3, which also
+adds the unreadable usage figure to "Needs you now".
 
 ## Next action
 
