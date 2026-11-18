@@ -2,15 +2,28 @@ package state
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 )
 
+// startRelease is goodRelease with its round designed, so a start breaks
+// no rule. Every start test also needs a readable reading, from
+// writeReading.
+var startRelease = strings.Replace(goodRelease, `"needs_geoff": true`, `"needs_geoff": true, "design_written": true`, 1)
+
+// writeReading writes a usage.json that holds percent and is read at 22:30.
+func writeReading(t *testing.T, dir string, percent int) {
+	t.Helper()
+	writeFile(t, dir, UsageFile, fmt.Sprintf(`{"format":1,"percent":%d,"reset_text":"Resets 5pm","read_at":"2026-11-20T22:30:00Z"}`, percent))
+}
+
 func loaded(t *testing.T) *State {
 	t.Helper()
 	dir := t.TempDir()
-	writeFile(t, dir, "releases/alpha.json", goodRelease)
+	writeFile(t, dir, "releases/alpha.json", startRelease)
+	writeReading(t, dir, 40)
 	s, err := Load(dir)
 	if err != nil {
 		t.Fatal(err)

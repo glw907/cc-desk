@@ -6,6 +6,7 @@ import (
 	"math"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -146,18 +147,36 @@ func findPass(s *State, project, pass string) (*ReleaseFile, *Pass, error) {
 	return rf, p, nil
 }
 
-// StartPass starts a not-started pass, or resumes a stopped one and closes
-// its open stop interval.
-func StartPass(project, pass string) Event {
+// StartPass starts a not-started pass that is free to start, or resumes a
+// stopped one and closes its open stop interval. A pass that breaks a rule
+// is refused. A free pass that a limit holds is recorded as waiting.
+func StartPass(project, pass string) Event { return start(project, pass, "") }
+
+// StartOnGuess is StartPass for a pass resting on an unanswered question:
+// it records the guess, taking the question's recommended option, and
+// leaves the question out of the rules a plain start would break.
+func StartOnGuess(project, pass, question string) Event { return start(project, pass, question) }
+
+func start(project, pass, guess string) Event {
 	return func(s *State, now time.Time) error {
 		rf, p, err := findPass(s, project, pass)
 		if err != nil {
 			return err
 		}
+		var q *Question
+		if guess != "" {
+			if q = rf.question(guess); q == nil {
+				return fmt.Errorf("question %q not found in project %q", guess, project)
+			}
+			switch {
+			case !slices.Contains(p.Questions, guess):
+				return Refuse(fmt.Sprintf("cannot start %s/%s: pass %q does not rest on question %q", project, pass, pass, guess))
+			case q.Answer != nil:
+				return Refuse(fmt.Sprintf("cannot start %s/%s: question %q is already answered", project, pass, guess))
+			}
+		}
 		t := now.UTC()
 		switch p.State {
-		case NotStarted:
-			p.Started = &t
 		case Stopped:
 			last := &p.Stops[len(p.Stops)-1]
 			if t.Before(last.Start) {
@@ -165,11 +184,31 @@ func StartPass(project, pass string) Event {
 			}
 			last.End = &t
 			p.StopReason = ""
+			p.State = Building
+			rf.Dirty = true
+			s.passEvent = true
+			return nil
+		case NotStarted:
 		default:
 			return Refuse(fmt.Sprintf("pass %q is %s and cannot start", pass, p.State))
 		}
-		p.State = Building
+
+		if broken := s.Breaks(rf, p, guess); len(broken) > 0 {
+			parts := make([]string, len(broken))
+			for i, b := range broken {
+				parts[i] = b.Name + " (" + b.Detail + ")"
+			}
+			return Refuse(fmt.Sprintf("cannot start %s/%s: %s", project, pass, strings.Join(parts, "; ")))
+		}
+		if q != nil {
+			p.Guess = &Guess{Question: q.ID, Recommendation: q.Recommended, At: t}
+		}
 		rf.Dirty = true
+		if limits := s.Limits(); len(limits) > 0 {
+			p.State, p.Wait = Waiting, &Wait{Since: t, Limits: limits}
+			return nil
+		}
+		p.State, p.Started = Building, &t
 		s.passEvent = true
 		return nil
 	}
