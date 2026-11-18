@@ -20,7 +20,7 @@
   the reset is Nov 20, 10:59pm Alaska time.
 
 <!-- round-report sessions -->
-**The Sessions round's first pass waits for Geoff's approve.** Pull request 8 teaches the
+**The Sessions round's first pass waits for Geoff's approval.** Pull request 8 teaches the
 `cc-desk` command to record sessions and decide what each needs. Its review accepted it, and its
 check passed. It waits on one question: what a session should do after a one-model limit. The
 second pass has started from its branch. Weekly usage read 93 percent.
@@ -30,11 +30,11 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
 <!-- round-report page -->
-**The Page round has started.** Its first pass builds the status page's app, its sidebar, and
-its front page. Nothing has landed yet. Weekly usage read 92 percent before the first launch.
-Nothing waits for Geoff: the auto-mode entry its third pass needs is in place.
+**The Page round's first pass waits for Geoff's approval.** Pull request 7 builds the status
+page's app, sidebar, and front page. Its tests and check pass, and it asks two choices of Geoff.
+The second pass has started from its branch. Weekly usage read 93 percent.
 
-Open documents: none.
+Open documents: none. Pull request 7 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
@@ -49,11 +49,12 @@ claude --model claude-opus-5-5 --effort high "$(cat docs/plans/2026-11-17-sessio
 
 ## Open decisions
 
-- Pull request 8 (`sessions-check`) waits for Geoff's approve. Its question: a session stopped
-  by a one-model limit relaunches once the account's usage reads under the stop line, uncounted,
-  so it can loop until the reset. Keep it, hold the relaunch until the reset time in the stop's
-  text (recommended), or count each relaunch after the first. The detail is
-  `docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md` on the branch.
+- Pull request 8 (`sessions-check`) waits for Geoff's approve and one call: when a session
+  stopped by a one-model limit restarts. Recommended: at the reset time in its stop text
+  (`docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md` on the branch).
+- Pull request 7 (`page-front`) waits for Geoff's approve; its review escalated two calls
+  (recommended: approve both). The page sets `trustedOrigins: ['*']` so a write gets 405, and
+  a missing `snapshot.json` reads "No state yet". Five open test gaps become follow-ups.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
