@@ -20,8 +20,3 @@ export function tabTitle(answer: StateAnswer | null, now: Date): string {
 	const words = answer?.snapshot ? sessionWords(answer.snapshot.next_session, now) : null;
 	return words === null ? 'cc-desk' : `${words} · cc-desk`;
 }
-
-/** The first letter in lower case, for words that follow a colon. */
-export function lowerFirst(text: string): string {
-	return text.charAt(0).toLowerCase() + text.slice(1);
-}

@@ -10,6 +10,7 @@ waiting or stopped pass, opened to show its passes. A waiting pass shows why it 
 	import { word } from './words';
 
 	interface Props {
+		/** The release whose rounds are listed, with the running ones opened to their passes. */
 		release: Release;
 		/** Where a waiting pass's limits and reset text come from. */
 		snapshot: Snapshot;

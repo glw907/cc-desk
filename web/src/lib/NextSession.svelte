@@ -11,6 +11,7 @@ reader reads as "None".
 	import { DASH, NONE, formatRange } from './time';
 
 	interface Props {
+		/** The snapshot's forecast. A `not_designed` entry names a round with no plan yet. */
 		next: NextSession;
 		/** The browser's clock, which "Today" and "Tomorrow" are measured from. */
 		now: Date;

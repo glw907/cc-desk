@@ -5,13 +5,19 @@ poll that keeps the state fresh.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import '../app.css';
 	import { poll } from '#lib/poll.svelte.ts';
 	import { tabTitle } from '#lib/session.ts';
 	import Banners from '#lib/Banners.svelte';
 	import Sidebar from '#lib/Sidebar.svelte';
 
-	let { children } = $props();
+	interface Props {
+		/** The page for the current route. */
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	onMount(() => poll.start());
 </script>

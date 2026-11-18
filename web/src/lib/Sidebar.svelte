@@ -10,6 +10,7 @@ draws nothing under the forecast until the first good snapshot arrives.
 	import { count } from './sums';
 
 	interface Props {
+		/** The whole snapshot, so each release's sums come from its own rounds. */
 		snapshot: Snapshot;
 		/** The browser's clock, passed on to the forecast. */
 		now: Date;

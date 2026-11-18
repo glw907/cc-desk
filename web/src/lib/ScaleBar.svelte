@@ -8,6 +8,7 @@ segment, so give every part a planned figure.
 	import type { Part } from './sums';
 
 	interface Props {
+		/** The segments in order, each sized by its share of the planned minutes. */
 		parts: Part[];
 		/** Read aloud in place of the bar, since the segments carry no text. */
 		label: string;

@@ -10,6 +10,7 @@ building round hung beneath it on a rule, with a bar of that round's passes.
 	import { word } from './words';
 
 	interface Props {
+		/** The release to draw: its scale bar, its rounds in order, and its "Rough" mark. */
 		release: Release;
 	}
 
