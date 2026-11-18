@@ -1,0 +1,36 @@
+You are cc-desk-state-rules-rulings-plan, the planner of pass 4 of round `state-rules` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-state-and-rules-design.md, approved by Geoff on 2026-11-17. It is the approved design for this pass. Where this prompt and the design differ, the design wins.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-state-rules-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, which holds wherever the round's design is silent.
+- The `standards:go-conventions` and `standards:golang-spf13-cobra` skills, since the plan sets Go tasks.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/state-rules-rulings, on branch `state-rules-rulings`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`, with passes 1 to 3 landed. If the conductor's message right after your launch names another base, use that one, and still name `main` as the PR's base.
+
+The pass: a ruling is one appended line with Geoff's exact words, recorded only from a registered desk session, and it answers its question, closes any guess on it, and frees what waited.
+Planned minutes: 60. Class: `ordinary`. A plan whose path comes out over 120 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. The design's section "Rulings and the guard": the ruling line and its short id, the verb that records a ruling, the three tests of the guard with a refusal that names the failed test, the function that writes a `desks.json` entry (no verb registers a desk from the command line), a ruling that marks its question answered, a guess that reads held or missed, and the passes a ruling frees. Read the PRs of passes 1 to 3 with their `## Decisions` and `[advisor]` lines first.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done item 4 ("Ruling"), done item 6 ("Two writers"), and done item 8 ("The gate") from the design. Every check runs the built `cc-desk` binary against a fixture state folder, as the design's "What done looks like" opens by saying. Run each check on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. Its first task is a probe that pushes one commit and reads CI: can a test on the CI runner give a process a controlling terminal? The round plan's shared assumptions record that `script -qec` did it on the workstation with no new dependency, and that the runner is untested. The gate fails on a skipped test, so the terminal case can't skip there; if the runner gives no terminal, standing answer 13 in the round plan applies. The design changes one refusal case of the main design's done item 4, as its "Rulings and the guard" says, and the plan quotes that. This is the round's last pass, so its PR also shows that every done item of the design, 1 to 8, passes on the branch.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: state-rules` line, and a `Pass: state-rules-rulings` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-17; read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code as the earlier passes left it.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers 13 to 17 and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The executor's prompt says so.
+- One `standards:plan-reviewer` read, with its findings folded.
+
+Save the plan as docs/plans/2026-11-17-state-rules-rulings-plan.md and the executor prompt as docs/plans/2026-11-17-state-rules-rulings-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill; the plan and the executor prompt both name it. Follow-ups are one file each under docs/follow-ups/, never a shared backlog.
+
+The executor prompt names the executor cc-desk-state-rules-rulings, on Sonnet at medium effort, and names conductor-cc-desk as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: state-rules` and `Pass: state-rules-rulings` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. `pass-core` "Until cc-desk runs" holds: no session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the worktree's main checkout. If you must park, do it as `round.md` "Parking at planning" says: the conductor reads the stop from the draft PR and takes it to Geoff.

@@ -13,18 +13,20 @@
   session starts from the plan and branch. A pass runs with zero prompts under five allow rules.
 - Open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
+- The State and rules round is designed and approved (Geoff, 2026-11-17):
+  `docs/specs/2026-11-17-state-and-rules-design.md`. Its round plan is
+  `docs/plans/2026-11-17-state-rules-round.md`: four passes in one chain, 315 planned minutes,
+  round id `state-rules`. No pass has started.
+- The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 ## Next action
 
-Design the State and rules round in a fresh session in Geoff's terminal. The Prove pass closed with
-pull request 2 on 2026-11-17. Launch prompt, run from `~/Projects/cc-desk`:
+Run the State and rules round. Geoff starts the conductor in a fresh Opus session in his
+terminal, from `~/Projects/cc-desk`, with this prompt:
 
 ```text
-Read docs/STATUS.md, then design the State and rules round of the cc-desk route with me, using the
-standards:brainstorming skill. Start from the round's row in docs/plans/2026-11-17-route.md, the
-design in docs/specs/2026-11-17-cc-desk-design.md, and the findings in
-docs/research/2026-11-17-prove-findings.md, with the open tests in
-docs/follow-ups/2026-11-17-rerun-prove-proofs.md. Proof 7 decides how the usage stop reads its figure.
+You are the conductor of the cc-desk State and rules round. Read
+docs/plans/2026-11-17-state-rules-conductor-prompt.txt and follow it from its first line.
 ```
 
 ## Open decisions
