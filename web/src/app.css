@@ -11,7 +11,9 @@
    mockup's copy of the sheet. Colors, type sizes, spacing, radii, and motion are Survey tokens.
    The gaps are these literals, filed in docs/follow-ups/survey-rail-muted-doc-measure.md: the
    three widths below, the 80rem breakpoint (a media query can't read a variable), the line
-   heights 1.25, 1.35, 1.5 and 1.55, and the font weight 600 (Survey's only weight token is 500). */
+   heights 1.25, 1.35, 1.5 and 1.55, the font weight 600 (Survey's only weight token is 500), and
+   the weight reset to normal, plus a 48px gap written as two 24px tokens, since Survey's spacing
+   tokens stop at 24px. */
 :root {
 	--rail-width: 23rem;
 	--doc-measure: 36.5rem;
@@ -177,6 +179,9 @@ a.rail-row:hover {
 .state {
 	font-weight: 600;
 }
+.state:is(.not_started, .not_designed) {
+	font-weight: normal;
+}
 .state.building {
 	color: var(--color-primary);
 }
@@ -226,10 +231,11 @@ a.rail-row:hover {
 }
 .desk h2 {
 	font-size: var(--text-step-12);
+	text-wrap: balance;
 }
 .desk .next {
 	max-width: var(--doc-measure);
-	margin-bottom: var(--spacing-24px);
+	margin-bottom: calc(var(--spacing-24px) * 2);
 }
 .ahead {
 	display: grid;
@@ -263,6 +269,7 @@ a.rail-row:hover {
 }
 .board-head h3 {
 	font-size: var(--text-step-11);
+	text-wrap: balance;
 }
 .board-head .muted {
 	font-size: var(--text-step-9);
@@ -281,6 +288,7 @@ a.rail-row:hover {
 .round-line,
 .passes li {
 	display: flex;
+	align-items: baseline;
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: var(--spacing-12px);
@@ -351,6 +359,12 @@ a.rail-row:hover {
 .table th {
 	color: var(--color-muted);
 }
+.table :is(th, td):first-child {
+	padding-inline-start: 0;
+}
+.table td:first-child {
+	font-variant-numeric: tabular-nums;
+}
 
 /* An item's page: one reading column. Ported from the mockup's copy of Survey's sheet, which
    defines these classes where Survey v1.7.0 has none. */
@@ -389,12 +403,17 @@ a.rail-row:hover {
 	margin-top: var(--spacing-16px);
 }
 .prose-doc h2 {
+	margin-top: var(--spacing-24px);
 	font-family: var(--font-display);
 	font-weight: var(--font-weight-heading);
 	font-size: var(--text-step-12);
+	line-height: 1.25;
 	padding-top: var(--spacing-16px);
 	border-top: var(--border) dashed var(--site-rule-color);
 	text-wrap: balance;
+}
+.prose-doc h2 + :not(h2) {
+	margin-top: var(--spacing-10px);
 }
 .prose-doc :is(ul, ol) {
 	padding-inline-start: var(--spacing-24px);
