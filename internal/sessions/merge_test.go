@@ -124,6 +124,20 @@ func TestDecideMergeRowRulesStillRun(t *testing.T) {
 	}
 }
 
+func TestDecideMergeFixWaitsOutTheUsageHold(t *testing.T) {
+	for _, usage := range []int{100, -1} {
+		s, key := world("pass", usage, ready(nil))
+		ev := Evidence{
+			Records: map[Key]RecordEvidence{key: {Row: rowDone, HasRow: true}},
+			Pulls:   map[Key]PullRead{key: {Pulls: []Pull{pull("abc", failed("gate"))}}},
+		}
+		got := Decide(s, ev, t0)[0]
+		if got.Decision.Decision != WaitUsage || got.Merge.Failures != nil {
+			t.Errorf("usage %d: failed check decided %s with failures %v, want wait_usage and none recorded", usage, got.Decision.Decision, got.Merge.Failures)
+		}
+	}
+}
+
 func TestDecideMergeStoppedPass(t *testing.T) {
 	stop := func(rf *state.ReleaseFile, sess *state.Session, p *state.Pass) {
 		ready(nil)(rf, sess, p)

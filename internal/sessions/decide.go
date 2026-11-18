@@ -122,6 +122,13 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			return
 		}
 		mr, decided, info, held := decideMerge(base, sess, pass, ev, key)
+		if decided && hold && mr.Decision.Decision == Fix {
+			// A fix relaunches the session, so the usage hold waits it out
+			// with no attempt spent.
+			base.Decision, base.Detail = WaitUsage, mr.Decision.Detail
+			out = append(out, Result{Decision: base})
+			return
+		}
 		if decided {
 			out = append(out, mr)
 			return
