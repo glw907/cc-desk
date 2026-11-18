@@ -19,11 +19,14 @@ TOOLS = ("Artifact", "SendFeedback", "Workflow", "AskUserQuestion", "ReportFindi
 
 
 def session_id(owned, name):
+    found = None
     for line in open(owned):
         cols = line.rstrip("\n").split("\t")
         if len(cols) > 2 and cols[2] == name:
-            return cols[1]
-    raise SystemExit(f"tokens.py: {name} is not in {owned}")
+            found = cols[1]
+    if found is None:
+        raise SystemExit(f"tokens.py: {name} is not in {owned}")
+    return found
 
 
 def transcript(projects, sid):

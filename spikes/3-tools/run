@@ -17,9 +17,10 @@ LEAN_PROMPT='Reply with the single word "ready". Run no tool.'
 bash "$OWN" launch ccd-spike-3-full "$SB" --model sonnet --effort low --permission-mode default \
   "$FULL_PROMPT" >"$OUT/launch-full.txt" 2>&1 || { ev "launch full failed"; exit 1; }
 ev "full: $(tail -1 "$OUT/launch-full.txt")"
+# --disallowedTools takes every word after it, so the prompt goes first.
 bash "$OWN" launch ccd-spike-3-lean "$SB" --model sonnet --effort low --permission-mode default \
-  --disallowedTools Artifact SendFeedback Workflow AskUserQuestion ReportFindings \
-  "$LEAN_PROMPT" >"$OUT/launch-lean.txt" 2>&1 || { ev "launch lean failed"; exit 1; }
+  "$LEAN_PROMPT" --disallowedTools Artifact SendFeedback Workflow AskUserQuestion ReportFindings \
+  >"$OUT/launch-lean.txt" 2>&1 || { ev "launch lean failed"; exit 1; }
 ev "lean: $(tail -1 "$OUT/launch-lean.txt")"
 
 # Wait for both to finish (state done), up to five minutes.

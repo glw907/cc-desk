@@ -255,10 +255,38 @@ Fallback applies: a fresh session starts from the pass's plan and branch.
 
 ## Proof 3
 
-Not attempted. The plan's mechanism table gives the five unused tools at 54,000 characters, but no
-launch with `--disallowedTools` was measured.
+Usage read 87 percent before the run. `spikes/3-tools/run` launched two sessions in one sandbox on
+Sonnet at low effort, and `tokens.py` read only those two transcripts, found by session id in
+`owned.tsv`.
 
-Fallback applies: sessions launch with every tool, at the token cost the prototype paid.
+Launch lines:
+
+```
+full: claude --bg --name ccd-spike-3-full --model sonnet --effort low --permission-mode default "<asks about the five tools>"
+lean: claude --bg --name ccd-spike-3-lean --model sonnet --effort low --permission-mode default "Reply with the single word ""ready"". Run no tool." --disallowedTools Artifact SendFeedback Workflow AskUserQuestion ReportFindings
+```
+
+Per-tool record. No transcript held a deferred-tools record that named any of the five. The full
+session's own answer was "full definition is in my tool list" for each of Artifact, SendFeedback,
+Workflow, AskUserQuestion, and ReportFindings, so all five were present in full.
+
+| First request | Input | Cache creation | Cache read | Total |
+| --- | --- | --- | --- | --- |
+| Full | 2 | 24,073 | 30,107 | 54,182 |
+| Lean | 2 | 35,190 | 0 | 35,192 |
+
+The lean request is 18,990 tokens smaller, about 3,800 for each of the five tools. The threshold was
+2,000 tokens for each tool present, which is 10,000 for five. The split between cache creation and
+cache read says only how warm the cache was, so the finding rests on the total.
+
+Two things to know:
+
+- The first lean launch put the prompt after `--disallowedTools`, which takes every word that
+  follows, so the prompt became a sixth tool name and the session sat at an empty prompt. The
+  prompt now goes first. Any launcher built from this must do the same.
+- The saving is measured on the first request only. Later requests were not compared.
+
+Held.
 
 ## Proof 7
 

@@ -1,0 +1,3493 @@
+[
+  {
+    "id": "8e656ca5",
+    "cwd": "/var/home/glw907/Projects/aksailingclub-org",
+    "kind": "background",
+    "startedAt": 1792021165647,
+    "sessionId": "8e656ca5-9a2b-4204-975e-c93d8453c057",
+    "name": "aksailingclub-org-repo-organization",
+    "state": "done"
+  },
+  {
+    "id": "880af234",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792361052197,
+    "sessionId": "880af234-e5dd-48ed-addd-6543daceae5e",
+    "name": "workstation-self-hosting-pass0",
+    "state": "done"
+  },
+  {
+    "id": "5df9ba7e",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792363511180,
+    "sessionId": "5df9ba7e-e19b-4be2-a8c0-1729d63b9f09",
+    "name": "conductor-servers",
+    "state": "stopped"
+  },
+  {
+    "id": "c27d5d8f",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792372232945,
+    "sessionId": "c27d5d8f-1573-4016-87d7-183b069fbf7b",
+    "name": "workstation-self-hosting-proton",
+    "state": "done"
+  },
+  {
+    "id": "bf979ff8",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792378169025,
+    "sessionId": "bf979ff8-d9d1-4855-b5cc-3baf25e9a1d2",
+    "name": "conductor-drafter",
+    "state": "stopped"
+  },
+  {
+    "id": "84f6f49d",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792378169947,
+    "sessionId": "84f6f49d-eb27-42d7-8be5-70fbbe349f63",
+    "name": "servers-foundation",
+    "state": "stopped"
+  },
+  {
+    "id": "38d6acde",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792378209498,
+    "sessionId": "38d6acde-8cac-4ce3-a111-8e17f56a7105",
+    "name": "drafter-f2-prompts-tracks",
+    "state": "done"
+  },
+  {
+    "id": "51f50328",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792378557249,
+    "sessionId": "51f50328-28c4-4cd6-ba04-c71cb05493c3",
+    "name": "Continue development",
+    "state": "done"
+  },
+  {
+    "id": "b9e96e24",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792390220873,
+    "sessionId": "b9e96e24-2819-42f1-9202-42cc342a092f",
+    "name": "conductor-drafter",
+    "state": "stopped"
+  },
+  {
+    "id": "255ada87",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792390268877,
+    "sessionId": "255ada87-4f2b-4d24-84a8-4da44393ff8f",
+    "name": "drafter-b3-drafting",
+    "state": "done"
+  },
+  {
+    "id": "470b5f0a",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792428153807,
+    "sessionId": "470b5f0a-dd7a-4174-8ec9-2d3f4f2d827a",
+    "name": "conductor-drafter",
+    "state": "stopped"
+  },
+  {
+    "id": "c3277267",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792428231784,
+    "sessionId": "c3277267-43fe-4e50-aaf0-8b340a14a5e9",
+    "name": "drafter-b3c-pilot",
+    "state": "done"
+  },
+  {
+    "id": "7ca01c31",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792429202827,
+    "sessionId": "7ca01c31-6991-4a2f-972e-e74757f13bfc",
+    "name": "Setup continuation",
+    "state": "done"
+  },
+  {
+    "id": "1080a943",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792430892531,
+    "sessionId": "1080a943-ff8b-4da1-806e-8425d253ead9",
+    "name": "servers-foundation",
+    "state": "done"
+  },
+  {
+    "id": "eee4b343",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792474713851,
+    "sessionId": "eee4b343-13f1-42ae-9a81-1ede9ae1495d",
+    "name": "conductor-drafter",
+    "state": "done"
+  },
+  {
+    "id": "4726cfa0",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792510325811,
+    "sessionId": "4726cfa0-67ca-4bb5-b84e-39fdb2d59ac4",
+    "name": "drafter-acceptance-plan",
+    "state": "done"
+  },
+  {
+    "id": "5343c953",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792518131115,
+    "sessionId": "5343c953-795d-4fab-9347-64a89946180d",
+    "name": "drafter-blueprint-first-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "423657f3",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792523050514,
+    "sessionId": "423657f3-16b2-49c7-9610-8d7e8912f99a",
+    "name": "drafter-blueprint-first-plan",
+    "state": "done"
+  },
+  {
+    "id": "a2dd9cf5",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792529117913,
+    "sessionId": "a2dd9cf5-b615-4fc6-9bee-abb65448bd29",
+    "name": "conductor-drafter",
+    "state": "done"
+  },
+  {
+    "id": "fa26d662",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792529153393,
+    "sessionId": "fa26d662-40d9-41a5-9065-f2742e872480",
+    "name": "drafter-blueprint-first",
+    "state": "stopped"
+  },
+  {
+    "id": "162146d1",
+    "cwd": "/var/home/glw907/Projects/drafter/.claude/worktrees/blueprint-first",
+    "kind": "background",
+    "startedAt": 1792535411100,
+    "sessionId": "162146d1-d401-4b0a-a08f-47de73935082",
+    "name": "drafter-blueprint-first",
+    "state": "stopped"
+  },
+  {
+    "id": "77fa03e4",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792537404205,
+    "sessionId": "77fa03e4-23ec-4b72-b102-9cf486414656",
+    "name": "servers-photos-plan",
+    "state": "done"
+  },
+  {
+    "id": "ab6bea2c",
+    "cwd": "/var/home/glw907/Projects/drafter/.claude/worktrees/blueprint-first",
+    "kind": "background",
+    "startedAt": 1792537946873,
+    "sessionId": "ab6bea2c-9add-4d2d-ae5c-276b11783d6b",
+    "name": "drafter-blueprint-first",
+    "state": "done"
+  },
+  {
+    "id": "dd88849d",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792545952507,
+    "sessionId": "dd88849d-3eb2-4f14-8735-ef9aed248b39",
+    "name": "servers-photos",
+    "state": "done"
+  },
+  {
+    "id": "4bb5da31",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792560419378,
+    "sessionId": "4bb5da31-8b5e-410f-a94e-0b2542a4ecad",
+    "name": "servers-mail-plan",
+    "state": "done"
+  },
+  {
+    "id": "3947a17b",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792566306346,
+    "sessionId": "3947a17b-2844-4670-99f1-7a08d23e5bb7",
+    "name": "conductor-drafter",
+    "state": "done"
+  },
+  {
+    "id": "2a8dfca9",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792566357729,
+    "sessionId": "2a8dfca9-0c2d-426a-a5fa-fe511678634f",
+    "name": "drafter-reviewed-pages",
+    "state": "stopped"
+  },
+  {
+    "id": "baf83000",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792599481137,
+    "sessionId": "baf83000-a0d8-48c5-932a-9d18cdec2be1",
+    "name": "approval-queue-comments-design",
+    "state": "done"
+  },
+  {
+    "id": "846b5774",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792606761683,
+    "sessionId": "846b5774-bdd2-495f-9d40-3a1897fe6561",
+    "name": "servers-mail",
+    "state": "done"
+  },
+  {
+    "id": "dad78863",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792610652483,
+    "sessionId": "dad78863-ffa6-4815-8e94-e56f10ca2c47",
+    "name": "conductor-approval-queue",
+    "state": "stopped"
+  },
+  {
+    "id": "0efaafbb",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792610899939,
+    "sessionId": "0efaafbb-4d51-47f7-81e6-9ed8803b22f1",
+    "name": "approval-queue-comments",
+    "state": "done"
+  },
+  {
+    "id": "c6120606",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792662928878,
+    "sessionId": "c6120606-46f9-44bf-bb20-11279e030495",
+    "name": "servers-cutover",
+    "state": "done"
+  },
+  {
+    "id": "90bbf346",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792703919558,
+    "sessionId": "90bbf346-bdd1-4bc1-9312-d97b93cbe2a7",
+    "name": "survey-pass-1",
+    "state": "done"
+  },
+  {
+    "id": "71dbd336",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792704948794,
+    "sessionId": "71dbd336-c09e-49f5-bc02-0ce38d088240",
+    "name": "plan-reviewer-trust-prompt",
+    "state": "done"
+  },
+  {
+    "id": "f1c0c56b",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792706378522,
+    "sessionId": "f1c0c56b-67c3-4405-8353-b0bc886e0e09",
+    "name": "servers-bookmarks",
+    "state": "done"
+  },
+  {
+    "id": "921fbd88",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792707459777,
+    "sessionId": "921fbd88-477d-4977-b69c-8fa5380f45db",
+    "name": "conductor-survey",
+    "state": "done"
+  },
+  {
+    "id": "b11951c2",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792707489089,
+    "sessionId": "b11951c2-a0bd-46b9-876c-7fc3fd9ecc31",
+    "name": "survey-pass-2",
+    "state": "stopped"
+  },
+  {
+    "id": "dcdba98a",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792718802198,
+    "sessionId": "dcdba98a-3425-4d32-82de-46e72e6c8d7b",
+    "name": "exxit-typo-exit-command",
+    "state": "done"
+  },
+  {
+    "id": "0aeb475d",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792719579862,
+    "sessionId": "0aeb475d-b8bd-4e05-9611-ff49f8ed567b",
+    "name": "conductor-drafter",
+    "state": "done"
+  },
+  {
+    "id": "31e53c30",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792719728836,
+    "sessionId": "31e53c30-87d9-47c7-ad1c-2d7b470558cf",
+    "name": "drafter-source-path-plan",
+    "state": "done"
+  },
+  {
+    "id": "d14fd34a",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792723009035,
+    "sessionId": "d14fd34a-031a-4dfe-a4ca-6209f8481be2",
+    "name": "conductor-survey",
+    "state": "stopped"
+  },
+  {
+    "id": "0b7f0186",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792723042291,
+    "sessionId": "0b7f0186-7588-4c64-abde-6095c88f249d",
+    "name": "survey-pass-3",
+    "state": "done"
+  },
+  {
+    "id": "f274e13b",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792723134142,
+    "sessionId": "f274e13b-ca80-4598-b792-b1ac1bed2036",
+    "name": "survey-house-style-pass-3",
+    "state": "stopped"
+  },
+  {
+    "id": "c3b7d0e3",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1792723326157,
+    "sessionId": "c3b7d0e3-4158-449a-9b7c-4de08a94a9ef",
+    "name": "survey-writing-2026-10",
+    "state": "done"
+  },
+  {
+    "id": "105b3397",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792858757979,
+    "sessionId": "105b3397-a4e5-4786-b01f-5a12028860f4",
+    "name": "conductor-drafter",
+    "state": "stopped"
+  },
+  {
+    "id": "91b30c5b",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792861290813,
+    "sessionId": "91b30c5b-242d-45fe-bbd7-25affe4de277",
+    "name": "conductor-.dotfiles",
+    "state": "stopped"
+  },
+  {
+    "id": "799784de",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792861398487,
+    "sessionId": "799784de-c144-45f3-85dc-bfb17634ee86",
+    "name": "conductor-approval-queue",
+    "state": "done"
+  },
+  {
+    "id": "cf416570",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792861444492,
+    "sessionId": "cf416570-672b-43b2-8a07-7d49656a8558",
+    "name": "approval-queue-sendback-revisions",
+    "state": "done"
+  },
+  {
+    "id": "e4b1479a",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792862066418,
+    "sessionId": "e4b1479a-379d-44ca-9c47-2ef704c59216",
+    "name": "plan-pass-two-handover",
+    "state": "done"
+  },
+  {
+    "id": "86bbb4e4",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792862079877,
+    "sessionId": "86bbb4e4-ffce-4174-8594-b020e1b895a0",
+    "name": "cairn-docs-pass-handoff",
+    "state": "done"
+  },
+  {
+    "id": "3cf996e4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1792862100230,
+    "sessionId": "3cf996e4-5c8e-454f-bff3-682e0ba33431",
+    "name": "drafter-batch-status-visibility",
+    "state": "done"
+  },
+  {
+    "id": "318f9115",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792870266165,
+    "sessionId": "318f9115-6f8e-4608-aba7-125578b01e43",
+    "name": "approval-queue-docs-friction-plan",
+    "state": "done"
+  },
+  {
+    "id": "39047bb1",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792872796176,
+    "sessionId": "39047bb1-2792-425a-8c3d-6ff978ba8995",
+    "name": "approval-queue-docs-friction",
+    "state": "done"
+  },
+  {
+    "id": "80d95c8a",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792885425538,
+    "sessionId": "80d95c8a-ab22-4b06-92b1-f0b3b97f7c51",
+    "name": "approval-queue-polish-plan",
+    "state": "done"
+  },
+  {
+    "id": "90b2eb2b",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792888769454,
+    "sessionId": "90b2eb2b-109b-4279-b47d-616e8475c8b9",
+    "name": "approval-queue-polish",
+    "state": "done"
+  },
+  {
+    "id": "f3c448e8",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792901684535,
+    "sessionId": "f3c448e8-6cf0-4b57-a9e1-9f7aa4e21f66",
+    "name": "servers-ward-probes",
+    "state": "stopped"
+  },
+  {
+    "id": "8f665360",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1792951309588,
+    "sessionId": "8f665360-fe84-40c1-8494-ecef1640eff0",
+    "name": "merge-pr-139-and-140",
+    "state": "done"
+  },
+  {
+    "id": "71905af6",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1792960507294,
+    "sessionId": "71905af6-c302-4f95-8fdf-67b983fac0c3",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "0546fe97",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1792960536026,
+    "sessionId": "0546fe97-a376-45d1-8ad6-14a13e3e2fd7",
+    "name": "phonebook-pass-2-backend",
+    "state": "stopped"
+  },
+  {
+    "id": "030c0133",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1792960588641,
+    "sessionId": "030c0133-8330-4163-a59a-959f7770a63b",
+    "name": "phonebook-pass-2-backend",
+    "state": "done"
+  },
+  {
+    "id": "eaa22219",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1792960840879,
+    "sessionId": "eaa22219-8651-4944-a2f1-06641a17e0aa",
+    "name": "file-docs-gate-backlog-item",
+    "state": "done"
+  },
+  {
+    "id": "44339b91",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792964895132,
+    "sessionId": "44339b91-dc76-48c2-997d-b33d49dc156f",
+    "name": "conductor-drafter",
+    "state": "stopped"
+  },
+  {
+    "id": "9b2f6cab",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792964895687,
+    "sessionId": "9b2f6cab-5234-4341-8020-febb3b0e2921",
+    "name": "conductor-approval-queue",
+    "state": "stopped"
+  },
+  {
+    "id": "8ba0e226",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792964939571,
+    "sessionId": "8ba0e226-4f3e-4d32-83b9-877c5ca62aec",
+    "name": "drafter-batch-4-friction",
+    "state": "done"
+  },
+  {
+    "id": "8e0d222a",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792964940389,
+    "sessionId": "8e0d222a-80a5-40f0-a989-d583ffd0db01",
+    "name": "approval-queue-batch-4-friction",
+    "state": "done"
+  },
+  {
+    "id": "54aa90ed",
+    "cwd": "/var/home/glw907/Projects/drafter",
+    "kind": "background",
+    "startedAt": 1792965381717,
+    "sessionId": "54aa90ed-a16a-4c4d-a2fa-ee30819bba55",
+    "name": "plan-cairn-batch-handoff",
+    "state": "done"
+  },
+  {
+    "id": "c7413f7e",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792980891491,
+    "sessionId": "c7413f7e-2988-4530-8c4b-d7f8fcb5a7c2",
+    "name": "conductor-servers",
+    "state": "done"
+  },
+  {
+    "id": "a1be4db2",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792980916753,
+    "sessionId": "a1be4db2-70f0-4c2f-abc1-42c2044d53f7",
+    "name": "servers-ward-address-book",
+    "state": "stopped"
+  },
+  {
+    "id": "950a6700",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792980987454,
+    "sessionId": "950a6700-4a49-47e1-a0cb-c0342b38cacd",
+    "name": "servers-ward-address-book",
+    "state": "done"
+  },
+  {
+    "id": "c08ba8d5",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1792981197546,
+    "sessionId": "c08ba8d5-7d97-4182-8006-7a1c8a646956",
+    "name": "launch-servers-conductor",
+    "state": "done"
+  },
+  {
+    "id": "037f5b15",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1792984432900,
+    "sessionId": "037f5b15-c219-4b54-a866-754478f8b264",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "af7be5f3",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1792984477343,
+    "sessionId": "af7be5f3-50fe-4dfa-92f0-58dcf92795e9",
+    "name": "phonebook-pass-3-web",
+    "state": "done"
+  },
+  {
+    "id": "5b9e0083",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792996822753,
+    "sessionId": "5b9e0083-1a34-4568-bc40-1ae9e19d826d",
+    "name": "conductor-approval-queue",
+    "state": "done"
+  },
+  {
+    "id": "3fd10276",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1792996870130,
+    "sessionId": "3fd10276-4d66-4fbe-bbd7-6f49dfe7933a",
+    "name": "approval-queue-docs-cutover",
+    "state": "done"
+  },
+  {
+    "id": "7187f1f6",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1792996870641,
+    "sessionId": "7187f1f6-57fd-4cb9-9ef4-1a46568e5bb2",
+    "name": "cairn-cms-docs-cutover",
+    "state": "done"
+  },
+  {
+    "id": "29aef30f",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792996871136,
+    "sessionId": "29aef30f-630d-4daa-b668-06426e7d3859",
+    "name": "dotfiles-docs-cutover",
+    "state": "stopped"
+  },
+  {
+    "id": "bfda93e6",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792997218954,
+    "sessionId": "bfda93e6-4a7f-4306-bea2-b952184b17f4",
+    "name": "dotfiles-docs-cutover",
+    "state": "stopped"
+  },
+  {
+    "id": "359c4944",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1792997350433,
+    "sessionId": "359c4944-334f-4940-a333-6f6a3caab907",
+    "name": "dotfiles-docs-cutover",
+    "state": "done"
+  },
+  {
+    "id": "475a8849",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793046074049,
+    "sessionId": "475a8849-1228-412b-9823-48b6af67d98e",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "a260e6ec",
+    "cwd": "/var/home/glw907/Projects/cairn-cms/.claude/worktrees/docs-improvement-loop",
+    "kind": "background",
+    "startedAt": 1793047132284,
+    "sessionId": "a260e6ec-9a35-4f71-aab8-0455ee9af16a",
+    "name": "cairn-docs-cycle-2026-10-dry",
+    "state": "done"
+  },
+  {
+    "id": "5f63226d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793069464090,
+    "sessionId": "5f63226d-168e-4b5f-b245-8ec62d4251cd",
+    "name": "cairn-docs-cycle-2026-10",
+    "state": "done"
+  },
+  {
+    "id": "251f44c0",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793072047440,
+    "sessionId": "251f44c0-5824-4c64-8972-7fa948a8c65f",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "920beb72",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793072070698,
+    "sessionId": "920beb72-ea2f-42d2-a462-c78bdf1f8c2c",
+    "name": "phonebook-automation",
+    "state": "stopped"
+  },
+  {
+    "id": "80e9fe2c",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793073456662,
+    "sessionId": "80e9fe2c-0da0-47a0-b71b-b1828085f7c1",
+    "name": "cairn-cms-docs-eval-trust-planner",
+    "state": "stopped"
+  },
+  {
+    "id": "55ddc712",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793080234561,
+    "sessionId": "55ddc712-d7f8-4ebf-a08a-c063926e51ca",
+    "name": "phonebook-automation",
+    "state": "done"
+  },
+  {
+    "id": "5bce6056",
+    "cwd": "/var/home/glw907/Projects/cairn-cms/.claude/worktrees/docs-cycle-hardening",
+    "kind": "background",
+    "startedAt": 1793115800779,
+    "sessionId": "5bce6056-8a63-418e-941b-a2350112efc3",
+    "name": "cairn-docs-cycle-2026-10",
+    "state": "done"
+  },
+  {
+    "id": "567c1fc8",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793116884704,
+    "sessionId": "567c1fc8-d5c4-4d6d-801b-3071294d6af1",
+    "name": "phonebook-automation",
+    "state": "done"
+  },
+  {
+    "id": "1e184a09",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793123989297,
+    "sessionId": "1e184a09-e214-40cb-be49-8f72b3465203",
+    "name": "cairn-cms-docs-eval-trust",
+    "state": "done"
+  },
+  {
+    "id": "a8b03ad0",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1793151037332,
+    "sessionId": "a8b03ad0-2c88-40fd-b860-057360768392",
+    "name": "merge-docs-eval-record",
+    "state": "done"
+  },
+  {
+    "id": "d6001bac",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793151680134,
+    "sessionId": "d6001bac-7db9-4268-af76-89ae4c016d59",
+    "name": "phonebook-pass-4",
+    "state": "done"
+  },
+  {
+    "id": "0b459a90",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793151908934,
+    "sessionId": "0b459a90-6b8e-4956-8c7f-bdeca7fb55a3",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "86c70176",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793240695783,
+    "sessionId": "86c70176-a67e-4320-8550-6056142eb3b6",
+    "name": "timer-probe",
+    "state": "stopped"
+  },
+  {
+    "id": "c2d26357",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793240723308,
+    "sessionId": "c2d26357-88e4-4883-b77d-673195bdc472",
+    "name": "timer-probe2",
+    "state": "stopped"
+  },
+  {
+    "id": "84ab18b8",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793240780426,
+    "sessionId": "84ab18b8-e81f-4a10-b54f-4c032eb59847",
+    "name": "timer-probe3",
+    "state": "done"
+  },
+  {
+    "id": "6ac2d652",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793433660760,
+    "sessionId": "6ac2d652-e13a-4b28-9267-0abd6c59c742",
+    "name": "conductor-cairn-cms",
+    "state": "stopped"
+  },
+  {
+    "id": "ab627928",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793433660760,
+    "sessionId": "ab627928-693e-4211-9f76-a8267b64175a",
+    "name": "conductor-phonebook",
+    "state": "stopped"
+  },
+  {
+    "id": "5a2050df",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793433686775,
+    "sessionId": "5a2050df-3f92-438f-93d4-88e756e04f30",
+    "name": "cairn-cms-docs-final-1",
+    "state": "done"
+  },
+  {
+    "id": "78649909",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793433809987,
+    "sessionId": "78649909-2d66-4976-ab8f-c307619a7bc9",
+    "name": "phonebook-pass-5",
+    "state": "done"
+  },
+  {
+    "id": "6ffaa6cf",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793437662193,
+    "sessionId": "6ffaa6cf-bf20-420f-a9ad-6c0a6e5348d0",
+    "name": "cairn-cms-docs-final-2",
+    "state": "done"
+  },
+  {
+    "id": "41d1b191",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793440465270,
+    "sessionId": "41d1b191-0ca9-4f25-9ff4-31dcb3001f91",
+    "name": "cairn-cms-docs-final-3",
+    "state": "done"
+  },
+  {
+    "id": "e9dbbd1e",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793440496228,
+    "sessionId": "e9dbbd1e-9fd6-476e-ab07-749a9a58bb1b",
+    "name": "cairn-cms-docs-capture",
+    "state": "failed"
+  },
+  {
+    "id": "26956330",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793468437209,
+    "sessionId": "26956330-4b0b-48ea-8f1d-7d9f6cb2d82a",
+    "name": "backlog-sweep-triage-plan",
+    "state": "done"
+  },
+  {
+    "id": "587f8fed",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793468448213,
+    "sessionId": "587f8fed-4c00-41ec-ac08-e9ae216fbcc7",
+    "name": "schedule-phonebook-pass-5-launch",
+    "state": "done"
+  },
+  {
+    "id": "1a8ed641",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793468513544,
+    "sessionId": "1a8ed641-8c9e-41a9-b5ce-8ba142a370c4",
+    "name": "cairn-cms-docs-final-3",
+    "state": "done"
+  },
+  {
+    "id": "dabe5253",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793474576138,
+    "sessionId": "dabe5253-5321-4c79-b535-d37f38fb826a",
+    "name": "cairn-cms-docs-final-4",
+    "state": "done"
+  },
+  {
+    "id": "f218724a",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793475419936,
+    "sessionId": "f218724a-f0b8-47d8-a80f-ce35c475933f",
+    "name": "phonebook-cleanup-pass-handover",
+    "state": "done"
+  },
+  {
+    "id": "cfe88cd0",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793477784045,
+    "sessionId": "cfe88cd0-0137-4dbb-aa42-33eb74d04002",
+    "name": "cairn-cms-docs-final-5",
+    "state": "stopped"
+  },
+  {
+    "id": "13f51163",
+    "cwd": "/var/home/glw907",
+    "kind": "background",
+    "startedAt": 1793478351714,
+    "sessionId": "13f51163-f9ba-459a-a10c-c9e66d715dc3",
+    "name": "exit-typo-session-guidance",
+    "state": "done"
+  },
+  {
+    "id": "7868b4db",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793483156683,
+    "sessionId": "7868b4db-8fab-4e90-885f-dcfe36bba364",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "33d243f2",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793483181096,
+    "sessionId": "33d243f2-7966-47ce-964e-dccf31d6f78c",
+    "name": "phonebook-voicemail-rings",
+    "state": "done"
+  },
+  {
+    "id": "1f5c45c1",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793490547885,
+    "sessionId": "1f5c45c1-81ce-43dc-b927-ace4ccdc519f",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "4534f35d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793490605485,
+    "sessionId": "4534f35d-0dcc-4a2d-a5d2-1076c8f49fa7",
+    "name": "cairn-cms-agent-first-1",
+    "state": "stopped"
+  },
+  {
+    "id": "b14a45bf",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793493762844,
+    "sessionId": "b14a45bf-7d9d-43d0-8e8b-f5fae2a57f13",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "c51430f1",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793493797629,
+    "sessionId": "c51430f1-cd09-4b0e-878c-00f090bcff2f",
+    "name": "relaunch-conductor-executor-grants",
+    "state": "done"
+  },
+  {
+    "id": "3c20e95d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms/.claude/worktrees/agent-first-1",
+    "kind": "background",
+    "startedAt": 1793493798821,
+    "sessionId": "3c20e95d-a304-4100-bc7a-61e41a2092c5",
+    "name": "cairn-cms-agent-first-1",
+    "state": "done"
+  },
+  {
+    "id": "f08a96e6",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793501320188,
+    "sessionId": "f08a96e6-5da1-41c1-9c04-63fecf9fb4d5",
+    "name": "cairn-cms-agent-first-2",
+    "state": "done"
+  },
+  {
+    "id": "7f3f2c5a",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793505166612,
+    "sessionId": "7f3f2c5a-c002-4e45-9c99-716fd4c8623c",
+    "name": "cairn-cms-agent-first-3",
+    "state": "done"
+  },
+  {
+    "id": "2163f159",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793513507314,
+    "sessionId": "2163f159-ca92-4e57-aab5-abfa1988e483",
+    "name": "phonebook-backlog-clearing-planner",
+    "state": "done"
+  },
+  {
+    "id": "36ee1813",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793524147096,
+    "sessionId": "36ee1813-8c43-4069-ba27-45394fe2a0e8",
+    "name": "conductor-phonebook",
+    "state": "done"
+  },
+  {
+    "id": "fa632442",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793524176103,
+    "sessionId": "fa632442-4d22-455e-b635-7866ad0c1ef6",
+    "name": "phonebook-backlog-clearing",
+    "state": "done"
+  },
+  {
+    "id": "82fe4c13",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793525986340,
+    "sessionId": "82fe4c13-415b-40b0-925f-177b51c467de",
+    "name": "cairn-cms-agent-first-4",
+    "state": "done"
+  },
+  {
+    "id": "e051a04e",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1793529076848,
+    "sessionId": "e051a04e-72a0-4f00-a036-2bfd23592813",
+    "name": "survey-writing-2026-11",
+    "state": "done"
+  },
+  {
+    "id": "28b5f8d5",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793564213891,
+    "sessionId": "28b5f8d5-6bde-4f62-836a-c0cad6cfafc8",
+    "name": "cairn-cms-media-publish-plan",
+    "state": "done"
+  },
+  {
+    "id": "4931ed95",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793564214601,
+    "sessionId": "4931ed95-36ba-4723-82a0-7936213e84b5",
+    "name": "cairn-cms-scaffold-plan",
+    "state": "done"
+  },
+  {
+    "id": "e4573501",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793565396543,
+    "sessionId": "e4573501-5fe8-47a6-820d-f9220e31623c",
+    "name": "cairn-cms-scaffold-template",
+    "state": "done"
+  },
+  {
+    "id": "b932f9fb",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793565942548,
+    "sessionId": "b932f9fb-ec06-4eda-b874-bdaaa0c273d3",
+    "name": "cairn-cms-media-publish",
+    "state": "done"
+  },
+  {
+    "id": "0f7503ff",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793566177521,
+    "sessionId": "0f7503ff-8b3d-4cf9-89b7-ff48740e9122",
+    "name": "cairn-cms-scaffold-setup",
+    "state": "done"
+  },
+  {
+    "id": "4bbddc65",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793581160176,
+    "sessionId": "4bbddc65-4c51-4c2a-b610-8a85a2a679df",
+    "name": "cairn-cms-audit-trim-plan",
+    "state": "done"
+  },
+  {
+    "id": "b37db137",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793582373418,
+    "sessionId": "b37db137-f78e-4631-8178-5581191371c2",
+    "name": "cairn-cms-auth-removal-plan",
+    "state": "done"
+  },
+  {
+    "id": "e356e6df",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793582566699,
+    "sessionId": "e356e6df-13eb-45f7-8d71-4375d9104f50",
+    "name": "conductor-phonebook",
+    "state": "stopped"
+  },
+  {
+    "id": "15ba8b61",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793582591105,
+    "sessionId": "15ba8b61-cec0-4bca-8c83-2e2aadc7153b",
+    "name": "phonebook-backlog-close-out",
+    "state": "done"
+  },
+  {
+    "id": "752b74b4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793582809721,
+    "sessionId": "752b74b4-5dfa-406c-90d2-0ab0605b6c77",
+    "name": "cairn-cms-wiring-core-plan",
+    "state": "done"
+  },
+  {
+    "id": "1b5cb797",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793582813276,
+    "sessionId": "1b5cb797-d270-42eb-ab7a-5ba1f181b579",
+    "name": "cairn-cms-field-values-plan",
+    "state": "done"
+  },
+  {
+    "id": "2e2177cd",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793582816805,
+    "sessionId": "2e2177cd-6236-49d7-b1f5-dab469200625",
+    "name": "cairn-cms-tidy-lists-plan",
+    "state": "done"
+  },
+  {
+    "id": "d58ab965",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793583325461,
+    "sessionId": "d58ab965-d225-4d0c-bd12-bed0e3150d95",
+    "name": "cairn-cms-audit-trim",
+    "state": "done"
+  },
+  {
+    "id": "48504a8c",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793584366886,
+    "sessionId": "48504a8c-3b24-4772-89e5-54941464a94a",
+    "name": "cairn-cms-field-values",
+    "state": "done"
+  },
+  {
+    "id": "ae0e3d79",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793584721523,
+    "sessionId": "ae0e3d79-e156-4235-8c2b-f4e2ee48f3c3",
+    "name": "cairn-cms-tidy-lists",
+    "state": "done"
+  },
+  {
+    "id": "65f176f9",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793585022747,
+    "sessionId": "65f176f9-5f31-4848-83ed-b179b5c668f5",
+    "name": "cairn-cms-wiring-core",
+    "state": "done"
+  },
+  {
+    "id": "60f8ec07",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793585146929,
+    "sessionId": "60f8ec07-5fe0-411d-9ef9-87c1ada3dde8",
+    "name": "cairn-cms-auth-removal",
+    "state": "done"
+  },
+  {
+    "id": "92df3158",
+    "cwd": "/var/home/glw907/Projects/phonebook",
+    "kind": "background",
+    "startedAt": 1793589470419,
+    "sessionId": "92df3158-8fc4-418c-8199-3682d73a07bf",
+    "name": "reset-office-phone-voip",
+    "state": "done"
+  },
+  {
+    "id": "ca84d303",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793592569154,
+    "sessionId": "ca84d303-c24a-4ad8-8a83-8ad3ffbea34b",
+    "name": "cairn-cms-tool-gates-plan",
+    "state": "done"
+  },
+  {
+    "id": "d0f75eff",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793594002597,
+    "sessionId": "d0f75eff-ec36-428f-9c09-a47f6160aef6",
+    "name": "cairn-cms-tool-gates",
+    "state": "done"
+  },
+  {
+    "id": "c07d6a04",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793598659947,
+    "sessionId": "c07d6a04-d5f2-4386-93da-d1afc9afa913",
+    "name": "cairn-cms-content-rest-plan",
+    "state": "done"
+  },
+  {
+    "id": "e26cb352",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793598663640,
+    "sessionId": "e26cb352-b553-4a78-b67c-377a5c28412d",
+    "name": "cairn-cms-admin-rest-plan",
+    "state": "done"
+  },
+  {
+    "id": "c431ecfd",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793598667178,
+    "sessionId": "c431ecfd-d2cc-47c1-9d21-c6e3595b33a3",
+    "name": "cairn-cms-p1-p8-plan",
+    "state": "done"
+  },
+  {
+    "id": "36d0bb09",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793600067766,
+    "sessionId": "36d0bb09-a05e-4478-b419-24db447a1202",
+    "name": "cairn-cms-small-api-plan",
+    "state": "done"
+  },
+  {
+    "id": "d6fcb0ae",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793600095739,
+    "sessionId": "d6fcb0ae-53af-4271-8f39-fd0024344079",
+    "name": "cairn-cms-p1-p8",
+    "state": "done"
+  },
+  {
+    "id": "7b596c0c",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793601110814,
+    "sessionId": "7b596c0c-4260-4edd-bb3d-ef96c328b165",
+    "name": "cairn-cms-content-rest",
+    "state": "done"
+  },
+  {
+    "id": "c7018620",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793601858650,
+    "sessionId": "c7018620-00bb-4615-9802-4aec9c51854e",
+    "name": "cairn-cms-admin-rest",
+    "state": "done"
+  },
+  {
+    "id": "0ab806a2",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793604106276,
+    "sessionId": "0ab806a2-b35d-4072-803e-6cf4993aabea",
+    "name": "cairn-cms-small-api",
+    "state": "done"
+  },
+  {
+    "id": "5d71624e",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793605407333,
+    "sessionId": "5d71624e-950f-442d-8b97-08fe8bfc78dc",
+    "name": "cairn-cms-tool-fixes-plan",
+    "state": "done"
+  },
+  {
+    "id": "4c941f52",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793607644479,
+    "sessionId": "4c941f52-836d-47c4-816b-19f7692e8b5e",
+    "name": "cairn-cms-tool-fixes",
+    "state": "done"
+  },
+  {
+    "id": "74f75a6f",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793613996143,
+    "sessionId": "74f75a6f-9326-429e-9710-274329afbcf5",
+    "name": "cairn-cms-p2-p4-plan",
+    "state": "done"
+  },
+  {
+    "id": "a7c2623c",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793617294519,
+    "sessionId": "a7c2623c-ee55-4f08-bdbf-9ad421f08b67",
+    "name": "cairn-cms-p2-p4",
+    "state": "done"
+  },
+  {
+    "id": "9ae85e5d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793626059199,
+    "sessionId": "9ae85e5d-5dc3-443e-b8bc-95a35cf74cbb",
+    "name": "cairn-cms-cleanup-plan",
+    "state": "done"
+  },
+  {
+    "id": "25c70c2c",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793645717114,
+    "sessionId": "25c70c2c-bdde-48c4-8211-5d9c19986fad",
+    "name": "cairn-cms-cleanup",
+    "state": "done"
+  },
+  {
+    "id": "b09b35a4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793661469859,
+    "sessionId": "b09b35a4-2ae0-4e56-9bea-434b1e0c34c5",
+    "name": "cairn-cms-dep-sweep",
+    "state": "done"
+  },
+  {
+    "id": "243eaefe",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793663262001,
+    "sessionId": "243eaefe-307d-4e18-9c66-d3469f16d007",
+    "name": "cairn-cms-release-sweep",
+    "state": "done"
+  },
+  {
+    "id": "582c5897",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793689619943,
+    "sessionId": "582c5897-4a58-4cdb-a58f-6bc7a41f4893",
+    "name": "launch-cairn-planner-session",
+    "state": "done"
+  },
+  {
+    "id": "20de2221",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793689677551,
+    "sessionId": "20de2221-36a9-4829-9dad-b1b1ffc46fd8",
+    "name": "cairn-cms-setup-fix-plan",
+    "state": "done"
+  },
+  {
+    "id": "bf08b840",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793729239715,
+    "sessionId": "bf08b840-8380-48c9-9f03-de322be30c97",
+    "name": "cairn-cms-setup-fix",
+    "state": "done"
+  },
+  {
+    "id": "964d978f",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1793731869103,
+    "sessionId": "964d978f-4a86-46d3-a980-98d276d15e20",
+    "name": "vault-key-setup-pass-cli",
+    "state": "done"
+  },
+  {
+    "id": "784b801f",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1793775586374,
+    "sessionId": "784b801f-be27-471d-bda7-6f9efb4c3815",
+    "name": "conductor-dotfiles",
+    "state": "done"
+  },
+  {
+    "id": "52e17415",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1793775803825,
+    "sessionId": "52e17415-bd90-492a-b58a-c14bdf7371ca",
+    "name": "dotfiles-credential-hygiene-a",
+    "state": "stopped"
+  },
+  {
+    "id": "1c686a8d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793822887289,
+    "sessionId": "1c686a8d-3800-4fdd-b24c-c4fafa7b9c9e",
+    "name": "unblock-conductor-dotfiles-commit",
+    "state": "done"
+  },
+  {
+    "id": "52fccb37",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793822984604,
+    "sessionId": "52fccb37-b616-4651-b2d9-3ab7179b964c",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "bf32a76e",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793823051731,
+    "sessionId": "bf32a76e-5529-430b-8067-eff7f0c40a00",
+    "name": "cairn-cms-release-gate-a",
+    "state": "done"
+  },
+  {
+    "id": "fac6c195",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1793823052259,
+    "sessionId": "fac6c195-2f42-42d4-a169-dd1c440c2585",
+    "name": "cairn-cms-release-process-b",
+    "state": "stopped"
+  },
+  {
+    "id": "25eb3f66",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794059692211,
+    "sessionId": "25eb3f66-e58b-4153-bb95-086ebc330598",
+    "name": "settings-json-patch-approval",
+    "state": "done"
+  },
+  {
+    "id": "529f06d2",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794059807757,
+    "sessionId": "529f06d2-285c-4bb3-860c-b9d9c79b56a9",
+    "name": "dotfiles-credential-hygiene-a",
+    "state": "stopped"
+  },
+  {
+    "id": "18fc4904",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1794061738713,
+    "sessionId": "18fc4904-6c29-452c-8ea5-12deff862daa",
+    "name": "conductor-servers",
+    "state": "done"
+  },
+  {
+    "id": "452e24a9",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1794062095578,
+    "sessionId": "452e24a9-95ef-4e23-8dfd-ed5ac78da26a",
+    "name": "ship-pr-after-ci",
+    "state": "done"
+  },
+  {
+    "id": "65f82845",
+    "cwd": "/var/home/glw907/Projects/cairn-cms/.claude/worktrees/release-process-b",
+    "kind": "background",
+    "startedAt": 1794075568381,
+    "sessionId": "65f82845-3cbc-439e-8569-fcea196471a3",
+    "name": "cairn-cms-release-process-b",
+    "state": "done"
+  },
+  {
+    "id": "12a84a8c",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1794075747010,
+    "sessionId": "12a84a8c-6a8b-424c-87e5-e707a18173ac",
+    "name": "servers-credential-hygiene-b",
+    "state": "done"
+  },
+  {
+    "id": "5a870916",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794082796441,
+    "sessionId": "5a870916-6a40-4ef9-8f15-cc61e334343b",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "16c37311",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794084581908,
+    "sessionId": "16c37311-d43b-4de5-aaa5-6501141679e0",
+    "name": "conductor-initiatives",
+    "state": "failed"
+  },
+  {
+    "id": "d9efb488",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794084680408,
+    "sessionId": "d9efb488-8135-4500-bd42-3c7676cc3dd0",
+    "name": "initiatives-credential-hygiene-c",
+    "state": "done"
+  },
+  {
+    "id": "d73d7ccd",
+    "cwd": "/var/home/glw907/Projects/servers",
+    "kind": "background",
+    "startedAt": 1794087966006,
+    "sessionId": "d73d7ccd-17c3-43d7-aaad-f63c64638344",
+    "name": "conductor-servers (2)",
+    "state": "done"
+  },
+  {
+    "id": "62470924",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/907-rebuild-design",
+    "kind": "background",
+    "startedAt": 1794096808045,
+    "sessionId": "62470924-2be0-41df-a924-06f930d41e08",
+    "name": "907-life-rebuild",
+    "state": "done"
+  },
+  {
+    "id": "fd409ee2",
+    "cwd": "/var/home/glw907/Projects/907-life",
+    "kind": "background",
+    "startedAt": 1794096932004,
+    "sessionId": "fd409ee2-ebc0-449d-be34-a05e5b605694",
+    "name": "retire-old-checkout-archive",
+    "state": "done"
+  },
+  {
+    "id": "a5d2b8c3",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794179858204,
+    "sessionId": "a5d2b8c3-6723-4b91-a368-dc8c31f2add0",
+    "name": "cairn-cms-cairn-setup-probe",
+    "state": "done"
+  },
+  {
+    "id": "d0ff747d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794179928138,
+    "sessionId": "d0ff747d-7081-404a-ba9a-321ae260f04a",
+    "name": "cairn-cms-cairn-setup-probe-2",
+    "state": "stopped"
+  },
+  {
+    "id": "e82b126f",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794179980124,
+    "sessionId": "e82b126f-a3a4-4bd4-b4f9-9e544bcb8fcb",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "6cc98e64",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794180042069,
+    "sessionId": "6cc98e64-c86e-4efa-96d1-39114de6f02a",
+    "name": "cairn-cms-cairn-new-1",
+    "state": "done"
+  },
+  {
+    "id": "7b2aff14",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794188728768,
+    "sessionId": "7b2aff14-8094-4265-ab4c-0c06d2189f64",
+    "name": "cairn-cms-cairn-new-4",
+    "state": "done"
+  },
+  {
+    "id": "f589c826",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794188729440,
+    "sessionId": "f589c826-9186-4f66-93b4-3c7c8b26895a",
+    "name": "cairn-cms-cairn-new-2",
+    "state": "stopped"
+  },
+  {
+    "id": "259e47fc",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794188730347,
+    "sessionId": "259e47fc-056d-4097-943e-eae98222c200",
+    "name": "cairn-cms-cairn-new-3",
+    "state": "done"
+  },
+  {
+    "id": "64fd49ae",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794206212816,
+    "sessionId": "64fd49ae-b183-43f0-849f-f54c5f063c66",
+    "name": "cairn-cms-theme-garden-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "e8eccfe6",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794212954874,
+    "sessionId": "e8eccfe6-d9bf-4dfc-bfc7-ed0049b98543",
+    "name": "cairn-cms-cairn-new-5",
+    "state": "done"
+  },
+  {
+    "id": "67d0fbaa",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794217235079,
+    "sessionId": "67d0fbaa-0b60-4324-b592-dbd60071585a",
+    "name": "cairn-cms-cairn-new-6",
+    "state": "done"
+  },
+  {
+    "id": "4651638d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794242021003,
+    "sessionId": "4651638d-5295-4fa0-8ffe-f518bfc580ca",
+    "name": "cairn-cms-theme-garden-probe",
+    "state": "done"
+  },
+  {
+    "id": "b467d134",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794242198670,
+    "sessionId": "b467d134-d625-4e10-8965-103f716503ad",
+    "name": "cairn-cms-theme-garden-1",
+    "state": "done"
+  },
+  {
+    "id": "06cc7ec5",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794252864125,
+    "sessionId": "06cc7ec5-1b31-48ed-83ff-ce848c90dc42",
+    "name": "cairn-cms-setup-tooling-plan",
+    "state": "done"
+  },
+  {
+    "id": "f4c98993",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794255863614,
+    "sessionId": "f4c98993-6f06-4ab3-b7ce-7773408b7421",
+    "name": "deploy-speed-optimization-levers",
+    "state": "done"
+  },
+  {
+    "id": "a15ed84e",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794263339104,
+    "sessionId": "a15ed84e-d153-4e68-92a7-c98b58a6de80",
+    "name": "cairn-cms-setup-tooling-probe",
+    "state": "stopped"
+  },
+  {
+    "id": "5013bd5e",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794278832426,
+    "sessionId": "5013bd5e-2192-432c-a7a5-69035d5df303",
+    "name": "cairn-cms-theme-garden-3-design",
+    "state": "done"
+  },
+  {
+    "id": "6e3d2da4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794289039318,
+    "sessionId": "6e3d2da4-afdf-457a-a3f0-b832a1b51269",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "95c83688",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794335683362,
+    "sessionId": "95c83688-95a7-4f39-ac30-7b3992357a14",
+    "name": "conductor-dotfiles",
+    "state": "done"
+  },
+  {
+    "id": "d03d8b2e",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794339661861,
+    "sessionId": "d03d8b2e-d8fb-4002-9931-bf8fb53ae54f",
+    "name": "merge-prs-and-guard-fix",
+    "state": "done"
+  },
+  {
+    "id": "4837d614",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794341481215,
+    "sessionId": "4837d614-4e55-4ee4-a6c0-eab251b83d42",
+    "name": "cairn-cms-setup-tooling-3b",
+    "state": "done"
+  },
+  {
+    "id": "1e56d109",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794365990156,
+    "sessionId": "1e56d109-fe10-4548-85bc-f93f04082714",
+    "name": "approval-queue-pass-2-plan",
+    "state": "done"
+  },
+  {
+    "id": "97ee4ce8",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794366161063,
+    "sessionId": "97ee4ce8-ed95-4d42-af8f-4eb41ced796b",
+    "name": "initiatives-workstation-refinement",
+    "state": "done"
+  },
+  {
+    "id": "db95f726",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794366511525,
+    "sessionId": "db95f726-a3a4-45d2-80a4-ea0ff1285e7e",
+    "name": "dotfiles-refinement-1-plan",
+    "state": "done"
+  },
+  {
+    "id": "e7d2d4bc",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794367190135,
+    "sessionId": "e7d2d4bc-360f-46df-9742-d26bd94472c2",
+    "name": "workstation-refinement-plan-review",
+    "state": "done"
+  },
+  {
+    "id": "e9e8027b",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794367255529,
+    "sessionId": "e9e8027b-caf9-4e9c-8b77-5c9201802ddc",
+    "name": "dotfiles-refinement-1-probe",
+    "state": "done"
+  },
+  {
+    "id": "ad6ebc60",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794367324001,
+    "sessionId": "ad6ebc60-d1d8-402a-8c36-fb1ed8cf5b1f",
+    "name": "dotfiles-refinement-1-probe2",
+    "state": "done"
+  },
+  {
+    "id": "7208815f",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794368511617,
+    "sessionId": "7208815f-c7fd-457f-b316-8689c210d830",
+    "name": "conductor-approval-queue",
+    "state": "stopped"
+  },
+  {
+    "id": "9c8bcdd5",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794368529698,
+    "sessionId": "9c8bcdd5-c21e-40c6-b655-42fb3f172274",
+    "name": "approval-queue-pass-2a",
+    "state": "done"
+  },
+  {
+    "id": "e69530ba",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794369347015,
+    "sessionId": "e69530ba-3d90-4925-8a18-af405a1fd1bd",
+    "name": "conductor-dotfiles",
+    "state": "stopped"
+  },
+  {
+    "id": "ae9730f3",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794370196880,
+    "sessionId": "ae9730f3-1f8c-4719-b810-af9353119a5d",
+    "name": "dotfiles-refinement-1",
+    "state": "done"
+  },
+  {
+    "id": "6e27ff14",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794373125815,
+    "sessionId": "6e27ff14-fdbb-426e-a173-21ae22422955",
+    "name": "start-claude-session",
+    "state": "done"
+  },
+  {
+    "id": "f080c32c",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1794376878109,
+    "sessionId": "f080c32c-1c07-4f38-82f9-4c8f7c0d57a9",
+    "name": "survey-refinement-3",
+    "state": "done"
+  },
+  {
+    "id": "9ccaf848",
+    "cwd": "/var/home/glw907/Projects/standards",
+    "kind": "background",
+    "startedAt": 1794377182911,
+    "sessionId": "9ccaf848-dea3-4167-b0cc-5a2c5fa706c9",
+    "name": "standards-refinement-3",
+    "state": "done"
+  },
+  {
+    "id": "22cdc18f",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794377914722,
+    "sessionId": "22cdc18f-d3cc-46eb-babd-ceb40363978f",
+    "name": "conductor-handoff-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "1b05ebb6",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794385489798,
+    "sessionId": "1b05ebb6-a83a-4448-b276-c2cd35dbe4e2",
+    "name": "approval-queue-pass-2a",
+    "state": "done"
+  },
+  {
+    "id": "4b425c96",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794390334345,
+    "sessionId": "4b425c96-2b80-42d5-8cfa-8aee0ca01c72",
+    "name": "dotfiles-pass-2b",
+    "state": "done"
+  },
+  {
+    "id": "e164725c",
+    "cwd": "/var/home/glw907/Projects/survey",
+    "kind": "background",
+    "startedAt": 1794421540979,
+    "sessionId": "e164725c-24b5-479f-bcf1-94134769f4b3",
+    "name": "survey-refinement-3",
+    "state": "done"
+  },
+  {
+    "id": "c98539be",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794422011497,
+    "sessionId": "c98539be-7142-4445-8cb2-598d6ef6d8ba",
+    "name": "dotfiles-refinement-3",
+    "state": "stopped"
+  },
+  {
+    "id": "c4ed95d7",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794429747889,
+    "sessionId": "c4ed95d7-e5ef-4a64-9672-c484146c84df",
+    "name": "conductor-workstation-refinement",
+    "state": "done"
+  },
+  {
+    "id": "94a50d24",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794438856000,
+    "sessionId": "94a50d24-9ce5-4a7b-a78a-96a781b57aaf",
+    "name": "probe-goal-bg",
+    "state": "stopped"
+  },
+  {
+    "id": "d5f550b7",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794439684600,
+    "sessionId": "d5f550b7-b306-4356-a795-7ac8ce7c3030",
+    "name": "probe-bg-wake",
+    "state": "done"
+  },
+  {
+    "id": "f79f5125",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794439685090,
+    "sessionId": "f79f5125-7b16-4098-aa56-e6f1d1fefac9",
+    "name": "probe-taskstop",
+    "state": "done"
+  },
+  {
+    "id": "d8fcc6bf",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794439978545,
+    "sessionId": "d8fcc6bf-378e-437a-956d-1ec0ca36c6bc",
+    "name": "probe-enter-path",
+    "state": "done"
+  },
+  {
+    "id": "6735aed9",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794451587641,
+    "sessionId": "6735aed9-1001-48e4-8552-d041c5e3c0a9",
+    "name": "probe-goal-wait",
+    "state": "done"
+  },
+  {
+    "id": "7cefc958",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794451707157,
+    "sessionId": "7cefc958-c788-431f-b407-216f0579a889",
+    "name": "probe-goal-state",
+    "state": "done"
+  },
+  {
+    "id": "c67832a5",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794455520456,
+    "sessionId": "c67832a5-72fd-4451-b243-f4b1b2534ff9",
+    "name": "conductor-approval-queue",
+    "state": "done"
+  },
+  {
+    "id": "bb055eee",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794455528686,
+    "sessionId": "bb055eee-51fe-4568-ac88-5c8d62605a35",
+    "name": "conductor-dotfiles",
+    "state": "done"
+  },
+  {
+    "id": "38cef942",
+    "cwd": "/var/home/glw907/Projects/standards",
+    "kind": "background",
+    "startedAt": 1794455529331,
+    "sessionId": "38cef942-f9b1-4000-b4b3-55e7f958381d",
+    "name": "standards-ur-s1-plan",
+    "state": "done"
+  },
+  {
+    "id": "d6cdd72c",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794455550290,
+    "sessionId": "d6cdd72c-3837-4c9f-8214-81dffe91a3e0",
+    "name": "approval-queue-ur-q1-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "29e44c2e",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794455559806,
+    "sessionId": "29e44c2e-16a9-4cf0-bee9-afe5b9aac1ca",
+    "name": "dotfiles-ur-w1-plan",
+    "state": "done"
+  },
+  {
+    "id": "9e394bbe",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794456697393,
+    "sessionId": "9e394bbe-3b7f-4c23-84bf-8aa58470ec60",
+    "name": "dotfiles-ur-w1",
+    "state": "stopped"
+  },
+  {
+    "id": "e255a65e",
+    "cwd": "/var/home/glw907/Projects/standards",
+    "kind": "background",
+    "startedAt": 1794456779949,
+    "sessionId": "e255a65e-1eca-4e4a-8f15-1f0df8811435",
+    "name": "standards-ur-s1",
+    "state": "done"
+  },
+  {
+    "id": "25378618",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794457357435,
+    "sessionId": "25378618-12e7-48ae-8177-6567429538b9",
+    "name": "approval-queue-ur-q1",
+    "state": "done"
+  },
+  {
+    "id": "5e58a0f9",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794457689765,
+    "sessionId": "5e58a0f9-8785-49ae-bd9d-2a0c3321e132",
+    "name": "dotfiles-ur-w2-plan",
+    "state": "done"
+  },
+  {
+    "id": "451ef917",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794458673168,
+    "sessionId": "451ef917-fd66-4202-ad38-4f6874967f63",
+    "name": "dotfiles-ur-w2",
+    "state": "done"
+  },
+  {
+    "id": "e45651b3",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794459178398,
+    "sessionId": "e45651b3-2ec5-45e5-8adf-c90f5cd92117",
+    "name": "approval-queue-ur-q2-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "99d35869",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794460843750,
+    "sessionId": "99d35869-f079-45cd-b9a6-96d755fdfd7c",
+    "name": "approval-queue-ur-q2",
+    "state": "done"
+  },
+  {
+    "id": "5974a5aa",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794462152147,
+    "sessionId": "5974a5aa-999b-4bd2-b693-9992e2e5d731",
+    "name": "approval-queue-ur-q3-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "e51a8c2d",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794463789992,
+    "sessionId": "e51a8c2d-6bb1-4e26-bdf5-ba91ee599c50",
+    "name": "approval-queue-ur-q3",
+    "state": "done"
+  },
+  {
+    "id": "928796fc",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794465741763,
+    "sessionId": "928796fc-e7b0-46b1-80b7-673fe00fcfe5",
+    "name": "approval-queue-ur-q4-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "87de8930",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794468977095,
+    "sessionId": "87de8930-39c8-44d8-9e66-e440671c6ba2",
+    "name": "approval-queue-ur-q4",
+    "state": "done"
+  },
+  {
+    "id": "762bc711",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794470891343,
+    "sessionId": "762bc711-cf29-4256-851e-683e86bcddb6",
+    "name": "dotfiles-ur-w4-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "fd6958a7",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794472265917,
+    "sessionId": "fd6958a7-3837-4884-8ee6-6ea02f5a1d48",
+    "name": "dotfiles-ur-w4",
+    "state": "done"
+  },
+  {
+    "id": "179422d6",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794474789224,
+    "sessionId": "179422d6-7d71-4eed-a298-ae5aa6bb719d",
+    "name": "dotfiles-ur-w5-plan",
+    "state": "done"
+  },
+  {
+    "id": "12a75906",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794476226414,
+    "sessionId": "12a75906-7679-49b0-950f-3fecd44fb708",
+    "name": "dotfiles-ur-w5",
+    "state": "stopped"
+  },
+  {
+    "id": "3c662ad9",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794499734327,
+    "sessionId": "3c662ad9-858a-45ac-a435-d8cb011dee84",
+    "name": "dotfiles-ur-w5",
+    "state": "done"
+  },
+  {
+    "id": "1fb0f8cc",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794501072055,
+    "sessionId": "1fb0f8cc-d2db-41e6-aee5-e6d29facc270",
+    "name": "dotfiles-ur-w3-plan",
+    "state": "done"
+  },
+  {
+    "id": "6be2d3be",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794502494878,
+    "sessionId": "6be2d3be-bc94-46d5-b42d-1eb48db4ebee",
+    "name": "dotfiles-ur-w3",
+    "state": "done"
+  },
+  {
+    "id": "8b426e82",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794517247963,
+    "sessionId": "8b426e82-00eb-4b9f-9a09-1ec00e1bd5fc",
+    "name": "conductor-workstation",
+    "state": "stopped"
+  },
+  {
+    "id": "0d9498e7",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794517248671,
+    "sessionId": "0d9498e7-5b69-4995-a264-90a7fd83af93",
+    "name": "conductor-approval-queue",
+    "state": "stopped"
+  },
+  {
+    "id": "21e2c211",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794517253451,
+    "sessionId": "21e2c211-f75b-4963-a0b4-a087f29d25aa",
+    "name": "publish-unattended-rounds-record",
+    "state": "done"
+  },
+  {
+    "id": "aacc6f4d",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794517423710,
+    "sessionId": "aacc6f4d-bb6e-49d8-9136-10fa2fe1aa0f",
+    "name": "conductor-workstation",
+    "state": "stopped"
+  },
+  {
+    "id": "d9895ebc",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794517427187,
+    "sessionId": "d9895ebc-541f-4682-8ee4-dbb8c3496a56",
+    "name": "conductor-approval-queue",
+    "state": "stopped"
+  },
+  {
+    "id": "c4a86f71",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794517471358,
+    "sessionId": "c4a86f71-d19c-4f73-983b-2f03559ac674",
+    "name": "workstation-ws-d0-plan",
+    "state": "done"
+  },
+  {
+    "id": "288c0e18",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794518021992,
+    "sessionId": "288c0e18-5dc5-4237-8e69-72f46fc19232",
+    "name": "workstation-ws-d0",
+    "state": "done"
+  },
+  {
+    "id": "3ee17782",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794518562209,
+    "sessionId": "3ee17782-03b7-476b-a807-0d2895ca7609",
+    "name": "approval-queue-aq-a1-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "76936a4f",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794520196947,
+    "sessionId": "76936a4f-c4ea-41d8-8694-969725568c38",
+    "name": "approval-queue-aq-a1",
+    "state": "done"
+  },
+  {
+    "id": "55b671b0",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794522912865,
+    "sessionId": "55b671b0-757d-4d94-8a7e-248304777271",
+    "name": "approval-queue-aq-a2-plan",
+    "state": "done"
+  },
+  {
+    "id": "0f5c20c3",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794524313401,
+    "sessionId": "0f5c20c3-9b22-48ef-b5b4-2f77190ab0ae",
+    "name": "approval-queue-aq-a2",
+    "state": "done"
+  },
+  {
+    "id": "91b841c5",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794527196195,
+    "sessionId": "91b841c5-ddeb-4b61-a2f4-fa138d4f7902",
+    "name": "approval-queue-aq-a3-plan",
+    "state": "done"
+  },
+  {
+    "id": "918af35f",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794528743950,
+    "sessionId": "918af35f-1e3c-4623-aa09-eb559c8024ca",
+    "name": "approval-queue-aq-a3",
+    "state": "done"
+  },
+  {
+    "id": "30ddbd62",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794532672879,
+    "sessionId": "30ddbd62-5dab-4620-8e2d-d11794854e45",
+    "name": "approval-queue-aq-a4-plan",
+    "state": "done"
+  },
+  {
+    "id": "f7d2ac60",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794534081701,
+    "sessionId": "f7d2ac60-b27b-4922-a30c-29f7d13c104e",
+    "name": "approval-queue-aq-a4",
+    "state": "done"
+  },
+  {
+    "id": "54cafbfb",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794547058046,
+    "sessionId": "54cafbfb-cd99-4a36-ad5f-874e31e45f05",
+    "name": "approval-queue-aq-a4",
+    "state": "done"
+  },
+  {
+    "id": "e3720905",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794549017788,
+    "sessionId": "e3720905-c611-45ca-baab-42ed8e41e761",
+    "name": "approval-queue-aq-a5-plan",
+    "state": "done"
+  },
+  {
+    "id": "4957d346",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794550420342,
+    "sessionId": "4957d346-8240-4762-95fc-57ba58aeefdb",
+    "name": "approval-queue-aq-a5",
+    "state": "done"
+  },
+  {
+    "id": "8ee2aba3",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794557254443,
+    "sessionId": "8ee2aba3-22c4-4ccc-bb2e-85131ccaee6d",
+    "name": "workstation-ws-d1-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "da3336f2",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794557469284,
+    "sessionId": "da3336f2-70aa-48a1-be79-bd79aee19468",
+    "name": "conductor-workstation",
+    "state": "done"
+  },
+  {
+    "id": "7ea0a981",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794557498280,
+    "sessionId": "7ea0a981-7fb9-4b06-bbef-b643a723498d",
+    "name": "workstation-ws-d1-plan",
+    "state": "done"
+  },
+  {
+    "id": "a29ac7fd",
+    "cwd": "/var/home/glw907/Projects/initiatives/.claude/worktrees/unattended-rounds/unattended-rounds",
+    "kind": "background",
+    "startedAt": 1794557552138,
+    "sessionId": "a29ac7fd-491d-4c44-a593-3f65cdc92f3f",
+    "name": "conductor-approval-queue",
+    "state": "done"
+  },
+  {
+    "id": "62622965",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794557592864,
+    "sessionId": "62622965-c582-494f-8641-f39bf9702ca4",
+    "name": "approval-queue-aq-a6-plan",
+    "state": "done"
+  },
+  {
+    "id": "ce7d1859",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794559368495,
+    "sessionId": "ce7d1859-3b49-4524-b34d-1d20e4008f54",
+    "name": "workstation-ws-d1-trust-probe",
+    "state": "done"
+  },
+  {
+    "id": "11473914",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794559678980,
+    "sessionId": "11473914-f4e6-459e-ae57-d9fbb7248586",
+    "name": "approval-queue-aq-a6",
+    "state": "done"
+  },
+  {
+    "id": "bbb155f3",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794559801992,
+    "sessionId": "bbb155f3-17b9-4cf3-a308-aace5f094864",
+    "name": "workstation-ws-d1",
+    "state": "done"
+  },
+  {
+    "id": "40978d9e",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794560819612,
+    "sessionId": "40978d9e-9a69-473c-8557-b80c58c07d96",
+    "name": "workstation-ws-d1-e2e-1",
+    "state": "done"
+  },
+  {
+    "id": "82e321de",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794592744053,
+    "sessionId": "82e321de-78c2-438c-9342-5eb0cf37f133",
+    "name": "workstation-ws-d2-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "4a7aa7e3",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794595490169,
+    "sessionId": "4a7aa7e3-7913-4680-8133-3c22b53f81f6",
+    "name": "workstation-ws-d2",
+    "state": "done"
+  },
+  {
+    "id": "bf461f11",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794599062039,
+    "sessionId": "bf461f11-3f16-4c13-90c8-008400d50c15",
+    "name": "workstation-ws-d3-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "135bc4f1",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794599601143,
+    "sessionId": "135bc4f1-678d-49cb-b7ff-7e3a88c9cb07",
+    "name": "workstation-ws-d3-plan",
+    "state": "done"
+  },
+  {
+    "id": "f3755352",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794601951286,
+    "sessionId": "f3755352-e825-49a6-b76d-4469571ce895",
+    "name": "workstation-ws-d3",
+    "state": "stopped"
+  },
+  {
+    "id": "10d1f0df",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794607524306,
+    "sessionId": "10d1f0df-27c1-4254-92d3-f5ac2f57cc55",
+    "name": "cli-redesign-round-pattern",
+    "state": "done"
+  },
+  {
+    "id": "4a33a3d2",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794611822390,
+    "sessionId": "4a33a3d2-83e7-42dc-92a6-a56fb56d95db",
+    "name": "rename-servers-repo-household-it",
+    "state": "done"
+  },
+  {
+    "id": "fdfddecb",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794611884400,
+    "sessionId": "fdfddecb-4618-4276-b244-919bc74b85a9",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "ef24144b",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794613985843,
+    "sessionId": "ef24144b-f0f4-44d2-a637-a4ec4fd960df",
+    "name": "conductor-household-it",
+    "state": "done"
+  },
+  {
+    "id": "eaf592a2",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794614043160,
+    "sessionId": "eaf592a2-af0c-46e3-b667-fc4e6493a8ce",
+    "name": "household-it-runbook-map-1-plan",
+    "state": "done"
+  },
+  {
+    "id": "11a74817",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794616945089,
+    "sessionId": "11a74817-c0b8-488e-8ee9-f29bd118b1cb",
+    "name": "household-it-runbook-map-1",
+    "state": "stopped"
+  },
+  {
+    "id": "ebf773da",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794623862809,
+    "sessionId": "ebf773da-25a1-476d-84ce-f1912392bf36",
+    "name": "household-it-runbook-map-1",
+    "state": "done"
+  },
+  {
+    "id": "1b955af7",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794623969316,
+    "sessionId": "1b955af7-783d-486a-a3c7-d4c08bb2724a",
+    "name": "cairn-cms-setup-tooling-close",
+    "state": "done"
+  },
+  {
+    "id": "1593a4b7",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794633710006,
+    "sessionId": "1593a4b7-a278-424c-81fa-b4f2dc0f19a3",
+    "name": "household-it-runbook-map-2-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "6046874d",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794636401590,
+    "sessionId": "6046874d-9925-49ee-975a-8177d5376a35",
+    "name": "household-it-runbook-map-2",
+    "state": "stopped"
+  },
+  {
+    "id": "09da0234",
+    "cwd": "/var/home/glw907/Projects/household-it",
+    "kind": "background",
+    "startedAt": 1794637746259,
+    "sessionId": "09da0234-58da-4b9b-9b35-03d72b3a2291",
+    "name": "household-it-runbook-map-2",
+    "state": "done"
+  },
+  {
+    "id": "814a7bf6",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794643637990,
+    "sessionId": "814a7bf6-9d2d-4efc-ac2b-f46570f7c760",
+    "name": "workstation-runbook-agents-plan",
+    "state": "done"
+  },
+  {
+    "id": "358c7d30",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794677260494,
+    "sessionId": "358c7d30-c9a4-4035-9ced-8350c31060f2",
+    "name": "conductor-cairn-cms",
+    "state": "done"
+  },
+  {
+    "id": "d9ab0763",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794677291365,
+    "sessionId": "d9ab0763-d7c9-4d4c-9d89-8b8a4eb6e853",
+    "name": "cairn-cms-tui-language-1-plan",
+    "state": "done"
+  },
+  {
+    "id": "da2071dd",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794678763731,
+    "sessionId": "da2071dd-d782-4710-bfab-a58923d93c59",
+    "name": "tighten-claude-command-rules",
+    "state": "done"
+  },
+  {
+    "id": "cdc9fb8d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794678986474,
+    "sessionId": "cdc9fb8d-7d0b-43ec-afb3-f7459f63d928",
+    "name": "cairn-cms-tui-language-1",
+    "state": "done"
+  },
+  {
+    "id": "89f90501",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794698195588,
+    "sessionId": "89f90501-7c75-4fe9-9576-58eec3f003f9",
+    "name": "cairn-cms-tui-language-2-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "208e92ab",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794698625698,
+    "sessionId": "208e92ab-0e11-4a89-8a11-f7e1be2539ca",
+    "name": "cairn-cms-theme-catalog-1",
+    "state": "done"
+  },
+  {
+    "id": "27ab05cf",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794698843479,
+    "sessionId": "27ab05cf-ae2d-4781-b4bd-b59feb022db4",
+    "name": "dotfiles-self-hosting-router-upkeep",
+    "state": "done"
+  },
+  {
+    "id": "137249ff",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794699409408,
+    "sessionId": "137249ff-1ab1-4e15-af4b-ff10e666b1fd",
+    "name": "conductor-theme-catalog",
+    "state": "done"
+  },
+  {
+    "id": "f04cf88d",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794702191694,
+    "sessionId": "f04cf88d-e327-4e94-9896-dad287435906",
+    "name": "dotfiles-router-upkeep-sync",
+    "state": "done"
+  },
+  {
+    "id": "31588a63",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794702246521,
+    "sessionId": "31588a63-1ba3-47da-840d-4e0a8deffef0",
+    "name": "cairn-cms-tui-language-2-plan",
+    "state": "done"
+  },
+  {
+    "id": "33ef0207",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794703033227,
+    "sessionId": "33ef0207-b2bb-434c-ac9e-1c6e1f357b4c",
+    "name": "cairn-cms-tui-language-2",
+    "state": "done"
+  },
+  {
+    "id": "57975e76",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794717228164,
+    "sessionId": "57975e76-1511-49b1-8bed-423702bececb",
+    "name": "cairn-cms-tui-language-3-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "9a8398b9",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794719167888,
+    "sessionId": "9a8398b9-3d94-4d53-94b8-f66bd41a2985",
+    "name": "cairn-cms-tui-language-3",
+    "state": "done"
+  },
+  {
+    "id": "8420e250",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794720844219,
+    "sessionId": "8420e250-e640-4357-80af-394b71661427",
+    "name": "conductor-pennant",
+    "state": "stopped"
+  },
+  {
+    "id": "a372dbe7",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794720869321,
+    "sessionId": "a372dbe7-5eae-499a-b194-72a3b5a25a9d",
+    "name": "cairn-cms-pennant-1-plan",
+    "state": "done"
+  },
+  {
+    "id": "e263785d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794722957511,
+    "sessionId": "e263785d-93c0-4a67-9661-24fff440e714",
+    "name": "cairn-cms-pennant-1",
+    "state": "stopped"
+  },
+  {
+    "id": "726b7fb6",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794724582723,
+    "sessionId": "726b7fb6-58c9-4d2b-8504-6dd50231417c",
+    "name": "conductor-events",
+    "state": "done"
+  },
+  {
+    "id": "b62d9190",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794724614474,
+    "sessionId": "b62d9190-daec-4839-a43e-fdf99fefd504",
+    "name": "cairn-cms-events-1-plan",
+    "state": "done"
+  },
+  {
+    "id": "84d463dc",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794726621850,
+    "sessionId": "84d463dc-e1cb-4839-98f7-53d78bedfa24",
+    "name": "cairn-cms-events-1",
+    "state": "done"
+  },
+  {
+    "id": "a2a0ddfd",
+    "cwd": "/var/home/glw907/Projects/cairn-cms/.claude/worktrees/tui-language-4",
+    "kind": "background",
+    "startedAt": 1794735897557,
+    "sessionId": "a2a0ddfd-3cf5-4db7-a989-dd43242d7445",
+    "name": "cairn-cms-tui-language-4-plan",
+    "state": "done"
+  },
+  {
+    "id": "cbc007f5",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794736282476,
+    "sessionId": "cbc007f5-aac1-47eb-8c10-258e93cc1119",
+    "name": "cairn-cms-pennant-2-plan",
+    "state": "done"
+  },
+  {
+    "id": "dc3bbd28",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794737715123,
+    "sessionId": "dc3bbd28-c14f-4a83-bca9-53548c2d93db",
+    "name": "cairn-cms-tui-language-4",
+    "state": "done"
+  },
+  {
+    "id": "6318472a",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794739287627,
+    "sessionId": "6318472a-a835-43d1-840f-5fa49d4de9e7",
+    "name": "cairn-cms-pennant-2",
+    "state": "stopped"
+  },
+  {
+    "id": "9885ae3d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794765700667,
+    "sessionId": "9885ae3d-4eef-4220-80ec-0e7b0f87c4b3",
+    "name": "cairn-cms-pennant-2",
+    "state": "stopped"
+  },
+  {
+    "id": "df86608d",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794766179232,
+    "sessionId": "df86608d-a8e4-4d80-96aa-aadd33c58ecc",
+    "name": "cairn-cms-tui-language-3",
+    "state": "done"
+  },
+  {
+    "id": "5912e9b0",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794769493642,
+    "sessionId": "5912e9b0-3b13-4e14-8b30-49c33fa91caa",
+    "name": "cairn-cms-pennant-3-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "1021af6b",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794770068665,
+    "sessionId": "1021af6b-44ef-4ddb-9b12-f88430f26c66",
+    "name": "cairn-cms-tui-language-4",
+    "state": "done"
+  },
+  {
+    "id": "2c12e413",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794777602455,
+    "sessionId": "2c12e413-67b9-48d8-ac8e-dedfd39ed3d4",
+    "name": "cairn-cms-pennant-3-plan",
+    "state": "done"
+  },
+  {
+    "id": "1330c292",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794778337965,
+    "sessionId": "1330c292-db1f-49d4-89b5-3be8c7147906",
+    "name": "cairn-cms-pennant-3",
+    "state": "done"
+  },
+  {
+    "id": "3334accf",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794786608233,
+    "sessionId": "3334accf-8b3a-4cc9-a94c-93ceda9205f2",
+    "name": "cairn-cms-pennant-4-plan",
+    "state": "done"
+  },
+  {
+    "id": "f6d00f7e",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794787461861,
+    "sessionId": "f6d00f7e-d604-4a40-99cd-62ff641449f7",
+    "name": "conductor-dubplate",
+    "state": "stopped"
+  },
+  {
+    "id": "113781de",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794788235181,
+    "sessionId": "113781de-0cc2-48b9-8bd4-2fe4cfc1fe12",
+    "name": "approval-queue-desk-queue-plan",
+    "state": "done"
+  },
+  {
+    "id": "9ce9fc80",
+    "cwd": "/var/home/glw907/Projects/initiatives",
+    "kind": "background",
+    "startedAt": 1794788606573,
+    "sessionId": "9ce9fc80-3f70-4ca5-a70c-c6a324ca9439",
+    "name": "advisor-desk-scope-amendment",
+    "state": "done"
+  },
+  {
+    "id": "a108e08f",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794789305069,
+    "sessionId": "a108e08f-adae-4760-ad10-696e889c0ef0",
+    "name": "cairn-cms-pennant-4",
+    "state": "done"
+  },
+  {
+    "id": "0e8f4650",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794790579276,
+    "sessionId": "0e8f4650-f94a-4fe4-a6fb-98b1a56b6c8d",
+    "name": "approval-queue-desk-queue",
+    "state": "done"
+  },
+  {
+    "id": "ce9fd842",
+    "cwd": "/var/home/glw907/Projects/approval-queue",
+    "kind": "background",
+    "startedAt": 1794791555487,
+    "sessionId": "ce9fd842-7adc-4149-9e17-126047a28eb7",
+    "name": "approval-queue-desk-queue",
+    "state": "done"
+  },
+  {
+    "id": "210ff9f0",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794794141142,
+    "sessionId": "210ff9f0-f7fd-4649-aa8c-80bf9f97ed66",
+    "name": "workstation-desk-ws-plan",
+    "state": "done"
+  },
+  {
+    "id": "e7776bf7",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794794413071,
+    "sessionId": "e7776bf7-53c9-41e9-9da2-794004bd872c",
+    "name": "probe-desk-ondisk",
+    "state": "done"
+  },
+  {
+    "id": "305afd88",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794794797368,
+    "sessionId": "305afd88-cb4c-4983-91f3-5642d09e0531",
+    "name": "probe-desk-orphan",
+    "state": "done"
+  },
+  {
+    "id": "a28a1a02",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794796241196,
+    "sessionId": "a28a1a02-0e86-48e9-814d-0fe8d6da90f5",
+    "name": "probe-desk-revive",
+    "state": "done"
+  },
+  {
+    "id": "55906333",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794796342919,
+    "sessionId": "55906333-9a82-4a5d-a280-102272f70f41",
+    "name": "probe-desk-revive2",
+    "state": "stopped"
+  },
+  {
+    "id": "338e88a4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794796800974,
+    "sessionId": "338e88a4-9957-4cef-92e3-a318e22ef980",
+    "name": "pennant-round-close-packet",
+    "state": "stopped"
+  },
+  {
+    "id": "20051772",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794797000055,
+    "sessionId": "20051772-c4bf-4b9e-8287-6065a618fe2b",
+    "name": "workstation-desk-ws",
+    "state": "done"
+  },
+  {
+    "id": "e4c3e00e",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794797573060,
+    "sessionId": "e4c3e00e-18d8-443d-b567-7c5ed5fb86b4",
+    "name": "desk",
+    "state": "done"
+  },
+  {
+    "id": "7917307a",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794797739970,
+    "sessionId": "7917307a-f271-452b-9890-a9950d7013de",
+    "name": "desk",
+    "state": "stopped"
+  },
+  {
+    "id": "898a00bf",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794801698844,
+    "sessionId": "898a00bf-e0d5-44ae-bf6a-7ffd84432a8a",
+    "name": "desk",
+    "state": "failed"
+  },
+  {
+    "id": "856abd3d",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794803193648,
+    "sessionId": "856abd3d-2b9f-426d-bc4b-5993b03f4f91",
+    "name": "conductor-dubplate",
+    "state": "failed"
+  },
+  {
+    "id": "853760cd",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794803244150,
+    "sessionId": "853760cd-93f9-4d38-9d6f-c545cd4c979d",
+    "name": "dubplate-cleanup-ci-plan",
+    "state": "done"
+  },
+  {
+    "id": "3db2cf99",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794806324823,
+    "sessionId": "3db2cf99-5440-42f3-a50d-a65e616c5c0f",
+    "name": "dubplate-cleanup-ci",
+    "state": "done"
+  },
+  {
+    "id": "fcce294b",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794812889582,
+    "sessionId": "fcce294b-a0e6-4eca-8274-1e79b56d4d58",
+    "name": "dubplate-cleanup-gate-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "f9669e5a",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794845428599,
+    "sessionId": "f9669e5a-a8a5-46ea-8661-446fc8532f6c",
+    "name": "dubplate-cleanup-gate-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "a6667dba",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794846701620,
+    "sessionId": "a6667dba-1e25-4c16-a433-d6e8cc1d4980",
+    "name": "conductor-foundation",
+    "state": "failed"
+  },
+  {
+    "id": "916c2a65",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794846724358,
+    "sessionId": "916c2a65-0616-441b-9fb8-64b8d180da3c",
+    "name": "cairn-cms-foundation-1-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "334693b7",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794846752039,
+    "sessionId": "334693b7-1a5a-44bd-8a8f-e6dd3e26f5e1",
+    "name": "dubplate-cleanup-gate",
+    "state": "done"
+  },
+  {
+    "id": "1cb10023",
+    "cwd": "/var/home/glw907/.dotfiles/claude/.claude/skills/pass-core",
+    "kind": "background",
+    "startedAt": 1794846955496,
+    "sessionId": "1cb10023-c2fe-485a-806e-fa1801a7675c",
+    "state": "done"
+  },
+  {
+    "id": "1a2a42d8",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794848461902,
+    "sessionId": "1a2a42d8-1251-4b6d-bd37-5f64715c1a61",
+    "name": "cairn-cms-foundation-1",
+    "state": "done"
+  },
+  {
+    "id": "4406c345",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794854094055,
+    "sessionId": "4406c345-5169-47c1-ad6d-8848b5c8e7a4",
+    "name": "dubplate-cleanup-store-plan",
+    "state": "done"
+  },
+  {
+    "id": "81555bb6",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794855809412,
+    "sessionId": "81555bb6-7651-44cf-9420-c96285c209fd",
+    "name": "workstation-run-past-park-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "6cd03a96",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794856036401,
+    "sessionId": "6cd03a96-7016-4e29-8f54-b713f0e4f309",
+    "name": "dubplate-cleanup-store",
+    "state": "stopped"
+  },
+  {
+    "id": "a46f62b3",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794856216477,
+    "sessionId": "a46f62b3-a9af-4c45-9760-741ce8f9f26f",
+    "name": "dubplate-cleanup-store",
+    "state": "done"
+  },
+  {
+    "id": "15c242fa",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794857071723,
+    "sessionId": "15c242fa-3968-41da-85e8-1167292c16c0",
+    "name": "cairn-cms-foundation-2-plan",
+    "state": "done"
+  },
+  {
+    "id": "b6a2a2be",
+    "cwd": "/var/home/glw907/.dotfiles",
+    "kind": "background",
+    "startedAt": 1794857295350,
+    "sessionId": "b6a2a2be-0288-4642-9417-d9efb74a92eb",
+    "name": "workstation-run-past-park",
+    "state": "done"
+  },
+  {
+    "id": "e438d6e5",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794859157814,
+    "sessionId": "e438d6e5-89fb-4a10-933b-6c81c75a62ca",
+    "name": "cairn-cms-foundation-2",
+    "state": "failed"
+  },
+  {
+    "id": "376af6e3",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794865991633,
+    "sessionId": "376af6e3-12c4-4c02-9b87-5d60552c3961",
+    "name": "dubplate-cleanup-web-plan",
+    "state": "failed"
+  },
+  {
+    "id": "ff96fa45",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794868929599,
+    "sessionId": "ff96fa45-4916-489c-ad10-b553f1dc93ec",
+    "name": "dubplate-cleanup-web",
+    "state": "failed"
+  },
+  {
+    "id": "818e389e",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794884122729,
+    "sessionId": "818e389e-ee83-4611-be50-3c6793cfedb7",
+    "name": "desk",
+    "state": "stopped"
+  },
+  {
+    "id": "e5f9720c",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794884381942,
+    "sessionId": "e5f9720c-18f2-401f-b739-f14599791efa",
+    "name": "conductor-dubplate",
+    "state": "stopped"
+  },
+  {
+    "id": "08146f32",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794884385809,
+    "sessionId": "08146f32-e6d0-4683-aad6-0d2758aaa85d",
+    "name": "conductor-foundation",
+    "state": "done"
+  },
+  {
+    "id": "cf1710bd",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794884429909,
+    "sessionId": "cf1710bd-4751-444d-9da3-fbf698ffaff4",
+    "name": "dubplate-cleanup-web",
+    "state": "done"
+  },
+  {
+    "id": "319cb09b",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794884430358,
+    "sessionId": "319cb09b-b858-4a45-945d-0ce65b535075",
+    "name": "cairn-cms-foundation-2",
+    "state": "done"
+  },
+  {
+    "id": "5701c5a7",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794888618789,
+    "sessionId": "5701c5a7-567e-4fe0-8fda-db3adc0d0dd3",
+    "name": "dubplate-cleanup-ops-plan",
+    "state": "done"
+  },
+  {
+    "id": "94fb59e1",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794888709608,
+    "sessionId": "94fb59e1-39f7-4017-af71-f1a479ee21e1",
+    "name": "cairn-cms-foundation-3-plan",
+    "state": "done"
+  },
+  {
+    "id": "cbd9d808",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794891361577,
+    "sessionId": "cbd9d808-5eb7-429e-922f-52643440ec8d",
+    "name": "cairn-cms-foundation-3",
+    "state": "stopped"
+  },
+  {
+    "id": "04ba9462",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794891948140,
+    "sessionId": "04ba9462-3dc8-4652-a5ff-77ef6aab14bb",
+    "name": "dubplate-cleanup-ops",
+    "state": "done"
+  },
+  {
+    "id": "10277ab8",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794895108265,
+    "sessionId": "10277ab8-d8d5-4fb7-8af5-a09c1d317871",
+    "name": "dubplate-engine-design",
+    "state": "done"
+  },
+  {
+    "id": "b3c9cad7",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794897719840,
+    "sessionId": "b3c9cad7-924d-4011-9ac6-8736c9aba853",
+    "name": "dubplate-intake-design",
+    "state": "stopped"
+  },
+  {
+    "id": "3189406b",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794897891718,
+    "sessionId": "3189406b-8020-4864-ab4e-2f9d7522a9c0",
+    "name": "cairn-layering-design",
+    "state": "stopped"
+  },
+  {
+    "id": "9067425a",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794897898569,
+    "sessionId": "9067425a-8d69-4db0-87da-e6f470bf6777",
+    "name": "dubplate-catalog-architecture",
+    "state": "done"
+  },
+  {
+    "id": "392087ce",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794898847696,
+    "sessionId": "392087ce-8742-4f13-b955-5e0feeb14741",
+    "name": "cairn-structure-design",
+    "state": "done"
+  },
+  {
+    "id": "93d87e73",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794898852396,
+    "sessionId": "93d87e73-8e41-40f3-b806-f485115c92b0",
+    "name": "dubplate-structure-design",
+    "state": "stopped"
+  },
+  {
+    "id": "8d62c113",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794899991574,
+    "sessionId": "8d62c113-1e67-4148-935c-e7a6e9a73ffb",
+    "name": "cairn-routing-design",
+    "state": "done"
+  },
+  {
+    "id": "3e819795",
+    "cwd": "/var/home/glw907/Projects/initiatives/theme-garden",
+    "kind": "background",
+    "startedAt": 1794901949703,
+    "sessionId": "3e819795-6c06-4fe0-be11-412de9a7ab88",
+    "state": "done"
+  },
+  {
+    "id": "a2a38a54",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794936198863,
+    "sessionId": "a2a38a54-88b7-4699-a4e0-f590dc1a535f",
+    "name": "conductor-foundation",
+    "state": "done"
+  },
+  {
+    "id": "f4d4d2c1",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794937295253,
+    "sessionId": "f4d4d2c1-e6ab-462e-88cb-24e9958ea48d",
+    "name": "cairn-tool-port-design",
+    "state": "done"
+  },
+  {
+    "id": "69008b16",
+    "cwd": "/var/home/glw907/Projects/dubplate",
+    "kind": "background",
+    "startedAt": 1794937997075,
+    "sessionId": "69008b16-b70b-4e6b-9749-87da1adca50a",
+    "name": "dubplate-engine",
+    "state": "done"
+  },
+  {
+    "id": "b4fa02eb",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794939088782,
+    "sessionId": "b4fa02eb-684f-463c-a26d-9c85269283a9",
+    "name": "cairn-cms-foundation-7-plan",
+    "state": "stopped"
+  },
+  {
+    "id": "1ca5b3a4",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794939847517,
+    "sessionId": "1ca5b3a4-b731-49dd-970b-6ff9d8f1f481",
+    "name": "cairn-layering-design",
+    "state": "done"
+  },
+  {
+    "id": "4dc21e80",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794940202272,
+    "sessionId": "4dc21e80-8505-4b41-a38a-782316032bd3",
+    "name": "cairn-route-design",
+    "state": "stopped"
+  },
+  {
+    "id": "e31dc192",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794942633106,
+    "sessionId": "e31dc192-eed4-493d-ae73-bb569e008e51",
+    "name": "cairn-cms-tool-delete-plan",
+    "state": "stopped"
+  },
+  {
+    "pid": 2027071,
+    "id": "2d4cd0a4",
+    "cwd": "/var/home/glw907/Projects/cairn-cms",
+    "kind": "background",
+    "startedAt": 1794945273228,
+    "sessionId": "2d4cd0a4-1ef2-4718-972e-d73798f62bc8",
+    "name": "cairn-cms-tool-delete",
+    "status": "busy",
+    "state": "blocked"
+  },
+  {
+    "id": "441739b5",
+    "cwd": "/var/home/glw907/Projects",
+    "kind": "background",
+    "startedAt": 1794947270952,
+    "sessionId": "441739b5-cd0e-4d64-b29c-4f2507a4a5dc",
+    "name": "cairn-route-design",
+    "state": "done"
+  },
+  {
+    "pid": 2841340,
+    "id": "e329f69b",
+    "cwd": "/var/home/glw907/Projects/cc-desk",
+    "kind": "background",
+    "startedAt": 1794958376177,
+    "sessionId": "e329f69b-0ccb-4e90-b198-9b4167294afe",
+    "name": "preflight-checks-spike-launch",
+    "status": "idle",
+    "state": "working"
+  },
+  {
+    "pid": 2841335,
+    "id": "92cc0981",
+    "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2",
+    "kind": "background",
+    "startedAt": 1794970838331,
+    "sessionId": "92cc0981-8df0-45c0-bdb1-3bda26cbc5e1",
+    "name": "cc-desk-prove",
+    "status": "busy",
+    "state": "working"
+  },
+  {
+    "pid": 2972161,
+    "id": "1d94674a",
+    "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/3-tools/sandbox",
+    "kind": "background",
+    "startedAt": 1794974219689,
+    "sessionId": "1d94674a-85a6-43d8-ba89-71f7c33ed809",
+    "name": "ccd-spike-3-full",
+    "status": "idle",
+    "state": "done"
+  },
+  {
+    "pid": 2976813,
+    "id": "0fe9c45d",
+    "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/3-tools/sandbox",
+    "kind": "background",
+    "startedAt": 1794974220781,
+    "sessionId": "0fe9c45d-1f2d-4137-8cf6-9f136a7061b9",
+    "name": "ccd-spike-3-lean",
+    "status": "idle",
+    "state": "done"
+  }
+]
