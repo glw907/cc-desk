@@ -1,0 +1,38 @@
+name: gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PIN_VALE_VERSION: 3.27.0
+      PIN_VALE_SHA256: c80d62f6bce87b81843ac5b512a26e63213927b957adba0a64fc594570da2000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.27.4
+
+      - name: Install vale
+        run: |
+          set -euo pipefail
+          a=vale_${PIN_VALE_VERSION}_Linux_64-bit.tar.gz
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$a" "https://github.com/errata-ai/vale/releases/download/v${PIN_VALE_VERSION}/$a"
+          echo "$PIN_VALE_SHA256  $RUNNER_TEMP/$a" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xf "$RUNNER_TEMP/$a" -C "$RUNNER_TEMP/bin" vale
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Gate
+        run: bash scripts/gate.sh

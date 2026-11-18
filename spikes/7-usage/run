@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Proof 7, look 2: read the weekly usage without a model call. Look 1 (the status
+# line in a background session) is not run here; see the findings report.
+set -euo pipefail
+cd "$(dirname "$0")"
+claude -p "/usage" --model haiku --output-format json </dev/null >usage.json
+python3 -I read.py usage.json
+python3 -I read.py --fixture
