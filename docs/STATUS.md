@@ -20,26 +20,24 @@
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 <!-- round-report state-rules -->
-**The start rules are built and wait on one question for Geoff, and the last pass is starting.**
-Passes 1 and 2 have landed as pull requests 3 and 4. Pass 3 is ready as pull request 5 and waits
-for Geoff's answer under "Open decisions". Pass 4, which records rulings, is starting from pass
-3's branch. Weekly usage read 90 percent, under the 100 percent stop.
+**The start rules have landed, and the last pass is in planning.** Passes 1 to 3 have landed as
+pull requests 3, 4, and 5. The command keeps the state files, forecasts the next session with
+Geoff, and starts, holds, or refuses a pass by the rules. Pass 4, which records rulings, is being
+planned. Weekly usage read 90 percent, under the 100 percent stop. Nothing waits for Geoff.
 
-Open documents: none. Pull request 5 waits for Geoff's answer in his terminal session.
+Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
 ## State and rules passes
 
-Passes 1 and 2 have landed. The snapshot holds each release's pace and range, each pass's and
+Passes 1 to 3 have landed. The snapshot holds each release's pace and range, each pass's and
 round's needed time, and the next session with `waits_for_geoff`. Each pass event appends a line
 to `forecasts.jsonl`.
 
-Pass 3 (`state-rules-order`) is built and in pull request 5, waiting on its merge. A start now
-follows the rules for what is free to start: it begins, waits on the two-pass limit or on usage, or
-is refused with every broken rule named. `cc-desk usage` and `cc-desk free` are new, and the snapshot
-carries `free`, `why_not`, `waiting`, `open_guesses`, and the unreadable usage figure under "Needs
-you now". One call waits for Geoff: `docs/follow-ups/resume-skips-the-limits.md`.
+Pass 3 (`state-rules-order`) landed as pull request 5. A start now begins, waits on the two-pass
+limit or on usage, or is refused with every broken rule named. `cc-desk usage` and `cc-desk free`
+are new. Geoff kept the resume rule as built: a resumed stopped pass skips both limits.
 
 ## Next action
 
@@ -53,10 +51,6 @@ docs/plans/2026-11-17-state-rules-conductor-prompt.txt and follow it from its fi
 
 ## Open decisions
 
-- Pull request 5 (the start rules) waits for Geoff's answer: should a stopped pass that resumes
-  skip the limit of two passes building at once? Recommended: yes, as built. See
-  `docs/follow-ups/resume-skips-the-limits.md` on its branch. Pass 4 builds on its branch and
-  lands after it.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
