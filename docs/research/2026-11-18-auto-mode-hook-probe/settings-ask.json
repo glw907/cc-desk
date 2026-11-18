@@ -1,0 +1,1 @@
+{"permissions":{"allow":[],"ask":["Bash(date -u +%s > /var/home/glw907/.claude/jobs/b606693e/tmp/hookprobe/probe2.txt)"],"deny":["Bash(gh pr merge *)"]},"hooks":{"PermissionRequest":[{"hooks":[{"type":"command","command":"/var/home/glw907/.claude/jobs/b606693e/tmp/hookprobe/log-hook.sh","timeout":30}]}]}}
