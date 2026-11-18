@@ -146,6 +146,17 @@ const builders: Record<string, Builder> = {
 		copyFixture('twin', dir);
 		return WORKED_CLOCK;
 	},
+	quiet(dir) {
+		// Two releases whose rounds are designed and building, with no question left to ask.
+		copyFixture('writers', dir);
+		for (const name of ['east', 'west']) {
+			const file = path.join(dir, 'releases', `${name}.json`);
+			const release = JSON.parse(readFileSync(file, 'utf8')) as { questions: unknown[] };
+			release.questions = [];
+			writeFileSync(file, JSON.stringify(release));
+		}
+		return T('23:00');
+	},
 	stopped(dir) {
 		started(dir);
 		run(dir, T('23:10'), 'pass', 'stop', 'alpha', 'p13', '--reason', 'scope');
