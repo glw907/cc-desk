@@ -1,0 +1,43 @@
+You are cc-desk-desk-records-plan, the planner of pass 1 of round `desk` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this prompt and the design differ, the design wins.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, with the State and rules, Sessions, and Page designs beside it. They hold wherever the round's design is silent.
+- The `standards:go-conventions` and `standards:golang-spf13-cobra` skills, since the plan sets Go tasks.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/desk-records, on branch `desk-records`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`.
+- This pass runs alone. Passes 2 and 4 start when it lands, and both read the verbs and the brief it builds.
+
+The pass: questions, rulings, reports, rounds, and stops carry what the desk and the page say, the check keeps a log, and one verb prints the brief.
+Planned minutes: 120. Class: `ordinary`. A plan whose path comes out over 240 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. The design's section "What the records gain", read with what "The page", "Rulings", and "The check's repairs" need recorded. This pass builds the new fields of a question with the verb that adds one from a file, the field that lets a ruling name the one it replaces, the record of a pass closed by a ruling, a release's list of commands that always ask and its place in a launched session's settings file, the shape of a refused command on a session's record, the report record with the verbs that record one from a file and mark it read, what a round gains, the record of a design conversation in progress, the log of what the check carried out, a stop's time and a pass's reason, the rule that an ended record never reads "Needs you now", the brief verb, and what the snapshot and its TypeScript type gain for all of these. It builds no opener, no merge answer, no page, and no hook: passes 3, 4, and 5 use what it records.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done item 1 ("Records") and done item 11 ("The gate") from the design. Run each check that can run on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. This pass fixes the name of every new verb and the format of the brief, and the two skills, the desk, and the page are written against them. Choose the names by the cobra skill and the names the command already uses, and list each verb with its arguments in the PR body. Every verb takes a usage reading today through `commitReading` in cmd/cc-desk/root.go; the verb behind "Mark as read" takes none and reads no session list, so verify how a verb can skip both. The page's service will run that verb, so it carries no desk guard. A working session records a question or a report from a background session, so those two carry none either, and neither can record a ruling. The brief reads the forecast the snapshot already computes. Its order is the planned minutes each question holds up, most first. The check's log gets one line for each thing the check carries out today, and pass 5 adds its lines later. The real state folder holds no project today (the round plan's shared assumptions), so the copy that item 1 asks for proves the files beside the releases; the releases are proved by the earlier rounds' fixtures, which stay as they are (standing answer 16). New fields are additions only, and docs/follow-ups/strict-reader-key-case.md says what the strict reader does with a key it doesn't know. The `ask` rule's form in a settings file is in docs/research/2026-11-18-ask-rule-probe/.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: desk` line, and a `Pass: desk-records` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-18. Read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code as the earlier passes left it.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The CI watch lists runs by branch. The executor's prompt says both.
+- One `standards:plan-reviewer` read with its findings folded, as `round.md` "A plan inside a round" asks. The plan's `Reviewed:` line says so.
+
+Four checks the last two rounds' reports asked for. Each was a planning miss there.
+1. Run `bash scripts/gate.sh` with the plan file in place before you commit the plan. The gate lints the plan.
+2. A step that names a tool's version names it as `go.mod` or the lockfile records it.
+3. Each task's file list comes from a search for every caller, test, fixture, and generated file of what the task changes.
+4. A step that runs under a systemd unit or timer names that unit's `PATH` and shows each command resolving under it, hook commands included.
+
+Save the plan as docs/plans/2026-11-18-desk-records-plan.md and the executor prompt as docs/plans/2026-11-18-desk-records-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. The plan and the executor prompt both name it. Follow-ups are one file each under docs/follow-ups/, never a shared backlog. A follow-up the design's "Backlog" table folds into this pass is removed by this pass, and one it rewords is reworded.
+
+The executor prompt names the executor cc-desk-desk-records, on Sonnet at medium effort, and names conductor-cc-desk as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: desk` and `Pass: desk-records` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. `pass-core` "Until cc-desk runs" holds. No session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the main checkout. If you must park, do it as `round.md` "Parking at planning" says. The conductor reads the stop from the draft PR and writes it under "Open decisions" in docs/STATUS.md on `main`.

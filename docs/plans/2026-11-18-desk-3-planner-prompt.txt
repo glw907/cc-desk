@@ -1,0 +1,43 @@
+You are cc-desk-desk-open-plan, the planner of pass 3 of round `desk` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this prompt and the design differ, the design wins.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, with the State and rules, Sessions, and Page designs beside it. They hold wherever the round's design is silent.
+- The `standards:go-conventions` and `standards:golang-spf13-cobra` skills, since the plan sets Go tasks.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/desk-open, on branch `desk-open`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`.
+- Pass 4 (`desk-page`) may still be building beside this one, in its own worktree. Its sessions are not yours to message, end, or wait for. Everything under `web/` and the page's unit is that pass's (standing answer 17).
+
+The pass: `cc-desk` opens the session, the check starts free passes, a wrong record is replaced, and a merge question has answers.
+Planned minutes: 100. Class: `runner`. A plan whose path comes out over 200 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. The design's sections "The desk opens" and "Rulings". This pass builds the root command that opens the desk on a terminal and prints help without one, `cc-desk <project> <round>`, the way the brief and the skill's name reach the session, the desk's settings file, the registration, the 30-second limit on `desk register`'s read of the session list, the check's new step that starts each free pass, the three cases of a replaced ruling, the three answers to a merge question with what a closed pass holds back, and the README's install lines with `~/.local/bin/cc-desk`.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done items 3 ("The desk opens"), 4 ("Ruling"), 5 ("Replacing and merging"), and 11 ("The gate") from the design. Run each check that can run on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. The round plan's shared assumptions hold the probes this pass rests on: how a session on a terminal is listed, the four variables a test clears so the session is listed at all, the trust question, the first line showing on screen, and the code that shows the check starts no pass today. The command replaces itself with `claude`, so the process id it registers is the one the session list shows. The workstation doesn't have the two skills until the conductor installs them after pass 5, so the tests give the session the `cc-desk` skill by its path in the repo. The check's new step uses the start the `pass start` verb runs, under the rules in `Breaks`, never on a guess and never in a release with no checkout; verify where the limit of two building passes is kept. The real state folder holds no project, so the step starts nothing when this pass is installed. The ruling guard was built and reviewed in the State and rules round. This pass calls it and doesn't change what it checks; a plan that finds it must takes the `auth-data` reads, as the round plan says. Items 3 to 5 need a live desk session on a pseudo-terminal the test makes, and none is a Go test that skips: they are scripts whose output goes in the PR. Live sessions run in the scratch checkout under names that start `cc-desk-scratch-`, as the auto mode entry in the round plan allows for `cc-desk-desk-open`. The merge answers act on a pull request in glw907/cc-desk-scratch only. If the code proves a line of skills/cc-desk/SKILL.md wrong, correct the line and list it (standing answer 15). The design's "Backlog" table folds cc-desk-on-browser-path.md, merge-question-answer.md, and item 6 of live-check-cleanup-gaps.md into this pass.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: desk` line, and a `Pass: desk-open` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-18. Read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code as the earlier passes left it.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The CI watch lists runs by branch. The executor's prompt says both.
+- One `standards:plan-reviewer` read with its findings folded, as `round.md` "A plan inside a round" asks. The plan's `Reviewed:` line says so.
+
+Four checks the last two rounds' reports asked for. Each was a planning miss there.
+1. Run `bash scripts/gate.sh` with the plan file in place before you commit the plan. The gate lints the plan.
+2. A step that names a tool's version names it as `go.mod` or the lockfile records it.
+3. Each task's file list comes from a search for every caller, test, fixture, and generated file of what the task changes.
+4. A step that runs under a systemd unit or timer names that unit's `PATH` and shows each command resolving under it, hook commands included.
+
+Save the plan as docs/plans/2026-11-18-desk-open-plan.md and the executor prompt as docs/plans/2026-11-18-desk-open-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. The plan and the executor prompt both name it. Follow-ups are one file each under docs/follow-ups/, never a shared backlog. A follow-up the design's "Backlog" table folds into this pass is removed by this pass, and one it rewords is reworded.
+
+The executor prompt names the executor cc-desk-desk-open, on Sonnet at medium effort, and names conductor-cc-desk as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: desk` and `Pass: desk-open` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. `pass-core` "Until cc-desk runs" holds. No session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the main checkout. If you must park, do it as `round.md` "Parking at planning" says. The conductor reads the stop from the draft PR and writes it under "Open decisions" in docs/STATUS.md on `main`.

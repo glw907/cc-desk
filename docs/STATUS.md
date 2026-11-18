@@ -13,6 +13,12 @@
   `~/.local/share/cc-desk/bin/cc-desk`, every five minutes. Follow-ups are files in
   `docs/follow-ups/`, with no `BACKLOG.md`; three carry Geoff's rulings of 2026-11-18.
 - The usage stop is 100 percent of the week; `cc-desk usage` prints the figure.
+- Geoff approved the Desk and skills round on 2026-11-18, in his terminal: the design
+  (`docs/specs/2026-11-18-desk-skills-design.md`), its round plan
+  (`docs/plans/2026-11-18-desk-skills-round.md`), and the auto mode entry `cc-desk-desk-round`,
+  which is in the settings. The round is six passes under the id `desk`, run by the background
+  session `conductor-cc-desk`. It ends with one real run that waits for Geoff at the desk, from
+  `docs/specs/2026-11-18-stuck-sessions-design.md`.
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,
@@ -30,11 +36,17 @@ Open documents: none.
 
 ## Next action
 
-Design the Desk and skills round with Geoff. From `~/Projects/cc-desk`, launch the design session:
+The conductor runs the Desk and skills round from its prompt,
+`docs/plans/2026-11-18-desk-conductor-prompt.txt`. If no session named `conductor-cc-desk` is
+running and the round isn't finished, launch it again from `~/Projects/cc-desk`, and it resumes
+from this file and the round's report:
 
 ```text
-claude --model claude-fable-5-2 --effort high "$(cat docs/plans/2026-11-18-desk-skills-design-prompt.txt)"
+claude --bg --model claude-opus-5-5 --effort medium --name conductor-cc-desk "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-conductor-prompt.txt)"
 ```
+
+When the round reports, the Move round is designed next. It also reshapes the cairn and dubplate
+initiatives so that cc-desk can take them over (Geoff, 2026-11-18).
 
 ## Open decisions
 

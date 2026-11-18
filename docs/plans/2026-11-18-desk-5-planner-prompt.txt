@@ -1,0 +1,43 @@
+You are cc-desk-desk-check-plan, the planner of pass 5 of round `desk` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this prompt and the design differ, the design wins.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, with the State and rules, Sessions, and Page designs beside it. They hold wherever the round's design is silent.
+- The `standards:go-conventions` and `standards:golang-spf13-cobra` skills, since the plan sets Go tasks.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/desk-check, on branch `desk-check`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`.
+- Pass 4 (`desk-page`) may still be building beside this one, in its own worktree. Its sessions are not yours to message, end, or wait for. Everything under `web/` and the page's unit is that pass's (standing answer 17).
+
+The pass: refusals are recorded, a model limit holds the relaunch, the cleanup stops the session, a merge call is bounded, and the conductor starts when a report is due.
+Planned minutes: 100. Class: `runner` and `live-account`. A plan whose path comes out over 200 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. The design's section "The check's repairs", five repairs. This pass builds the `PermissionDenied` hook in each launched session's settings file with the verb that records a refusal, the hold of a usage relaunch until the reset time with the count rule for a stop that names no time, the cleanup's stop step, the 60-second limits on the merge call, the fetch, and the pull, the question after three failed merge calls in a row, and the check's start and two relaunches of a conductor when a report is due.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done item 7 ("Repairs") and done item 11 ("The gate") from the design. Run each check that can run on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. The first task runs one launch in the scratch repo with the hook in the session's settings file, on a command the workstation's log shows auto mode refuses, and keeps the hook's input as the fixture. The round plan's shared assumptions say what is proven about that hook and what isn't. Geoff's two rulings are quoted in docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md and docs/follow-ups/merged-pass-session-still-listed.md. Build to their words, and note that the design builds the stop step whatever the 10-minute listing shows and lists that as Claude's call. The hook's command runs under whatever `PATH` the session has, so the settings file names the binary by its full path. The stand-ins that sleep need a way for a test to put them in place of `gh` and `git`. The check's log from pass 1 gains a line for each new thing the check carries out. The conductor's rule that a relaunch finds the report recorded and writes no second one lives in the template and the working skill, which are pass 2's files (standing answer 15). Every live merge is in glw907/cc-desk-scratch, and standing answers 18, 19, and 21 hold for the live runs: once pass 3 is installed the timed check starts a free pass by itself. The design's "Backlog" table folds auto-mode-prompt-clause.md, merge-call-fails-for-good.md, merged-pass-session-still-listed.md, usage-relaunch-loop-on-a-model-limit.md, and item 1 of launch-review-notes.md into this pass.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: desk` line, and a `Pass: desk-check` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-18. Read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code as the earlier passes left it.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The CI watch lists runs by branch. The executor's prompt says both.
+- One `standards:plan-reviewer` read with its findings folded, as `round.md` "A plan inside a round" asks. The plan's `Reviewed:` line says so.
+
+Four checks the last two rounds' reports asked for. Each was a planning miss there.
+1. Run `bash scripts/gate.sh` with the plan file in place before you commit the plan. The gate lints the plan.
+2. A step that names a tool's version names it as `go.mod` or the lockfile records it.
+3. Each task's file list comes from a search for every caller, test, fixture, and generated file of what the task changes.
+4. A step that runs under a systemd unit or timer names that unit's `PATH` and shows each command resolving under it, hook commands included.
+
+Save the plan as docs/plans/2026-11-18-desk-check-plan.md and the executor prompt as docs/plans/2026-11-18-desk-check-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. The plan and the executor prompt both name it. Follow-ups are one file each under docs/follow-ups/, never a shared backlog. A follow-up the design's "Backlog" table folds into this pass is removed by this pass, and one it rewords is reworded.
+
+The executor prompt names the executor cc-desk-desk-check, on Sonnet at medium effort, and names conductor-cc-desk as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: desk` and `Pass: desk-check` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. `pass-core` "Until cc-desk runs" holds. No session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the main checkout. If you must park, do it as `round.md` "Parking at planning" says. The conductor reads the stop from the draft PR and writes it under "Open decisions" in docs/STATUS.md on `main`.

@@ -1,0 +1,1 @@
+{"permissions":{"ask":["Bash(date *)","Bash(date)"]},"hooks":{"PermissionRequest":[{"hooks":[{"type":"command","command":"<probe folder>/log-hook.sh","timeout":30}]}]}}

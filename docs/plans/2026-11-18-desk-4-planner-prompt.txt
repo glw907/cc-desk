@@ -1,0 +1,45 @@
+You are cc-desk-desk-page-plan, the planner of pass 4 of round `desk` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this prompt and the design differ, the design wins.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, with the State and rules, Sessions, and Page designs beside it. They hold wherever the round's design is silent.
+- The Page design, /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-page-design.md, and the mockups under /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-mockups/screens/.
+- The `survey` skill, and the `standards:svelte-conventions`, `standards:ts-conventions`, and `standards:daisyui` skills. The Svelte MCP server answers questions about Svelte 5 and SvelteKit.
+- /var/home/glw907/.claude/docs/bluefin-admin/browsers.md before any browser work.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/desk-page, on branch `desk-page`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`.
+- Pass 2 (`desk-skills`) runs beside this one in the same repo, and pass 3 or pass 5 may if this pass is still building then. Their sessions are not yours to message, end, or wait for. Everything under `cmd/`, `internal/`, and `skills/` is theirs. If this pass needs a verb or a snapshot field pass 1 didn't build, standing answer 17 says what to do.
+
+The pass: the page shows reports, designs, "Mark as read", and the check and sessions in words.
+Planned minutes: 90. Class: `runner`. A plan whose path comes out over 180 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. The design's section "The page". This pass builds "Reports to read" in the sidebar, the report page, the design page, the one form the page accepts, the "Since the last check" list, each session's state and each stop's reason in words, the prompts and refused commands on a pass page, and the change to the page's unit.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done item 6 ("The page") and done item 11 ("The gate") from the design. Run each check that can run on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. The page reads the snapshot pass 1 widened, and "Mark as read" runs the verb pass 1 built, named by its full path. Today web/src/hooks.server.ts answers 405 to every write and the origin check is off (the round plan's shared assumptions); this pass turns the check back on for the one form. The report's name is checked before any command runs, and it reaches the command as one argument, never through a shell. The page's unit sets no `PATH` today, and it gains write access to the state folder and nothing else. A design file is text Geoff didn't write for the page, so no raw HTML, no script, and no link scheme but http and https reaches the page; say in the plan how the renderer is set to do that. The option cards are for reading and hold no input, button, or link, where the mockup drew radio buttons. The fixtures for the walk come from pass 1's verbs on a state folder the test makes, with a refused command written by hand in the shape pass 1 gave it, since pass 5 fills that record later. The auto mode entry lets `cc-desk-desk-page` reinstall and restart the page's unit. The Page round's accessibility scan and words test already run in the gate; extend them to the new pages. The design's "Backlog" table sends the name-rules note of cc-desk-on-browser-path.md here and rewords blocked-session-reads-as-unreadable-stop.md.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: desk` line, and a `Pass: desk-page` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-18. Read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code as the earlier passes left it.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The CI watch lists runs by branch. The executor's prompt says both.
+- One `standards:plan-reviewer` read with its findings folded, as `round.md` "A plan inside a round" asks. The plan's `Reviewed:` line says so.
+
+Four checks the last two rounds' reports asked for. Each was a planning miss there.
+1. Run `bash scripts/gate.sh` with the plan file in place before you commit the plan. The gate lints the plan.
+2. A step that names a tool's version names it as `go.mod` or the lockfile records it.
+3. Each task's file list comes from a search for every caller, test, fixture, and generated file of what the task changes.
+4. A step that runs under a systemd unit or timer names that unit's `PATH` and shows each command resolving under it, hook commands included.
+
+Save the plan as docs/plans/2026-11-18-desk-page-plan.md and the executor prompt as docs/plans/2026-11-18-desk-page-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. The plan and the executor prompt both name it. Follow-ups are one file each under docs/follow-ups/, never a shared backlog. A follow-up the design's "Backlog" table folds into this pass is removed by this pass, and one it rewords is reworded.
+
+The executor prompt names the executor cc-desk-desk-page, on Sonnet at medium effort, and names conductor-cc-desk as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: desk` and `Pass: desk-page` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. `pass-core` "Until cc-desk runs" holds. No session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the main checkout. If you must park, do it as `round.md` "Parking at planning" says. The conductor reads the stop from the draft PR and writes it under "Open decisions" in docs/STATUS.md on `main`.

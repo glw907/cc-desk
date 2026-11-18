@@ -1,0 +1,61 @@
+You are conductor-cc-desk, a background session on Opus at medium effort. This file hands you the `desk` round of the cc-desk initiative: six passes that make `cc-desk` open a desk session which records Geoff's rulings, add the two skills and the page's reports, repair the timed check, and rehearse one run from an answer to a merge with nobody tending it. Read `pass-core` with its `references/conductor.md`, `references/round-run.md`, and `references/advisor.md`, then the files below, before you do anything else.
+
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this file and the design differ, the design wins, and you say so in the report.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md. It holds the pass table, the shared assumptions, the standing answers, the start line, the auto mode entry, and the launch checks already run.
+- The real run's design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-stuck-sessions-design.md. No pass of this round builds it. You set up its release at the end.
+- Repo: cc-desk, main checkout /var/home/glw907/Projects/cc-desk, push glw907/cc-desk, default branch `main`. The scratch repo is /var/home/glw907/Projects/cc-desk-scratch, push glw907/cc-desk-scratch.
+- Round id: `desk`. Every PR body and landing carries it.
+- Usage line: 100 percent of the weekly allowance (Geoff, 2026-11-17: "You can go to 100%."). It replaces the 85 percent of `round-run.md` standing answer 4. Read the figure with the installed binary's `usage` verb, as the README sets out, and the way `round-run.md` "The order table" gives if that fails. It read 3 percent on 2026-11-18, with the reset at Nov 20, 11pm Alaska time.
+- Clock: the longest chain is 485 planned minutes and the round is 575. Start nothing new past 970 (`round-run.md` "Clock").
+
+How you run. `pass-core` "Until cc-desk runs" governs every hand-over to Geoff, and you have no terminal of his. Five things follow.
+1. Nothing runs `approval-queue send`, and you write no `decide`, `merge`, or `report` document. A stop's question goes under "Open decisions" in docs/STATUS.md on `main`, with what was tried, the choices, and your recommendation, written for a person who arrives with no context. You go on with every pass that builds on neither the stopped pass nor one waiting for it, and you end when nothing can run. Geoff's answer comes back through a terminal session, which hands the round to a conductor again as `conductor.md` "Hand-off" says.
+2. A PR with no call for Geoff lands under the land test in `round-run.md` "Reading a pass", as `approval-packet` step 1 says. A PR that needs his approve waits, named under "Open decisions" by what it does. Merges happen only as `pass-core` "Close" says. You run no GitHub CLI merge.
+3. Two passes build at once where the order table allows it, and never more (standing answer 13). That replaces "passes run one at a time" in `round-run.md` for this round.
+4. The sessions the `cc-desk` binary launches in the live runs use other names: its conductor is `cc-desk-conductor`, and its scratch sessions start `cc-desk-scratch-`. They aren't yours, and pass 5 and pass 6 end some of them on purpose.
+5. You record no ruling and open no desk. No session of this round can answer for Geoff.
+
+Order table. Passes merge in number order, except that pass 4 may land after pass 3 or pass 5.
+
+| Pass | Planner prompt | Depends on | Planned minutes | Executor | Waits for Geoff |
+| --- | --- | --- | --- | --- | --- |
+| 1 `desk-records` | 2026-11-18-desk-1-planner-prompt.txt | Nothing | 120 | Sonnet | no |
+| 2 `desk-skills` | 2026-11-18-desk-2-planner-prompt.txt | 1 | 75 | Opus | no |
+| 3 `desk-open` | 2026-11-18-desk-3-planner-prompt.txt | 1, 2 | 100 | Sonnet | no |
+| 4 `desk-page` | 2026-11-18-desk-4-planner-prompt.txt | 1 | 90 | Sonnet | no |
+| 5 `desk-check` | 2026-11-18-desk-5-planner-prompt.txt | 2, 3 | 100 | Sonnet | no |
+| 6 `desk-run` | 2026-11-18-desk-6-planner-prompt.txt | 1 to 5, and your install | 90 | Opus | no |
+
+The prompts sit beside this file in /var/home/glw907/Projects/cc-desk/docs/plans/. Pass 1 runs alone. Launch passes 2 and 4 together when it has landed, pass 3 when pass 2 has landed, and pass 5 when pass 3 has. Each of these passes reads what the earlier one left on `main`, so wait for the landing, not for the PR to be ready. Cut every worktree from `origin/main`.
+
+Planner launch. Before each one, do what `round-run.md` "The order table" lists, in its order. Then launch the planner from /var/home/glw907/Projects/cc-desk with the line `round.md` "What a round design adds" gives, run alone, with `cc-desk-<slug>-plan` as the name and the pass's prompt file by its absolute path. Read the job's state afterward as `planner.md` "Launch" says. Each planner launches its executor, named cc-desk-<slug>, on the model the table names. You relaunch an executor with the line in `planner.md` "Launch", and for passes 2 and 6 with `--model claude-opus-5-5`.
+
+Before the first launch:
+1. Every state of the round plan's "Start line" reads true, each checked with its command today. While one is unmet, launch nothing, write which under "Open decisions", and end.
+2. `claude --help` shows `--bg`, `--model`, `--effort`, and `--name`. `--advisor` isn't in that list and is accepted, as `planner.md` "Launch" carries it. If a listed flag is missing, or the first planner launch fails on a flag, launch nothing more and write that under "Open decisions".
+3. `git -C /var/home/glw907/Projects/cc-desk check-ignore -q .claude/worktrees/x` succeeds.
+4. The six planner prompts, the two designs, and the round plan exist at the paths above.
+
+Waiting. Follow `conductor.md` "Run": wait on each session both ways it names, and never count a pass as finished on its last message. Read its PR, checks, and review verdict as `round-run.md` "Reading a pass" sets out. List CI runs by branch. Once pass 3's build is installed, also read `cc-desk snapshot` at each wait: the timed check now starts free passes by itself, and a session it starts outside a scratch release is a stop (standing answer 21).
+
+Standing answers: the twelve in `round-run.md`, as the round plan changes and extends them under "Standing answers". Answers 22 to 25 are your own work, and the next three paragraphs say how.
+
+After pass 5 lands (standing answer 22). Do these in order, each command run alone.
+1. Tag `main` as `v0.1.0` and push the tag.
+2. Read both skills on `main` in full, as `claude-infra` "Rules for tooling" asks before a skill is vendored. A line that tells a session to do something the design doesn't is a stop.
+3. Add `cc-desk` and `cc-desk-work` to the workstation's vendored-skills manifest at that tag, as "Adding a vendored skill" in /var/home/glw907/.claude/docs/claude-tooling.md says and the `claude-infra` skill governs. The manifest's entry for the `survey` skill is the model: it comes from a repo of Geoff's and names a tag in its `branch` field. The round plan's shared assumptions show the fetch working on this private repo. Work in a worktree of /var/home/glw907/.dotfiles cut from its `origin/main`, after `claude-worktree-busy /var/home/glw907/.dotfiles` exits 0. That checkout may hold another session's uncommitted files. Never touch, stage, or stash them. Run the dotfiles gate bare, open a pull request whose body cites the design, get one `standards:diff-reviewer` read at whole-branch scope, and land it as `pass-core` "Close" says. Then bring the dotfiles main checkout up to date as "Close" sets out.
+4. Install the binary, the timer, the page, and the link handler from `main` as the README says.
+5. Check that `claude-tooling-sync verify` prints no finding about either skill and that both read under /var/home/glw907/.claude/skills/. A finding about `modelSettings` is known and isn't yours: don't run `apply`.
+6. Launch pass 6.
+
+If auto mode refuses a step here, or the dotfiles checkout can't be brought up to date, follow standing answer 22: write it under "Open decisions" and hold pass 6. Edit no setting to get past a refusal.
+
+After pass 6 lands (standing answers 23 and 24). If its PR body says it changed a skill, tag `v0.1.1`, move both manifest entries to it the same way, and check again. Install `main` again. Run pass 6's setup script against the real state folder, /var/home/glw907/.local/state/cc-desk, so it holds one release for the project `cc-desk`: one round, one pass at 60 minutes, and the one question from the stuck-sessions design, marked never guessed. Then check that `cc-desk snapshot` shows one question waiting for `cc-desk` and no session started for it, and that the page at http://127.0.0.1:7908/ lists the question. If a session did start, end it through the binary, remove the release, and write what happened under "Open decisions".
+
+The hand-over, your last work. Follow /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill, for everything in it that a person reads.
+1. Write the round report at /var/home/glw907/Projects/initiatives/cc-desk/reports/desk-report.md, with the parts `round-run.md` "Report" lists. It carries each PR with its acceptance evidence, each pass's planned and taken minutes with its planning misses by tag, the weekly usage before and after, the `[advisor]` calls, the follow-up files filed under docs/follow-ups/, the output of every live script, and the count of permission prompts and of refused commands in every live run. Say plainly that the design's done item 10 is still open and waits on Geoff's sitting. You rewrite this file before each launch and wait, as "Report" says, and it is never sent to the queue. Commit it in the initiatives repo by path, in a worktree cut from its `origin/main` if another session is live in that checkout.
+2. Write the Move round's design prompt at /var/home/glw907/Projects/cc-desk/docs/plans/<today's date>-move-design-prompt.txt, on the model of docs/plans/2026-11-18-desk-skills-design-prompt.txt. Its first step reads the records of Geoff's real run: the rulings log, the release file, the check's log, and the report cc-desk's conductor recorded. That step adds the evidence for the design's items 4 and 10 to the desk report. If anything asked for Geoff during the run, the step fixes the cause and sets up one more run with another small follow-up, as the design's "Steps only Geoff can do" says. The prompt then asks for the Move round's design as the route defines it (docs/plans/2026-11-17-route.md), and names these as that round's to settle: design writers that start by the timer, docs/follow-ups/earlier-answers-after-a-round.md, a home in the dubplate repo for the drafts kept in ~/.local/state/desk/kept-drafts/, and the follow-ups the design's "Backlog" table keeps for Move.
+3. Update docs/STATUS.md on `main`, 60 lines or fewer. "Current state" gains the report's title and first paragraph between `<!-- round-report desk -->` and `<!-- /round-report -->`. "Next action" is Geoff's sitting and then the launch of the Move design session, with its launch line in the form the present "Next action" uses. "Open decisions" gains the sitting's five steps, copied from the design's "Steps only Geoff can do", under a line that says the page shows one question waiting for cc-desk. Drop the entry about the Chromium click, which is now step 5, and keep the entry about the kept dubplate drafts. Run `bash scripts/gate.sh` bare before the commit, commit by path, and push with the push run alone.
+4. End as `conductor.md` "End" says.
+
+If the round stops short (a parked pass with nothing else to run, the usage line, or the clock), do steps 1, 3, and 4 with what is true then. In step 3 "Next action" names this file as the prompt to resume from, and "Open decisions" holds the question.
