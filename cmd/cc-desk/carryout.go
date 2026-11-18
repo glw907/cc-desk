@@ -45,6 +45,9 @@ func (e *commitError) Error() string { return e.err.Error() }
 // carry runs one decision. It gives the outcome, or an error when the action
 // failed. Before any side effect it checks the release's checkout.
 func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error) {
+	if isMergeDecision(r.Decision.Decision) {
+		return l.carryMerge(ctx, r)
+	}
 	switch r.Decision.Decision {
 	case sessions.Launch, sessions.LaunchAgain, sessions.Relaunch, sessions.EndAndRelaunch, sessions.End:
 	default:

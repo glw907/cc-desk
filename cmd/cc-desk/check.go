@@ -138,6 +138,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 		if err != nil {
 			return err
 		}
+		l.gh = cf.ghCmd
 		outcomes, err := l.carryOut(ctx, results)
 		if outcomes == nil {
 			return err

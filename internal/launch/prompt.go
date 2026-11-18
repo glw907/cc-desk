@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"strings"
 	"text/template"
 )
 
@@ -33,7 +34,21 @@ type Prompt struct {
 	// Answer is set on the relaunch that follows an answered permission
 	// prompt. It takes the place of Relaunch.
 	Answer *AnswerNote
+	// Fix is set on the relaunch that sends a pull request back to its
+	// session. It takes the place of Relaunch and Answer.
+	Fix *FixNote
 }
+
+// FixNote fills the fix paragraph: the pull request, the commit the check
+// read, and what failed.
+type FixNote struct {
+	Number   int
+	Commit   string
+	Failures []string
+}
+
+// List gives the failures as one phrase.
+func (f FixNote) List() string { return strings.Join(f.Failures, "; ") }
 
 // AnswerNote fills the answer paragraph. On a yes, Rule is the rule added;
 // on a no, Command is the command that was refused.
@@ -52,18 +67,23 @@ type RelaunchNote struct {
 func (p Prompt) PushCommand() string { return "git push origin " + p.Branch }
 
 // Fill renders the prompt for the kind, with the relaunch paragraph on a
-// relaunch or the answer paragraph after an answered prompt. It refuses a
-// prompt that sets both.
+// relaunch, the answer paragraph after an answered prompt, or the fix
+// paragraph on a pull request sent back. It refuses a prompt that sets more
+// than one.
 func Fill(p Prompt) (string, error) {
-	if p.Relaunch != nil && p.Answer != nil {
-		return "", fmt.Errorf("prompt for %s sets both a relaunch and an answer", p.Name)
-	}
 	files := []string{p.Kind + ".txt"}
-	if p.Relaunch != nil {
-		files = append(files, "relaunch.txt")
+	notes := 0
+	for _, n := range []struct {
+		set  bool
+		file string
+	}{{p.Relaunch != nil, "relaunch.txt"}, {p.Answer != nil, "answer.txt"}, {p.Fix != nil, "fix.txt"}} {
+		if n.set {
+			notes++
+			files = append(files, n.file)
+		}
 	}
-	if p.Answer != nil {
-		files = append(files, "answer.txt")
+	if notes > 1 {
+		return "", fmt.Errorf("prompt for %s sets more than one of a relaunch, an answer, and a fix", p.Name)
 	}
 	var out bytes.Buffer
 	for i, f := range files {

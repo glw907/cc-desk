@@ -169,6 +169,153 @@ func TestAnswerNotes(t *testing.T) {
 	}
 }
 
+func TestFixNote(t *testing.T) {
+	base := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b", Ready: "cc-desk pass ready"}
+	p := base
+	p.Fix = &FixNote{Number: 7, Commit: "abc123", Failures: []string{"gate", "vale"}}
+	got, err := Fill(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{"Pull request 7", "abc123", "gate; vale", "git push origin b", "cc-desk pass ready", "doesn't count toward the two"} {
+		if !strings.Contains(got, w) {
+			t.Errorf("fix prompt lacks %q:\n%s", w, got)
+		}
+	}
+	if strings.Contains(got, "This is relaunch") {
+		t.Error("the fix prompt holds the relaunch wording")
+	}
+	for name, other := range map[string]func(*Prompt){
+		"a relaunch": func(p *Prompt) { p.Relaunch = &RelaunchNote{Count: 1} },
+		"an answer":  func(p *Prompt) { p.Answer = &AnswerNote{Yes: true} },
+	} {
+		q := p
+		other(&q)
+		if _, err := Fill(q); err == nil {
+			t.Errorf("a fix with %s must be refused", name)
+		}
+	}
+}
+
+func TestRemove(t *testing.T) {
+	// worktree makes a branch with one commit in a worktree of its own.
+	worktree := func(t *testing.T) (Worktree, string) {
+		t.Helper()
+		checkout := repoWithRemote(t)
+		w := Worktree{Checkout: checkout, Default: "main", Path: filepath.Join(checkout, ".claude", "worktrees", "w"), Branch: "w"}
+		if _, err := w.Make(); err != nil {
+			t.Fatal(err)
+		}
+		runGit(t, w.Path, "config", "user.email", "t@example.com")
+		runGit(t, w.Path, "config", "user.name", "t")
+		runGit(t, w.Path, "commit", "-q", "--allow-empty", "-m", "work")
+		return w, checkout
+	}
+	t.Run("a clean worktree and a merged branch", func(t *testing.T) {
+		w, checkout := worktree(t)
+		runGit(t, checkout, "config", "user.email", "t@example.com")
+		runGit(t, checkout, "config", "user.name", "t")
+		runGit(t, checkout, "merge", "-q", "--no-ff", "-m", "merge", "w")
+		if notes := w.Remove(true); len(notes) != 0 {
+			t.Errorf("notes = %v, want none", notes)
+		}
+		if _, err := os.Stat(w.Path); err == nil || branchExists(t, checkout, "w") {
+			t.Error("the worktree or the branch is still there")
+		}
+	})
+	t.Run("a dirty worktree stays", func(t *testing.T) {
+		w, checkout := worktree(t)
+		if err := os.WriteFile(filepath.Join(w.Path, "scratch"), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		notes := w.Remove(true)
+		if len(notes) != 1 || !strings.HasPrefix(notes[0], "worktree left: ") {
+			t.Errorf("notes = %v, want one worktree note", notes)
+		}
+		if _, err := os.Stat(w.Path); err != nil || !branchExists(t, checkout, "w") {
+			t.Error("a dirty worktree and its branch must stay")
+		}
+	})
+	t.Run("an unmerged branch stays", func(t *testing.T) {
+		w, checkout := worktree(t)
+		notes := w.Remove(true)
+		if len(notes) != 1 || !strings.HasPrefix(notes[0], "branch left: ") {
+			t.Errorf("notes = %v, want one branch note", notes)
+		}
+		if _, err := os.Stat(w.Path); err == nil || !branchExists(t, checkout, "w") {
+			t.Error("the worktree should go and the unmerged branch stay")
+		}
+	})
+	t.Run("a checkout that was not pulled keeps the branch", func(t *testing.T) {
+		w, checkout := worktree(t)
+		notes := w.Remove(false)
+		if len(notes) != 1 || !strings.HasPrefix(notes[0], "branch left: ") || !branchExists(t, checkout, "w") {
+			t.Errorf("notes = %v, branch exists = %v", notes, branchExists(t, checkout, "w"))
+		}
+	})
+}
+
+func TestPull(t *testing.T) {
+	// ahead puts one new commit on origin's main, from a second clone.
+	ahead := func(t *testing.T, checkout string) {
+		t.Helper()
+		other := filepath.Join(t.TempDir(), "other")
+		remote := runGit(t, checkout, "remote", "get-url", "origin")
+		if out, err := exec.Command("git", "clone", "-q", remote, other).CombinedOutput(); err != nil {
+			t.Fatalf("clone: %v: %s", err, out)
+		}
+		runGit(t, other, "config", "user.email", "t@example.com")
+		runGit(t, other, "config", "user.name", "t")
+		if err := os.WriteFile(filepath.Join(other, "f"), []byte("y"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		runGit(t, other, "commit", "-q", "-am", "merge")
+		runGit(t, other, "push", "-q", "origin", "main")
+	}
+	t.Run("a clean checkout is pulled", func(t *testing.T) {
+		checkout := repoWithRemote(t)
+		ahead(t, checkout)
+		w := Worktree{Checkout: checkout, Default: "main"}
+		pulled, note, err := w.Pull(nil)
+		if err != nil || !pulled || note != "" {
+			t.Fatalf("pulled = %v, note = %q, err = %v", pulled, note, err)
+		}
+		if b, _ := os.ReadFile(filepath.Join(checkout, "f")); string(b) != "y" {
+			t.Error("the checkout did not take the merge")
+		}
+	})
+	t.Run("a touched file with a change is left", func(t *testing.T) {
+		checkout := repoWithRemote(t)
+		ahead(t, checkout)
+		if err := os.WriteFile(filepath.Join(checkout, "f"), []byte("mine"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		if err != nil || pulled || !strings.HasPrefix(note, "checkout not pulled: ") {
+			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
+		}
+	})
+	t.Run("a live session in the checkout holds it, one in a worktree does not", func(t *testing.T) {
+		checkout := repoWithRemote(t)
+		ahead(t, checkout)
+		w := Worktree{Checkout: checkout, Default: "main"}
+		if pulled, note, _ := w.Pull([]string{filepath.Join(checkout, "sub")}); pulled || note == "" {
+			t.Errorf("pulled = %v, note = %q, want it held", pulled, note)
+		}
+		if pulled, _, _ := w.Pull([]string{filepath.Join(checkout, ".claude", "worktrees", "x")}); !pulled {
+			t.Error("a session in a worktree must not hold the pull")
+		}
+	})
+	t.Run("a checkout off the default branch is left", func(t *testing.T) {
+		checkout := repoWithRemote(t)
+		runGit(t, checkout, "checkout", "-q", "-b", "other")
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		if err != nil || pulled || !strings.Contains(note, "other") {
+			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
+		}
+	})
+}
+
 func runGit(t *testing.T, dir string, args ...string) string {
 	t.Helper()
 	out, err := git(dir, args...)

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -79,6 +80,78 @@ func (w Worktree) dropBranch(tip string) error {
 		return fmt.Errorf("the branch %s is left in place: %w", w.Branch, err)
 	}
 	return nil
+}
+
+// Pull brings the main checkout up to date after a merge, with --ff-only. It
+// pulls only when the checkout is on the default branch, no file the merge
+// touched has an uncommitted change, and no live session's cwd is the
+// checkout or a folder under it outside .claude/worktrees/. Otherwise it
+// gives the reason, as the note "checkout not pulled: <reason>", and runs
+// nothing that changes the checkout.
+func (w Worktree) Pull(liveCwds []string) (pulled bool, note string, err error) {
+	skip := func(reason string) (bool, string, error) { return false, "checkout not pulled: " + reason, nil }
+	on, err := git(w.Checkout, "rev-parse", "--abbrev-ref", "HEAD")
+	if err != nil {
+		return false, "", err
+	}
+	if on != w.Default {
+		return skip("the checkout is on " + on + ", not " + w.Default)
+	}
+	if _, err := git(w.Checkout, "fetch", "origin", w.Default); err != nil {
+		return false, "", err
+	}
+	names, err := git(w.Checkout, "diff", "--name-only", "HEAD...origin/"+w.Default)
+	if err != nil {
+		return false, "", err
+	}
+	if names != "" {
+		args := append([]string{"status", "--porcelain", "--"}, strings.Split(names, "\n")...)
+		dirty, err := git(w.Checkout, args...)
+		if err != nil {
+			return false, "", err
+		}
+		if dirty != "" {
+			return skip("a file the merge touched has an uncommitted change")
+		}
+	}
+	worktrees := filepath.Join(w.Checkout, ".claude", "worktrees")
+	for _, cwd := range liveCwds {
+		if under(cwd, w.Checkout) && !under(cwd, worktrees) {
+			return skip("a live session is working in " + cwd)
+		}
+	}
+	if _, err := git(w.Checkout, "pull", "--ff-only", "origin", w.Default); err != nil {
+		return skip(err.Error())
+	}
+	return true, "", nil
+}
+
+// under reports whether path is dir or a folder beneath it.
+func under(path, dir string) bool {
+	rel, err := filepath.Rel(dir, path)
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
+}
+
+// Remove takes the worktree away with no force flag, then the branch with
+// `git branch -d`, only when the checkout was pulled. Each refusal is a note,
+// never an error: a dirty worktree and an unmerged branch stay in place.
+func (w Worktree) Remove(pulled bool) (notes []string) {
+	if _, err := git(w.Checkout, "worktree", "remove", w.Path); err != nil {
+		return append(notes, "worktree left: "+lastLine(err.Error()))
+	}
+	if !pulled {
+		return append(notes, "branch left: the checkout was not pulled")
+	}
+	if _, err := git(w.Checkout, "branch", "-d", w.Branch); err != nil {
+		notes = append(notes, "branch left: "+lastLine(err.Error()))
+	}
+	return notes
+}
+
+// lastLine is the last non-empty line of text.
+func lastLine(text string) string {
+	lines := strings.Split(strings.TrimSpace(text), "\n")
+	return strings.TrimSpace(lines[len(lines)-1])
 }
 
 // Reuse checks that the recorded worktree still exists and is on the
