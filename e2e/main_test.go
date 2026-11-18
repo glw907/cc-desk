@@ -88,12 +88,19 @@ func runWith(t *testing.T, usageCommand, dir, now string, args ...string) result
 // newState copies the base fixture into a fresh folder.
 func newState(t *testing.T) string {
 	t.Helper()
+	return newStateFrom(t, "state")
+}
+
+// newStateFrom copies the named fixture under testdata into a fresh folder.
+func newStateFrom(t *testing.T, fixture string) string {
+	t.Helper()
+	src := filepath.Join("testdata", fixture)
 	dst := filepath.Join(t.TempDir(), "state")
-	err := filepath.WalkDir("testdata/state", func(p string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		rel, _ := filepath.Rel("testdata/state", p)
+		rel, _ := filepath.Rel(src, p)
 		target := filepath.Join(dst, rel)
 		if d.IsDir() {
 			return os.MkdirAll(target, 0o755)
