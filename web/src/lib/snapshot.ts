@@ -159,6 +159,7 @@ export interface Decision {
 	reason?: string;
 	detail?: string;
 	counted?: boolean;
+	outcome?: string;
 }
 
 /** The last run of the session check. */
