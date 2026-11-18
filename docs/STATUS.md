@@ -25,9 +25,9 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
 <!-- round-report page -->
-**The Page round's first four passes wait for Geoff's approval.** Pull requests 7, 9, 11, and 13
-build the page, its item pages, its service at http://127.0.0.1:7908/, and its terminal link.
-Each asks a choice of Geoff. The fifth pass has started.
+**The Page round is built, and its five pull requests wait for Geoff's approval.** Pull requests
+7, 9, 11, and 13 build the page, its item pages, its service at http://127.0.0.1:7908/, and its
+link, and each asks a choice. Pull request 15 polishes the page, asks nothing, and lands after 13.
 
 Open documents: none. Pull requests 7, 9, 11, and 13 wait under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
