@@ -209,7 +209,47 @@ Held.
 
 ## Proof 6
 
-Not attempted, so no owned process was ended and no relaunch was tried.
+Usage read 87 percent before the run. `spikes/6-relaunch/run` makes a linked worktree of this repo
+as the sandbox (branch `ccd-spike-6`, since a nested `git init` is its own trust root), launches
+`ccd-spike-6-relaunch` on a five-step prompt (each step sleeps 60 seconds, then commits, and the
+prompt has the session check the log first), and runs `own.sh kill` after the second commit.
+
+| Time | What happened | Commits | Row of the original |
+| --- | --- | --- | --- |
+| 03:40:09 | Before the kill | 2 | `working busy`, pid 2956315 |
+| 03:40:10 | `own.sh kill` ended the process | 2 | |
+| 03:40:20 | Ten seconds later | 2 | `working`, no pid, no status |
+| 03:40:30 | Twenty seconds later, with no command from me | 2 | `working busy`, new pid 2961551 |
+| 03:41:24 | Step 3 committed | 3 | same |
+| 03:42:12 | End of the two-minute watch for a wake | 3 | same |
+| 03:42:13 | `own.sh respawn` printed "restarted 96fdc1a7" | 3 | `blocked idle`, pid 2959603, for 5.5 minutes |
+| 03:47:52 | `own.sh resume` with "Carry on from the last commit." | 3 | note: the session "is already running in the background, so this started a copy as e3b28ac7" |
+| 03:49:01 and 03:50:04 | Steps 4 and 5 committed by the copy | 5 | original still `blocked idle` |
+
+The branch at the end, with no step written twice:
+
+```
+5c66eb9 Step 5
+872d0da Step 4
+61b2ff5 Step 3
+7a890cc Step 2
+4ac0399 Step 1
+```
+
+Four things this showed:
+
+- Ending the process did not leave the session dead. Within 20 seconds the row had a new pid and read
+  `working busy`. Whether the supervisor relaunched it or the step in flight kept the row busy, the
+  saved rows can't say. Step 3 did commit about 74 seconds later, and nothing came after it.
+- `respawn` printed success and left the session `blocked idle` with an empty prompt. It did not
+  carry on, and nothing in the row says why.
+- `resume` with a prompt did the work. The copy ran steps 4 and 5 and read the log first, so it
+  skipped steps 1 to 3.
+- The copy sat in a different folder (the worktree root) and carried the resume prompt as its name.
+  The run's saves list rows by folder, so they show one row throughout. A full list at 03:47:52
+  showed two: the original, idle, and the copy, working. The condition "no save shows two live
+  rows for the work" is therefore not met, though only one row was ever working. The third
+  attempt, a fresh launch, was not needed and was not tried.
 
 Fallback applies: a fresh session starts from the pass's plan and branch.
 

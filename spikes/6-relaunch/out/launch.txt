@@ -1,0 +1,6 @@
+backgrounded · 96fdc1a7 · ccd-spike-6-relaunch
+  claude agents             list sessions
+  claude attach 96fdc1a7    open in this terminal
+  claude logs 96fdc1a7      show recent output
+  claude stop 96fdc1a7      stop this session
+own.sh: owned 96fdc1a7 (ccd-spike-6-relaunch)
