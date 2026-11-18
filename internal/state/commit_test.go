@@ -135,3 +135,52 @@ func TestCommitCreatesStateFolder(t *testing.T) {
 		t.Error("snapshot.json missing in the created folder")
 	}
 }
+
+func TestCommitReading(t *testing.T) {
+	loadedReading := `{"format":1,"percent":40,"reset_text":"old","read_at":"2026-11-20T22:58:00Z"}`
+	fresh := func(at time.Time) Usage { return Usage{Percent: 55, ResetText: "new", ReadAt: at} }
+
+	tests := []struct {
+		name    string
+		file    string // usage.json before; "" for none
+		reading Usage
+		forced  bool
+		want    string // substring of usage.json after
+	}{
+		{"a fresh reading is written", "", fresh(testClock), false, `"reset_text": "new"`},
+		{"a newer reading replaces the loaded one", loadedReading, fresh(testClock), false, `"reset_text": "new"`},
+		{"an older reading leaves usage.json alone", loadedReading, fresh(testClock.Add(-10 * time.Minute)), false, `"reset_text":"old"`},
+		{"a tie keeps the loaded reading", loadedReading, fresh(testClock.Add(-2 * time.Minute)), false, `"reset_text":"old"`},
+		{"a forced reading always wins", loadedReading, fresh(testClock.Add(-10 * time.Minute)), true, `"reset_text": "new"`},
+		{"a loaded reading from the future loses", `{"format":1,"percent":40,"reset_text":"old","read_at":"2026-11-21T22:58:00Z"}`, fresh(testClock.Add(-time.Hour)), false, `"reset_text": "new"`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeFile(t, dir, "releases/alpha.json", goodRelease)
+			if tt.file != "" {
+				writeFile(t, dir, UsageFile, tt.file)
+			}
+			if _, err := Commit(dir, testClock, time.Second, WithReading(tt.reading, tt.forced, nil), render); err != nil {
+				t.Fatal(err)
+			}
+			if got := readFile(t, dir, UsageFile); !strings.Contains(got, tt.want) {
+				t.Errorf("usage.json = %s, want it to hold %s", got, tt.want)
+			}
+		})
+	}
+
+	t.Run("a refused event leaves the folder as it was", func(t *testing.T) {
+		dir := t.TempDir()
+		writeFile(t, dir, "releases/alpha.json", goodRelease)
+		writeFile(t, dir, UsageFile, loadedReading)
+		refuse := func(*State, time.Time) error { return Refuse("no") }
+		_, err := Commit(dir, testClock, time.Second, WithReading(fresh(testClock), true, refuse), render)
+		if !isRefusal(err) {
+			t.Fatalf("error = %v, want a refusal", err)
+		}
+		if readFile(t, dir, UsageFile) != loadedReading {
+			t.Error("a refusal rewrote usage.json")
+		}
+	})
+}

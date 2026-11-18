@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/glw907/cc-desk/internal/atomicfile"
@@ -16,6 +17,7 @@ import (
 const (
 	SnapshotFile      = "snapshot.json"
 	SnapshotErrorFile = "snapshot-error.json"
+	UsageFile         = "usage.json"
 )
 
 // Event changes the loaded state and marks each release file it changed
@@ -41,8 +43,8 @@ type snapshotError struct {
 // waiting up to wait, then loads and checks every file. A load or check
 // failure writes snapshot-error.json and leaves every other file alone.
 // A clean load removes that file, so a refusal clears it too. Commit
-// then applies ev, settles, writes each changed release atomically,
-// appends a forecast line when ev started, finished, or stopped a pass,
+// then applies ev, settles, writes each changed release and a changed
+// usage.json atomically, appends a forecast line when ev started, finished, or stopped a pass,
 // and rewrites snapshot.json. It returns the snapshot's bytes. A nil ev
 // changes nothing.
 func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Render) ([]byte, error) {
@@ -92,6 +94,16 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		}
 	}
 
+	if s.usageDirty {
+		data, err := marshal(s.Usage)
+		if err != nil {
+			return nil, fmt.Errorf("encode %s: %w", UsageFile, err)
+		}
+		if err := atomicfile.WriteFile(filepath.Join(dir, UsageFile), data, 0o644); err != nil {
+			return nil, fmt.Errorf("write %s: %w", UsageFile, err)
+		}
+	}
+
 	snap, fc, err := render(s, now)
 	if err != nil {
 		return nil, fmt.Errorf("build snapshot: %w", err)
@@ -108,9 +120,68 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 	return snap, nil
 }
 
-// settle starts the passes that wait on a limit and now fit. Pass 3 fills
-// it in.
-func settle(s *State, now time.Time) {}
+// WithReading wraps ev with a fresh usage reading. Inside the lock it keeps
+// one reading: the fresh one when forced, when no reading is loaded, when
+// the loaded one is older, or when the loaded one is dated after the clock.
+// On a tie the loaded reading stays. It then settles, so a waiting pass that
+// now fits starts before ev can take its place, and runs ev, which may be
+// nil. usage.json is written only when the fresh reading won and ev
+// succeeded.
+func WithReading(u Usage, forced bool, ev Event) Event {
+	return func(s *State, now time.Time) error {
+		u.Format = Format
+		if forced || s.Usage == nil || s.Usage.ReadAt.Before(u.ReadAt) || s.Usage.ReadAt.After(now) {
+			s.Usage = &u
+			s.usageDirty = true
+		}
+		settle(s, now)
+		if ev == nil {
+			return nil
+		}
+		return ev(s, now)
+	}
+}
+
+// settle starts the waiting passes that now fit, oldest request first.
+// Ties go to release order, then pass order. Each pass sees the passes
+// settled before it as building. A pass that still waits has its limit
+// list updated in place. Settling never re-checks the four names: a pass
+// that passed them when it was accepted keeps its place.
+func settle(s *State, now time.Time) {
+	type entry struct {
+		rf *ReleaseFile
+		p  *Pass
+		at int
+	}
+	var waiting []entry
+	n := 0
+	for _, rf := range s.Releases {
+		if rf.Done {
+			continue
+		}
+		for i := range rf.Passes {
+			if p := &rf.Passes[i]; p.State == Waiting {
+				waiting = append(waiting, entry{rf, p, n})
+				n++
+			}
+		}
+	}
+	slices.SortStableFunc(waiting, func(a, b entry) int { return a.p.Wait.Since.Compare(b.p.Wait.Since) })
+	for _, e := range waiting {
+		limits := s.Limits()
+		if len(limits) == 0 {
+			t := now.UTC()
+			e.p.State, e.p.Started, e.p.Wait = Building, &t, nil
+			e.rf.Dirty = true
+			s.passEvent = true
+			continue
+		}
+		if !slices.Equal(limits, e.p.Wait.Limits) {
+			e.p.Wait.Limits = limits
+			e.rf.Dirty = true
+		}
+	}
+}
 
 // appendForecast adds one line to forecasts.jsonl by rewriting the whole
 // file atomically, so a crash never leaves half a line. A last line with no

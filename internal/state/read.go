@@ -223,6 +223,12 @@ func Load(dir string) (*State, error) {
 		if usage.ReadAt.IsZero() {
 			return nil, &FileError{File: "usage.json", Err: errors.New(`missing required field "read_at"`)}
 		}
+		switch {
+		case usage.Error != "" && (usage.Percent != 0 || usage.ResetText != ""):
+			return nil, &FileError{File: "usage.json", Err: errors.New(`an "error" reading carries no "percent" or "reset_text"`)}
+		case usage.Error == "" && usage.ResetText == "":
+			return nil, &FileError{File: "usage.json", Err: errors.New(`needs "reset_text", or "error" for a reading that failed`)}
+		}
 		s.Usage = &usage
 	}
 

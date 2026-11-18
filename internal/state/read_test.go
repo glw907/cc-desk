@@ -79,6 +79,8 @@ func TestReadFailures(t *testing.T) {
 		{"settings syntax", "settings.json", `[]`, "settings.json: json: cannot unmarshal array"},
 		{"settings range", "settings.json", `{"format":1,"usage_stop_percent":101}`, "settings.json: usage_stop_percent 101"},
 		{"usage missing read_at", "usage.json", `{"format":1,"percent":10,"reset_text":"x"}`, `usage.json: missing required field "read_at"`},
+		{"usage error with percent", "usage.json", `{"format":1,"error":"x","percent":10,"read_at":"2026-11-20T22:30:00Z"}`, `usage.json: an "error" reading carries no`},
+		{"usage without reset text or error", "usage.json", `{"format":1,"percent":10,"read_at":"2026-11-20T22:30:00Z"}`, `usage.json: needs "reset_text"`},
 		{"rulings blank line", "rulings.jsonl", `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}` + "\n\n", "rulings.jsonl line 2: syntax error: blank line"},
 		{"rulings syntax on line 2", "rulings.jsonl", `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}` + "\n{bad\n", "rulings.jsonl line 2:"},
 		{"rulings duplicate id", "rulings.jsonl", `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}` + "\n" + `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}`, `rulings.jsonl line 2: ruling id "a" appears twice`},

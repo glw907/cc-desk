@@ -214,4 +214,6 @@ type State struct {
 	// passEvent is set by a pass start, finish, or stop, and tells Commit
 	// to append a forecast line.
 	passEvent bool
+	// usageDirty is set when a fresh reading replaced usage.json's.
+	usageDirty bool
 }
