@@ -26,9 +26,15 @@ poll that keeps the state fresh.
 	<title>{tabTitle(poll.answer, poll.now)}</title>
 </svelte:head>
 
-<div class="drawer drawer-open">
-	<input id="rail" type="checkbox" class="drawer-toggle" />
-	<div class="drawer-content">
+<div class="frame">
+	<nav class="rail" aria-label="Status">
+		<a href="/" class="wordmark block px-3 pb-6 pt-2 text-xl">cc-desk</a>
+		<a href="/rulings" class="rail-row">Rulings</a>
+		{#if poll.answer?.snapshot}
+			<Sidebar snapshot={poll.answer.snapshot} now={poll.now} />
+		{/if}
+	</nav>
+	<div class="frame-content">
 		<Banners
 			answer={poll.answer}
 			connected={poll.connected}
@@ -36,14 +42,5 @@ poll that keeps the state fresh.
 			now={poll.now}
 		/>
 		{@render children()}
-	</div>
-	<div class="drawer-side">
-		<nav class="rail min-h-full p-4" aria-label="Status">
-			<a href="/" class="wordmark block px-3 pb-6 pt-2 text-xl">cc-desk</a>
-			<a href="/rulings" class="rail-row">Rulings</a>
-			{#if poll.answer?.snapshot}
-				<Sidebar snapshot={poll.answer.snapshot} now={poll.now} />
-			{/if}
-		</nav>
 	</div>
 </div>

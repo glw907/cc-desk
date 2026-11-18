@@ -32,7 +32,7 @@ test.describe('the sidebar on started', () => {
 	test('the building round hangs under alpha, and beta has none', async ({ page }) => {
 		const round = block(page, 'alpha/v1').locator('[data-round="alpha/r2"]');
 		await expect(round).toContainText('0 of 3 passes done');
-		await expect(round).toContainText('Building');
+		await expect(round.locator('.figures .state')).toHaveText('Building');
 		await expect(block(page, 'beta/v2').locator('[data-round]')).toHaveCount(0);
 	});
 

@@ -35,7 +35,7 @@ round lists its passes as plain links, so each pass is one click from the front 
 			{#if release.rough}<span class="rough">Rough</span>{/if}
 		</h3>
 		<p class="muted">{roundsDone}. {percentDone(release.rounds)}% of the work.</p>
-		<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} />
+		<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} words="roundState" />
 	</header>
 
 	<ol class="rounds">

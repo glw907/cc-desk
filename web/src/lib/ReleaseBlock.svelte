@@ -26,7 +26,7 @@ building round hung beneath it on a rule, with a bar of that round's passes.
 		<span><strong>{release.project}</strong> to {release.name}</span>
 		{#if release.rough}<span class="rough">Rough</span>{/if}
 	</p>
-	<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} />
+	<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} words="roundState" />
 	<p class="figures">
 		<span>{roundsDone}</span>
 		<span>{percentDone(release.rounds)}% of the work</span>
@@ -39,7 +39,7 @@ building round hung beneath it on a rule, with a bar of that round's passes.
 				<p class="branch-head">
 					<a class="branch-title" href="/{release.project}/{round.name}">{round.name}</a>
 				</p>
-				<ScaleBar parts={passParts(round.passes)} label={passesDone} slim />
+				<ScaleBar parts={passParts(round.passes)} label={passesDone} words="passState" slim />
 				<p class="figures">
 					<span>{passesDone}</span>
 					<span class="state {round.state}">{word('roundState', round.state)}</span>
