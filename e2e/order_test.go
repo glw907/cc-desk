@@ -204,3 +204,270 @@ func TestWaitingOrder(t *testing.T) {
 		sameFolder(t, before, folder(t, a))
 	})
 }
+
+// limitSnap is the part of the snapshot the limit tests read.
+type limitSnap struct {
+	Waiting []struct {
+		Project   string   `json:"project"`
+		Pass      string   `json:"pass"`
+		Limits    []string `json:"limits"`
+		ResetText *string  `json:"reset_text"`
+	} `json:"waiting"`
+	NextSession struct {
+		State   string   `json:"state"`
+		Reasons []string `json:"reasons"`
+	} `json:"next_session"`
+	Releases []struct {
+		Project string `json:"project"`
+		Rounds  []struct {
+			Passes []struct {
+				Name  string `json:"name"`
+				State string `json:"state"`
+			} `json:"passes"`
+		} `json:"rounds"`
+	} `json:"releases"`
+}
+
+func (s limitSnap) stateOf(t *testing.T, project, pass string) string {
+	t.Helper()
+	for _, rel := range s.Releases {
+		if rel.Project != project {
+			continue
+		}
+		for _, rd := range rel.Rounds {
+			for _, p := range rd.Passes {
+				if p.Name == pass {
+					return p.State
+				}
+			}
+		}
+	}
+	t.Fatalf("pass %s/%s not in the snapshot", project, pass)
+	return ""
+}
+
+// waitingOn returns the limits a pass is listed as waiting on, or nil.
+func (s limitSnap) waitingOn(project, pass string) []string {
+	for _, w := range s.Waiting {
+		if w.Project == project && w.Pass == pass {
+			return w.Limits
+		}
+	}
+	return nil
+}
+
+func snapWith(t *testing.T, si *standIn, dir, now string) limitSnap {
+	t.Helper()
+	r := si.run(t, dir, now, "snapshot")
+	if r.code != 0 {
+		t.Fatalf("snapshot exit %d: %s", r.code, r.stderr)
+	}
+	var s limitSnap
+	if err := json.Unmarshal([]byte(r.stdout), &s); err != nil {
+		t.Fatal(err)
+	}
+	return s
+}
+
+// start runs a start that must exit 0 and returns its stderr.
+func start(t *testing.T, si *standIn, dir, now string, args ...string) string {
+	t.Helper()
+	r := si.run(t, dir, now, append([]string{"pass", "start"}, args...)...)
+	if r.code != 0 {
+		t.Fatalf("start %v exit %d: %s", args, r.code, r.stderr)
+	}
+	return r.stderr
+}
+
+func requireState(t *testing.T, s limitSnap, project, pass, want string) {
+	t.Helper()
+	if got := s.stateOf(t, project, pass); got != want {
+		t.Errorf("%s/%s is %s, want %s", project, pass, got, want)
+	}
+}
+
+func requireWaitingOn(t *testing.T, s limitSnap, project, pass string, want ...string) {
+	t.Helper()
+	requireState(t, s, project, pass, "waiting")
+	if got := s.waitingOn(project, pass); strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("%s/%s waits on %v, want %v", project, pass, got, want)
+	}
+}
+
+const resetText = "Nov 20, 10:59pm (America/Anchorage)"
+
+func TestLimits(t *testing.T) {
+	t.Run("two_pass_limit", func(t *testing.T) {
+		si := newStandIn(t, 0, usageResult(40))
+		dir := newStateFrom(t, "order")
+		start(t, si, dir, at(t, 0), "north", "n-free")
+		start(t, si, dir, at(t, 1), "south", "s-free")
+		if got := start(t, si, dir, at(t, 2), "north", "n-two"); !strings.Contains(got, "waiting north/n-two on two_pass_limit") {
+			t.Errorf("wait line = %q", got)
+		}
+		start(t, si, dir, at(t, 3), "south", "s-two")
+		s := snapWith(t, si, dir, at(t, 4))
+		requireWaitingOn(t, s, "north", "n-two", "two_pass_limit")
+		requireWaitingOn(t, s, "south", "s-two", "two_pass_limit")
+		if len(s.Waiting) != 2 || s.Waiting[0].Pass != "n-two" {
+			t.Errorf("waiting = %+v, want n-two first", s.Waiting)
+		}
+
+		if r := si.run(t, dir, at(t, 5), "pass", "finish", "north", "n-free"); r.code != 0 {
+			t.Fatalf("finish exit %d: %s", r.code, r.stderr)
+		}
+		s = snapWith(t, si, dir, at(t, 6))
+		requireState(t, s, "north", "n-two", "building")
+		requireWaitingOn(t, s, "south", "s-two", "two_pass_limit")
+	})
+
+	t.Run("usage_99", func(t *testing.T) {
+		si := newStandIn(t, 0, usageResult(99))
+		dir := newStateFrom(t, "order")
+		start(t, si, dir, at(t, 0), "north", "n-free")
+		requireState(t, snapWith(t, si, dir, at(t, 1)), "north", "n-free", "building")
+	})
+
+	t.Run("usage_100_then_99", func(t *testing.T) {
+		si := newStandIn(t, 0, usageResult(100))
+		dir := newStateFrom(t, "order")
+		start(t, si, dir, at(t, 0), "north", "n-free")
+		s := snapWith(t, si, dir, at(t, 1))
+		requireWaitingOn(t, s, "north", "n-free", "usage")
+		if len(s.Waiting) != 1 || s.Waiting[0].ResetText == nil || *s.Waiting[0].ResetText != resetText {
+			t.Errorf("waiting = %+v, want reset text %q", s.Waiting, resetText)
+		}
+
+		si.set(t, usageResult(99))
+		requireState(t, snapWith(t, si, dir, at(t, 6)), "north", "n-free", "building")
+	})
+
+	t.Run("stop_85", func(t *testing.T) {
+		si := newStandIn(t, 0, usageResult(87))
+		dir := newStateFrom(t, "order")
+		writeIn(t, dir, "settings.json", `{"format": 1, "usage_stop_percent": 85}`+"\n")
+		start(t, si, dir, at(t, 0), "north", "n-free")
+		requireWaitingOn(t, snapWith(t, si, dir, at(t, 1)), "north", "n-free", "usage")
+	})
+
+	t.Run("unparseable", func(t *testing.T) {
+		si := newStandIn(t, 0, "this is not a result\n")
+		dir := newStateFrom(t, "order")
+		start(t, si, dir, at(t, 0), "north", "n-free")
+		s := snapWith(t, si, dir, at(t, 1))
+		requireWaitingOn(t, s, "north", "n-free", "usage")
+		if len(s.Waiting) != 1 || s.Waiting[0].ResetText != nil {
+			t.Errorf("waiting = %+v, want a null reset text", s.Waiting)
+		}
+		if s.NextSession.State != "needs_you_now" || strings.Join(s.NextSession.Reasons, "|") != "the usage figure can't be read" {
+			t.Errorf("next_session = %+v", s.NextSession)
+		}
+	})
+
+	t.Run("cache", func(t *testing.T) {
+		si := newStandIn(t, 0, usageResult(40))
+		dir := newStateFrom(t, "order")
+		snapWith(t, si, dir, at(t, 0))
+		snapWith(t, si, dir, at(t, 1))
+		if got := si.calls(t); got != 1 {
+			t.Errorf("after two verbs 1 minute apart the stand-in ran %d times, want 1", got)
+		}
+		snapWith(t, si, dir, at(t, 5))
+		if got := si.calls(t); got != 2 {
+			t.Errorf("after a verb 5 minutes on the stand-in ran %d times, want 2", got)
+		}
+	})
+}
+
+func TestGuessWaits(t *testing.T) {
+	si := newStandIn(t, 0, usageResult(40))
+	dir := newStateFrom(t, "order")
+	start(t, si, dir, at(t, 0), "north", "n-free")
+	start(t, si, dir, at(t, 1), "south", "s-free")
+	got := start(t, si, dir, at(t, 2), "north", "n-guess", "--guess", "north-q2")
+	if !strings.Contains(got, "waiting north/n-guess on two_pass_limit") {
+		t.Errorf("wait line = %q", got)
+	}
+
+	var rel struct {
+		Passes []struct {
+			Name  string `json:"name"`
+			Guess *struct {
+				Question string `json:"question"`
+			} `json:"guess"`
+		} `json:"passes"`
+	}
+	if err := json.Unmarshal([]byte(folder(t, dir)["releases/north.json"]), &rel); err != nil {
+		t.Fatal(err)
+	}
+	var recorded bool
+	for _, p := range rel.Passes {
+		if p.Name == "n-guess" && p.Guess != nil && p.Guess.Question == "north-q2" {
+			recorded = true
+		}
+	}
+	if !recorded {
+		t.Error("the waiting guess start did not record its guess")
+	}
+
+	r := si.run(t, dir, at(t, 3), "snapshot")
+	if r.code != 0 {
+		t.Fatalf("snapshot exit %d: %s", r.code, r.stderr)
+	}
+	var open struct {
+		OpenGuesses []struct {
+			Pass string `json:"pass"`
+		} `json:"open_guesses"`
+		Total int `json:"guess_minutes_total"`
+	}
+	if err := json.Unmarshal([]byte(r.stdout), &open); err != nil {
+		t.Fatal(err)
+	}
+	if len(open.OpenGuesses) != 1 || open.OpenGuesses[0].Pass != "n-guess" || open.Total != 200 {
+		t.Errorf("open_guesses %+v total %d, want n-guess and 200", open.OpenGuesses, open.Total)
+	}
+}
+
+func TestFreeVerb(t *testing.T) {
+	si := newStandIn(t, 0, usageResult(40))
+	dir := newStateFrom(t, "order")
+	start(t, si, dir, at(t, 0), "north", "n-free")
+	start(t, si, dir, at(t, 1), "south", "s-free")
+	start(t, si, dir, at(t, 2), "north", "n-two")
+	r := si.run(t, dir, at(t, 3), "free")
+	if r.code != 0 {
+		t.Fatalf("free exit %d: %s", r.code, r.stderr)
+	}
+	lines := strings.Split(strings.TrimSpace(r.stdout), "\n")
+	for _, want := range []string{
+		"free south/s-two",
+		"waiting north/n-two on two_pass_limit",
+		"not free north/n-big: an unanswered question",
+	} {
+		var found bool
+		for _, l := range lines {
+			if l == want {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("free printed no line %q; lines: %q", want, lines)
+		}
+	}
+}
+
+func TestUsageReader(t *testing.T) {
+	built := `{"type":"result","subtype":"success","is_error":false,"num_turns":0,"total_cost_usd":0,` +
+		`"result":"Current week (Fable): 12% used · resets Nov 21, 1:00am (America/Anchorage)\n` +
+		`Current session: 96% used · resets 3:00pm\n` +
+		`Current week (all models): 61% used · resets Nov 20, 10:59pm (America/Anchorage)\n"}` + "\n"
+	si := newStandIn(t, 0, built)
+	dir := newStateFrom(t, "order")
+	r := si.run(t, dir, at(t, 0), "usage")
+	if r.code != 0 {
+		t.Fatalf("usage exit %d: %s", r.code, r.stderr)
+	}
+	if want := "61% used, resets " + resetText + "\n"; r.stdout != want {
+		t.Errorf("usage printed %q, want %q", r.stdout, want)
+	}
+}
