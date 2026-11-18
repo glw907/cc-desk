@@ -4,6 +4,7 @@
   "name": "v2",
   "repo": "glw907/beta",
   "rounds": [
+    {"name": "b2", "summary": "A building pass with a ready pull request.", "needs_geoff": true, "design_written": true},
     {
       "name": "b1", "summary": "A building pass with two after it.", "needs_geoff": true, "design_written": true,
       "session": {
@@ -16,7 +17,12 @@
   "passes": [
     {"name": "b-build", "summary": "Building now.", "round": "b1", "planned_minutes": 20, "state": "building", "started": "2026-11-20T22:30:00Z"},
     {"name": "b-after", "summary": "Waits on the build and on qb.", "round": "b1", "planned_minutes": 30, "state": "not_started", "after": ["b-build"], "questions": ["qb"]},
-    {"name": "b-tail", "summary": "Comes after b-after.", "round": "b1", "planned_minutes": 40, "state": "not_started", "after": ["b-after"]}
+    {"name": "b-tail", "summary": "Comes after b-after.", "round": "b1", "planned_minutes": 40, "state": "not_started", "after": ["b-after"]},
+    {
+      "name": "b4", "summary": "Add the report verbs", "round": "b2", "planned_minutes": 60, "state": "building",
+      "started": "2026-11-20T22:00:00Z", "questions": ["merge-b4-1"],
+      "pull_request": {"number": 12, "commit": "3f2a9c1", "verdict": "fix", "ready": "2026-11-20T22:45:00Z", "question": "merge-b4-1"}
+    }
   ],
   "questions": [
     {
@@ -28,6 +34,12 @@
       "causes": {"restart": "The session comes back by itself.", "stop": "The pass stops and waits for you."},
       "reason": "A restart costs nothing and the pass is cheap to redo.",
       "never_guess": true
+    },
+    {
+      "id": "merge-b4-1",
+      "text": "The pull request lies outside its design.",
+      "options": ["merge", "fix again", "close"],
+      "recommended": "merge"
     }
   ]
 }
