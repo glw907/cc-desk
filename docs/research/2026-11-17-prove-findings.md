@@ -1,40 +1,43 @@
 # Prove first: findings
 
-The pass built the repo's scaffold and gate, and the helper that every proof session is meant to
-launch through. It then read the week's usage and found it at 87 percent, above the plan's limit of
-85. The plan's stop rule says to launch no more proof sessions, so six of the seven proofs weren't
-attempted. Proof 7 needs no session for its second look, and that look held. Each unattempted
-proof closes with the design's fallback, and the follow-up
-`docs/follow-ups/2026-11-17-rerun-prove-proofs.md` says how to rerun them after the allowance resets
-on Nov 20 at 11pm Alaska time.
+Five of the seven proofs held and two fell back. A pass can run from a worktree to a merge with no
+permission prompt, a new worktree raises no trust prompt, a script can tell the states apart,
+dropping five tools saves about 19,000 tokens per session, and usage can be read without a model.
+A session blocked on a lost connection can't be woken by `respawn` or `resume`, and a killed
+session can't be relied on to come back as one row, so the check restarts such sessions from the
+files. Each section ends with one closing line, and the follow-up
+`docs/follow-ups/2026-11-17-rerun-prove-proofs.md` lists what stays open.
 
-A "Fallback applies" below means the design's fallback is the safe assumption for the later
-rounds, not that the behavior was tested and failed.
+A "Fallback applies" below means the design's fallback is the safe assumption for the later rounds.
+It doesn't mean the behavior failed in every form: each section says what was tried.
 
-| Proof | Result | Why |
+| Proof | Result | What decided it |
 | --- | --- | --- |
-| 5. A new worktree raises no trust prompt | Fallback applies, not attempted | Usage at 87 percent |
-| 1. Wake a session blocked on a lost connection | Fallback applies, not attempted | Usage at 87 percent |
-| 4. A pass runs with no permission prompt | Fallback applies, not attempted | Usage at 87 percent |
-| 2. Tell the states apart | Fallback applies, not attempted | Usage at 87 percent |
-| 6. Relaunch from the state files | Fallback applies, not attempted | Usage at 87 percent |
-| 3. Dropped tools leave the context | Fallback applies, not attempted | Usage at 87 percent |
+| 5. A new worktree raises no trust prompt | Held | The session finished in 25 seconds and never showed `blocked` |
+| 1. Wake a session blocked on a lost connection | Fallback applies | No wake brought the row back to `working`, for 614 seconds after the link returned |
+| 4. A pass runs with no permission prompt | Held | Two runs of the eight-step pass: zero prompts, zero denials |
+| 2. Tell the states apart | Held | All 16 cases labeled right. Expired sign-in, usage limit, and EAI_AGAIN rest on an undocumented file |
+| 6. Relaunch from the state files | Fallback applies | `respawn` left the session idle, and `resume` made a second row |
+| 3. Dropped tools leave the context | Held | The first request was 18,990 tokens smaller |
 | 7. Read the usage without a model | Held | `claude -p "/usage"` reports no tokens and no cost |
 
-## The stop
+## Usage and the sessions
 
-The plan's "Stops and their answers" says to read usage before a proof's first launch with
-`claude -p "/usage" --model haiku < /dev/null`, on its "Current week (all models)" line, and at 85
-or more to launch no proof sessions and close. The read, on 2026-11-17:
+The weekly figure read 86 percent at proof 1 and 87 percent at proofs 4, 2, 6, and 3, under the
+pass's ceiling of 100 percent (raised from 85 on 2026-11-17). No proof was cut short or marked on the
+figure. Every proof session launched and stopped through `bash spikes/own.sh`. The closing audit
+numbers are in the pull request.
 
-```text
-Current week (all models): 87% used · resets Nov 20, 11pm (America/Anchorage)
-Current week (Fable): 81% used · resets Nov 20, 11pm (America/Anchorage)
-```
+Three things happened outside the plan, and each is recorded here:
 
-The pass launched no proof session. `bash spikes/own.sh start`, `finish`, and `audit` ran with an
-empty owned list, and the audit printed `strangers: 0`, `foreign kills: 0`, `foreign restarts: 0`,
-`bypass: 0`, and `allow hooks: none`.
+- A session `e329f69b` was live in the main checkout, so `claude-worktree-busy` exited 1. I
+  worked only in my own worktree. I read its `claude logs` once before I saw that it wasn't mine,
+  discarded the text, and used none of it.
+- Auto mode refused two of my actions, both named in proofs 1 and 4: a `sleep 90 && echo` step, and
+  a write of an `approval-queue land` allow rule into a spike settings file.
+- Two scripts had bugs the proofs found: `own.sh`'s `runs()` (it mishandled a first argument with a
+  space) and proof 1's `tunnel.py` (a tuple used where a string belonged). Both are fixed, and
+  `own_test.sh` passes.
 
 ## Proof 5
 
@@ -82,16 +85,16 @@ as `blocked`.
 | Wake | Command | Three minutes later |
 | --- | --- | --- |
 | Nothing | none | Row `blocked idle`, 3 steps |
-| Respawn | `claude respawn <id>` | Row `blocked idle`, 3 steps. It printed "restarted 5305f47d" and a note that the session was already running, so it started a copy, `b2ddeeb4`. |
+| Restart | `claude respawn <id>` | Row `blocked idle`, 3 steps. It printed "restarted 5305f47d" and a note that the session was already running, so it started a copy, `b2ddeeb4`. |
 | Resume | `claude --resume <sid> --bg` | Row `blocked idle`, 4 steps |
 
 No wake brought the row back to `working`. `progress.txt` still reached step 5 by 03:27, so
-something kept running the Bash calls after the respawn and the resume. I did not read a job file
+something kept running the Bash calls after `respawn` and `resume`. I did not read a job file
 or transcript to say which process wrote steps 4 and 5, and `claude agents` never listed the copy
-as a row of its own. The one result is that the row, the only signal the later rounds can read,
+as a separate row. The one result is that the row, the only signal the later rounds can read,
 stayed `blocked idle` for 614 seconds after the link returned, whatever ran underneath.
 
-A real drop on the laptop (wifi lost, lid shut) was not tested. The tunnel models a refused
+A real drop on the laptop (WiFi lost, lid shut) was not tested. The tunnel models a refused
 connection, and a dropped one may behave otherwise. That test is filed as a follow-up.
 
 Fallback applies: the check ends the session and relaunches it from the files.
@@ -123,7 +126,7 @@ trusted" in proof 1's first attempt, and a clone of the scratch repo is the same
 shape therefore launches with `--worktree` from a cc-desk worktree, which inherits trust, and the
 prompt has the session clone the scratch repo into a plain `scratch/` folder inside it and work
 there with `git -C scratch`. The shell's directory moved into `scratch/` after step 1 in run 2, and
-the session corrected for it. A later round that runs a pass in a repo of its own should launch from
+the session corrected for it. A later round that runs a pass in another repo should launch from
 a worktree of that repo, the case proof 5 held.
 
 **Answering a prompt from outside.** A prompt can be answered without attaching, through a
@@ -147,7 +150,7 @@ attaching. The hook waits up to 120 seconds, then denies, so the desk has two mi
 file. I did not drive `claude attach`, the control socket, or anything under `~/.claude/daemon/`.
 
 **Denials by class.** The log held 129 rows on 2026-11-18, 2 more than the plan read. The two are
-this pass's own: proof 1's first session had `sleep 90 && echo step1 >> progress.txt` refused as
+this pass's: proof 1's first session had `sleep 90 && echo step1 >> progress.txt` refused as
 Destructive or Unwanted Actions (the later runs use a `step.sh` script instead), and my write of
 proof 4's settings file with an `approval-queue land` allow rule was refused as Self-Modification.
 `denials.py` gives the same classes as the plan's table, and the lines below confirm or correct each.
@@ -157,7 +160,7 @@ proof 4's settings file with an `approval-queue land` allow rule was refused as 
 | Classifier unavailable | 47 | Every kind, in an outage | No setting. 13 sessions: 8 later settled `killed`, 3 `done`, 1 `claimed-spare`, 1 not named in `daemon.log`. An exact allow rule did not come into play: the runs above hit no outage, so whether a rule skips the classifier is untested. A bounded retry after 60 seconds is the plan's rule |
 | No explanation from the server-side classifier | 10 | Every kind | Mostly matched another class on the target; the answer is the same rule as the matching class |
 | Destructive or Unwanted Actions | 14 | Pass executor, Retire round | A gate script that cleans up what it starts, with an exact allow rule |
-| Self-Modification | 11 | Desk session; a pass that changes its own launch | Launch settings in a file the `cc-desk` command writes. Confirmed this pass: a write of an allow rule for `approval-queue land` into a spike settings file was refused with this class, and the same file without that rule went through |
+| Self-Modification | 11 | Desk session; a pass that changes its launch | Launch settings in a file the `cc-desk` command writes. Confirmed this pass: a write of an allow rule for `approval-queue land` into a spike settings file was refused with this class, and the same file without that rule went through |
 | Interfere With Workloads | 11 | Pass executor, conductor | The gate script, and session control in the `cc-desk` command |
 | Undermining Oversight | 4 | Conductor, desk session | Session control in the `cc-desk` command |
 | Unauthorized Access | 4 | Desk session, executor | Each session gets the paths it needs and reads no other session's files |
@@ -183,7 +186,7 @@ Held.
 | Finished session (this proof) | `row.state` `done` with `row.status` `idle` | idle | 2, 60 seconds apart |
 | Permission prompt (this proof) | `row.waitingFor` is `permission prompt`, with `state` `blocked` and `status` `waiting` | permission prompt | 2, 60 seconds apart |
 | Lost connection (proof 1) | The row reads `blocked idle` and carries no reason. The `claude logs` screen holds "API Error: Couldn't connect through your proxy (ERR_PROXY_TUNNEL)" | lost connection | 2, 10 minutes apart |
-| EAI_AGAIN, 2026-11-14 (recorded text) | `state.json` `detail`: "API Error: Can't reach the API server — check your internet or DNS (EAI_AGAIN)" | lost connection | fixture |
+| EAI_AGAIN, 2026-11-14 (recorded text) | `state.json` `detail`: `API Error: Can't reach the API server — check your internet or DNS (EAI_AGAIN)` | lost connection | fixture |
 | Expired sign-in (recorded text) | `state.json` `detail`: "Login expired" | expired sign-in | fixture |
 | Weekly limit and Fable limit (recorded texts) | `state.json` `detail`: "You've hit your ... limit · resets ..." | usage limit | 2 fixtures |
 
@@ -210,19 +213,19 @@ Held.
 ## Proof 6
 
 Usage read 87 percent before the run. `spikes/6-relaunch/run` makes a linked worktree of this repo
-as the sandbox (branch `ccd-spike-6`, since a nested `git init` is its own trust root), launches
+as the sandbox (branch `ccd-spike-6`, since a nested `git init` is a separate trust root), launches
 `ccd-spike-6-relaunch` on a five-step prompt (each step sleeps 60 seconds, then commits, and the
 prompt has the session check the log first), and runs `own.sh kill` after the second commit.
 
 | Time | What happened | Commits | Row of the original |
 | --- | --- | --- | --- |
-| 03:40:09 | Before the kill | 2 | `working busy`, pid 2956315 |
+| 03:40:09 | Before the kill | 2 | `working busy`, PID 2956315 |
 | 03:40:10 | `own.sh kill` ended the process | 2 | |
-| 03:40:20 | Ten seconds later | 2 | `working`, no pid, no status |
-| 03:40:30 | Twenty seconds later, with no command from me | 2 | `working busy`, new pid 2961551 |
+| 03:40:20 | Ten seconds later | 2 | `working`, no PID, no status |
+| 03:40:30 | Twenty seconds later, with no command from me | 2 | `working busy`, new PID 2961551 |
 | 03:41:24 | Step 3 committed | 3 | same |
 | 03:42:12 | End of the two-minute watch for a wake | 3 | same |
-| 03:42:13 | `own.sh respawn` printed "restarted 96fdc1a7" | 3 | `blocked idle`, pid 2959603, for 5.5 minutes |
+| 03:42:13 | `own.sh respawn` printed "restarted 96fdc1a7" | 3 | `blocked idle`, PID 2959603, for 5.5 minutes |
 | 03:47:52 | `own.sh resume` with "Carry on from the last commit." | 3 | note: the session "is already running in the background, so this started a copy as e3b28ac7" |
 | 03:49:01 and 03:50:04 | Steps 4 and 5 committed by the copy | 5 | original still `blocked idle` |
 
@@ -238,7 +241,7 @@ The branch at the end, with no step written twice:
 
 Four things this showed:
 
-- Ending the process did not leave the session dead. Within 20 seconds the row had a new pid and read
+- Ending the process did not leave the session dead. Within 20 seconds the row had a new PID and read
   `working busy`. Whether the supervisor relaunched it or the step in flight kept the row busy, the
   saved rows can't say. Step 3 did commit about 74 seconds later, and nothing came after it.
 - `respawn` printed success and left the session `blocked idle` with an empty prompt. It did not
@@ -267,7 +270,7 @@ lean: claude --bg --name ccd-spike-3-lean --model sonnet --effort low --permissi
 ```
 
 Per-tool record. No transcript held a deferred-tools record that named any of the five. The full
-session's own answer was "full definition is in my tool list" for each of Artifact, SendFeedback,
+session's answer was "full definition is in my tool list" for each of Artifact, SendFeedback,
 Workflow, AskUserQuestion, and ReportFindings, so all five were present in full.
 
 | First request | Input | Cache creation | Cache read | Total |

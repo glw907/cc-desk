@@ -1,18 +1,22 @@
-# Rerun proofs 1 to 6
+# Open tests from the Prove pass
 
-The Prove pass stopped before its first launch because weekly usage read 87 percent, above the plan's
-85. Proofs 1 to 6 weren't attempted. `docs/plans/2026-11-17-prove-plan.md` still holds each proof's
-steps, and `spikes/own.sh` is built and tested to launch and control the sessions.
+The Prove pass ran all six proofs and closed each with a result in
+`docs/research/2026-11-17-prove-findings.md`. Five items stay open. None blocks the State and rules
+round, which starts from the two fallbacks.
 
-To rerun:
-
-1. Read usage with `claude -p "/usage" --model haiku < /dev/null` and record it. The ceiling is
-   now 100 percent, and the limit pauses the pass rather than closing it (Geoff, 2026-11-17).
-2. Run `bash spikes/own.sh start`, then proof 5, then the others in the plan's order.
-3. Write each proof's folder under `spikes/`, with a `run` script, and its `## Proof <n>` section in
-   `docs/research/2026-11-17-prove-findings.md`.
-4. Proof 4 is the goal Geoff set: zero prompts for a pass from worktree to merge.
-
-Proof 1's real-drop test also stays open: on the next real `API unavailable` block, give
-the session a few minutes to retry by itself, then try `own.sh respawn` and then `own.sh resume`
-on that session.
+1. **A real connection drop.** Proof 1 modeled a lost connection with a proxy that refused the
+   tunnel. A dropped link (WiFi lost, lid shut) may behave otherwise. On the next real `API
+   unavailable` block, give the session a few minutes to retry by itself, then try `own.sh respawn`
+   and then `own.sh resume` on it, and record the row after each.
+2. **Resume after stopping the original.** Proof 6's `resume` made a copy because the original,
+   idle after its `respawn`, was still registered. Run it again with `own.sh stop` on the original first, and check
+   whether the copy carries on as the only row. If it does, proof 6's fallback can narrow to "stop,
+   then resume".
+3. **A live expired sign-in and usage limit.** Proof 2 labeled both from recorded text in
+   `state.json`, an undocumented file. When one happens, save `claude logs` for that session and see
+   whether the documented command shows the same words, so the check needn't read the file.
+4. **The sign-in expiry warning.** `loginExpiresAt` from `claude auth status --json` was not read
+   in proof 2. Read it once and record whether it gives notice before a sign-in lapses.
+5. **A supervisor restart after a kill.** In proof 6 the row had a new process id and read `working` 20
+   seconds after `own.sh kill`, with no command from the pass. The saved rows don't show whether the
+   supervisor started it again. Repeat the kill and save the process list too.

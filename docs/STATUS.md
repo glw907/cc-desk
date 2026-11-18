@@ -7,20 +7,19 @@
 - The Prove pass's first run landed as pull request 1 on 2026-11-17. It built the Go scaffold,
   `scripts/gate.sh`, the CI workflow, and `spikes/own.sh`, the helper that launches and controls
   proof sessions. A second review found three blocking bugs in `own.sh`, fixed before the merge.
-- That run stopped on the plan's old 85 percent usage limit, with usage at 87 percent, so it
-  launched no proof session. Proof 7 held through `claude -p "/usage"`. Proofs 1 to 6 close as
-  not attempted in `docs/research/2026-11-17-prove-findings.md` until the second run replaces them.
-- Geoff raised this pass's weekly usage ceiling to 100 percent on 2026-11-17, in his terminal
-  session. At the limit the pass pauses and never closes. He resets the allowance, and his
-  terminal session wakes the executor. The plan's "Stops and their answers" row says the same.
+- The first run stopped on the plan's old 85 percent usage limit and launched no proof session.
+  Geoff raised the ceiling to 100 percent on 2026-11-17, and the second run ran all six proofs.
+- The report is `docs/research/2026-11-17-prove-findings.md`. Proofs 5, 4, 2, 3, and 7 held. Proofs 1
+  and 6 fall back: the check restarts a blocked or killed session from the files, and a fresh
+  session starts from the plan and branch. A pass runs with zero prompts under five allow rules.
+- Open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
 
 ## Next action
 
-The second run (session `cc-desk-prove`, branch `worktree-cc-desk-prove-run2`) is in progress.
-Proofs 5, 4, 2, and 3 held; proofs 1 and 6 fall back. Task 10 (findings, follow-ups, STATUS) is next, then the close. If it paused
-at the usage limit, wake it after Geoff's reset. When the proofs close, design the State and
-rules round from the findings.
+Design the State and rules round from the findings, in Geoff's terminal session. The second run's
+pull request (branch `worktree-cc-desk-prove-run2`) carries the proofs and lands through
+`approval-queue land` once its checks and review pass.
 
 ## Open decisions
 
