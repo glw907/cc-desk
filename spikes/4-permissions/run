@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Proof 4: one run of the pass shape on the scratch repo.
+# Usage: run <n> [permission-mode] [settings-file]
+# Saves out/run<n>/ with the launch line, every polled row, the final screen,
+# and tally.py's count. Takes up to about 25 minutes.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+ROOT=$(cd "$HERE/../.." && pwd)
+N=${1:?run number}
+MODE=${2:-auto}
+SETTINGS=${3:-$HERE/settings.json}
+LABEL=r$N-$(date -u +%H%M%S)
+OUT=$HERE/out/run$N
+rm -rf "$OUT"
+mkdir -p "$OUT"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+
+ev "usage: $(claude -p '/usage' --model haiku </dev/null | grep 'Current week (all')"
+
+EXISTING=$(dirname "$ROOT")/ccd-spike-4-existing-$N
+git worktree add -q -b ccd-spike-4-existing-$N "$EXISTING" origin/main
+PROMPT=$(sed -e "s|@RUN@|$LABEL|g" -e "s|@WT@|$EXISTING|g" "$HERE/prompt.txt")
+
+LINE="claude --bg --name ccd-spike-4-main-$N --worktree ccd-spike-4-$N --permission-mode $MODE --settings $SETTINGS --model sonnet --effort low"
+echo "$LINE" >"$OUT/launch-line.txt"
+bash "$OWN" launch ccd-spike-4-main-$N "$ROOT" --worktree ccd-spike-4-$N --permission-mode "$MODE" \
+  --settings "$SETTINGS" --model sonnet --effort low "$PROMPT" >"$OUT/launch.txt" 2>&1 || {
+  ev "launch failed"; cat "$OUT/launch.txt"; exit 1; }
+ID=$(tail -1 "$OUT/launch.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/')
+SID=$(awk -F'\t' -v id="$ID" '$1 == id {print $2}' "$HERE/../owned.tsv")
+ev "launched $ID ($SID)"
+
+blocked=0
+for i in $(seq 1 150); do
+  sleep 10
+  claude agents --json --all >"$OUT/list.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("id") == sys.argv[2]:
+        print(json.dumps(r))
+' "$OUT/list.json" "$ID" >>"$OUT/rows.jsonl"
+  s=$(tail -1 "$OUT/rows.jsonl" | python3 -I -c 'import json,sys; print(json.loads(sys.stdin.read() or "{}").get("state",""))')
+  ev "poll $i: state=$s"
+  case $s in
+    blocked)
+      blocked=$((blocked + 1))
+      bash "$OWN" logs "$ID" 2>&1 | python3 -I -c '
+import re, sys
+t = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", " ", sys.stdin.read())
+print(re.sub(r"\s+", " ", t)[-900:])
+' >"$OUT/blocked-$i.txt"
+      ;;
+    done | failed | stopped | "") break ;;
+  esac
+  [ $blocked -ge 6 ] && { ev "blocked for 3 polls: stopping"; break; }
+done
+bash "$OWN" logs "$ID" 2>&1 | python3 -I -c '
+import re, sys
+t = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", " ", sys.stdin.read())
+print(re.sub(r"\s+", " ", t)[-2500:])
+' >"$OUT/final-screen.txt"
+python3 -I "$HERE/tally.py" "$OUT/rows.jsonl" "$SID" "$HOME/.local/state/claude-denials.jsonl" | tee "$OUT/tally.txt"
+ev "done; ID=$ID SID=$SID"

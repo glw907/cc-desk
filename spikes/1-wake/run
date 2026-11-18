@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# Proof 1: wake a session blocked on a lost connection. Takes about 40 minutes.
+# Run from a worktree of the repo, after own.sh start. Everything it saw goes
+# to out/ and out/events.log.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+OUT=$HERE/out
+SB=$HERE/sandbox
+PORT=18907
+mkdir -p "$OUT"
+: >"$OUT/events.log"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+
+# state_of <id>: the row's state and status, saving the whole list too.
+state_of() {
+  claude agents --json --all >"$OUT/list.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("id") == sys.argv[2]:
+        print(r.get("state", ""), r.get("status", ""))
+' "$OUT/list.json" "$1"
+}
+steps() { grep -c '^step' "$SB/progress.txt" 2>/dev/null || true; }
+snap() { # snap <id> <label>
+  claude agents --json --all >"$OUT/row-$2.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("id") == sys.argv[2]:
+        print(json.dumps(r))
+' "$OUT/row-$2.json" "$1" >>"$OUT/rows.txt"
+  bash "$OWN" logs "$1" 2>&1 | python3 -I -c '
+import re, sys
+t = sys.stdin.read()
+t = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", " ", t)
+print(re.sub(r"\s+", " ", t)[-700:])
+' >>"$OUT/logs-$2.txt"
+}
+
+# 1. Sandbox, tunnel.
+rm -rf "$SB" "$OUT/block" "$OUT/tunnel.log" "$OUT/rows.txt"
+mkdir -p "$SB"
+: >"$SB/progress.txt"
+cp "$HERE/step.sh" "$SB/step.sh"
+nohup python3 -I "$HERE/tunnel.py" --port "$PORT" --log "$OUT/tunnel.log" --block "$OUT/block" \
+  >"$OUT/tunnel.out" 2>&1 &
+echo $! >"$OUT/tunnel.pid"
+sleep 1
+ev "tunnel up on 127.0.0.1:$PORT"
+
+# 2. Launch.
+bash "$OWN" launch ccd-spike-1-wake "$SB" --model sonnet --effort low \
+  --settings "$HERE/settings.json" "$(cat "$HERE/prompt.txt")" >"$OUT/launch.txt" 2>&1 || {
+  ev "launch failed"; cat "$OUT/launch.txt"; exit 1; }
+ID=$(tail -1 "$OUT/launch.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/')
+ev "launched $ID"
+
+# 3. Proxy check: names only, never values.
+DP=$(bash "$OWN" daemonpid 2>&1 | tail -1)
+ev "supervisor pid: $DP"
+if [ -r "/proc/$DP/environ" ] && tr '\0' '\n' <"/proc/$DP/environ" | cut -d= -f1 | grep -qiE '^(https?_proxy|all_proxy|no_proxy)$'; then
+  ev "proxy check: supervisor environment HOLDS a proxy variable name"
+else
+  ev "proxy check: no proxy variable name in the supervisor environment"
+fi
+
+# 4. Wait for API traffic through the tunnel and two progress lines.
+for i in $(seq 1 24); do
+  if grep -q api.anthropic.com "$OUT/tunnel.log" 2>/dev/null && [ "$(steps)" -ge 2 ]; then break; fi
+  sleep 15
+done
+ev "pre-cut: tunnel hosts: $(awk '{print $3}' "$OUT/tunnel.log" | sort | uniq -c | tr '\n' ' '); steps: $(steps)"
+if ! grep -q api.anthropic.com "$OUT/tunnel.log" 2>/dev/null; then
+  ev "NO API TRAFFIC THROUGH TUNNEL: the state can't be made"
+  snap "$ID" nostate
+  exit 3
+fi
+
+# 5. Cut the link and watch up to 20 minutes.
+touch "$OUT/block"
+ev "link cut (steps: $(steps))"
+T0=$(date +%s)
+LEFT=
+for i in $(seq 1 20); do
+  sleep 60
+  s=$(state_of "$ID")
+  ev "min $i after cut: row=[$s] steps=$(steps)"
+  snap "$ID" "cut$i"
+  case $s in working*) ;; *) LEFT=$s; break ;; esac
+done
+if [ -z "$LEFT" ]; then
+  ev "session never left working in 20 minutes"
+  rm -f "$OUT/block"; ev "link restored anyway"
+  for i in 1 2 3 4 5; do sleep 60; ev "after restore min $i: row=[$(state_of "$ID")] steps=$(steps)"; done
+  exit 4
+fi
+ev "session left working: [$LEFT]; recording logs"
+snap "$ID" blocked
+
+# 6. Link returns; try each wake in turn.
+rm -f "$OUT/block"
+TR=$(date +%s)
+ev "link restored"
+worked=
+wait_back() { # wait_back <label>: up to 180 s for the row to read working
+  for j in $(seq 1 18); do
+    sleep 10
+    s=$(state_of "$ID")
+    case $s in working*) ev "$1: row is working ($(( $(date +%s) - TR )) s after the link's return)"; return 0 ;; esac
+  done
+  ev "$1: row still [$(state_of "$ID")] steps=$(steps)"
+  return 1
+}
+if wait_back "wake 1 (nothing)"; then worked=nothing; fi
+if [ -z "$worked" ]; then
+  bash "$HERE/wake.sh" respawn "$ID" >>"$OUT/wake2.txt" 2>&1
+  ev "wake 2 (respawn) ran"
+  if wait_back "wake 2"; then worked=respawn; fi
+fi
+if [ -z "$worked" ]; then
+  bash "$HERE/wake.sh" resume "$ID" >>"$OUT/wake3.txt" 2>&1
+  ev "wake 3 (resume) ran"
+  if wait_back "wake 3"; then worked=resume; fi
+fi
+ev "result: wake=${worked:-none}"
+# Let the session run on until six lines or 10 minutes after the return.
+for k in $(seq 1 12); do
+  [ "$(steps)" -ge 6 ] && break
+  [ $(( $(date +%s) - TR )) -ge 600 ] && [ -z "$worked" ] && break
+  sleep 30
+done
+ev "end: steps=$(steps) row=[$(state_of "$ID")] seconds after return=$(( $(date +%s) - TR ))"
+cp "$SB/progress.txt" "$OUT/progress.txt"
+snap "$ID" end

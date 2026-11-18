@@ -1,0 +1,7 @@
+note: session 96fdc1a7 is already running in the background, so this started a copy as e3b28ac7. `claude attach 96fdc1a7` opens the original.
+backgrounded · e3b28ac7
+  claude agents             list sessions
+  claude attach e3b28ac7    open in this terminal
+  claude logs e3b28ac7      show recent output
+  claude stop e3b28ac7      stop this session
+own.sh: owned the copy e3b28ac7

@@ -1,0 +1,6 @@
+backgrounded · d17b99f9 · ccd-spike-4-main-2
+  claude agents             list sessions
+  claude attach d17b99f9    open in this terminal
+  claude logs d17b99f9      show recent output
+  claude stop d17b99f9      stop this session
+own.sh: owned d17b99f9 (ccd-spike-4-main-2)

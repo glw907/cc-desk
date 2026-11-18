@@ -1,0 +1,13 @@
+[
+ {
+  "pid": 2951503,
+  "id": "dc0b2f97",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/4-permissions/sandbox-answer",
+  "kind": "background",
+  "startedAt": 1794972696384,
+  "sessionId": "dc0b2f97-952a-454d-9efd-7afb6ef42a82",
+  "name": "ccd-spike-4-answer",
+  "status": "idle",
+  "state": "done"
+ }
+]

@@ -1,0 +1,6 @@
+backgrounded · 0fe9c45d · ccd-spike-3-lean
+  claude agents             list sessions
+  claude attach 0fe9c45d    open in this terminal
+  claude logs 0fe9c45d      show recent output
+  claude stop 0fe9c45d      stop this session
+own.sh: owned 0fe9c45d (ccd-spike-3-lean)

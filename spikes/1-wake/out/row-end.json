@@ -1,0 +1,24 @@
+[
+ {
+  "pid": 2932574,
+  "id": "5305f47d",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+  "kind": "background",
+  "startedAt": 1794972009611,
+  "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+  "name": "ccd-spike-1-wake",
+  "status": "idle",
+  "state": "blocked"
+ },
+ {
+  "pid": 2940204,
+  "id": "b2ddeeb4",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2",
+  "kind": "background",
+  "startedAt": 1794972194225,
+  "sessionId": "b2ddeeb4-39a5-4947-90b8-5aac23fc4688",
+  "name": "step-3-sequential-run",
+  "status": "busy",
+  "state": "working"
+ }
+]

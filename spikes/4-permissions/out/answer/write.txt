@@ -1,0 +1,1 @@
+Bash 'date -u +%s > probe.txt'

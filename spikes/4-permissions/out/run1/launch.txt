@@ -1,0 +1,6 @@
+backgrounded · dbf6884d · ccd-spike-4-main-1
+  claude agents             list sessions
+  claude attach dbf6884d    open in this terminal
+  claude logs dbf6884d      show recent output
+  claude stop dbf6884d      stop this session
+own.sh: owned dbf6884d (ccd-spike-4-main-1)

@@ -1,0 +1,17 @@
+5c66eb9 Step 5
+872d0da Step 4
+61b2ff5 Step 3
+7a890cc Step 2
+4ac0399 Step 1
+4b14f78 Raise the Prove pass's usage ceiling and set up its second run
+3ab673a Merge pull request #1 from glw907/worktree-cc-desk-prove
+15d445e Fix the review's three blocking findings in own.sh
+102e0ed Fix the reviewer's blocking findings in own.sh and record the refused message
+f96f757 Record the Prove findings: usage stop, proof 7 held
+4722236 Add the owned-session helper and its test
+3d4287a Accept Geoff in the vale vocabulary
+9639585 Add the Go scaffold, gate script, and CI workflow
+722f8ea Record the Prove pre-flight and the executor launch
+c50d595 Point STATUS at the Prove round's pre-flight and launch
+ebab047 Record the route and the Prove round's plan
+c2d5bbd Record the approved design and the page mockup

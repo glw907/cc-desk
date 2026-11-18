@@ -1,0 +1,24 @@
+[
+ {
+  "pid": 2972161,
+  "id": "1d94674a",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/3-tools/sandbox",
+  "kind": "background",
+  "startedAt": 1794974219689,
+  "sessionId": "1d94674a-85a6-43d8-ba89-71f7c33ed809",
+  "name": "ccd-spike-3-full",
+  "status": "idle",
+  "state": "done"
+ },
+ {
+  "pid": 2976813,
+  "id": "0fe9c45d",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/3-tools/sandbox",
+  "kind": "background",
+  "startedAt": 1794974220781,
+  "sessionId": "0fe9c45d-1f2d-4137-8cf6-9f136a7061b9",
+  "name": "ccd-spike-3-lean",
+  "status": "idle",
+  "state": "done"
+ }
+]

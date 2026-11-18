@@ -1,0 +1,25 @@
+[
+ {
+  "pid": 2953370,
+  "id": "0c026eb1",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-idle",
+  "kind": "background",
+  "startedAt": 1794972886321,
+  "sessionId": "0c026eb1-740c-486f-80ee-6c26ec6ecd6e",
+  "name": "ccd-spike-2-idle",
+  "status": "idle",
+  "state": "done"
+ },
+ {
+  "pid": 2955776,
+  "id": "85b9dc54",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/2-states/sandbox-prompt",
+  "kind": "background",
+  "startedAt": 1794972890338,
+  "sessionId": "85b9dc54-3b40-4893-9141-8955bdbf276b",
+  "name": "ccd-spike-2-prompt",
+  "status": "waiting",
+  "waitingFor": "permission prompt",
+  "state": "blocked"
+ }
+]

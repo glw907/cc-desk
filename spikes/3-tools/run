@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Proof 3: what a launch saves when it drops five tools. Two owned sessions in
+# one sandbox, same model and effort. Run from the repo root after proof 6 ends.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+OUT=$HERE/out
+SB=$HERE/sandbox
+rm -rf "$OUT" "$SB"
+mkdir -p "$OUT" "$SB"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+ev "usage: $(claude -p '/usage' --model haiku </dev/null | grep 'Current week (all')"
+
+FULL_PROMPT='For each of these five tools, say whether its full definition (with parameters) is in your tool list now or it is only named as a deferred tool you would have to load first: Artifact, SendFeedback, Workflow, AskUserQuestion, ReportFindings. Answer one line per tool. Then reply "ready". Run no tool.'
+LEAN_PROMPT='Reply with the single word "ready". Run no tool.'
+
+bash "$OWN" launch ccd-spike-3-full "$SB" --model sonnet --effort low --permission-mode default \
+  "$FULL_PROMPT" >"$OUT/launch-full.txt" 2>&1 || { ev "launch full failed"; exit 1; }
+ev "full: $(tail -1 "$OUT/launch-full.txt")"
+# --disallowedTools takes every word after it, so the prompt goes first.
+bash "$OWN" launch ccd-spike-3-lean "$SB" --model sonnet --effort low --permission-mode default \
+  "$LEAN_PROMPT" --disallowedTools Artifact SendFeedback Workflow AskUserQuestion ReportFindings \
+  >"$OUT/launch-lean.txt" 2>&1 || { ev "launch lean failed"; exit 1; }
+ev "lean: $(tail -1 "$OUT/launch-lean.txt")"
+
+# Wait for both to finish (state done), up to five minutes.
+for i in $(seq 1 30); do
+  sleep 10
+  claude agents --json --all >"$OUT/list.json"
+  n=$(python3 -I -c '
+import json, sys
+print(sum(1 for r in json.load(open(sys.argv[1])) if r.get("cwd") == sys.argv[2] and r.get("state") == "done"))
+' "$OUT/list.json" "$SB")
+  [ "$n" -ge 2 ] && break
+done
+ev "done rows: $n"
+for k in full lean; do
+  id=$(tail -1 "$OUT/launch-$k.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/')
+  bash "$OWN" logs "$id" >"$OUT/logs-$k.txt" 2>&1
+  bash "$OWN" stop "$id" >/dev/null 2>&1
+  bash "$OWN" rm "$id" >/dev/null 2>&1
+done
+python3 -I "$HERE/tokens.py" "$HERE/../owned.tsv" ccd-spike-3-full ccd-spike-3-lean >"$OUT/tokens.json" 2>"$OUT/tokens.err"
+ev "tokens: $(tr -d '\n ' <"$OUT/tokens.json")"

@@ -1,0 +1,13 @@
+You are running a small throwaway pass on the scratch repo glw907/cc-desk-scratch. Report each step's result in one line as you go. The run label is @RUN@.
+
+Step 0. Run `git clone https://github.com/glw907/cc-desk-scratch.git scratch` in your working folder, then `git -C scratch checkout -b ccd-@RUN@`. All later steps work inside scratch/.
+Step 1. Edit scratch/toy.go (add a comment line to any function) and write a new file scratch/notes-@RUN@.md with one line of text.
+Step 2. Run the gate: `bash scratch/scripts/gate.sh`.
+Step 3. Commit twice: first `git -C scratch add toy.go` then `git -C scratch commit -m "Edit toy"`, then `git -C scratch add notes-@RUN@.md` and `git -C scratch commit -m "Add notes"`.
+Step 4. Push the branch: `git -C scratch push -u origin ccd-@RUN@`.
+Step 5. Open a draft pull request: `gh pr create -R glw907/cc-desk-scratch --head ccd-@RUN@ --base main --draft --title "Scratch @RUN@" --body "Throwaway proof."`. Note the number it prints.
+Step 6. Mark it ready: `gh pr ready <n> -R glw907/cc-desk-scratch`.
+Step 7. Land it: `approval-queue land glw907/cc-desk-scratch#<n> "Scratch proof: a throwaway pull request landed on the scratch repo."`. Set the Bash call's timeout to 600000 milliseconds, since it waits for the pull request's check.
+Step 8. Call the EnterWorktree tool with the path @WT@ (an existing worktree of this repo), then reply with the word done.
+
+If a step is refused or asks for approval, report the exact refusal text, skip that step, and go on to the next. Do nothing outside these steps.

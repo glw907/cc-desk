@@ -1,0 +1,13 @@
+[
+ {
+  "pid": 2930080,
+  "id": "5305f47d",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/1-wake/sandbox",
+  "kind": "background",
+  "startedAt": 1794971323490,
+  "sessionId": "5305f47d-bc3a-458a-a5bf-7dc40936f466",
+  "name": "ccd-spike-1-wake",
+  "status": "busy",
+  "state": "working"
+ }
+]

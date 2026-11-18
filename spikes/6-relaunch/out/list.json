@@ -1,0 +1,24 @@
+[
+ {
+  "pid": 2959603,
+  "id": "96fdc1a7",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2/spikes/6-relaunch/sandbox",
+  "kind": "background",
+  "startedAt": 1794973333843,
+  "sessionId": "96fdc1a7-52f0-43de-ac5d-1f31a74bccd2",
+  "name": "ccd-spike-6-relaunch",
+  "status": "idle",
+  "state": "blocked"
+ },
+ {
+  "pid": 2963655,
+  "id": "e3b28ac7",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/cc-desk-prove-run2",
+  "kind": "background",
+  "startedAt": 1794973671832,
+  "sessionId": "e3b28ac7-bdcb-4fe2-99ec-69fecbe39b3f",
+  "name": "missing-step-one-resume",
+  "status": "busy",
+  "state": "working"
+ }
+]

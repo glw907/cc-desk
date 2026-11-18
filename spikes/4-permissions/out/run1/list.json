@@ -1,0 +1,13 @@
+[
+ {
+  "pid": 2942307,
+  "id": "dbf6884d",
+  "cwd": "/var/home/glw907/Projects/cc-desk/.claude/worktrees/ccd-spike-4-existing-1",
+  "kind": "background",
+  "startedAt": 1794972487320,
+  "sessionId": "dbf6884d-1330-4729-8493-e5a0acae9ab1",
+  "name": "ccd-spike-4-main-1",
+  "status": "idle",
+  "state": "done"
+ }
+]

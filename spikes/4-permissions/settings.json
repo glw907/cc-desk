@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone https://github.com/glw907/cc-desk-scratch.git scratch)",
+      "Bash(git -C scratch *)",
+      "Bash(bash scratch/scripts/gate.sh)",
+      "Bash(gh pr create -R glw907/cc-desk-scratch *)",
+      "Bash(gh pr ready * -R glw907/cc-desk-scratch)"
+    ]
+  }
+}

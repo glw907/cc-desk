@@ -1,0 +1,20 @@
+03:08:42 tunnel up on 127.0.0.1:18907
+03:08:43 launched 5305f47d
+03:08:43 supervisor pid: 34178
+03:08:43 proxy check: no proxy variable name in the supervisor environment
+03:11:59 pre-cut: tunnel hosts:      14 api.anthropic.com       1 api.github.com       1 downloads.claude.ai       1 formulae.brew.sh       2 http-intake.logs.us5.datadoghq.com       2 mcp.cloudflare.com       2 mcp-proxy.anthropic.com       3 mcp.svelte.dev       1 registry.npmjs.org ; steps: 2
+03:11:59 link cut (steps: 2)
+03:12:59 min 1 after cut: row=[working busy] steps=2
+03:14:00 min 2 after cut: row=[working busy] steps=3
+03:15:01 min 3 after cut: row=[working busy] steps=3
+03:16:02 min 4 after cut: row=[working busy] steps=3
+03:17:03 min 5 after cut: row=[blocked idle] steps=3
+03:17:04 session left working: [blocked idle]; recording logs
+03:17:04 link restored
+03:20:08 wake 1 (nothing): row still [blocked idle] steps=3
+03:20:09 wake 2 (respawn) ran
+03:23:13 wake 2: row still [blocked idle] steps=3
+03:23:14 wake 3 (resume) ran
+03:26:18 wake 3: row still [blocked idle] steps=4
+03:26:18 result: wake=none
+03:27:18 end: steps=5 row=[blocked idle] seconds after return=614

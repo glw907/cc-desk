@@ -1,0 +1,118 @@
+# 03:40:09 before kill
+96fdc1a7 2956315 working busy
+# 03:40:20 after kill 1
+96fdc1a7  working 
+# 03:40:30 after kill 2
+96fdc1a7 2961551 working busy
+# 03:40:40 after kill 3
+96fdc1a7 2961551 working busy
+# 03:40:51 after kill 4
+96fdc1a7 2961551 working busy
+# 03:41:01 after kill 5
+96fdc1a7 2961551 working busy
+# 03:41:11 after kill 6
+96fdc1a7 2961551 working busy
+# 03:41:21 after kill 7
+96fdc1a7 2961551 working busy
+# 03:41:31 after kill 8
+96fdc1a7 2961551 working busy
+# 03:41:42 after kill 9
+96fdc1a7 2961551 working busy
+# 03:41:52 after kill 10
+96fdc1a7 2961551 working busy
+# 03:42:02 after kill 11
+96fdc1a7 2961551 working busy
+# 03:42:12 after kill 12
+96fdc1a7 2961551 working busy
+# 03:42:24 respawn
+96fdc1a7 2959603 blocked idle
+# 03:42:34 respawn
+96fdc1a7 2959603 blocked idle
+# 03:42:44 respawn
+96fdc1a7 2959603 blocked idle
+# 03:42:54 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:05 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:15 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:25 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:35 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:46 respawn
+96fdc1a7 2959603 blocked idle
+# 03:43:56 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:06 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:16 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:26 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:37 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:47 respawn
+96fdc1a7 2959603 blocked idle
+# 03:44:57 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:07 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:18 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:28 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:38 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:48 respawn
+96fdc1a7 2959603 blocked idle
+# 03:45:58 respawn
+96fdc1a7 2959603 blocked idle
+# 03:46:09 respawn
+96fdc1a7 2959603 blocked idle
+# 03:46:19 respawn
+96fdc1a7 2959603 blocked idle
+# 03:46:29 respawn
+96fdc1a7 2959603 blocked idle
+# 03:46:39 respawn
+96fdc1a7 2959603 blocked idle
+# 03:46:50 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:00 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:10 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:20 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:31 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:41 respawn
+96fdc1a7 2959603 blocked idle
+# 03:47:51 respawn
+96fdc1a7 2959603 blocked idle
+# 03:48:02 resume
+96fdc1a7 2959603 blocked idle
+# 03:48:12 resume
+96fdc1a7 2959603 blocked idle
+# 03:48:22 resume
+96fdc1a7 2959603 blocked idle
+# 03:48:33 resume
+96fdc1a7 2959603 blocked idle
+# 03:48:43 resume
+96fdc1a7 2959603 blocked idle
+# 03:48:53 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:03 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:14 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:24 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:34 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:44 resume
+96fdc1a7 2959603 blocked idle
+# 03:49:54 resume
+96fdc1a7 2959603 blocked idle
+# 03:50:05 resume
+96fdc1a7 2959603 blocked idle
