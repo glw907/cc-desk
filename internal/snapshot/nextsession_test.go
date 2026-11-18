@@ -144,6 +144,40 @@ func TestRenderForecast(t *testing.T) {
 	}
 }
 
+// A building predecessor that has used its paced length at the middle pace
+// but not at the high ratio leaves the time at now. The range is now to now.
+func TestNextSessionReadyNowRange(t *testing.T) {
+	now := utcTime(21, 12, 0)
+	rf := worked("a")
+	rf.Passes = rf.Passes[:12]
+	rf.Passes = append(rf.Passes,
+		building("p13", "r2", 100, now.Add(-125*time.Minute)),
+		todo("ask", "r2", 30, "p13"))
+	rf.Passes[13].Questions = []string{"q"}
+	rf.Questions = []state.Question{{ID: "q", Text: "t", Options: []string{"x", "y"}, Recommended: "x"}}
+	n := sessionOf(t, now, rf).NextSession
+	if n.State == nil || *n.State != "ready_now" || n.Range == nil {
+		t.Fatalf("next_session = %+v", n)
+	}
+	wantTime(t, "time", n.Time, now)
+	wantTime(t, "range low", &n.Range.Low, now)
+	wantTime(t, "range high", &n.Range.High, now)
+}
+
+// A pass event with only a question no pass rests on writes a null-time line.
+func TestRenderForecastOrphanQuestion(t *testing.T) {
+	now := utcTime(20, 23, 0)
+	rf := asking("a", 0, true)
+	rf.Questions = append(rf.Questions, state.Question{ID: "loose", Text: "t", Options: []string{"x"}, Recommended: "x"})
+	_, fc, err := Render(&state.State{Releases: []*state.ReleaseFile{rf}}, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fc.Project != "" || fc.Round != "" || fc.Time != nil {
+		t.Errorf("forecast = %+v, want no names and no time", fc)
+	}
+}
+
 // A question no pass rests on has no round and is needed now.
 func TestNextSessionQuestionWithoutPass(t *testing.T) {
 	now := utcTime(20, 23, 0)

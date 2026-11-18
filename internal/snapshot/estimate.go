@@ -443,7 +443,13 @@ func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time) *item {
 	t, rough := setter.time.UTC(), setter.rough
 	next.Time, next.Rough = &t, &rough
 	if !rough {
-		next.Range = &Range{Low: setter.low.UTC(), High: setter.high.UTC()}
+		low, high := setter.low.UTC(), setter.high.UTC()
+		if *next.State == "ready_now" {
+			// A time already reached has no spread, even when a building
+			// predecessor is still inside its high-pace length.
+			low, high = t, t
+		}
+		next.Range = &Range{Low: low, High: high}
 	}
 	return setter
 }

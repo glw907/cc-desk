@@ -143,7 +143,7 @@ func forecastLines(t *testing.T, dir string) []forecastLine {
 		t.Fatal(err)
 	}
 	var out []forecastLine
-	for _, line := range strings.Split(strings.TrimSuffix(string(data), "\n"), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSuffix(string(data), "\n"), "\n") {
 		var f forecastLine
 		if err := json.Unmarshal([]byte(line), &f); err != nil {
 			t.Fatalf("forecasts.jsonl line %q: %v", line, err)
@@ -266,13 +266,18 @@ func TestEstimate(t *testing.T) {
 		do(t, dir, at200, "pass", "start", "alpha", "p13")
 		s := readEst(t, dir, at200)
 		b := s.Releases[s.release(t, "beta")]
+		var foundB3 bool
 		for _, rd := range b.Rounds {
 			if rd.Name != "b3" {
 				continue
 			}
+			foundB3 = true
 			if rd.State != "not_designed" || rd.Needs.Kind != "not_designed" || rd.MinutesBefore == nil || *rd.MinutesBefore != 480 || str(rd.ForecastTime) != "2026-11-21T07:00:00Z" {
 				t.Errorf("b3 = %+v, want not_designed, 480 minutes before, forecast 2026-11-21T07:00:00Z", rd)
 			}
+		}
+		if !foundB3 {
+			t.Fatal("b3 is not in the snapshot")
 		}
 		n := s.NextSession
 		wantList(t, "not_designed", n.NotDesigned, []string{"beta/b3"})

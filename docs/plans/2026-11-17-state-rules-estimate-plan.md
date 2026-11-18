@@ -458,8 +458,6 @@ This pass adds:
   time, which differs from the snapshot in that edge case; the follow-up
   `docs/follow-ups/orphan-question-forecast.md` holds the open fix.
 - `rounds` lists only question rounds, and `not_designed` lists only rounds whose start is ahead.
-- In `ready_now` the range keeps the setting pass's low and high ends, so `high` can be later than
-  now when a building predecessor has used its paced length at the middle pace but not the high one.
 
 ## Rulings
 
