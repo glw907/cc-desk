@@ -119,7 +119,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 			}
 			recs := make([]state.Recorded, len(results))
 			for i, r := range results {
-				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working}
+				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working, PRWait: r.Merge.Wait}
 				if r.Decision.Decision == sessions.Stop {
 					recs[i].Stop = state.StopReason(r.Reason)
 				}
