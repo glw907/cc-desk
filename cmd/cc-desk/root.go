@@ -19,9 +19,10 @@ const version = "0.1.0"
 
 // rootFlags holds the persistent flags every verb reads.
 type rootFlags struct {
-	stateDir     string
-	now          string
-	usageCommand string
+	stateDir         string
+	now              string
+	usageCommand     string
+	systemctlCommand string
 }
 
 // dir returns the state folder: the flag, else $XDG_STATE_HOME/cc-desk,
@@ -117,6 +118,8 @@ func newRootCmd() *cobra.Command {
 	_ = cmd.PersistentFlags().MarkHidden("now")
 	cmd.PersistentFlags().StringVar(&f.usageCommand, "usage-command", "", "the command that prints the usage result")
 	_ = cmd.PersistentFlags().MarkHidden("usage-command")
-	cmd.AddCommand(newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f), newSessionCmd(&f), newPromptCmd(&f), newFollowupCmd(&f), newRulesCmd(&f))
+	cmd.PersistentFlags().StringVar(&f.systemctlCommand, "systemctl-command", "", "the command that stands in for systemctl")
+	_ = cmd.PersistentFlags().MarkHidden("systemctl-command")
+	cmd.AddCommand(newTimerCmd(&f), newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f), newSessionCmd(&f), newPromptCmd(&f), newFollowupCmd(&f), newRulesCmd(&f))
 	return cmd
 }
