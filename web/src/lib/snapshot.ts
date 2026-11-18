@@ -115,6 +115,59 @@ export interface OpenGuess {
 	minutes: number;
 }
 
+/** A permission prompt a session stopped on, as `internal/state/types.go` records it. */
+export interface Prompt {
+	time: Time;
+	tool: string;
+	command?: string;
+	suggested_rule?: string;
+	answer?: string;
+}
+
+/** One session record of a live release. Pass is null for a conductor and a design writer; round is null for a conductor. */
+export interface SessionEntry {
+	project: string;
+	round: string | null;
+	pass: string | null;
+	kind: string;
+	name: string;
+	short_id: string;
+	last_state: string | null;
+	last_seen: Time | null;
+	last_working: Time | null;
+	relaunches: number;
+	stop_reason: string | null;
+	prompts: Prompt[];
+}
+
+/** One cause that needs Geoff now. */
+export interface NeedEntry {
+	project: string;
+	round: string | null;
+	session: string | null;
+	reason: string;
+	cause: string;
+	todo: string;
+}
+
+/** One decision the session check made on a record. */
+export interface Decision {
+	project: string;
+	record: string;
+	session: string;
+	decision: string;
+	reason?: string;
+	detail?: string;
+	counted?: boolean;
+}
+
+/** The last run of the session check. */
+export interface LastCheck {
+	time: Time;
+	list_failures: number;
+	decisions: Decision[];
+}
+
 export interface Snapshot {
 	format: number;
 	generated_at: Time;
@@ -126,6 +179,9 @@ export interface Snapshot {
 	open_guesses: OpenGuess[];
 	guess_minutes_total: number;
 	guess_minutes_limit: number;
+	sessions: SessionEntry[];
+	needs_you_now: NeedEntry[];
+	last_check: LastCheck | null;
 }
 
 /** What `/api/state` answers: everything the page draws and every banner it may show. */
