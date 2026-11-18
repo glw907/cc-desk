@@ -43,7 +43,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p02",
@@ -59,7 +63,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p03",
@@ -75,7 +83,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p04",
@@ -91,7 +103,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p05",
@@ -107,7 +123,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p06",
@@ -123,7 +143,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p07",
@@ -139,7 +163,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p08",
@@ -155,7 +183,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p09",
@@ -171,7 +203,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p10",
@@ -187,7 +223,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p11",
@@ -203,7 +243,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p12",
@@ -219,9 +263,16 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "r2",
@@ -247,7 +298,11 @@
                 ],
                 "recommended": "files",
                 "answered": false,
-                "answer_kind": null
+                "answer_kind": null,
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               }
             ]
           },
@@ -269,7 +324,11 @@
               "needed_time": "2026-11-20T23:00:00Z",
               "free": true,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p14",
@@ -287,7 +346,11 @@
               "why_not": [
                 "unfinished work before it"
               ],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null,
+              "closed": null
             },
             {
               "name": "p15",
@@ -308,7 +371,11 @@
                   ],
                   "recommended": "files",
                   "answered": false,
-                  "answer_kind": null
+                  "answer_kind": null,
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 }
               ],
               "minutes_before": 300,
@@ -318,9 +385,16 @@
                 "unfinished work before it",
                 "an unanswered question"
               ],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "questions",
+              "needs_reason": null,
+              "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         }
       ]
     },
@@ -365,7 +439,11 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": "Routine cleanup.",
+              "closed": null
             },
             {
               "name": "b-two",
@@ -381,9 +459,16 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": "Routine cleanup.",
+              "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "b2",
@@ -409,7 +494,11 @@
                 ],
                 "recommended": "drop",
                 "answered": true,
-                "answer_kind": "ruling"
+                "answer_kind": "ruling",
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               },
               {
                 "id": "beta-q2",
@@ -420,7 +509,11 @@
                 ],
                 "recommended": "cc-desk",
                 "answered": true,
-                "answer_kind": "carried"
+                "answer_kind": "carried",
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               }
             ]
           },
@@ -447,7 +540,11 @@
                   ],
                   "recommended": "drop",
                   "answered": true,
-                  "answer_kind": "ruling"
+                  "answer_kind": "ruling",
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 },
                 {
                   "id": "beta-q2",
@@ -458,16 +555,27 @@
                   ],
                   "recommended": "cc-desk",
                   "answered": true,
-                  "answer_kind": "carried"
+                  "answer_kind": "carried",
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 }
               ],
               "minutes_before": 0,
               "needed_time": "2026-11-20T23:00:00Z",
               "free": true,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "questions",
+              "needs_reason": null,
+              "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "b3",
@@ -488,7 +596,10 @@
           "minutes_before": 480,
           "needed_time": "2026-11-21T07:00:00Z",
           "forecast_time": "2026-11-21T07:00:00Z",
-          "passes": []
+          "passes": [],
+          "design": null,
+          "context": [],
+          "calls": []
         }
       ]
     }
@@ -534,5 +645,8 @@
   "guess_minutes_limit": 300,
   "sessions": [],
   "needs_you_now": [],
-  "last_check": null
+  "last_check": null,
+  "check_log": [],
+  "reports": [],
+  "design_conversations": []
 }

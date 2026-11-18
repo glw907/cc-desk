@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "project": "beta",
+  "name": "v2",
+  "repo": "glw907/beta",
+  "rounds": [
+    {"name": "b2", "summary": "A building pass with a ready pull request.", "needs_geoff": true, "design_written": true},
+    {
+      "name": "b1", "summary": "A building pass with two after it.", "needs_geoff": true, "design_written": true,
+      "session": {
+        "name": "beta-b1-design", "kind": "design", "short_id": "b1b2b3b4", "session_id": "b1b2b3b4-0000",
+        "worktree": "/w/beta", "branch": "beta-b1-design", "launched": "2026-11-20T20:00:00Z", "launch_tries": 2,
+        "stop_reason": "launch_failed", "stopped": "2026-11-20T20:05:00Z", "ended": "2026-11-20T20:06:00Z"
+      }
+    }
+  ],
+  "passes": [
+    {"name": "b-build", "summary": "Building now.", "round": "b1", "planned_minutes": 20, "state": "building", "started": "2026-11-20T22:30:00Z"},
+    {"name": "b-after", "summary": "Waits on the build and on qb.", "round": "b1", "planned_minutes": 30, "state": "not_started", "after": ["b-build"], "questions": ["qb"]},
+    {"name": "b-tail", "summary": "Comes after b-after.", "round": "b1", "planned_minutes": 40, "state": "not_started", "after": ["b-after"]},
+    {
+      "name": "b4", "summary": "Add the report verbs", "round": "b2", "planned_minutes": 60, "state": "building",
+      "started": "2026-11-20T22:00:00Z", "questions": ["merge-b4-1"],
+      "pull_request": {"number": 12, "commit": "3f2a9c1", "verdict": "fix", "ready": "2026-11-20T22:45:00Z", "question": "merge-b4-1"}
+    }
+  ],
+  "questions": [
+    {
+      "id": "qb",
+      "text": "Should the check restart a session that lost its connection?",
+      "options": ["restart", "stop"],
+      "recommended": "restart",
+      "background": ["A dropped connection looks the same as a stopped session.", "Two restarts are allowed already."],
+      "causes": {"restart": "The session comes back by itself.", "stop": "The pass stops and waits for you."},
+      "reason": "A restart costs nothing and the pass is cheap to redo.",
+      "never_guess": true
+    },
+    {
+      "id": "merge-b4-1",
+      "text": "The pull request lies outside its design.",
+      "options": ["merge", "fix again", "close"],
+      "recommended": "merge"
+    }
+  ]
+}

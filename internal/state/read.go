@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -194,7 +195,29 @@ func Load(dir string) (*State, error) {
 				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("desk %d is missing session_id, pid, or started", i+1)}
 			}
 		}
+		for i, c := range desks.Conversations {
+			if c.Project == "" || c.Round == "" || c.Desk == "" || c.Started.IsZero() {
+				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("conversation %d is missing project, round, desk, or started", i+1)}
+			}
+			if slices.ContainsFunc(desks.Conversations[:i], func(o Conversation) bool { return o.Project == c.Project && o.Round == c.Round }) {
+				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("round %s/%s has two conversations", c.Project, c.Round)}
+			}
+		}
 		s.Desks = desks
+	}
+
+	s.Reports = Reports{Format: Format}
+	var reports Reports
+	if found, err := readJSON(dir, ReportsFile, &reports); err != nil {
+		return nil, err
+	} else if found {
+		if err := checkFormat(reports.Format); err != nil {
+			return nil, &FileError{File: ReportsFile, Err: err}
+		}
+		if err := validateReports(&reports); err != nil {
+			return nil, &FileError{File: ReportsFile, Err: err}
+		}
+		s.Reports = reports
 	}
 
 	var settings Settings
@@ -256,6 +279,18 @@ func Load(dir string) (*State, error) {
 		r := &s.Rulings[i]
 		if r.ID == "" || r.Time.IsZero() || r.Desk == "" || r.Words == "" {
 			return nil, &FileError{File: "rulings.jsonl", Line: i + 1, Err: errors.New("missing id, time, desk, or words")}
+		}
+		if r.Replaces != "" && !slices.ContainsFunc(s.Rulings[:i], func(g Ruling) bool { return g.ID == r.Replaces }) {
+			return nil, &FileError{File: "rulings.jsonl", Line: i + 1, Err: fmt.Errorf("replaces %q, which is not an earlier ruling", r.Replaces)}
+		}
+	}
+	if s.CheckLog, err = readJSONL(dir, CheckLogFile, func(l *CheckLogLine) int { return l.Format }); err != nil {
+		return nil, err
+	}
+	for i := range s.CheckLog {
+		l := &s.CheckLog[i]
+		if l.Time.IsZero() || l.Project == "" || l.Record == "" || l.Decision == "" || l.Outcome == "" {
+			return nil, &FileError{File: CheckLogFile, Line: i + 1, Err: errors.New("needs time, project, record, decision, and outcome")}
 		}
 	}
 	if s.Forecasts, err = readJSONL(dir, "forecasts.jsonl", func(f *Forecast) int { return f.Format }); err != nil {

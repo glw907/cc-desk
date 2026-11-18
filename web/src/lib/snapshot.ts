@@ -15,6 +15,8 @@ export interface Ruling {
 	round?: string;
 	question?: string;
 	option?: string;
+	/** The id of the ruling this one replaces as a question's answer. */
+	replaces?: string;
 }
 
 export interface Question {
@@ -24,6 +26,10 @@ export interface Question {
 	recommended: string;
 	answered: boolean;
 	answer_kind: string | null;
+	background: string[];
+	causes: Record<string, string>;
+	reason: string | null;
+	never_guess: boolean;
 }
 
 export interface Needs {
@@ -47,6 +53,20 @@ export interface Pass {
 	free: boolean | null;
 	why_not: string[];
 	guess_outcome: string | null;
+	/** When the open stop began; null unless the pass is stopped. */
+	stopped_at: Time | null;
+	/** `questions` when the pass rests on any, else `nothing`. */
+	needs_kind: string;
+	/** The pass's own reason it needs nothing, else its round's, else null. */
+	needs_reason: string | null;
+	/** Set for a pass a ruling closed without a merge. */
+	closed: Closed | null;
+}
+
+/** The ruling that closed a pass, and when. */
+export interface Closed {
+	ruling: string;
+	time: Time;
 }
 
 export interface Round {
@@ -63,6 +83,12 @@ export interface Round {
 	needed_time: Time | null;
 	forecast_time: Time | null;
 	passes: Pass[];
+	/** The design's path; null until one is recorded. */
+	design: string | null;
+	/** Paragraphs a desk reads before it asks. */
+	context: string[];
+	/** Decisions the design made. */
+	calls: Call[];
 }
 
 export interface Release {
@@ -124,6 +150,14 @@ export interface Prompt {
 	answer?: string;
 }
 
+/** A call a session's settings turned away, as `internal/state/types.go` records it. */
+export interface Refusal {
+	time: Time;
+	tool: string;
+	target: string;
+	reason: string;
+}
+
 /** One session record of a live release. Pass is null for a conductor and a design writer; round is null for a conductor. */
 export interface SessionEntry {
 	project: string;
@@ -138,6 +172,9 @@ export interface SessionEntry {
 	relaunches: number;
 	stop_reason: string | null;
 	prompts: Prompt[];
+	/** When the session's stop began; null when it is not stopped. */
+	stopped_at: Time | null;
+	refusals: Refusal[];
 	/** The note a merged pass's cleanup left: what stayed in place. */
 	cleanup?: string;
 }
@@ -171,6 +208,57 @@ export interface LastCheck {
 	decisions: Decision[];
 }
 
+/** One thing the session check did: a stop it applied or an outcome it carried out. */
+export interface CheckLogLine {
+	format: number;
+	time: Time;
+	project: string;
+	record: string;
+	decision: string;
+	outcome: string;
+	reason?: string;
+	detail?: string;
+}
+
+/** One decision a pass or round made, and the other way it could have gone. */
+export interface Call {
+	call: string;
+	chosen: string;
+	other: string;
+	why: string;
+}
+
+/** Something the plan missed, and what it cost. */
+export interface Miss {
+	miss: string;
+	cost: string;
+}
+
+/** One pass in a report's folded detail. */
+export interface ReportPass {
+	name: string;
+	state: string;
+	planned_minutes: number;
+	actual_minutes: number | null;
+	pull_request: number | null;
+	closed: Closed | null;
+}
+
+/** A report from a round or a release. `read` is null until it is marked read. */
+export interface Report {
+	id: string;
+	project: string;
+	/** Null for a release's report. */
+	round: string | null;
+	title: string;
+	summary: string;
+	calls: Call[];
+	misses: Miss[];
+	sent: Time;
+	read: Time | null;
+	passes: ReportPass[];
+}
+
 export interface Snapshot {
 	format: number;
 	generated_at: Time;
@@ -185,6 +273,20 @@ export interface Snapshot {
 	sessions: SessionEntry[];
 	needs_you_now: NeedEntry[];
 	last_check: LastCheck | null;
+	/** The last 50 lines of the check log, oldest first. */
+	check_log: CheckLogLine[];
+	/** Every report, oldest first. */
+	reports: Report[];
+	/** Each design conversation in progress, in the order they started. */
+	design_conversations: DesignConversation[];
+}
+
+/** A desk session talking a round's design through. */
+export interface DesignConversation {
+	project: string;
+	round: string;
+	desk: string;
+	started: Time;
 }
 
 /** What `/api/state` answers: everything the page draws and every banner it may show. */

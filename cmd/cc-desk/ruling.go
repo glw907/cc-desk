@@ -17,12 +17,13 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 
 	var req state.RulingRequest
 	record := &cobra.Command{
-		Use:   "record <words> [--project P --round R --question Q --option O]",
+		Use:   "record <words> [--project P --round R --question Q --option O] [--replaces <id>]",
 		Short: "Record a ruling in Geoff's exact words",
 		Long: "Append one ruling to rulings.jsonl, from a desk session only. The words are one\n" +
 			"argument, taken byte for byte; words that start with - go after --. With --project,\n" +
 			"--round, --question, and --option together, the ruling answers that question, closes\n" +
-			"any guess on it, and frees what waited. A session that is not a registered desk, a\n" +
+			"any guess on it, and frees what waited. With --replaces as well, it replaces the\n" +
+			"question's current answer while no pass resting on the question has started. A session that is not a registered desk, a\n" +
 			"command that does not run under the desk's process, and a desk process with no\n" +
 			"terminal are each refused, with the failing test named.",
 		Args: cobra.ExactArgs(1),
@@ -54,6 +55,7 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 	fl.StringVar(&req.Round, "round", "", "the round of the question")
 	fl.StringVar(&req.Question, "question", "", "the question's id")
 	fl.StringVar(&req.Option, "option", "", "the option Geoff chose")
+	fl.StringVar(&req.Replaces, "replaces", "", "the id of the ruling this one replaces as the question's answer")
 	cmd.AddCommand(record)
 	return cmd
 }

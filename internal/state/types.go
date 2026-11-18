@@ -87,7 +87,10 @@ type Session struct {
 	LastState   string      `json:"last_state,omitempty"`
 	LastWorking *time.Time  `json:"last_working,omitempty"`
 	Prompts     []Prompt    `json:"prompts,omitempty"`
-	Finished    *time.Time  `json:"finished,omitempty"`
+	// Refusals are the calls the session's settings turned away. The prompt
+	// pass fills it; a file without it reads as none.
+	Refusals []Refusal  `json:"refusals,omitempty"`
+	Finished *time.Time `json:"finished,omitempty"`
 	// StopReason and Stopped are set on a conductor's or design writer's
 	// record only. A pass's stop stays on the pass.
 	StopReason StopReason `json:"stop_reason,omitempty"`
@@ -115,6 +118,15 @@ type Relaunch struct {
 	Time    time.Time `json:"time"`
 	Cause   string    `json:"cause"`
 	Counted bool      `json:"counted"`
+}
+
+// Refusal is one call a session's settings turned away: the tool, what it
+// aimed at, and why the rule refused it.
+type Refusal struct {
+	Time   time.Time `json:"time"`
+	Tool   string    `json:"tool"`
+	Target string    `json:"target"`
+	Reason string    `json:"reason"`
 }
 
 // Prompt is one permission prompt a session stopped on.
@@ -183,11 +195,14 @@ type Release struct {
 	DefaultBranch string `json:"default_branch,omitempty"`
 	// AllowRules are exact Claude Code permission rules the launch writes
 	// into each session's settings file, beside the report verbs.
-	AllowRules []string   `json:"allow_rules,omitempty"`
-	Conductor  *Session   `json:"conductor,omitempty"`
-	Rounds     []Round    `json:"rounds,omitempty"`
-	Passes     []Pass     `json:"passes,omitempty"`
-	Questions  []Question `json:"questions,omitempty"`
+	AllowRules []string `json:"allow_rules,omitempty"`
+	// AskRules are rules the launch writes under permissions.ask, so a
+	// session asks before each use. No rule is in both lists.
+	AskRules  []string   `json:"ask_rules,omitempty"`
+	Conductor *Session   `json:"conductor,omitempty"`
+	Rounds    []Round    `json:"rounds,omitempty"`
+	Passes    []Pass     `json:"passes,omitempty"`
+	Questions []Question `json:"questions,omitempty"`
 }
 
 // Round is a group of passes that share a design.
@@ -204,6 +219,12 @@ type Round struct {
 	DesignWritten  bool `json:"design_written,omitempty"`
 	// Session is the design writer's session.
 	Session *Session `json:"session,omitempty"`
+	// Design is the path of the round's design, Context the paragraphs a
+	// desk reads before it asks, and Calls the decisions the design made.
+	// A design file sets all three.
+	Design  string   `json:"design,omitempty"`
+	Context []string `json:"context,omitempty"`
+	Calls   []Call   `json:"calls,omitempty"`
 }
 
 // Pass is one unit of work in a round.
@@ -214,6 +235,9 @@ type Pass struct {
 	PlannedMinutes int      `json:"planned_minutes"`
 	After          []string `json:"after,omitempty"`
 	Questions      []string `json:"questions,omitempty"`
+	// NoNeedReason says why this pass needs nothing from Geoff when it rests
+	// on no question. The round's own reason stands in when it is empty.
+	NoNeedReason string `json:"no_need_reason,omitempty"`
 	// Model and Effort override the launch's default of opus at high.
 	Model      string         `json:"model,omitempty"`
 	Effort     string         `json:"effort,omitempty"`
@@ -233,6 +257,16 @@ type Pass struct {
 	Guess       *Guess       `json:"guess,omitempty"`
 	Session     *Session     `json:"session,omitempty"`
 	PullRequest *PullRequest `json:"pull_request,omitempty"`
+	// Closed marks a done pass whose pull request Geoff's ruling closed
+	// without a merge. It is a mark on a done pass, never a sixth state, so
+	// an older file reads as it did.
+	Closed *Closed `json:"closed,omitempty"`
+}
+
+// Closed is the ruling that closed a pass and when.
+type Closed struct {
+	Ruling string    `json:"ruling"`
+	Time   time.Time `json:"time"`
 }
 
 // StopInterval is one stretch a pass spent stopped. End is nil while the
@@ -271,6 +305,16 @@ type Question struct {
 	Options     []string `json:"options"`
 	Recommended string   `json:"recommended"`
 	Answer      *Answer  `json:"answer,omitempty"`
+	// Background is the paragraphs that tell a reader what the question is
+	// about, and Causes says what each option sets going. Reason is why the
+	// recommendation is the one. All three are optional in a release file, so
+	// a file written before they existed still reads.
+	Background []string          `json:"background,omitempty"`
+	Causes     map[string]string `json:"causes,omitempty"`
+	Reason     string            `json:"reason,omitempty"`
+	// NeverGuess keeps a pass from starting on this question's recommendation
+	// while it is unanswered.
+	NeverGuess bool `json:"never_guess,omitempty"`
 }
 
 // Answer is a ruling reference or a carried-over answer, never both.
@@ -297,6 +341,9 @@ type Ruling struct {
 	Round    string    `json:"round,omitempty"`
 	Question string    `json:"question,omitempty"`
 	Option   string    `json:"option,omitempty"`
+	// Replaces is the id of the ruling this one replaces as a question's
+	// answer. Both lines stay in the log.
+	Replaces string `json:"replaces,omitempty"`
 }
 
 // Forecast is one line of forecasts.jsonl: when the next decision session
@@ -335,10 +382,76 @@ type Decision struct {
 	Outcome  string `json:"outcome,omitempty"`
 }
 
+// CheckLogLine is one line of check-log.jsonl: a stop the session check
+// applied, or a non-empty outcome of a decision it carried out. Reason and
+// Detail repeat the decision's, so a reader can say why a session restarted.
+type CheckLogLine struct {
+	Format   int       `json:"format"`
+	Time     time.Time `json:"time"`
+	Project  string    `json:"project"`
+	Record   string    `json:"record"`
+	Decision string    `json:"decision"`
+	Outcome  string    `json:"outcome"`
+	Reason   string    `json:"reason,omitempty"`
+	Detail   string    `json:"detail,omitempty"`
+}
+
+// CheckLogFile is the append-only log of what the session check did.
+const CheckLogFile = "check-log.jsonl"
+
 // Desks is desks.json: the desk sessions that may record a ruling.
 type Desks struct {
-	Format int    `json:"format"`
-	Desks  []Desk `json:"desks,omitempty"`
+	Format        int            `json:"format"`
+	Desks         []Desk         `json:"desks,omitempty"`
+	Conversations []Conversation `json:"conversations,omitempty"`
+}
+
+// Conversation is a design conversation in progress: a desk session talking
+// a round's design through. DesignRound ends it.
+type Conversation struct {
+	Project string    `json:"project"`
+	Round   string    `json:"round"`
+	Desk    string    `json:"desk"`
+	Started time.Time `json:"started"`
+}
+
+// ReportsFile is reports.json.
+const ReportsFile = "reports.json"
+
+// Call is one decision a pass or round made: what it chose, the other
+// option, and why.
+type Call struct {
+	Call   string `json:"call"`
+	Chosen string `json:"chosen"`
+	Other  string `json:"other"`
+	Why    string `json:"why"`
+}
+
+// Miss is something the plan missed and what it cost.
+type Miss struct {
+	Miss string `json:"miss"`
+	Cost string `json:"cost"`
+}
+
+// Report is what a conductor writes when a round ends, or a release when
+// it does. Read is null until Geoff marks it read. Calls and Misses are
+// written as [] when empty.
+type Report struct {
+	ID      string     `json:"id"`
+	Project string     `json:"project"`
+	Round   string     `json:"round,omitempty"`
+	Title   string     `json:"title"`
+	Summary string     `json:"summary"`
+	Calls   []Call     `json:"calls"`
+	Misses  []Miss     `json:"misses"`
+	Sent    time.Time  `json:"sent"`
+	Read    *time.Time `json:"read"`
+}
+
+// Reports is reports.json.
+type Reports struct {
+	Format  int      `json:"format"`
+	Reports []Report `json:"reports,omitempty"`
 }
 
 // Desk is one desk session and the process that runs it.
@@ -401,12 +514,18 @@ type State struct {
 	// Releases holds the live releases by sorted name, then the done ones.
 	Releases  []*ReleaseFile
 	Desks     Desks
+	Reports   Reports
 	Settings  Settings
 	Usage     *Usage
 	Rulings   []Ruling
 	Forecasts []Forecast
 	Check     CheckFile
+	// CheckLog holds the lines of check-log.jsonl as loaded.
+	CheckLog []CheckLogLine
 
+	// newCheckLog holds the lines an event added, which Commit appends to
+	// check-log.jsonl after the ruling and before any release file.
+	newCheckLog []CheckLogLine
 	// passEvent is set by a pass start, finish, or stop, and tells Commit
 	// to append a forecast line.
 	passEvent bool
@@ -417,6 +536,8 @@ type State struct {
 	newRuling *Ruling
 	// desksDirty is set when an event changed desks.json.
 	desksDirty bool
+	// reportsDirty is set when an event changed reports.json.
+	reportsDirty bool
 	// checkDirty is set when an event changed check.json.
 	checkDirty bool
 	// noSettle tells Commit to skip settle, so a failed list read starts no

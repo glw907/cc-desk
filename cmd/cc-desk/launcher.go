@@ -236,7 +236,7 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 		ready = launch.ReadyCommand(l.binary, l.dir, project, pl.pass)
 		rules = append(rules, "Bash("+ready+" *)")
 	}
-	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs, rules)
+	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, rf.AskRules, verbs, rules)
 	if err != nil {
 		return "", err
 	}

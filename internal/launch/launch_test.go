@@ -42,7 +42,7 @@ func TestWriteSettings(t *testing.T) {
 	verbs := Verbs("/bin/cc-desk", state, "pass", "p", "w", "r")
 	followRule := "Bash(" + FollowUpCommand("/bin/cc-desk", state, "p", "pass:w") + " *)"
 	readyRule := "Bash(" + ReadyCommand("/bin/cc-desk", state, "p", "w") + " *)"
-	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, verbs, []string{followRule, readyRule})
+	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, nil, verbs, []string{followRule, readyRule})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,15 +80,42 @@ func TestWriteSettings(t *testing.T) {
 	if strings.Contains(string(data), "matcher") {
 		t.Error("the hook has no matcher")
 	}
-	design, err := WriteSettings(state, "/bin/cc-desk", "p-design", nil, nil, []string{followRule})
+	design, err := WriteSettings(state, "/bin/cc-desk", "p-design", nil, nil, nil, []string{followRule})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if b, err := os.ReadFile(design); err != nil || strings.Contains(string(b), "pass ready") {
 		t.Errorf("a design launch's settings hold a ready rule: %q, %v", b, err)
 	}
-	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, nil); err == nil {
+	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, nil, nil); err == nil {
 		t.Error("a relative state folder must be refused")
+	}
+}
+
+func TestWriteSettingsAsk(t *testing.T) {
+	state := t.TempDir()
+	read := func(ask []string) string {
+		t.Helper()
+		path, err := WriteSettings(state, "/bin/cc-desk", "p-ask", nil, ask, nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(data)
+	}
+	if got := read(nil); strings.Contains(got, `"ask"`) {
+		t.Errorf("a release with no ask rules writes an ask key: %s", got)
+	}
+	got := read([]string{"Bash(date *)"})
+	var s settings
+	if err := json.Unmarshal([]byte(got), &s); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(s.Permissions.Ask, []string{"Bash(date *)"}) {
+		t.Errorf("ask = %v", s.Permissions.Ask)
 	}
 }
 

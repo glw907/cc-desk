@@ -1,0 +1,134 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "timer-live",
+  "repo": "glw907/cc-desk-scratch",
+  "checkout": "/var/home/glw907/Projects/cc-desk-scratch",
+  "default_branch": "live-2026-11-18",
+  "allow_rules": [
+    "Bash(bash scripts/gate.sh)",
+    "Bash(git add notes-timer-live-a.md)",
+    "Bash(git add notes-timer-live-b.md)",
+    "Bash(git add docs/follow-ups/*)",
+    "Bash(git commit -m *)",
+    "Bash(git push origin timer-live-a)",
+    "Bash(git push origin timer-live-b)",
+    "Bash(gh pr create --repo glw907/cc-desk-scratch *)",
+    "Bash(git rev-parse HEAD)",
+    "Bash(git log --oneline *)"
+  ],
+  "rounds": [
+    {
+      "name": "live",
+      "summary": "Two fixture passes for the timer's live run.",
+      "needs_geoff": false,
+      "no_need_reason": "A fixture run in the scratch repo, with nothing to decide.",
+      "design_written": true
+    }
+  ],
+  "passes": [
+    {
+      "name": "timer-live-a",
+      "summary": "Write one notes file, run the gate, and open a pull request.",
+      "round": "live",
+      "planned_minutes": 10,
+      "model": "sonnet",
+      "effort": "medium",
+      "state": "done",
+      "started": "2026-11-18T14:51:21.670670962Z",
+      "finished": "2026-11-18T15:18:58.40317894Z",
+      "stops": [
+        {
+          "start": "2026-11-18T14:56:32.145957747Z",
+          "end": "2026-11-18T15:12:36.533654485Z"
+        }
+      ],
+      "actual_minutes": 12,
+      "session": {
+        "name": "cc-desk-scratch-timer-live-a",
+        "kind": "pass",
+        "short_id": "70cdede6",
+        "session_id": "70cdede6-109b-495b-bf53-d61e4775ccaf",
+        "worktree": "/var/home/glw907/Projects/cc-desk-scratch/.claude/worktrees/timer-live-a",
+        "branch": "timer-live-a",
+        "launched": "2026-11-18T15:13:08.05084977Z",
+        "launch_tries": 1,
+        "relaunches": [
+          {
+            "time": "2026-11-18T15:13:08.05084977Z",
+            "cause": "missing",
+            "counted": true
+          }
+        ],
+        "last_seen": "2026-11-18T15:13:21.057978073Z",
+        "last_state": "working",
+        "last_working": "2026-11-18T15:13:21.057978073Z",
+        "ended": "2026-11-18T15:18:58.40317894Z"
+      },
+      "pull_request": {
+        "number": 3,
+        "commit": "f5746cae0babd96009c3ecc25959d3eefd5cf019",
+        "verdict": "accept",
+        "ready": "2026-11-18T15:13:21.030598602Z",
+        "merged": "2026-11-18T15:18:58.40317894Z",
+        "inside_design": true,
+        "merge_called": "2026-11-18T15:18:58.40317894Z",
+        "cleaned": "2026-11-18T15:18:58.40317894Z"
+      }
+    },
+    {
+      "name": "timer-live-b",
+      "summary": "Commit twice with two sleeps between, file a follow-up, and open a pull request.",
+      "round": "live",
+      "planned_minutes": 20,
+      "model": "sonnet",
+      "effort": "medium",
+      "state": "done",
+      "started": "2026-11-18T14:51:21.688518814Z",
+      "finished": "2026-11-18T15:24:30.631885705Z",
+      "stops": [
+        {
+          "start": "2026-11-18T14:56:32.145957747Z",
+          "end": "2026-11-18T15:12:36.551254364Z"
+        }
+      ],
+      "actual_minutes": 17,
+      "session": {
+        "name": "cc-desk-scratch-timer-live-b",
+        "kind": "pass",
+        "short_id": "ba577031",
+        "session_id": "ba577031-41c0-4e53-90b3-2924a0b907e5",
+        "worktree": "/var/home/glw907/Projects/cc-desk-scratch/.claude/worktrees/timer-live-b",
+        "branch": "timer-live-b",
+        "launched": "2026-11-18T15:18:58.40317894Z",
+        "launch_tries": 1,
+        "relaunches": [
+          {
+            "time": "2026-11-18T15:13:08.05084977Z",
+            "cause": "missing",
+            "counted": true
+          },
+          {
+            "time": "2026-11-18T15:18:58.40317894Z",
+            "cause": "missing",
+            "counted": true
+          }
+        ],
+        "last_seen": "2026-11-18T15:19:23.171137153Z",
+        "last_state": "working",
+        "last_working": "2026-11-18T15:19:23.171137153Z",
+        "ended": "2026-11-18T15:24:30.631885705Z"
+      },
+      "pull_request": {
+        "number": 4,
+        "commit": "2bb936aa905d2d9a3deb763384390592b3979544",
+        "verdict": "accept",
+        "ready": "2026-11-18T15:19:23.144826856Z",
+        "merged": "2026-11-18T15:24:30.631885705Z",
+        "inside_design": true,
+        "merge_called": "2026-11-18T15:24:30.631885705Z",
+        "cleaned": "2026-11-18T15:24:30.631885705Z"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "design": "docs/specs/2026-11-20-beta-b3-design.md",
+  "context": [
+    "Round b3 ships the beta release's last change.",
+    "The choice below is the only one still open."
+  ],
+  "calls": [
+    {"call": "How the change ships", "chosen": "One pass", "other": "Two passes", "why": "The change is small enough to review whole."}
+  ],
+  "passes": [
+    {"name": "b-four", "summary": "The first pass of round b3.", "round": "b3", "planned_minutes": 90, "state": "not_started", "questions": ["beta-q3"]}
+  ],
+  "questions": [
+    {"id": "beta-q3", "text": "Ship it?", "options": ["yes", "no"], "recommended": "yes"}
+  ]
+}

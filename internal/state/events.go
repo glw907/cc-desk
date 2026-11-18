@@ -80,6 +80,11 @@ type Design struct {
 	Format    int        `json:"format"`
 	Passes    []Pass     `json:"passes"`
 	Questions []Question `json:"questions,omitempty"`
+	// Design, Context, and Calls are the round fields of the same names.
+	// All three are optional.
+	Design  string   `json:"design,omitempty"`
+	Context []string `json:"context,omitempty"`
+	Calls   []Call   `json:"calls,omitempty"`
 }
 
 // DecodeDesign strictly decodes a design input.
@@ -93,6 +98,9 @@ func DecodeDesign(data []byte) (*Design, error) {
 	}
 	if len(d.Passes) == 0 {
 		return nil, errors.New(`missing required field "passes"`)
+	}
+	if err := checkRoundNotes(d.Context, d.Calls); err != nil {
+		return nil, err
 	}
 	return &d, nil
 }
@@ -138,11 +146,22 @@ func DesignRound(project, round string, d *Design) Event {
 			next.Questions = append(next.Questions, q)
 		}
 		next.Rounds[i].DesignWritten = true
+		next.Rounds[i].Design = d.Design
+		next.Rounds[i].Context = slices.Clone(d.Context)
+		next.Rounds[i].Calls = slices.Clone(d.Calls)
 		if err := validateRelease(&next); err != nil {
 			return fmt.Errorf("design for round %q: %w", round, err)
 		}
 		rf.Release = next
 		rf.Dirty = true
+		if n := len(s.Desks.Conversations); n > 0 {
+			s.Desks.Conversations = slices.DeleteFunc(s.Desks.Conversations, func(c Conversation) bool {
+				return c.Project == project && c.Round == round
+			})
+			if len(s.Desks.Conversations) != n {
+				s.desksDirty = true
+			}
+		}
 		return nil
 	}
 }
@@ -185,6 +204,8 @@ func start(project, pass, guess string) Event {
 				return Refuse(fmt.Sprintf("cannot start %s/%s: pass %q does not rest on question %q", project, pass, pass, guess))
 			case q.Answer != nil:
 				return Refuse(fmt.Sprintf("cannot start %s/%s: question %q is already answered", project, pass, guess))
+			case q.NeverGuess:
+				return Refuse(fmt.Sprintf("cannot start %s/%s: question %q is never guessed; it waits for a ruling", project, pass, guess))
 			}
 		}
 		t := now.UTC()
@@ -260,6 +281,51 @@ func FinishPass(project, pass string) Event {
 		p.Finished = &t
 		p.ActualMinutes = &minutes
 		p.State = Done
+		rf.Dirty = true
+		s.passEvent = true
+		return nil
+	}
+}
+
+// ClosePass records a building or stopped pass as closed by a ruling: done,
+// with its finish time and actual minutes, any open stop closed, and no merge.
+// A pass that has not started, is waiting, or is done has no pull request to
+// close and is refused. Only a unit test calls it; the verb is pass 3's.
+func ClosePass(project, pass, rulingID string) Event {
+	return func(s *State, now time.Time) error {
+		rf, p, err := findPass(s, project, pass)
+		if err != nil {
+			return err
+		}
+		switch p.State {
+		case Building, Stopped:
+		case Done:
+			return Refuse(fmt.Sprintf("pass %q is already done", pass))
+		default:
+			return Refuse(fmt.Sprintf("pass %q is %s and has no pull request to close", pass, p.State))
+		}
+		if !slices.ContainsFunc(s.Rulings, func(g Ruling) bool { return g.ID == rulingID }) {
+			return fmt.Errorf("ruling %q not found", rulingID)
+		}
+		t := now.UTC()
+		if t.Before(*p.Started) {
+			return fmt.Errorf("the clock %s is before pass %q started at %s", t.Format(time.RFC3339), pass, p.Started.Format(time.RFC3339))
+		}
+		if p.State == Stopped {
+			last := &p.Stops[len(p.Stops)-1]
+			if t.Before(last.Start) {
+				return fmt.Errorf("the clock %s is before pass %q stopped at %s", t.Format(time.RFC3339), pass, last.Start.Format(time.RFC3339))
+			}
+			last.End = &t
+			p.StopReason, p.StopDetail = "", ""
+		}
+		elapsed := t.Sub(*p.Started)
+		for _, st := range p.Stops {
+			elapsed -= st.End.Sub(st.Start)
+		}
+		minutes := int(math.Round(elapsed.Minutes()))
+		p.Finished, p.ActualMinutes, p.State = &t, &minutes, Done
+		p.Closed = &Closed{Ruling: rulingID, Time: t}
 		rf.Dirty = true
 		s.passEvent = true
 		return nil

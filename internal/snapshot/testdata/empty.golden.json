@@ -22,5 +22,8 @@
   "guess_minutes_limit": 300,
   "sessions": [],
   "needs_you_now": [],
-  "last_check": null
+  "last_check": null,
+  "check_log": [],
+  "reports": [],
+  "design_conversations": []
 }

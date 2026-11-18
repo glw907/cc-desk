@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "project": "alpha",
+  "name": "v1",
+  "repo": "glw907/alpha",
+  "ask_rules": ["Bash(date *)"],
+  "conductor": {
+    "name": "alpha-conductor", "kind": "conductor", "short_id": "a1b2c3d4", "session_id": "a1b2c3d4-0000",
+    "worktree": "/w/alpha", "branch": "alpha-conductor", "launched": "2026-11-20T21:00:00Z", "launch_tries": 1,
+    "refusals": [{"time": "2026-11-20T21:30:00Z", "tool": "Bash", "target": "rm -r build", "reason": "an ask rule"}],
+    "stop_reason": "sign_in_expired", "stopped": "2026-11-20T22:00:00Z", "ended": "2026-11-20T22:05:00Z"
+  },
+  "rounds": [
+    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true,
+     "design": "docs/specs/2026-11-18-alpha-r1-design.md",
+     "context": ["Round r1 holds the free pass and the stopped one."],
+     "calls": [{"call": "Where the stop lives", "chosen": "On the pass", "other": "On the round", "why": "A stop belongs to the session that hit it."}]},
+    {"name": "r2", "summary": "A closed pass and the pass held by it.", "needs_geoff": false, "no_need_reason": "Closed by a ruling.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "a-free", "summary": "Free now.", "round": "r1", "planned_minutes": 10, "state": "not_started", "questions": ["qa"]},
+    {
+      "name": "a-stopped", "summary": "Stopped on scope.", "round": "r1", "planned_minutes": 15, "state": "stopped",
+      "started": "2026-11-20T21:00:00Z", "stop_reason": "scope", "stops": [{"start": "2026-11-20T22:40:00Z"}],
+      "no_need_reason": "It only renames files."
+    },
+    {
+      "name": "a-closed", "summary": "Closed without a merge.", "round": "r2", "planned_minutes": 30, "state": "done",
+      "started": "2026-11-20T20:00:00Z", "finished": "2026-11-20T20:40:00Z", "actual_minutes": 40,
+      "closed": {"ruling": "r-0001", "time": "2026-11-20T20:40:00Z"}
+    },
+    {"name": "a-held", "summary": "Held by the closed pass.", "round": "r2", "planned_minutes": 20, "state": "not_started", "after": ["a-closed"]}
+  ],
+  "questions": [
+    {
+      "id": "qa",
+      "text": "Should the report keep its old name?",
+      "options": ["keep", "rename"],
+      "recommended": "keep",
+      "background": ["The report has had one name since the first release.", "A rename touches every link to it."],
+      "causes": {"keep": "Links keep working.", "rename": "Every link is rewritten."},
+      "reason": "A rename costs more than the name is worth."
+    }
+  ]
+}

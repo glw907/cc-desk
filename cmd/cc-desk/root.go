@@ -123,6 +123,6 @@ func newRootCmd() *cobra.Command {
 	_ = cmd.PersistentFlags().MarkHidden("systemctl-command")
 	cmd.PersistentFlags().StringVar(&f.claudeCommand, "claude-command", "claude", "the command that stands in for claude")
 	_ = cmd.PersistentFlags().MarkHidden("claude-command")
-	cmd.AddCommand(newTimerCmd(&f), newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f), newSessionCmd(&f), newPromptCmd(&f), newFollowupCmd(&f), newRulesCmd(&f), newDeskCmd(&f))
+	cmd.AddCommand(newTimerCmd(&f), newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f), newSessionCmd(&f), newPromptCmd(&f), newFollowupCmd(&f), newRulesCmd(&f), newDeskCmd(&f), newQuestionCmd(&f), newBriefCmd(&f), newReportCmd(&f))
 	return cmd
 }

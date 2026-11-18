@@ -9,6 +9,7 @@ package snapshot
 
 import (
 	"encoding/json"
+	"maps"
 	"slices"
 	"time"
 
@@ -33,7 +34,93 @@ type Snapshot struct {
 	Sessions          []SessionEntry `json:"sessions"`
 	NeedsYouNow       []NeedEntry    `json:"needs_you_now"`
 	LastCheck         *LastCheck     `json:"last_check"`
+	// CheckLog is the last CheckLogLimit lines of check-log.jsonl, oldest first.
+	CheckLog []state.CheckLogLine `json:"check_log"`
+	// Reports is every report in file order, each with its passes folded
+	// from its release.
+	Reports []ReportEntry `json:"reports"`
+	// DesignConversations is each design conversation in progress, in the
+	// order they started.
+	DesignConversations []state.Conversation `json:"design_conversations"`
 }
+
+// ReportEntry is a report's record and the passes it covers. Round is null
+// for a release's report, and Passes is empty when the release is gone.
+type ReportEntry struct {
+	ID      string       `json:"id"`
+	Project string       `json:"project"`
+	Round   *string      `json:"round"`
+	Title   string       `json:"title"`
+	Summary string       `json:"summary"`
+	Calls   []state.Call `json:"calls"`
+	Misses  []state.Miss `json:"misses"`
+	Sent    time.Time    `json:"sent"`
+	Read    *time.Time   `json:"read"`
+	Passes  []ReportPass `json:"passes"`
+}
+
+// ReportPass is one pass in a report's detail.
+type ReportPass struct {
+	Name           string `json:"name"`
+	State          string `json:"state"`
+	PlannedMinutes int    `json:"planned_minutes"`
+	ActualMinutes  *int   `json:"actual_minutes"`
+	PullRequest    *int   `json:"pull_request"`
+	// Closed is set for a pass Geoff's ruling closed without a merge.
+	Closed *Closed `json:"closed"`
+}
+
+// Closed is the ruling that closed a pass and when.
+type Closed struct {
+	Ruling string    `json:"ruling"`
+	Time   time.Time `json:"time"`
+}
+
+func closedOf(p *state.Pass) *Closed {
+	if p.Closed == nil {
+		return nil
+	}
+	return &Closed{Ruling: p.Closed.Ruling, Time: p.Closed.Time.UTC()}
+}
+
+// buildReports folds each report's passes from s.Releases, which holds the
+// done releases the rest of the snapshot skips. A release report covers every
+// pass of the project's first release; a round's covers that round's passes
+// in the first release that has the round.
+func buildReports(s *state.State) []ReportEntry {
+	out := []ReportEntry{}
+	for _, r := range s.Reports.Reports {
+		e := ReportEntry{ID: r.ID, Project: r.Project, Title: r.Title, Summary: r.Summary,
+			Calls: r.Calls, Misses: r.Misses, Sent: r.Sent, Read: r.Read, Passes: []ReportPass{}}
+		if r.Round != "" {
+			round := r.Round
+			e.Round = &round
+		}
+		for _, rf := range s.Releases {
+			if rf.Project != r.Project || (r.Round != "" && !slices.ContainsFunc(rf.Rounds, func(rd state.Round) bool { return rd.Name == r.Round })) {
+				continue
+			}
+			for i := range rf.Passes {
+				p := &rf.Passes[i]
+				if r.Round != "" && p.Round != r.Round {
+					continue
+				}
+				rp := ReportPass{Name: p.Name, State: string(p.State), PlannedMinutes: p.PlannedMinutes, ActualMinutes: p.ActualMinutes, Closed: closedOf(p)}
+				if p.PullRequest != nil && p.PullRequest.Number > 0 {
+					n := p.PullRequest.Number
+					rp.PullRequest = &n
+				}
+				e.Passes = append(e.Passes, rp)
+			}
+			break
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+// CheckLogLimit is how many check log lines the snapshot carries.
+const CheckLogLimit = 50
 
 // Release is one live release.
 type Release struct {
@@ -63,6 +150,10 @@ type Round struct {
 	NeededTime     *time.Time `json:"needed_time"`
 	ForecastTime   *time.Time `json:"forecast_time"`
 	Passes         []Pass     `json:"passes"`
+	// Design is the design's path, null until one is recorded.
+	Design  *string      `json:"design"`
+	Context []string     `json:"context"`
+	Calls   []state.Call `json:"calls"`
 }
 
 // Needs says what a round needs from Geoff. Kind is questions, nothing,
@@ -89,6 +180,15 @@ type Pass struct {
 	Free           *bool      `json:"free"`
 	WhyNot         []string   `json:"why_not"`
 	GuessOutcome   *string    `json:"guess_outcome"`
+	// StoppedAt is when the open stop began, null unless the pass is stopped.
+	StoppedAt *time.Time `json:"stopped_at"`
+	// NeedsKind is questions when the pass rests on any, else nothing.
+	// NeedsReason is the pass's own reason it needs nothing, else its
+	// round's, else null.
+	NeedsKind   string  `json:"needs_kind"`
+	NeedsReason *string `json:"needs_reason"`
+	// Closed is set for a pass Geoff's ruling closed without a merge.
+	Closed *Closed `json:"closed"`
 }
 
 // Question is a question with whether it is answered. AnswerKind is
@@ -100,6 +200,12 @@ type Question struct {
 	Recommended string   `json:"recommended"`
 	Answered    bool     `json:"answered"`
 	AnswerKind  *string  `json:"answer_kind"`
+	// Background, Causes, Reason, and NeverGuess carry the question's own
+	// fields: empty lists, an empty map, and a null reason when it has none.
+	Background []string          `json:"background"`
+	Causes     map[string]string `json:"causes"`
+	Reason     *string           `json:"reason"`
+	NeverGuess bool              `json:"never_guess"`
 }
 
 // NextSession is the next decision session. State is needs_you_now,
@@ -188,6 +294,10 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	snap.Reports = buildReports(s)
+	snap.DesignConversations = append([]state.Conversation{}, s.Desks.Conversations...)
+	snap.CheckLog = []state.CheckLogLine{}
+	snap.CheckLog = append(snap.CheckLog, s.CheckLog[max(0, len(s.CheckLog)-CheckLogLimit):]...)
 	snap.GuessMinutesTotal = s.OpenGuessMinutes()
 	pcs := paces(s)
 	var ctxs []*relCtx
@@ -276,6 +386,11 @@ func buildRound(s *state.State, rf *state.ReleaseFile, rd *state.Round, question
 		After:          append([]string{}, rd.After...),
 		PlannedMinutes: rd.PlannedMinutes,
 		Passes:         []Pass{},
+		Context:        append([]string{}, rd.Context...),
+		Calls:          append([]state.Call{}, rd.Calls...),
+	}
+	if rd.Design != "" {
+		out.Design = &rd.Design
 	}
 	var ids []string
 	allDone, anyStarted := true, false
@@ -357,6 +472,7 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		Finished:       utc(p.Finished),
 		Questions:      []Question{},
 		WhyNot:         []string{},
+		Closed:         closedOf(p),
 	}
 	if p.StopReason != "" {
 		reason := string(p.StopReason)
@@ -366,6 +482,19 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		out.Questions = append(out.Questions, buildQuestion(questions[id]))
 	}
 	out.GuessOutcome = guessOutcome(s, p, questions)
+	out.StoppedAt = openStop(p)
+	out.NeedsKind = "nothing"
+	if len(p.Questions) > 0 {
+		out.NeedsKind = "questions"
+	}
+	out.NeedsReason = strp(p.NoNeedReason)
+	if out.NeedsReason == nil {
+		for _, rd := range rf.Rounds {
+			if rd.Name == p.Round {
+				out.NeedsReason = strp(rd.NoNeedReason)
+			}
+		}
+	}
 	if p.State == state.NotStarted {
 		broken := s.Breaks(rf, p, "")
 		free := len(broken) == 0
@@ -375,6 +504,18 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		}
 	}
 	return out
+}
+
+// openStop is when the pass's open stop began, or nil when it has none.
+func openStop(p *state.Pass) *time.Time {
+	if p.State != state.Stopped || len(p.Stops) == 0 {
+		return nil
+	}
+	last := p.Stops[len(p.Stops)-1]
+	if last.End != nil {
+		return nil
+	}
+	return utc(&last.Start)
 }
 
 // The two outcomes of a closed guess.
@@ -413,6 +554,13 @@ func buildQuestion(q *state.Question) Question {
 		Text:        q.Text,
 		Options:     append([]string{}, q.Options...),
 		Recommended: q.Recommended,
+		Background:  append([]string{}, q.Background...),
+		Causes:      map[string]string{},
+		NeverGuess:  q.NeverGuess,
+	}
+	maps.Copy(out.Causes, q.Causes)
+	if q.Reason != "" {
+		out.Reason = &q.Reason
 	}
 	if q.Answer != nil {
 		out.Answered = true

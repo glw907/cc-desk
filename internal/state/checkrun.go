@@ -34,12 +34,26 @@ func RecordCheck(recs []Recorded) Event {
 			if err := applyRecorded(s, r, t); err != nil {
 				return err
 			}
+			if r.Stop != "" {
+				s.logCheck(t, r.Decision, "stopped: "+string(r.Stop))
+			}
 			decisions = append(decisions, r.Decision)
 		}
 		s.Check = CheckFile{Format: Format, LastRun: &t, Decisions: decisions}
 		s.checkDirty = true
 		return nil
 	}
+}
+
+// logCheck adds one line to the check log for Commit to append, and to the
+// loaded lines so the snapshot of the same commit shows it.
+func (s *State) logCheck(now time.Time, d Decision, outcome string) {
+	l := CheckLogLine{
+		Format: Format, Time: now.UTC(), Project: d.Project, Record: d.Record,
+		Decision: d.Decision, Outcome: outcome, Reason: d.Reason, Detail: d.Detail,
+	}
+	s.newCheckLog = append(s.newCheckLog, l)
+	s.CheckLog = append(s.CheckLog, l)
 }
 
 func applyRecorded(s *State, r Recorded, now time.Time) error {

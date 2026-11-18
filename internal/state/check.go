@@ -42,6 +42,14 @@ func validateRelease(r *Release) error {
 	if r.Repo == "" {
 		return errors.New(`missing required field "repo"`)
 	}
+	for i, rule := range r.AskRules {
+		if rule == "" {
+			return fmt.Errorf(`ask_rules %d: the rule is empty`, i+1)
+		}
+		if slices.Contains(r.AllowRules, rule) {
+			return fmt.Errorf("rule %q is in both allow_rules and ask_rules", rule)
+		}
+	}
 
 	rounds := map[string]*Round{}
 	for i := range r.Rounds {
@@ -55,6 +63,9 @@ func validateRelease(r *Release) error {
 		rounds[rd.Name] = rd
 		if rd.Summary == "" {
 			return fmt.Errorf(`round %q: missing required field "summary"`, rd.Name)
+		}
+		if err := checkRoundNotes(rd.Context, rd.Calls); err != nil {
+			return fmt.Errorf("round %q: %w", rd.Name, err)
 		}
 		if !rd.NeedsGeoff && rd.NoNeedReason == "" {
 			return fmt.Errorf(`round %q needs nothing from Geoff but gives no "no_need_reason"`, rd.Name)
@@ -84,6 +95,9 @@ func validateRelease(r *Release) error {
 		if !slices.Contains(q.Options, q.Recommended) {
 			return fmt.Errorf("question %q recommends %q, which is not one of its options", q.ID, q.Recommended)
 		}
+		if err := validateCauses(q); err != nil {
+			return err
+		}
 		if err := validateAnswer(q); err != nil {
 			return err
 		}
@@ -109,6 +123,25 @@ func validateRelease(r *Release) error {
 		return err
 	}
 	return findLoop(r)
+}
+
+// validateCauses holds a question's causes to its options: when it has any,
+// it has one for each option and none for anything else.
+func validateCauses(q *Question) error {
+	if len(q.Causes) == 0 {
+		return nil
+	}
+	for k := range q.Causes {
+		if !slices.Contains(q.Options, k) {
+			return fmt.Errorf("question %q: causes has %q, which is not one of its options", q.ID, k)
+		}
+	}
+	for _, o := range q.Options {
+		if q.Causes[o] == "" {
+			return fmt.Errorf("question %q: causes has nothing for option %q", q.ID, o)
+		}
+	}
+	return nil
 }
 
 func validateAnswer(q *Question) error {
@@ -195,6 +228,9 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	if err := validatePassSession(p); err != nil {
 		return err
 	}
+	if err := validateClosed(p); err != nil {
+		return err
+	}
 	if err := validatePullRequest(p, questions); err != nil {
 		return err
 	}
@@ -212,6 +248,23 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	}
 	if p.StopReason != "" && !ValidStopReason(p.StopReason) {
 		return fmt.Errorf("pass %q has stop reason %q, which is not a stop reason", p.Name, p.StopReason)
+	}
+	return nil
+}
+
+// validateClosed checks a pass's closed mark: a done pass with a ruling and
+// a time, and no merged pull request.
+func validateClosed(p *Pass) error {
+	c := p.Closed
+	switch {
+	case c == nil:
+		return nil
+	case p.State != Done:
+		return fmt.Errorf("pass %q is %s but is marked closed", p.Name, p.State)
+	case c.Ruling == "" || c.Time.IsZero():
+		return fmt.Errorf(`pass %q: closed needs a "ruling" and a "time"`, p.Name)
+	case p.PullRequest != nil && p.PullRequest.Merged != nil:
+		return fmt.Errorf("pass %q is marked closed but its pull_request is merged", p.Name)
 	}
 	return nil
 }
@@ -285,6 +338,11 @@ func validateSession(s *Session, want SessionKind, place string) error {
 	for i, p := range s.Prompts {
 		if p.Time.IsZero() || p.Tool == "" {
 			return fmt.Errorf(`%s: prompt %d needs "time" and "tool"`, place, i+1)
+		}
+	}
+	for i, r := range s.Refusals {
+		if r.Time.IsZero() || r.Tool == "" {
+			return fmt.Errorf(`%s: refusal %d needs "time" and "tool"`, place, i+1)
 		}
 	}
 	if (s.StopReason == "") != (s.Stopped == nil) {
@@ -400,8 +458,8 @@ func findLoop(r *Release) error {
 	return nil
 }
 
-// checkAnswers verifies every ruling answer in r points at a ruling that
-// exists.
+// checkAnswers verifies every ruling answer, and every closed pass's ruling,
+// in r points at a ruling that exists.
 func checkAnswers(r *Release, rulings []Ruling) error {
 	for i := range r.Questions {
 		q := &r.Questions[i]
@@ -410,6 +468,12 @@ func checkAnswers(r *Release, rulings []Ruling) error {
 		}
 		if !slices.ContainsFunc(rulings, func(g Ruling) bool { return g.ID == q.Answer.Ruling }) {
 			return fmt.Errorf("question %q is answered by ruling %q, which is not in rulings.jsonl", q.ID, q.Answer.Ruling)
+		}
+	}
+	for i := range r.Passes {
+		p := &r.Passes[i]
+		if p.Closed != nil && !slices.ContainsFunc(rulings, func(g Ruling) bool { return g.ID == p.Closed.Ruling }) {
+			return fmt.Errorf("pass %q is closed by ruling %q, which is not in rulings.jsonl", p.Name, p.Closed.Ruling)
 		}
 	}
 	return nil

@@ -1,0 +1,4 @@
+{"format":1,"time":"2026-11-20T21:00:00Z","project":"alpha","record":"conductor","decision":"launch","outcome":"launched a1b2c3d4"}
+{"format":1,"time":"2026-11-20T22:00:00Z","project":"alpha","record":"conductor","decision":"stop","outcome":"stopped: sign_in_expired","reason":"sign_in_expired","detail":"the session asked for a sign-in"}
+{"format":1,"time":"2026-11-20T22:30:00Z","project":"beta","record":"pass:b-build","decision":"relaunch","outcome":"relaunched b1b2b3b4","reason":"connection_dropped","detail":"the row said the connection was lost"}
+{"format":1,"time":"2026-11-20T22:50:00Z","project":"beta","record":"pass:b-build","decision":"relaunch","outcome":"not relaunched: two tries used","reason":"connection_dropped"}

@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "desks": [
+    {"session_id": "desk-1", "pid": 4242, "started": "2026-11-20T21:30:00Z"}
+  ],
+  "conversations": [
+    {"project": "beta", "round": "b3", "desk": "desk-1", "started": "2026-11-20T21:45:00Z"}
+  ]
+}

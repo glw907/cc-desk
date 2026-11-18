@@ -1,0 +1,136 @@
+{
+  "format": 1,
+  "generated_at": "2026-11-18T21:25:50.016658102Z",
+  "releases": [
+    {
+      "project": "cc-desk-scratch",
+      "name": "timer-live",
+      "repo": "glw907/cc-desk-scratch",
+      "pace": 1,
+      "pace_low": null,
+      "pace_high": null,
+      "rough": true,
+      "rounds": [
+        {
+          "name": "live",
+          "summary": "Two fixture passes for the timer's live run.",
+          "state": "done",
+          "after": [],
+          "planned_minutes": 30,
+          "actual_minutes": 29,
+          "started": "2026-11-18T14:51:21.670670962Z",
+          "finished": "2026-11-18T15:24:30.631885705Z",
+          "needs": {
+            "kind": "nothing",
+            "reason": "A fixture run in the scratch repo, with nothing to decide.",
+            "questions": []
+          },
+          "minutes_before": null,
+          "needed_time": null,
+          "forecast_time": null,
+          "passes": [
+            {
+              "name": "timer-live-a",
+              "summary": "Write one notes file, run the gate, and open a pull request.",
+              "state": "done",
+              "planned_minutes": 10,
+              "actual_minutes": 12,
+              "started": "2026-11-18T14:51:21.670670962Z",
+              "finished": "2026-11-18T15:18:58.40317894Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            },
+            {
+              "name": "timer-live-b",
+              "summary": "Commit twice with two sleeps between, file a follow-up, and open a pull request.",
+              "state": "done",
+              "planned_minutes": 20,
+              "actual_minutes": 17,
+              "started": "2026-11-18T14:51:21.688518814Z",
+              "finished": "2026-11-18T15:24:30.631885705Z",
+              "stop_reason": null,
+              "questions": [],
+              "minutes_before": null,
+              "needed_time": null,
+              "free": null,
+              "why_not": [],
+              "guess_outcome": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rulings": [],
+  "next_session": {
+    "state": "nothing_waiting",
+    "time": null,
+    "range": null,
+    "rough": null,
+    "question_count": 0,
+    "rounds": [],
+    "projects": [],
+    "not_designed": [],
+    "waiting_on_design": [],
+    "reasons": []
+  },
+  "waits_for_geoff": [],
+  "waiting": [],
+  "open_guesses": [],
+  "guess_minutes_total": 0,
+  "guess_minutes_limit": 300,
+  "sessions": [
+    {
+      "project": "cc-desk-scratch",
+      "round": "live",
+      "pass": "timer-live-a",
+      "kind": "pass",
+      "name": "cc-desk-scratch-timer-live-a",
+      "short_id": "70cdede6",
+      "last_state": "working",
+      "last_seen": "2026-11-18T15:13:21.057978073Z",
+      "last_working": "2026-11-18T15:13:21.057978073Z",
+      "relaunches": 1,
+      "stop_reason": null,
+      "prompts": []
+    },
+    {
+      "project": "cc-desk-scratch",
+      "round": "live",
+      "pass": "timer-live-b",
+      "kind": "pass",
+      "name": "cc-desk-scratch-timer-live-b",
+      "short_id": "ba577031",
+      "last_state": "working",
+      "last_seen": "2026-11-18T15:19:23.171137153Z",
+      "last_working": "2026-11-18T15:19:23.171137153Z",
+      "relaunches": 2,
+      "stop_reason": null,
+      "prompts": []
+    }
+  ],
+  "needs_you_now": [],
+  "last_check": {
+    "time": "2026-11-18T21:25:44.147255945Z",
+    "list_failures": 0,
+    "decisions": [
+      {
+        "project": "cc-desk-scratch",
+        "record": "pass:timer-live-a",
+        "session": "cc-desk-scratch-timer-live-a",
+        "decision": "none"
+      },
+      {
+        "project": "cc-desk-scratch",
+        "record": "pass:timer-live-b",
+        "session": "cc-desk-scratch-timer-live-b",
+        "decision": "none"
+      }
+    ]
+  }
+}
