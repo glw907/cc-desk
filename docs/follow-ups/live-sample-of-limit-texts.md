@@ -12,4 +12,4 @@ with the last 200 runes of the screen as its cause, so the failure is loud, not 
 
 The test needs a session that really hits a limit, so it waits on a day Geoff is near one. Save the
 two captures under `spikes/2-states/out/`, add them to `e2e/testdata/check/` as new fixtures beside
-the old ones, and add a case to `TestClassify`.
+the old ones, and add a case to `TestClassifyFixtures`.

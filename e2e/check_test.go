@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -33,7 +34,7 @@ type decision struct {
 // check gets, so no test reaches the real claude or the network.
 type rig struct {
 	claude, jobs, probe string
-	reads               string // the log the stand-in claude adds a line to on each list read
+	reads               string // the log the stand-in claude adds a nanosecond timestamp to on each list read
 }
 
 // claudeStandIn is the script a stand-in claude runs. The first list read
@@ -43,7 +44,7 @@ const claudeStandIn = `#!/bin/sh
 d=%q
 case "$1" in
 agents)
-  echo read >> "$d/reads.log"
+  date +%%s%%N >> "$d/reads.log"
   n=$(wc -l < "$d/reads.log")
   if [ "$n" -le 1 ]; then cat "$d/list-1.json"; else cat "$d/list-2.json"; fi
   ;;
@@ -110,7 +111,7 @@ func (r rig) readCount(t *testing.T) int {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return strings.Count(string(b), "read\n")
+	return len(strings.Fields(string(b)))
 }
 
 // probeServer answers the network probe. A server that is down hijacks each
@@ -397,6 +398,31 @@ func readFileIn(t *testing.T, dir, rel string) string {
 
 // launchClauses runs clauses 10 and 11 on the check-launch fixture, as
 // subtests of TestCheckStops.
+// TestCheckSecondReadWait runs the launch folder with the wait set to 200
+// milliseconds and reads the gap between the stand-in's two list calls.
+func TestCheckSecondReadWait(t *testing.T) {
+	url, _ := probeServer(t, false)
+	dir := newStateFrom(t, "check-launch")
+	r := newRig(t, "check-launch", url)
+	requireRun(t, checkRun(t, r, dir, workedClock, "--second-read-wait", "200ms"))
+	b, err := os.ReadFile(r.reads)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stamps := strings.Fields(string(b))
+	if len(stamps) != 2 {
+		t.Fatalf("list reads = %d, want 2", len(stamps))
+	}
+	first, err1 := strconv.ParseInt(stamps[0], 10, 64)
+	second, err2 := strconv.ParseInt(stamps[1], 10, 64)
+	if err1 != nil || err2 != nil {
+		t.Fatalf("read log holds %q", stamps)
+	}
+	if gap := time.Duration(second - first); gap < 200*time.Millisecond {
+		t.Errorf("gap between the two list reads = %v, want at least 200ms", gap)
+	}
+}
+
 func launchClauses(t *testing.T) {
 	url, _ := probeServer(t, false)
 	dir := newStateFrom(t, "check-launch")

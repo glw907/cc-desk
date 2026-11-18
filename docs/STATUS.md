@@ -40,11 +40,8 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 
 ## Running
 
-- Pass 1 of the Sessions round (sessions-check) is built and in draft pull request 8, on branch
-  `sessions-check`. `cc-desk check` records sessions, reads the session list, runs the probe, and
-  decides what each session needs. Pass 2 carries out the launches, ends, and relaunches.
-- Its one call for Geoff: whether a usage-limit relaunch waits for the reset time
-  (`docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md`). The conductor lands the pull request.
+- Pass 1 (sessions-check), pull request 8, built `cc-desk check`. Pass 2 carries out its decisions.
+  Round items 6 and 7 are not Go tests; they belong to pass 5, and its script output goes there.
 
 ## Next action
 
@@ -57,6 +54,7 @@ claude --model claude-opus-5-5 --effort high "$(cat docs/plans/2026-11-17-sessio
 
 ## Open decisions
 
+- Pull request 8 needs his call on usage relaunches: `docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md`.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
