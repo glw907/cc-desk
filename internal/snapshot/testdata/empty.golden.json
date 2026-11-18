@@ -19,5 +19,8 @@
   "waiting": [],
   "open_guesses": [],
   "guess_minutes_total": 0,
-  "guess_minutes_limit": 300
+  "guess_minutes_limit": 300,
+  "sessions": [],
+  "needs_you_now": [],
+  "last_check": null
 }

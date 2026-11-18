@@ -67,7 +67,7 @@ func newPassCmd(f *rootFlags) *cobra.Command {
 	var reason string
 	stop := &cobra.Command{
 		Use:   "stop <project> <pass> --reason <reason>",
-		Short: "Record the stop of a pass with one of the five reasons",
+		Short: "Record the stop of a pass with one of the stop reasons",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if _, err := f.commit(state.StopPass(args[0], args[1], state.StopReason(reason))); err != nil {
@@ -77,7 +77,7 @@ func newPassCmd(f *rootFlags) *cobra.Command {
 			return nil
 		},
 	}
-	stop.Flags().StringVar(&reason, "reason", "", "why the pass stopped: usage, irreversible, secret, auth_data, or scope")
+	stop.Flags().StringVar(&reason, "reason", "", "why the pass stopped: usage, irreversible, secret, auth_data, scope, permission_prompt, sign_in_expired, unreadable_stop, relaunch_limit, or launch_failed")
 	_ = stop.MarkFlagRequired("reason")
 	cmd.AddCommand(stop)
 	return cmd

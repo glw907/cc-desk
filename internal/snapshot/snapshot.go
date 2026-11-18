@@ -30,6 +30,9 @@ type Snapshot struct {
 	OpenGuesses       []OpenGuess    `json:"open_guesses"`
 	GuessMinutesTotal int            `json:"guess_minutes_total"`
 	GuessMinutesLimit int            `json:"guess_minutes_limit"`
+	Sessions          []SessionEntry `json:"sessions"`
+	NeedsYouNow       []NeedEntry    `json:"needs_you_now"`
+	LastCheck         *LastCheck     `json:"last_check"`
 }
 
 // Release is one live release.
@@ -204,6 +207,7 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		snap.OpenGuesses = append(snap.OpenGuesses, openGuesses(rf)...)
 	}
 	snap.Waiting = waitingPasses(s)
+	fillSessions(snap, s)
 	return snap, fillSession(snap, ctxs, now, usageUnreadable(s))
 }
 

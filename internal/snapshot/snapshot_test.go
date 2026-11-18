@@ -58,6 +58,7 @@ func TestSnapshotEveryFieldPresent(t *testing.T) {
 		"format": "1", "releases": "[]", "rulings": "[]", "waits_for_geoff": "[]",
 		"waiting": "[]", "open_guesses": "[]", "guess_minutes_total": "0", "guess_minutes_limit": "300",
 		"generated_at": `"2026-11-20T23:00:00Z"`,
+		"sessions":     "[]", "needs_you_now": "[]", "last_check": "null",
 	}
 	for k, v := range wantJSON {
 		if string(m[k]) != v {

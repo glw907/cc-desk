@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -42,8 +44,17 @@ func AddRelease(r *Release) Event {
 		for i := range r.Passes {
 			p := &r.Passes[i]
 			if p.State != NotStarted || p.Started != nil || p.Finished != nil || len(p.Stops) > 0 ||
-				p.StopReason != "" || p.ActualMinutes != nil || p.Wait != nil || p.Guess != nil {
+				p.StopReason != "" || p.ActualMinutes != nil || p.Wait != nil || p.Guess != nil ||
+				p.Session != nil || p.PullRequest != nil {
 				return fmt.Errorf("pass %q: a new release's passes must be not_started with no events", p.Name)
+			}
+		}
+		if r.Checkout != "" || r.DefaultBranch != "" || r.Conductor != nil {
+			return errors.New("a new release carries no checkout, default_branch, or conductor; release checkout and the session verbs set them")
+		}
+		for i := range r.Rounds {
+			if r.Rounds[i].Session != nil {
+				return fmt.Errorf("round %q: a new release's rounds carry no session record", r.Rounds[i].Name)
 			}
 		}
 		for i := range r.Questions {
@@ -114,7 +125,8 @@ func DesignRound(project, round string, d *Design) Event {
 				return fmt.Errorf("pass %q is in round %q, not %q", p.Name, p.Round, round)
 			}
 			if p.State != NotStarted || p.Started != nil || p.Finished != nil || len(p.Stops) > 0 ||
-				p.StopReason != "" || p.ActualMinutes != nil || p.Wait != nil || p.Guess != nil {
+				p.StopReason != "" || p.ActualMinutes != nil || p.Wait != nil || p.Guess != nil ||
+				p.Session != nil || p.PullRequest != nil {
 				return fmt.Errorf("pass %q: a designed pass must be not_started with no events", p.Name)
 			}
 			next.Passes = append(next.Passes, p)
@@ -250,7 +262,7 @@ func FinishPass(project, pass string) Event {
 	}
 }
 
-// StopPass stops a building pass for one of the five reasons and opens a
+// StopPass stops a building pass for one of the stop reasons and opens a
 // stop interval.
 func StopPass(project, pass string, reason StopReason) Event {
 	return func(s *State, now time.Time) error {
@@ -272,6 +284,28 @@ func StopPass(project, pass string, reason StopReason) Event {
 		p.State = Stopped
 		rf.Dirty = true
 		s.passEvent = true
+		return nil
+	}
+}
+
+// SetCheckout records the repo's main checkout and default branch on the
+// project's live release. The path must be absolute and an existing folder.
+func SetCheckout(project, path, branch string) Event {
+	return func(s *State, now time.Time) error {
+		rf, err := s.liveRelease(project)
+		if err != nil {
+			return err
+		}
+		if !filepath.IsAbs(path) {
+			return Refuse(fmt.Sprintf("checkout %q is not an absolute path", path))
+		}
+		if info, err := os.Stat(path); err != nil || !info.IsDir() {
+			return Refuse(fmt.Sprintf("checkout %q is not a folder that exists", path))
+		}
+		if branch == "" {
+			return errors.New("the default branch is empty")
+		}
+		rf.Checkout, rf.DefaultBranch, rf.Dirty = path, branch, true
 		return nil
 	}
 }

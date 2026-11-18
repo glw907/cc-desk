@@ -1,0 +1,30 @@
+{
+  "format": 1,
+  "project": "chk",
+  "name": "v1",
+  "repo": "glw907/chk",
+  "rounds": [
+    {"name": "r1", "summary": "Nine building passes, one for each way a session can read.", "needs_geoff": false, "no_need_reason": "A fixture.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "s01", "summary": "A permission prompt.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s01", "kind": "pass", "short_id": "c0000001", "session_id": "c0000001-0000", "worktree": "/w/chk/s01", "branch": "s01", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s02", "summary": "A sign-in that expired.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s02", "kind": "pass", "short_id": "c0000002", "session_id": "c0000002-0000", "worktree": "/w/chk/s02", "branch": "s02", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s03", "summary": "A usage limit.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s03", "kind": "pass", "short_id": "c0000003", "session_id": "c0000003-0000", "worktree": "/w/chk/s03", "branch": "s03", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s04", "summary": "A block the check cannot read.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s04", "kind": "pass", "short_id": "c0000004", "session_id": "c0000004-0000", "worktree": "/w/chk/s04", "branch": "s04", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s05", "summary": "A lost connection.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s05", "kind": "pass", "short_id": "c0000005", "session_id": "c0000005-0000", "worktree": "/w/chk/s05", "branch": "s05", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s06", "summary": "A second lost connection.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s06", "kind": "pass", "short_id": "c0000006", "session_id": "c0000006-0000", "worktree": "/w/chk/s06", "branch": "s06", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1}},
+    {"name": "s07", "summary": "Done and idle for 16 minutes.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s07", "kind": "pass", "short_id": "c0000007", "session_id": "c0000007-0000", "worktree": "/w/chk/s07", "branch": "s07", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1, "last_state": "working", "last_seen": "2026-11-20T22:44:00Z", "last_working": "2026-11-20T22:44:00Z"}},
+    {"name": "s08", "summary": "Done and idle for 14 minutes.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "session": {"name": "chk-s08", "kind": "pass", "short_id": "c0000008", "session_id": "c0000008-0000", "worktree": "/w/chk/s08", "branch": "s08", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1, "last_state": "working", "last_seen": "2026-11-20T22:46:00Z", "last_working": "2026-11-20T22:46:00Z"}},
+    {"name": "s09", "summary": "Done and idle for 16 minutes, with a ready report.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T20:00:00Z",
+     "pull_request": {"number": 9, "ready": "2026-11-20T22:50:00Z"},
+     "session": {"name": "chk-s09", "kind": "pass", "short_id": "c0000009", "session_id": "c0000009-0000", "worktree": "/w/chk/s09", "branch": "s09", "launched": "2026-11-20T20:00:00Z", "launch_tries": 1, "last_state": "working", "last_seen": "2026-11-20T22:44:00Z", "last_working": "2026-11-20T22:44:00Z"}}
+  ]
+}

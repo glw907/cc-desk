@@ -27,21 +27,130 @@ const (
 	StopSecret       StopReason = "secret"
 	StopAuthData     StopReason = "auth_data"
 	StopScope        StopReason = "scope"
+
+	// The reasons the session check records. The page shows each as words.
+	StopPermissionPrompt StopReason = "permission_prompt"
+	StopSignInExpired    StopReason = "sign_in_expired"
+	StopUnreadable       StopReason = "unreadable_stop"
+	StopRelaunchLimit    StopReason = "relaunch_limit"
+	StopLaunchFailed     StopReason = "launch_failed"
 )
 
-// StopReasons lists the five reasons in the order the design gives them.
-var StopReasons = []StopReason{StopUsage, StopIrreversible, StopSecret, StopAuthData, StopScope}
+// StopReasons lists every stop reason: the design's, then the check's.
+var StopReasons = []StopReason{
+	StopUsage, StopIrreversible, StopSecret, StopAuthData, StopScope,
+	StopPermissionPrompt, StopSignInExpired, StopUnreadable, StopRelaunchLimit, StopLaunchFailed,
+}
+
+// SessionListUnreadable is the reason the snapshot gives after three failed
+// reads of the session list in a row. It is not a stop reason and sits on
+// no record.
+const SessionListUnreadable = "session_list_unreadable"
+
+// ListFailureLimit is how many failed list reads in a row make the snapshot
+// say so.
+const ListFailureLimit = 3
+
+// SessionKind says what a session record's session works on.
+type SessionKind string
+
+const (
+	KindPass      SessionKind = "pass"
+	KindDesign    SessionKind = "design"
+	KindConductor SessionKind = "conductor"
+)
+
+// The states the check records in a session's last_state.
+const (
+	SeenWorking = "working"
+	SeenBlocked = "blocked"
+	SeenIdle    = "idle"
+	SeenMissing = "missing"
+)
+
+// Session is one background session and what the check knows of it. It sits
+// on the pass, round, or release it works on, and is absent until a launch
+// records it. A record without Ended is live.
+type Session struct {
+	Name        string      `json:"name"`
+	Kind        SessionKind `json:"kind"`
+	Model       string      `json:"model,omitempty"`
+	Effort      string      `json:"effort,omitempty"`
+	ShortID     string      `json:"short_id"`
+	SessionID   string      `json:"session_id"`
+	Worktree    string      `json:"worktree"`
+	Branch      string      `json:"branch"`
+	Launched    time.Time   `json:"launched"`
+	LaunchTries int         `json:"launch_tries"`
+	Relaunches  []Relaunch  `json:"relaunches,omitempty"`
+	LastSeen    *time.Time  `json:"last_seen,omitempty"`
+	LastState   string      `json:"last_state,omitempty"`
+	LastWorking *time.Time  `json:"last_working,omitempty"`
+	Prompts     []Prompt    `json:"prompts,omitempty"`
+	Finished    *time.Time  `json:"finished,omitempty"`
+	// StopReason and Stopped are set on a conductor's or design writer's
+	// record only. A pass's stop stays on the pass.
+	StopReason StopReason `json:"stop_reason,omitempty"`
+	Stopped    *time.Time `json:"stopped,omitempty"`
+	// StopDetail is the cause the check read at the session's last stop.
+	StopDetail string     `json:"stop_detail,omitempty"`
+	Ended      *time.Time `json:"ended,omitempty"`
+}
+
+// Counted reports how many of the session's relaunches count toward the
+// limit of two.
+func (s *Session) Counted() int {
+	n := 0
+	for _, r := range s.Relaunches {
+		if r.Counted {
+			n++
+		}
+	}
+	return n
+}
+
+// Relaunch is one relaunch of a session. One after a prompt's answer or a
+// fix does not count.
+type Relaunch struct {
+	Time    time.Time `json:"time"`
+	Cause   string    `json:"cause"`
+	Counted bool      `json:"counted"`
+}
+
+// Prompt is one permission prompt a session stopped on.
+type Prompt struct {
+	Time          time.Time `json:"time"`
+	Tool          string    `json:"tool"`
+	Command       string    `json:"command,omitempty"`
+	SuggestedRule string    `json:"suggested_rule,omitempty"`
+	Answer        string    `json:"answer,omitempty"`
+}
+
+// PullRequest is the pull request a pass's session opened.
+type PullRequest struct {
+	Number      int        `json:"number"`
+	Commit      string     `json:"commit,omitempty"`
+	Verdict     string     `json:"verdict,omitempty"`
+	FixAttempts int        `json:"fix_attempts,omitempty"`
+	Ready       *time.Time `json:"ready,omitempty"`
+	Merged      *time.Time `json:"merged,omitempty"`
+}
 
 // Release is one live release of a project: its rounds, passes, and the
 // questions they rest on. It is the content of releases/<project>.json.
 type Release struct {
-	Format    int        `json:"format"`
-	Project   string     `json:"project"`
-	Name      string     `json:"name"`
-	Repo      string     `json:"repo"`
-	Rounds    []Round    `json:"rounds,omitempty"`
-	Passes    []Pass     `json:"passes,omitempty"`
-	Questions []Question `json:"questions,omitempty"`
+	Format  int    `json:"format"`
+	Project string `json:"project"`
+	Name    string `json:"name"`
+	Repo    string `json:"repo"`
+	// Checkout is the absolute path of the repo's main checkout, and
+	// DefaultBranch its default branch. They are set together.
+	Checkout      string     `json:"checkout,omitempty"`
+	DefaultBranch string     `json:"default_branch,omitempty"`
+	Conductor     *Session   `json:"conductor,omitempty"`
+	Rounds        []Round    `json:"rounds,omitempty"`
+	Passes        []Pass     `json:"passes,omitempty"`
+	Questions     []Question `json:"questions,omitempty"`
 }
 
 // Round is a group of passes that share a design.
@@ -56,6 +165,8 @@ type Round struct {
 	// PlannedMinutes is the round's estimate while it has no passes.
 	PlannedMinutes int  `json:"planned_minutes,omitempty"`
 	DesignWritten  bool `json:"design_written,omitempty"`
+	// Session is the design writer's session.
+	Session *Session `json:"session,omitempty"`
 }
 
 // Pass is one unit of work in a round.
@@ -76,7 +187,9 @@ type Pass struct {
 	Wait *Wait `json:"wait,omitempty"`
 	// Guess records a pass started on an unanswered question. A guess
 	// start that waits carries it too.
-	Guess *Guess `json:"guess,omitempty"`
+	Guess       *Guess       `json:"guess,omitempty"`
+	Session     *Session     `json:"session,omitempty"`
+	PullRequest *PullRequest `json:"pull_request,omitempty"`
 }
 
 // StopInterval is one stretch a pass spent stopped. End is nil while the
@@ -155,6 +268,28 @@ type Forecast struct {
 	Time    *time.Time `json:"time"`
 }
 
+// CheckFile is check.json: what the last session check decided and how many
+// reads of the session list failed in a row. An absent file reads as zero.
+type CheckFile struct {
+	Format       int        `json:"format"`
+	ListFailures int        `json:"list_failures"`
+	LastRun      *time.Time `json:"last_run,omitempty"`
+	Decisions    []Decision `json:"decisions"`
+}
+
+// Decision is what the check decided for one session record. Record names
+// the record as pass:<name>, round:<name>, or conductor. Counted is set
+// only on a relaunch.
+type Decision struct {
+	Project  string `json:"project"`
+	Record   string `json:"record"`
+	Session  string `json:"session"`
+	Decision string `json:"decision"`
+	Reason   string `json:"reason,omitempty"`
+	Detail   string `json:"detail,omitempty"`
+	Counted  *bool  `json:"counted,omitempty"`
+}
+
 // Desks is desks.json: the desk sessions that may record a ruling.
 type Desks struct {
 	Format int    `json:"format"`
@@ -225,6 +360,7 @@ type State struct {
 	Usage     *Usage
 	Rulings   []Ruling
 	Forecasts []Forecast
+	Check     CheckFile
 
 	// passEvent is set by a pass start, finish, or stop, and tells Commit
 	// to append a forecast line.
@@ -236,4 +372,9 @@ type State struct {
 	newRuling *Ruling
 	// desksDirty is set when an event changed desks.json.
 	desksDirty bool
+	// checkDirty is set when an event changed check.json.
+	checkDirty bool
+	// noSettle tells Commit to skip settle, so a failed list read starts no
+	// waiting pass.
+	noSettle bool
 }

@@ -32,6 +32,9 @@ const (
 	DesksFile    = "desks.json"
 )
 
+// CheckStateFile is check.json, which the session check writes.
+const CheckStateFile = "check.json"
+
 // Render turns the state into the bytes of snapshot.json and the forecast
 // line the same build gives for the next session. Commit stamps the line's
 // format and time made.
@@ -80,7 +83,9 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 			return nil, err
 		}
 	}
-	settle(s, now)
+	if !s.noSettle {
+		settle(s, now)
+	}
 
 	// The ruling line goes first: a crash before the release write leaves a
 	// ruling no question points at, which loads, never an answer that
@@ -118,6 +123,16 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		}
 	}
 
+	if s.checkDirty {
+		data, err := marshal(s.Check)
+		if err != nil {
+			return nil, fmt.Errorf("encode %s: %w", CheckStateFile, err)
+		}
+		if err := atomicfile.WriteFile(filepath.Join(dir, CheckStateFile), data, 0o644); err != nil {
+			return nil, fmt.Errorf("write %s: %w", CheckStateFile, err)
+		}
+	}
+
 	snap, fc, err := render(s, now)
 	if err != nil {
 		return nil, fmt.Errorf("build snapshot: %w", err)
@@ -152,16 +167,22 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 // succeeded.
 func WithReading(u Usage, forced bool, ev Event) Event {
 	return func(s *State, now time.Time) error {
-		u.Format = Format
-		if forced || s.Usage == nil || s.Usage.ReadAt.Before(u.ReadAt) || s.Usage.ReadAt.After(now) {
-			s.Usage = &u
-			s.usageDirty = true
-		}
+		s.FoldUsage(u, forced, now)
 		settle(s, now)
 		if ev == nil {
 			return nil
 		}
 		return ev(s, now)
+	}
+}
+
+// FoldUsage keeps one reading as WithReading describes, without settling.
+// The session check uses it to learn the usage hold before it locks.
+func (s *State) FoldUsage(u Usage, forced bool, now time.Time) {
+	u.Format = Format
+	if forced || s.Usage == nil || s.Usage.ReadAt.Before(u.ReadAt) || s.Usage.ReadAt.After(now) {
+		s.Usage = &u
+		s.usageDirty = true
 	}
 }
 

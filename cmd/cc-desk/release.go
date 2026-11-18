@@ -11,7 +11,7 @@ import (
 func newReleaseCmd(f *rootFlags) *cobra.Command {
 	cmd := group(&cobra.Command{
 		Use:   "release",
-		Short: "Add a release",
+		Short: "Add a release or record its checkout",
 	})
 	cmd.AddCommand(&cobra.Command{
 		Use:   "add <file>",
@@ -33,5 +33,21 @@ func newReleaseCmd(f *rootFlags) *cobra.Command {
 			return nil
 		},
 	})
+	var branch string
+	checkout := &cobra.Command{
+		Use:   "checkout <project> <path>",
+		Short: "Record the repo's main checkout and default branch on the project's release",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if _, err := f.commit(state.SetCheckout(args[0], args[1], branch)); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "recorded the checkout of %s\n", args[0])
+			return nil
+		},
+	}
+	checkout.Flags().StringVar(&branch, "default-branch", "", "the repo's default branch")
+	_ = checkout.MarkFlagRequired("default-branch")
+	cmd.AddCommand(checkout)
 	return cmd
 }

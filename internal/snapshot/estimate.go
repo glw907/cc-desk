@@ -358,7 +358,7 @@ func (c *relCtx) questionItem(q *state.Question, now time.Time) item {
 func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time, unreadable bool) *item {
 	var items, questions, rounds []item
 	var onDesign []string
-	stopped := false
+	stopped := len(snap.NeedsYouNow) > 0
 	for _, c := range ctxs {
 		for i := range c.rf.Passes {
 			if c.rf.Passes[i].State == state.Stopped {

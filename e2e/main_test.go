@@ -117,7 +117,7 @@ func newStateFrom(t *testing.T, fixture string) string {
 	return dst
 }
 
-// folder reads every file under dir, leaving out the lock file.
+// folder reads every file under dir, leaving out the two lock files.
 func folder(t *testing.T, dir string) map[string]string {
 	t.Helper()
 	files := map[string]string{}
@@ -126,7 +126,7 @@ func folder(t *testing.T, dir string) map[string]string {
 			return err
 		}
 		rel, _ := filepath.Rel(dir, p)
-		if rel == "lock" {
+		if rel == "lock" || rel == "check.lock" {
 			return nil
 		}
 		data, err := os.ReadFile(p)

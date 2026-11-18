@@ -1,0 +1,197 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/glw907/cc-desk/internal/sessions"
+	"github.com/glw907/cc-desk/internal/snapshot"
+	"github.com/glw907/cc-desk/internal/state"
+	"github.com/glw907/cc-desk/internal/usage"
+	"github.com/spf13/cobra"
+)
+
+// checkFlags holds the check's own flags. The four hidden ones stand in for
+// the real claude command, its jobs folder, the network probe, and the wait
+// between the two list reads, so a test never reaches them.
+type checkFlags struct {
+	dryRun     bool
+	claude     string
+	jobsDir    string
+	probeURL   string
+	secondWait time.Duration
+}
+
+func newCheckCmd(f *rootFlags) *cobra.Command {
+	var cf checkFlags
+	cmd := &cobra.Command{
+		Use:   "check",
+		Short: "Decide what each session the state files name needs",
+		Long: "Read the session list and the state files, decide what each session record needs, and\n" +
+			"record the decisions in check.json. A launch, an end, or a relaunch is decided and\n" +
+			"printed, never carried out. With --dry-run, print the decisions and write nothing.",
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error { return runCheck(cmd, f, &cf) },
+	}
+	cmd.Flags().BoolVar(&cf.dryRun, "dry-run", false, "print the decisions and write nothing")
+	cmd.Flags().StringVar(&cf.claude, "claude-command", "claude", "the command that runs claude")
+	cmd.Flags().StringVar(&cf.jobsDir, "jobs-dir", "", "the folder of Claude Code's job state (default ~/.claude/jobs)")
+	cmd.Flags().StringVar(&cf.probeURL, "probe-url", "https://api.anthropic.com/", "the address the network probe asks")
+	cmd.Flags().DurationVar(&cf.secondWait, "second-read-wait", 30*time.Second, "the wait before the second list read")
+	for _, name := range []string{"claude-command", "jobs-dir", "probe-url", "second-read-wait"} {
+		_ = cmd.Flags().MarkHidden(name)
+	}
+	return cmd
+}
+
+// runCheck runs the ten steps of the check, as the design lists them.
+func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
+	dir, err := f.dir()
+	if err != nil {
+		return err
+	}
+	now, err := f.clock()
+	if err != nil {
+		return err
+	}
+	if cf.jobsDir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("find home folder: %w", err)
+		}
+		cf.jobsDir = filepath.Join(home, ".claude", "jobs")
+	}
+	ctx := context.Background()
+
+	// Step 1: the check lock, held to the end.
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("create state folder: %w", err)
+	}
+	unlock, err := state.LockFile(dir, state.CheckLockFile, state.LockWait)
+	if err != nil {
+		return err
+	}
+	defer unlock()
+
+	// Step 2: the usage reading, taken before any lock on the state.
+	u, _, _ := usage.Take(ctx, dir, f.usageCommand, now, false)
+
+	// Step 3: load the state to learn the records.
+	s, err := state.Load(dir)
+	if err != nil {
+		if cf.dryRun {
+			return err
+		}
+		// The commit path writes the error file as every verb does.
+		if _, cerr := state.Commit(dir, now, state.LockWait, nil, snapshot.Render); cerr != nil {
+			return cerr
+		}
+		return err
+	}
+	s.FoldUsage(u, false, now)
+
+	// Steps 4 to 8: gather the evidence.
+	ev, err := gatherEvidence(ctx, s, cf)
+	if err != nil {
+		if !cf.dryRun {
+			if _, cerr := state.Commit(dir, now, state.LockWait, state.RecordListFailure(), snapshot.Render); cerr != nil {
+				return errors.Join(err, cerr)
+			}
+		}
+		return err
+	}
+
+	// Steps 9 and 10: decide, record, and print.
+	var results []sessions.Result
+	if cf.dryRun {
+		results = sessions.Decide(s, ev, now)
+	} else {
+		record := func(s *state.State, now time.Time) error {
+			results = sessions.Decide(s, ev, now)
+			recs := make([]state.Recorded, len(results))
+			for i, r := range results {
+				recs[i] = state.Recorded{Decision: r.Decision, LastState: r.Observed.State, Seen: r.Observed.Seen, Working: r.Observed.Working}
+				if r.Decision.Decision == sessions.Stop {
+					recs[i].Stop = state.StopReason(r.Reason)
+				}
+			}
+			return state.RecordCheck(recs)(s, now)
+		}
+		if _, err := state.Commit(dir, now, state.LockWait, state.WithReading(u, false, record), snapshot.Render); err != nil {
+			return err
+		}
+	}
+	out := cmd.OutOrStdout()
+	for _, r := range results {
+		line, err := json.Marshal(r.Decision)
+		if err != nil {
+			return fmt.Errorf("encode decision: %w", err)
+		}
+		fmt.Fprintf(out, "%s\n", line)
+	}
+	return nil
+}
+
+// gatherEvidence reads the session list, and the second list when a record
+// has no row, then the job file and screen of each blocked row that names no
+// reason, then sends the network probe once when a lost connection could be
+// relaunched. A failed list read is the only error.
+func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessions.Evidence, error) {
+	list := func() ([]sessions.Row, error) {
+		rows, err := sessions.List(ctx, cf.claude)
+		if err != nil {
+			return nil, fmt.Errorf("read the session list: %w", err)
+		}
+		return rows, nil
+	}
+	rows, err := list()
+	if err != nil {
+		return sessions.Evidence{}, err
+	}
+	targets := sessions.Watched(s)
+	if anyMissing(targets, rows) {
+		time.Sleep(cf.secondWait)
+		if rows, err = list(); err != nil {
+			return sessions.Evidence{}, err
+		}
+	}
+
+	ev := sessions.Evidence{Records: make(map[sessions.Key]sessions.RecordEvidence, len(targets))}
+	hold := s.UsageStop()
+	probe := false
+	for _, t := range targets {
+		row, ok := sessions.Find(rows, t.Session.ShortID)
+		re := sessions.RecordEvidence{Row: row, HasRow: ok}
+		if ok && row.Class() == sessions.ClassBlocked && row.WaitingFor == "" {
+			re.Job = sessions.ReadJob(cf.jobsDir, t.Session.ShortID)
+			re.Screen = sessions.Screen(ctx, cf.claude, t.Session.ShortID)
+			lost := sessions.Classify(row, re.Job, re.Screen) == sessions.LabelLostConnection
+			if lost && !hold && t.Session.Counted() < sessions.RelaunchLimit {
+				probe = true
+			}
+		}
+		ev.Records[t.Key] = re
+	}
+	if probe {
+		ev.Probe = sessions.ProbeDown
+		if sessions.Probe(ctx, cf.probeURL) {
+			ev.Probe = sessions.ProbeUp
+		}
+	}
+	return ev, nil
+}
+
+// anyMissing reports whether a record that needs a row has none.
+func anyMissing(targets []sessions.Target, rows []sessions.Row) bool {
+	for _, t := range targets {
+		if row, ok := sessions.Find(rows, t.Session.ShortID); !ok || row.Class() == sessions.ClassNone {
+			return true
+		}
+	}
+	return false
+}
