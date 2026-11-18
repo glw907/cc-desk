@@ -4,18 +4,15 @@
 
 - The design (`docs/specs/2026-11-17-cc-desk-design.md`) and the route
   (`docs/plans/2026-11-17-route.md`, seven rounds) are approved.
-- The Prove round is merged as pull request 1 (`docs/research/2026-11-17-prove-findings.md`);
-  its open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
-- The State and rules round has landed as pull requests 3 to 6. Its report is
-  `~/Projects/initiatives/cc-desk/reports/state-rules-report.md`. Two of its follow-ups need
-  Geoff's choice when taken up: `orphan-question-forecast.md` and
-  `reading-errors-and-guess-on-resume.md`.
+- Prove landed as pull request 1, with open tests in `2026-11-17-rerun-prove-proofs.md`. State
+  and rules landed as 3 to 6; two of its follow-ups need Geoff's choice when taken up:
+  `orphan-question-forecast.md` and `reading-errors-and-guess-on-resume.md`.
 - The Sessions and Page rounds run side by side, one pass of each at a time, from the designs
   `docs/specs/2026-11-17-sessions-design.md` and `docs/specs/2026-11-17-page-design.md`. Each
   round plan sits beside its planner prompts in `docs/plans/`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
-- The usage stop is 100 percent of the week. The figure read 96 percent on 2026-11-18, and
-  the reset is Nov 20, 10:59pm Alaska time.
+- The usage stop is 100 percent of the week. The figure read 97 percent on 2026-11-18, and
+  the reset is Nov 20, 11pm Alaska time.
 
 <!-- round-report sessions -->
 **The Sessions round's first pass waits for Geoff's approval, and two more are ready behind
@@ -27,11 +24,11 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
 <!-- round-report page -->
-**The Page round's first three passes wait for Geoff's approval.** Pull requests 7, 9, and 11
-build the page, its item pages, and its service at http://127.0.0.1:7908/. Each passed its
-review and check and asks a choice of Geoff. The fourth pass has started. Usage read 96 percent.
+**The Page round's first four passes wait for Geoff's approval.** Pull requests 7, 9, 11, and 13
+build the page, its item pages, its service at http://127.0.0.1:7908/, and its terminal link.
+Each asks a choice of Geoff. The fifth pass has started. Usage read 97 percent.
 
-Open documents: none. Pull requests 7, 9, and 11 wait under "Open decisions".
+Open documents: none. Pull requests 7, 9, 11, and 13 wait under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 <!-- /round-report -->
 
@@ -55,6 +52,8 @@ claude --model claude-opus-5-5 --effort high "$(cat docs/plans/2026-11-17-sessio
   list their passes as muted links on the front page (recommended: keep).
 - Pull request 11 (`page-surface`, carries 9) waits for Geoff's approve and one call: the page
   reads "No state yet" until `~/.local/state/cc-desk` exists (recommended: approve).
+- Pull request 13 (`page-link`, carries 11) waits for Geoff's approve, three calls (recommended:
+  all), and his click in `docs/follow-ups/page-link-chromium-click.md`.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
