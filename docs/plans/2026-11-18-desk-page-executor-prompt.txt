@@ -25,7 +25,7 @@ How to work:
 - Task 7 runs bash web/scripts/install-page.sh, which the round plan's auto mode entry allows for you, and then the plan's live check. Install no binary and run no install-link.sh: the conductor installs from main after the round (standing answer 22).
 - Commit by path, never git add -A or git commit -a. No stash. Push only desk-page. Stop a background command with TaskStop, never kill or pkill. Run claude stop and git worktree commands alone, never chained.
 - When auto mode refuses a command, use the plan's "Refused commands and their alternatives" table once. Never edit a Claude settings file, an autoMode entry, or a hook, and name no new file settings.json.
-- Use the plan's standing answers 26 to 33, the round plan's 13 to 25, and round-run.md's twelve. A question with no standing answer goes through references/advisor.md; take the advisor's choice and list it under ## Decisions as an [advisor] line.
+- Use the plan's standing answers 26 to 34, the round plan's 13 to 25, and round-run.md's twelve. A question with no standing answer goes through references/advisor.md; take the advisor's choice and list it under ## Decisions as an [advisor] line.
 - Anything written for a person (the PR body, STATUS lines, README lines, follow-ups) follows /var/home/glw907/.claude/docs/voice/written-for-people.md. Load it through the writing-voice skill before you draft. Follow-ups are one file each under docs/follow-ups/; task 10 names the three changes.
 - No em dash in a code comment.
 

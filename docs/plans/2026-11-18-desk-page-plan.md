@@ -276,12 +276,12 @@ fixture, and runs pass 1's verbs on it. It edits no old fixture (round plan stan
    binary records one. `prompt hook` exits 0 even when it fails (`cmd/cc-desk/prompt.go:36-41`),
    so the builder asserts its stderr is empty and no `snapshot-error.json` exists. Step 2 also
    runs at the worked clock.
-6. Remove the checkout folder when the test's state folder goes: make it under the same
-   temp parent as the state folder, or register it for cleanup, so `allStates()` leaves none.
 5. The desk fixture already holds an unread report `rep-0001`, a designed round `alpha/r1` that
    needs Geoff with question `qa` (background and causes), a stopped pass, four check-log
    lines, and two sessions already (`alpha-conductor` with its own refusal, and
    `beta-b1-design`). The report `rep-0001` belongs to round `beta/b2`.
+6. Remove the checkout folder when the test's state folder goes: make it under the same
+   temp parent as the state folder, or register it for cleanup, so `allStates()` leaves none.
 
 The builder's check: its snapshot has one unread report, `alpha/r1` with `design` set and an
 unanswered question, a session on `beta/b-build` with one prompt and one refusal, and a
@@ -321,7 +321,7 @@ Each part of item 6, its task, and the command that shows it. Every Playwright c
 | The fixture holds the three | 1 | `npx playwright test tests/words.spec.ts` | `the page fixture holds a report, a waiting design, a prompt, and a refusal` |
 | The walk finds no control but "Mark as read"; files unchanged | 8 | `npx playwright test tests/surface.spec.ts` | The walk on `page`: one form, on report pages only, one button "Mark as read"; every other button "Copy command"; both trees and the checkout hash the same |
 | One click changes only the report's record and the snapshot; no usage reading | 4 | `npx playwright test tests/server.spec.ts -g "Mark as read"` | Hash every file before and after: only `reports.json` and `snapshot.json` differ, and `usage.json` is byte for byte the same |
-| Leaves "Reports to read", stays on the round page | 4 | the same | After the click the form gives way to a "Read" line (the binary's clock is the wall clock, so the test checks the line, not its words), the sidebar row is gone, and `/beta/b2` (the report's round) still links it |
+| Leaves "Reports to read", stays on the round page | 4 | the same | After the click the form is gone and the sidebar row is gone. `report read` runs at the wall clock against a fixture dated 2026-11-20, so the test asserts nothing drawn from a time: not the "Read" line's words, not an order by time. The report's round, `/beta/b2`, still links it |
 | Another address gets 405 | 4 | `npx playwright test tests/server.spec.ts tests/surface.spec.ts` | Each write method from the page's origin to every visited address, `/api/state`, an unknown address, and an asset gets 405 and `allow: GET, HEAD` |
 | From another origin gets 403 | 4 | the same | POST `?/read` with a form content type and `Origin: http://evil.example`, and with no content type and no `Origin`, gets 403, and `reports.json` is unchanged |
 | A dash or slash is refused before a command | 4 | the same | With `CC_DESK_BINARY` set to a stub that touches a marker and exits 1: first a good POST `?/read` on `rep-0001` makes the marker and shows the alert line (the control); then, with the marker removed, POST `/reports/-x?/read` and `/reports/a/b?/read` get 405 with `allow: GET, HEAD` (Kit's own 405 would carry `allow: GET`) and no marker exists |
@@ -345,15 +345,15 @@ no report page, no form, no builder named `page`.
 
 ## Tasks
 
-Commit after tasks 2, 4, 6, 8, and 10, each with the gate green; a gate run is about four
+Commit after tasks 2, 4, 6, 8, 9, and 10, each with the gate green; a gate run is about four
 minutes at `0d992b2`, counted in the minutes below. Each commit's report names its CI run's
 conclusion.
 
 ### Task 1: the `page` fixture (15 minutes)
 
 - Outcome: `buildState('page', dir)` builds the state in "Fixtures", and `allStates()` includes it.
-- Files: `web/tests/state.ts`, `web/tests/fixtures/page/alpha-r1-design.md`, `web/tests/words.spec.ts`,
-  `web/tests/fixtures/README.md` if the folder has one.
+- Files: `web/tests/state.ts`, `web/tests/fixtures/page/alpha-r1-design.md`, `web/tests/words.spec.ts`.
+  `web/tests/fixtures/` holds only `twin/` today, with no README.
 - Class: `runner`.
 - Check: `npx playwright test tests/words.spec.ts`.
 - Test: a new test in `words.spec.ts` asserts the builder's check from "Fixtures".
@@ -458,7 +458,9 @@ reasons. If `internal/state` on `main` gains a code before this pass lands, add 
   write with 405, or 403 from another origin.
 - Files: `web/systemd/cc-desk-page.service`, `web/scripts/install-page.sh`, `README.md`.
 - Class: `runner`.
-- Check: after the gate, `bash web/scripts/install-page.sh`, then the live check below.
+- Check: task 7's edits ride on task 8's commit and its gate run. After task 9's commit (task 9
+  changes `link.ts`, which the page bundles), run `bash web/scripts/install-page.sh` once, then
+  the live check below, so the live page holds every page change.
 - Test: the live check.
 
 The live check, each command run bare and its output pasted under `## Acceptance`:
@@ -567,6 +569,10 @@ pass adds:
   naming the tasks left.
 - **33. A review after the whole-branch read finds only low findings.** Fold them once or file
   them as follow-ups. They never start another round of review.
+- **34. The unit fails to start, or the action fails, under `ProtectHome=read-only`.** That
+  setting was probed on a transient unit, not with node serving the page. Paste the journal's
+  line (`journalctl --user -u cc-desk-page -n 20`) and write the stop. Never drop the setting
+  or widen `ReadWritePaths` to get past it.
 
 ## Decisions
 
