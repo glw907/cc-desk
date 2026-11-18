@@ -238,6 +238,48 @@ func TestSnapshotOpenGuesses(t *testing.T) {
 	}
 }
 
+func TestSnapshotGuessOutcome(t *testing.T) {
+	const rel = `{"format":1,"project":"p","name":"v1","repo":"r",
+	  "rounds":[{"name":"r1","summary":"s","needs_geoff":true,"design_written":true}],
+	  "passes":[
+	    {"name":"g","summary":"s","round":"r1","planned_minutes":50,"state":"building","started":"2026-11-20T22:30:00Z",
+	     "questions":["q"],"guess":{"question":"q","recommendation":"x","at":"2026-11-20T22:30:00Z"}},
+	    {"name":"plain","summary":"s","round":"r1","planned_minutes":50,"state":"not_started"}],
+	  "questions":[{"id":"q","text":"t","options":["x","y"],"recommended":"x"%s}]}`
+	withAnswer := func(answer string, rulings ...state.Ruling) *state.State {
+		return &state.State{
+			Releases: []*state.ReleaseFile{mustRelease(t, strings.Replace(rel, "%s", answer, 1))},
+			Rulings:  rulings,
+		}
+	}
+	ruling := `,"answer":{"ruling":"r-0001"}`
+	tests := []struct {
+		name string
+		s    *state.State
+		want string // "" is null
+	}{
+		{"held", withAnswer(ruling, state.Ruling{ID: "r-0001", Option: "x"}), Held},
+		{"missed", withAnswer(ruling, state.Ruling{ID: "r-0001", Option: "y"}), Missed},
+		{"open", withAnswer(""), ""},
+		{"carried over", withAnswer(`,"answer":{"carried":{"words":"w","date":"2026-11-01","source":"s"}}`), ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := passNamed(t, Build(tt.s, clock), "g").GuessOutcome
+			switch {
+			case tt.want == "" && got != nil:
+				t.Errorf("guess_outcome = %q, want null", *got)
+			case tt.want != "" && (got == nil || *got != tt.want):
+				t.Errorf("guess_outcome = %v, want %q", got, tt.want)
+			}
+		})
+	}
+	held := withAnswer(ruling, state.Ruling{ID: "r-0001", Option: "x"})
+	if got := passNamed(t, Build(held, clock), "plain").GuessOutcome; got != nil {
+		t.Errorf("a pass with no guess has outcome %q", *got)
+	}
+}
+
 func TestSnapshotLeavesOutDoneReleases(t *testing.T) {
 	rf := mustRelease(t, `{"format":1,"project":"p","name":"v1","repo":"r"}`)
 	rf.Done = true

@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "project": "west",
+  "name": "v1",
+  "repo": "glw907/west",
+  "rounds": [
+    {"name": "w1", "summary": "Seven building passes.", "needs_geoff": false, "no_need_reason": "The design settled every call.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "w-1", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-2", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-3", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-4", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-5", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-6", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"},
+    {"name": "w-7", "summary": "Building.", "round": "w1", "planned_minutes": 30, "state": "building", "started": "2026-11-20T20:00:00Z"}
+  ],
+  "questions": [
+    {"id": "west-q1", "text": "First?", "options": ["yes", "no"], "recommended": "yes"},
+    {"id": "west-q2", "text": "Second?", "options": ["yes", "no"], "recommended": "yes"},
+    {"id": "west-q3", "text": "Third?", "options": ["yes", "no"], "recommended": "yes"}
+  ]
+}

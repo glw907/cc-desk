@@ -21,6 +21,7 @@ var verbs = []verb{
 	{"pass stop", func(*testing.T) []string { return []string{"pass", "stop", "alpha", "p13", "--reason", "scope"} }},
 	{"usage", func(*testing.T) []string { return []string{"usage"} }},
 	{"free", func(*testing.T) []string { return []string{"free"} }},
+	{"ruling record", func(*testing.T) []string { return []string{"ruling", "record", "go"} }},
 	{"release add", func(t *testing.T) []string { return []string{"release", "add", input(t, "gamma.json")} }},
 	{"round design", func(t *testing.T) []string {
 		return []string{"round", "design", "beta", "b3", input(t, "design-b3.json")}

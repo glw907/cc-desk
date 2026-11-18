@@ -361,6 +361,7 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 	for _, id := range p.Questions {
 		out.Questions = append(out.Questions, buildQuestion(questions[id]))
 	}
+	out.GuessOutcome = guessOutcome(s, p, questions)
 	if p.State == state.NotStarted {
 		broken := s.Breaks(rf, p, "")
 		free := len(broken) == 0
@@ -370,6 +371,36 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		}
 	}
 	return out
+}
+
+// The two outcomes of a closed guess.
+const (
+	Held   = "held"
+	Missed = "missed"
+)
+
+// guessOutcome is held when the ruling that answered the guess's question
+// chose the recommendation the pass took, and missed when it chose another
+// option. It is nil with no guess, while the question is open, and when the
+// answer was carried over: no ruling closed it.
+func guessOutcome(s *state.State, p *state.Pass, questions map[string]*state.Question) *string {
+	if p.Guess == nil {
+		return nil
+	}
+	q := questions[p.Guess.Question]
+	if q == nil || q.Answer == nil || q.Answer.Ruling == "" {
+		return nil
+	}
+	for _, r := range s.Rulings {
+		if r.ID == q.Answer.Ruling {
+			out := Missed
+			if r.Option == p.Guess.Recommendation {
+				out = Held
+			}
+			return &out
+		}
+	}
+	return nil
 }
 
 func buildQuestion(q *state.Question) Question {
