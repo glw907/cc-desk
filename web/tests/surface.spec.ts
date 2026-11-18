@@ -1,26 +1,12 @@
 // The page is a reading surface: it holds no control, refuses every write, writes no file.
-import { createHash } from 'node:crypto';
 import { chmodSync, cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, test } from './app';
 import { crawl, openDrawn } from './crawl';
+import { hashTree } from './hash';
 import { buildState } from './state';
 import type { Snapshot } from '../src/lib/snapshot';
-
-/** SHA-256 of every file under `root`, by path relative to `root`. */
-function hashTree(root: string): Record<string, string> {
-	const out: Record<string, string> = {};
-	const walk = (dir: string) => {
-		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			const full = path.join(dir, entry.name);
-			if (entry.isDirectory()) walk(full);
-			else out[path.relative(root, full)] = createHash('sha256').update(readFileSync(full)).digest('hex');
-		}
-	};
-	walk(root);
-	return out;
-}
 
 /** Sets the mode of `root`, every folder under it, and every file under it. */
 function chmodTree(root: string, fileMode: number, dirMode: number): void {
@@ -88,7 +74,8 @@ test.describe('a reading surface', () => {
 			const addresses = [...visited, '/api/state', '/nothing/names/this', asset];
 			for (const address of addresses) {
 				for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
-					const res = await page.request.fetch(app.url + address, { method });
+					// The page's own origin, so Kit's origin check passes and the hook answers.
+					const res = await page.request.fetch(app.url + address, { method, headers: { origin: app.url } });
 					expect(res.status(), `${method} ${address}`).toBe(405);
 					expect(res.headers()['allow'], `${method} ${address} allow`).toBe('GET, HEAD');
 				}
@@ -129,7 +116,10 @@ test.describe('a reading surface', () => {
 		walk(src);
 		expect(files.length).toBeGreaterThan(10);
 
-		const allowedNames = new Set(['readFile', 'stat', 'access']);
+		const allowedNames = new Set(['readFile', 'stat', 'access', 'realpath']);
+		// The one file that runs a command, for "Mark as read". It may import child_process and
+		// call execFile; every other name below stays banned there as everywhere.
+		const runsCommand = path.join('lib', 'server', 'command.ts');
 		const importFrom = /(?:import|export)\s+([^;]*?)\s+from\s+['"](?:node:)?(fs|fs\/promises|child_process)['"]/g;
 		const requireOf = /require\(\s*['"](?:node:)?(fs|fs\/promises|child_process)['"]\s*\)/;
 		const wholeModule = /^(\*\s+as\s+\w+|\w+)$/;
@@ -152,6 +142,7 @@ test.describe('a reading surface', () => {
 				}
 				for (const raw of clause.replace(/[{}]/g, '').split(',')) {
 					const name = raw.trim().split(/\s+as\s+/)[0];
+					if (rel === runsCommand && m[2] === 'child_process' && name === 'execFile') continue;
 					if (name && !allowedNames.has(name)) found.push(`${rel}: imports ${name} from ${m[2]}`);
 				}
 			}
@@ -159,6 +150,7 @@ test.describe('a reading surface', () => {
 			if (required) found.push(`${rel}: requires ${required[1]}`);
 			text.split('\n').forEach((line, i) => {
 				const hit = call.exec(line);
+				if (hit && hit[1] === 'execFile' && rel === runsCommand) return;
 				// open( is a file call only where the file imports node:fs; window.open is not.
 				if (hit && (hit[1] !== 'open' || importsFs)) found.push(`${rel}:${i + 1}: calls ${hit[1]}(`);
 			});

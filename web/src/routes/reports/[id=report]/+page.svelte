@@ -1,15 +1,22 @@
 <!--
 @component
 A report's page at `/reports/<id>`: who sent it and when, its title and summary, the calls made
-along the way, what the plan missed, and a folded table of the round's passes. It draws nothing
-until the first good snapshot arrives, then the not-found view when no report has the id.
+along the way, what the plan missed, a "Mark as read" button, and a folded table of the round's
+passes. It is the only form on the page. A click that cannot be recorded shows the reason in an
+alert and leaves the report listed. It draws nothing until the first good snapshot arrives, then
+the not-found view when no report has the id.
 -->
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import NotFound from '#lib/NotFound.svelte';
 	import { poll } from '#lib/poll.svelte.ts';
 	import { formatMinutes, formatWhen } from '#lib/time.ts';
 	import { word } from '#lib/words.ts';
+	import type { ActionData } from './$types';
+
+	/** The action's answer, which holds a message only when the click could not be recorded. */
+	let { form }: { form: ActionData } = $props();
 
 	const snapshot = $derived(poll.answer?.snapshot ?? null);
 	const report = $derived(snapshot?.reports.find((r) => r.id === page.params.id));
@@ -51,6 +58,18 @@ until the first good snapshot arrives, then the not-found view when no report ha
 					</ul>
 				{:else}
 					<p>The plan missed nothing.</p>
+				{/if}
+
+				{#if report.read !== null}
+					<p>Read {formatWhen(report.read, poll.now)}.</p>
+				{:else}
+					<form method="POST" action="?/read" use:enhance class="command-actions">
+						<button type="submit" class="btn btn-sm btn-primary">Mark as read</button>
+						<span class="muted">The report stays on the round's page afterward.</span>
+					</form>
+					{#if form?.message}
+						<p class="form-error" role="alert">{form.message}</p>
+					{/if}
 				{/if}
 
 				<details>

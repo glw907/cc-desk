@@ -3,8 +3,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
-// The page has no form action, and hooks.server.ts refuses every write with a 405. SvelteKit's
-// origin check would answer a bare write with a 403 first, so it is off here.
+// Kit's origin check stays on: a form post from another origin gets a 403 before hooks.server.ts
+// runs, which matters for the one write the page takes, "Mark as read". The check runs in a
+// production build only, and adapter-node needs ORIGIN set to the page's own address.
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit({ adapter: adapter(), csrf: { trustedOrigins: ['*'] } })]
+	plugins: [tailwindcss(), sveltekit({ adapter: adapter() })]
 });

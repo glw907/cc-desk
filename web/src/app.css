@@ -435,6 +435,10 @@ a.rail-row:hover {
 .calls li {
 	padding-inline-start: var(--spacing-4px);
 }
+.form-error {
+	color: var(--cairn-error-ink);
+	font-size: var(--text-step-9);
+}
 .state-line {
 	display: flex;
 	flex-wrap: wrap;
