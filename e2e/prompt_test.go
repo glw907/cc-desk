@@ -367,9 +367,10 @@ func TestPromptGuard(t *testing.T) {
 	for name, c := range map[string]struct {
 		terminal  bool
 		sessionID string
+		reason    string
 	}{
-		"no terminal":          {false, promptDesk},
-		"unregistered session": {true, "not-a-desk-session"},
+		"no terminal":          {false, promptDesk, "the desk's process has no terminal"},
+		"unregistered session": {true, "not-a-desk-session", "this session isn't a registered desk"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			var before map[string]string
@@ -377,7 +378,7 @@ func TestPromptGuard(t *testing.T) {
 			snap := func() { before = folder(t, r.state) }
 
 			got := r.asDesk(t, c.terminal, c.sessionID, minutes(t, 5), snap, "prompt", "yes", "proj", "pass:a", "--follow-ups", follow)
-			if got.code != 2 || !strings.Contains(got.stderr, "cannot answer the prompt: ") {
+			if got.code != 2 || !strings.Contains(got.stderr, "cannot answer the prompt: "+c.reason) {
 				t.Errorf("prompt yes: exit %d, stderr %q; want exit 2 with the refusal", got.code, got.stderr)
 			}
 			sameFolder(t, before, folder(t, r.state))
@@ -390,7 +391,7 @@ func TestPromptGuard(t *testing.T) {
 
 			relBefore := readFileIn(t, r.state, release)
 			got = r.asDesk(t, c.terminal, c.sessionID, minutes(t, 5), nil, "rules", "add", "proj", "Bash(ls)")
-			if got.code != 2 || !strings.Contains(got.stderr, "cannot change the allow rules: ") {
+			if got.code != 2 || !strings.Contains(got.stderr, "cannot change the allow rules: "+c.reason) {
 				t.Errorf("rules add: exit %d, stderr %q; want exit 2 with the refusal", got.code, got.stderr)
 			}
 			if now := readFileIn(t, r.state, release); now != relBefore {

@@ -73,7 +73,9 @@ func WriteSettings(stateDir, binary, name string, allow, verbs []string, followU
 	for _, v := range verbs {
 		s.Permissions.Allow = append(s.Permissions.Allow, "Bash("+v+")")
 	}
-	s.Permissions.Allow = append(s.Permissions.Allow, followUp)
+	if followUp != "" {
+		s.Permissions.Allow = append(s.Permissions.Allow, followUp)
+	}
 	s.Permissions.Deny = Deny
 	s.Hooks.PermissionRequest = []hookGroup{{Hooks: []hookCommand{{
 		Type: "command", Command: binary + " --state-dir " + stateDir + " prompt hook", Timeout: 30,

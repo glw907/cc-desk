@@ -26,6 +26,8 @@ const (
 	causeNo  = "permission_no"
 )
 
+const answerLockWait = 60 * time.Second
+
 func newAnswerCmd(f *rootFlags, answer string) *cobra.Command {
 	var lf launchFlags
 	var followUps, rule string
@@ -68,9 +70,11 @@ func runAnswer(cmd *cobra.Command, f *rootFlags, lf *launchFlags, answer, projec
 	if err != nil {
 		return err
 	}
-	unlock, err := state.LockFile(l.dir, state.CheckLockFile, state.LockWait)
+	// A check holds this lock through its second-read wait, so an answer
+	// waits longer than the state lock's wait.
+	unlock, err := state.LockFile(l.dir, state.CheckLockFile, answerLockWait)
 	if err != nil {
-		return err
+		return state.Refuse("cannot answer the prompt: a check holds check.lock; run it again after the check: " + err.Error())
 	}
 	defer unlock()
 

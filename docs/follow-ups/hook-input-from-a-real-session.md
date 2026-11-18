@@ -1,4 +1,4 @@
-# Record a real hook input and check its session_id
+# Record a real hook input and check its `session_id`
 
 The prompt hook's tests read `e2e/testdata/prompts/hook-bash.json`, the example in the hooks
 reference. No live session has fed `cc-desk prompt hook` yet, so two things rest on the
