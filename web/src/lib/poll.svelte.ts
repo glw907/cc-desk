@@ -25,6 +25,8 @@ class Poll {
 	now = $state(new Date());
 
 	#timer: ReturnType<typeof setInterval> | undefined;
+	#tick = 0;
+	#applied = 0;
 
 	/** Fetches once now, then every `POLL_MS`. Returns the function that stops it. */
 	start(): () => void {
@@ -35,15 +37,21 @@ class Poll {
 
 	/** Asks the server for the state once. A failed request leaves the last answer in place. */
 	async refresh(): Promise<void> {
-		this.now = new Date();
+		const tick = ++this.#tick;
+		const asked = new Date();
+		this.now = asked;
 		try {
 			const res = await fetch('/api/state', { signal: AbortSignal.timeout(ANSWER_TIMEOUT_MS) });
 			if (!res.ok) throw new Error(`state answered ${res.status}`);
-			this.answer = (await res.json()) as StateAnswer;
-			this.answeredAt = this.now;
+			const answer = (await res.json()) as StateAnswer;
+			// A slow answer to an older request must not overwrite a newer one.
+			if (tick < this.#applied) return;
+			this.#applied = tick;
+			this.answer = answer;
+			this.answeredAt = asked;
 			this.connected = true;
 		} catch {
-			this.connected = false;
+			if (tick >= this.#applied) this.connected = false;
 		}
 	}
 }

@@ -44,7 +44,7 @@ reader reads as "None".
 		</span>
 	{/if}
 	{#if next.not_designed.length > 0}
-		<span class="session-sub">{count(next.not_designed.length, 'round')} not designed yet</span>
+		<span class="session-sub">Not designed yet: {list(next.not_designed)}</span>
 	{/if}
 	{#if next.state === 'needs_you_now' && next.reasons.length > 0}
 		<ul class="session-sub reasons">

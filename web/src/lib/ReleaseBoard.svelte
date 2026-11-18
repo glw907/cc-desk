@@ -56,6 +56,9 @@ waiting or stopped pass, opened to show its passes. A waiting pass shows why it 
 							<li class={pass.state} data-pass="{release.project}/{pass.name}">
 								<span class="t">{pass.name}</span>
 								<span class="s state {pass.state}">{word('passState', pass.state)}</span>
+								{#if pass.state === 'stopped' && pass.stop_reason}
+									<span class="why">{word('stopReason', pass.stop_reason)}</span>
+								{/if}
 								{#if pass.state === 'waiting' && wait}
 									<span class="why">
 										{wait.limits.map((l) => word('limit', l)).join(', ')}{#if wait.reset_text}. {wait.reset_text}{/if}

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test, type App } from './app';
@@ -92,6 +92,16 @@ test('with no snapshot the page reads No state yet, and nothing else until a bad
 
 	await expect(banner).toContainText("snapshot.json isn't valid JSON", { timeout: 5000 });
 	await expect(banner).toContainText('No state yet');
+});
+
+test('a snapshot.json that goes missing turns the page to No state yet', async ({ app, page }) => {
+	await open(app, page);
+	await expect(widget(page).getByTestId('session-state')).toHaveText('Today, about 8:00 pm');
+
+	rmSync(path.join(app.stateDir, 'snapshot.json'));
+
+	await expect(page.locator('[data-banner="no-state"]')).toHaveText('No state yet', { timeout: 5000 });
+	await expect(widget(page)).toHaveCount(0);
 });
 
 test('a stopped server shows Not connected, and a restarted one clears it', async ({ app, page }) => {

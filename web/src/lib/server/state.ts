@@ -27,8 +27,8 @@ async function readOrNull(file: string): Promise<string | null> {
 }
 
 /**
- * Reads both files afresh. A snapshot.json that is missing keeps the last good snapshot
- * on screen; one that isn't JSON adds the parse error beside it.
+ * Reads both files afresh. A snapshot.json that is missing is "No state yet", whatever was read
+ * before; one that isn't JSON keeps the last good snapshot and adds the parse error beside it.
  */
 export async function readState(dir: string = stateDir()): Promise<StateAnswer> {
 	const [snapshotText, errorText] = await Promise.all([
@@ -46,7 +46,9 @@ export async function readState(dir: string = stateDir()): Promise<StateAnswer> 
 		}
 	}
 
-	if (snapshotText !== null) {
+	if (snapshotText === null) {
+		lastGood = null;
+	} else {
 		try {
 			lastGood = JSON.parse(snapshotText) as Snapshot;
 		} catch (err) {

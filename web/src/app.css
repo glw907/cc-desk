@@ -8,10 +8,14 @@
 @source "./";
 
 /* Rules Survey v1.7.0 has no class for: the sidebar's rows and the page's measure came from the
-   mockup's copy of the sheet. Every value is a Survey token. */
+   mockup's copy of the sheet. Colors, type sizes, spacing, radii, and motion are Survey tokens.
+   The gaps are these literals, filed in docs/follow-ups/survey-rail-muted-doc-measure.md: the
+   three widths below, the 80rem breakpoint (a media query can't read a variable), the line
+   heights 1.25 and 1.35, and the font weight 600 (Survey's only weight token is 500). */
 :root {
 	--rail-width: 23rem;
 	--doc-measure: 36.5rem;
+	--page-width: 76rem;
 }
 .muted {
 	color: var(--color-muted);
@@ -189,7 +193,7 @@ a.rail-row:hover {
 /* The front page. */
 .desk {
 	padding: var(--spacing-24px);
-	max-width: 76rem;
+	max-width: var(--page-width);
 }
 .desk h2 {
 	font-size: var(--text-step-12);

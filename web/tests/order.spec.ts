@@ -23,6 +23,13 @@ test('guess: the front page lists the guess, and the total comes from the snapsh
 	await expect(main).toContainText('250 of 300 minutes', { timeout: 5000 });
 });
 
+test('stopped: a stopped pass names its reason in words', async ({ app, page }) => {
+	await show(app, page, 'stopped');
+	const row = page.locator('main [data-pass="alpha/p13"]');
+	await expect(row).toContainText('Stopped');
+	await expect(row).toContainText('A change of scope');
+});
+
 test('two: a pass held by the two-pass limit reads Waiting with that reason, in its row', async ({ app, page }) => {
 	await show(app, page, 'two');
 	for (const pass of ['north/n-two', 'south/s-two']) {

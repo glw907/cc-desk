@@ -21,7 +21,7 @@ answering. Each keeps the last good page below it. Shows nothing while the state
 	let { answer, connected, answeredAt, now }: Props = $props();
 </script>
 
-{#if answer && !connected}
+{#if !connected}
 	<div class="banner" role="status" data-banner="not-connected">
 		<strong>Not connected</strong>
 		<span>
