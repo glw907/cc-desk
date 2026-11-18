@@ -14,14 +14,13 @@
   `docs/specs/2026-11-17-sessions-design.md` and `docs/specs/2026-11-17-page-design.md`. Each
   round plan sits beside its planner prompts in `docs/plans/`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
-- The usage stop is 100 percent of the week. The figure read 94 percent on 2026-11-18, and
+- The usage stop is 100 percent of the week. The figure read 95 percent on 2026-11-18, and
   the reset is Nov 20, 10:59pm Alaska time.
 
 <!-- round-report sessions -->
-**The Sessions round's first pass waits for Geoff's approval.** Pull request 8 teaches the
-`cc-desk` command to record sessions and decide what each needs. Its review accepted it, and its
-check passed. It waits on one question: what a session should do after a one-model limit. The
-second pass has started from its branch. Weekly usage read 93 percent.
+**The Sessions round's first pass waits for Geoff's approval, and the second is ready behind
+it.** Pull request 8 records sessions and asks one call; pull request 10 starts them, asks
+nothing, and lands right after 8. The third pass has started. Usage read 95 percent.
 
 Open documents: none. Pull request 8 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
