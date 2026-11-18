@@ -42,8 +42,9 @@ no test runs the real `claude` or touches the network.
   classifier outage); `git worktree` 4 (chained); `git commit` 4 (`--no-verify`, an outage, Modify
   Shared Resources); `curl` 3. The alternative for each is in the table below.
 - Reviewed: one `standards:plan-reviewer` read of this plan (Opus, medium, 2026-11-18), as the
-  round plan's Pre-flight asks of every pass: 4 blocking, 12 should-fix, 9 notes. Every finding
-  is folded except one owner fork, which is filed (the per-model limit line in
+  round plan's Pre-flight asks of every pass: 4 blocking, 12 should-fix, 9 notes (N7 confirmed the
+  many-building-pass fixture is safe and needed no change). Every finding is folded except one
+  owner fork, which is filed (the per-model limit line in
   `## Decisions`).
 - Evidence: the mechanism table and the recorded searches below. Each acceptance check was run on
   today's code before any code was written; the outputs are under `## Acceptance`.
@@ -253,7 +254,8 @@ reset text, and for row 13 the last line.
 
 The last line is the job file's `detail` when it is set. Otherwise it comes from the screen: strip
 `\x1b\[[0-9;?]*[A-Za-z]`, OSC sequences (`\x1b]` to BEL or `\x1b\\`), and `\x1b7`/`\x1b8`; take
-the last non-empty line; collapse runs of white space to one space; keep its last 200 runes. With no
+the last non-empty line; remove the matches, then collapse each run of white space to one space and
+trim both ends; keep its last 200 runes. With no
 text at all it is "no text".
 
 **What a check writes in this pass** (standing answer 23): `last_seen`, `last_state`, and
@@ -402,7 +404,8 @@ No task holds code; the sections above fix the behavior.
 
 - Outcome: `cc-desk check` runs the ten steps, with `--dry-run` and the four hidden flags, and the
   check lock.
-- Files: `cmd/cc-desk/check.go`, `root.go`, `internal/state/lock.go`, `events.go`, `commit.go`.
+- Files: `cmd/cc-desk/check.go`, `root.go`, `internal/state/types.go` (the `noSettle` flag on
+  `State`), `lock.go`, `events.go`, `commit.go`.
 - Class: `ordinary`.
 - Check: `go test ./cmd/... ./internal/state/ -v`. The e2e check is task 7's.
 - Test: the lock on a named file has `Lock`'s tests run against it; the record event writes
@@ -457,7 +460,9 @@ No task holds code; the sections above fix the behavior.
   relaunch limit, and a failed launch clear once Geoff acts (the design says how a prompt and a
   usage limit clear, and is silent on these four); and a live sample of the sign-in and limit
   texts on the `claude logs` screen (proof 2's open test); and the uncounted usage relaunch that can
-  loop on a per-model limit (the per-model limit line in `## Decisions`).
+  loop on a per-model limit (the per-model limit line in `## Decisions`). That fork is the PR's one
+  call: the body reads `Calls: 1`, with the fork under `## Calls for Geoff` and the follow-up's
+  path, and the pass still closes and hands over as built.
 
 Path: tasks 1 to 8 in order, 158 minutes. Task 2 may run beside task 3 in a pair after task 1. At
 the last round's pace of about 0.6, that is about 95 minutes. Both are under the 180-minute park
@@ -475,7 +480,7 @@ full 10 seconds; a field name is the builder's; a path past 180 stops. This pass
 - **23. What a check writes in pass 1.** The `last_*` fields, each stop, and `check.json`. Never
   `launch_tries`, `relaunches`, a worktree, or a session. A launch, an end, or a relaunch is a
   printed and recorded decision. A clause of item 3 that says "ended and relaunched" or "launches
-  again" is met by that decision. Rows 10 and 11 have their try count set in the fixture.
+  again" is met by that decision. Clauses 10 and 11 have their try count set in the fixture.
 - **24. The goldens change.** Answer 16 protects the files the tests feed the binary. The two
   goldens are outputs: they gain the three keys and change in nothing else, which task 6's
   additions-only check shows. Every input file stays byte for byte. The PR lists both goldens.
@@ -528,7 +533,7 @@ full 10 seconds; a field name is the builder's; a path past 180 stops. This pass
   `relaunch_limit`, `launch_failed`. The list-failure entry's code, `session_list_unreadable`, is
   not a stop reason.
   Call: mine (naming, standing answer 21).
-- [advisor] The plan-reviewer read is folded whole: the usage cache moves the clock on 5 minutes
+- The plan-reviewer read is folded whole: the usage cache moves the clock on 5 minutes
   between readings; a usage hold turns every relaunch row to `wait_usage`, ahead of `wait_link`;
   the `check.json` broken case has a test of its own, so no fixture changes; the failed read gets
   a `noSettle` commit path; the relaunch limit applies to every cause; a done pass is left alone;

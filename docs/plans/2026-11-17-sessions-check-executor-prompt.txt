@@ -32,7 +32,7 @@ The PR: open it as a draft early, as executor.md "Work" says. Its body carries:
 Round: sessions
 Pass: sessions-check
 Review: <accept|fix|escalate>, open findings <n>
-Calls: none (or Calls: <n>, each under ## Calls for Geoff)
+Calls: 1, the per-model limit fork under ## Calls for Geoff, as the plan's task 8 says (add any further call to the count)
 and ## Acceptance with every item word for word from the plan and its evidence (the command and its output), plus ## Decisions, ## Planning misses, and the score, per round-run.md "Evidence" and pass-core "Close". At close, get one whole-branch standards:diff-reviewer read and fold it. A Low finding from a later delta read is folded once, checked by your own diff read and CI, or filed; it never opens another review round.
 
 Hand-over: merge nothing. When every acceptance item shows its evidence, CI is green on the last commit, and the review is in, mark the PR ready. That hands it to conductor-cc-desk, which reads it as round-run.md "Reading a pass" says and lands it. You don't land it yourself.
