@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -270,6 +271,9 @@ func Load(dir string) (*State, error) {
 		r := &s.Rulings[i]
 		if r.ID == "" || r.Time.IsZero() || r.Desk == "" || r.Words == "" {
 			return nil, &FileError{File: "rulings.jsonl", Line: i + 1, Err: errors.New("missing id, time, desk, or words")}
+		}
+		if r.Replaces != "" && !slices.ContainsFunc(s.Rulings[:i], func(g Ruling) bool { return g.ID == r.Replaces }) {
+			return nil, &FileError{File: "rulings.jsonl", Line: i + 1, Err: fmt.Errorf("replaces %q, which is not an earlier ruling", r.Replaces)}
 		}
 	}
 	if s.CheckLog, err = readJSONL(dir, CheckLogFile, func(l *CheckLogLine) int { return l.Format }); err != nil {

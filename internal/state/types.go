@@ -322,6 +322,9 @@ type Ruling struct {
 	Round    string    `json:"round,omitempty"`
 	Question string    `json:"question,omitempty"`
 	Option   string    `json:"option,omitempty"`
+	// Replaces is the id of the ruling this one replaces as a question's
+	// answer. Both lines stay in the log.
+	Replaces string `json:"replaces,omitempty"`
 }
 
 // Forecast is one line of forecasts.jsonl: when the next decision session

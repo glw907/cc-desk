@@ -106,9 +106,15 @@ const (
 // and just before the verb runs.
 func recordRuling(t *testing.T, how int, sessionID, dir, now, question, option string, beforeRun func()) result {
 	t.Helper()
+	return recordRulingArgs(t, how, sessionID, dir, now, rulingArgs(question, option), beforeRun)
+}
+
+// recordRulingArgs is recordRuling with the verb's own argument list.
+func recordRulingArgs(t *testing.T, how int, sessionID, dir, now string, verb []string, beforeRun func()) result {
+	t.Helper()
 	const deskSession = "e2e-desk-session"
 	out := t.TempDir()
-	args := append(globalArgs(t, dir, now), rulingArgs(question, option)...)
+	args := append(globalArgs(t, dir, now), verb...)
 
 	script := ""
 	if how != outsideDesk {

@@ -15,6 +15,8 @@ export interface Ruling {
 	round?: string;
 	question?: string;
 	option?: string;
+	/** The id of the ruling this one replaces as a question's answer. */
+	replaces?: string;
 }
 
 export interface Question {

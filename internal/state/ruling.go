@@ -27,9 +27,10 @@ const (
 
 // RulingRequest is what a desk session types: Geoff's words, and the
 // question they answer. Project, Round, Question, and Option are set
-// together or all empty.
+// together or all empty. Replaces names the ruling this one replaces, and
+// needs the four.
 type RulingRequest struct {
-	Words, Project, Round, Question, Option string
+	Words, Project, Round, Question, Option, Replaces string
 }
 
 // SameStart reports whether two process start times are the same moment.
@@ -93,6 +94,9 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 		if named != 0 && named != 4 {
 			return errors.New("a ruling that answers a question needs project, round, question, and option together")
 		}
+		if r.Replaces != "" && named != 4 {
+			return errors.New("a ruling that replaces another needs project, round, question, and option")
+		}
 
 		var q *Question
 		var rf *ReleaseFile
@@ -110,7 +114,11 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 			if !slices.Contains(q.Options, r.Option) {
 				return fmt.Errorf("option %q is not one of question %q's options %q", r.Option, r.Question, q.Options)
 			}
-			if q.Answer != nil {
+			if r.Replaces != "" {
+				if err := s.checkReplace(rf, q, r); err != nil {
+					return err
+				}
+			} else if q.Answer != nil {
 				return Refuse(fmt.Sprintf("%squestion %q is already answered", rulingPrefix, r.Question))
 			}
 		}
@@ -118,6 +126,7 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 		ruling := Ruling{
 			Format: Format, ID: s.nextRulingID(), Time: now.UTC(), Desk: c.SessionID,
 			Words: r.Words, Project: r.Project, Round: r.Round, Question: r.Question, Option: r.Option,
+			Replaces: r.Replaces,
 		}
 		s.Rulings = append(s.Rulings, ruling)
 		s.newRuling = &ruling
@@ -127,6 +136,49 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 		}
 		return nil
 	}
+}
+
+// checkReplace refuses a replacement the log or the passes don't allow, in
+// this order: the ruling doesn't exist, another already replaced it, it
+// answered a different question, it isn't the question's current answer, a
+// pass resting on the question has merged, a pass resting on it has started.
+// Starting the pass again belongs to the check, so a started pass is refused
+// here until that lands.
+func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) error {
+	i := slices.IndexFunc(s.Rulings, func(g Ruling) bool { return g.ID == r.Replaces })
+	if i < 0 {
+		return Refuse(fmt.Sprintf("%sruling %q does not exist", rulingPrefix, r.Replaces))
+	}
+	if j := slices.IndexFunc(s.Rulings, func(g Ruling) bool { return g.Replaces == r.Replaces }); j >= 0 {
+		return Refuse(fmt.Sprintf("%sruling %q is already replaced by %s", rulingPrefix, r.Replaces, s.Rulings[j].ID))
+	}
+	old := s.Rulings[i]
+	if old.Project != r.Project || old.Round != r.Round || old.Question != r.Question {
+		return Refuse(fmt.Sprintf("%sruling %q does not answer question %q of %s/%s", rulingPrefix, r.Replaces, r.Question, r.Project, r.Round))
+	}
+	if q.Answer == nil || q.Answer.Ruling != r.Replaces {
+		return Refuse(fmt.Sprintf("%sruling %q is not question %q's current answer", rulingPrefix, r.Replaces, r.Question))
+	}
+	var started *Pass
+	for k := range rf.Passes {
+		p := &rf.Passes[k]
+		if !slices.Contains(p.Questions, q.ID) {
+			continue
+		}
+		switch p.State {
+		case Done:
+			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has merged; a new change is needed", rulingPrefix, p.Name, q.ID))
+		case NotStarted:
+		default:
+			if started == nil {
+				started = p
+			}
+		}
+	}
+	if started != nil {
+		return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has started; replacing it while it builds comes in pass 3", rulingPrefix, started.Name, q.ID))
+	}
+	return nil
 }
 
 // RegisterDesk adds a desk session, or replaces the entry with the same
