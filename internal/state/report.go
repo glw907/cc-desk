@@ -17,6 +17,28 @@ type ReportFile struct {
 	Misses  []Miss `json:"misses"`
 }
 
+// checkCalls names the first call that has an empty part.
+func checkCalls(calls []Call) error {
+	for i, c := range calls {
+		for _, f := range []struct{ name, v string }{{"call", c.Call}, {"chosen", c.Chosen}, {"other", c.Other}, {"why", c.Why}} {
+			if strings.TrimSpace(f.v) == "" {
+				return fmt.Errorf("calls[%d] is missing %q", i, f.name)
+			}
+		}
+	}
+	return nil
+}
+
+// checkRoundNotes refuses an empty context paragraph and an incomplete call.
+func checkRoundNotes(context []string, calls []Call) error {
+	for i, c := range context {
+		if strings.TrimSpace(c) == "" {
+			return fmt.Errorf("context[%d] is empty", i)
+		}
+	}
+	return checkCalls(calls)
+}
+
 // DecodeReport strictly decodes a report file and names the first part
 // that is missing or empty.
 func DecodeReport(data []byte) (*ReportFile, error) {
@@ -37,12 +59,8 @@ func DecodeReport(data []byte) (*ReportFile, error) {
 			return nil, fmt.Errorf("missing required field %q", f.name)
 		}
 	}
-	for i, c := range r.Calls {
-		for _, f := range []struct{ name, v string }{{"call", c.Call}, {"chosen", c.Chosen}, {"other", c.Other}, {"why", c.Why}} {
-			if strings.TrimSpace(f.v) == "" {
-				return nil, fmt.Errorf("calls[%d] is missing %q", i, f.name)
-			}
-		}
+	if err := checkCalls(r.Calls); err != nil {
+		return nil, err
 	}
 	for i, m := range r.Misses {
 		for _, f := range []struct{ name, v string }{{"miss", m.Miss}, {"cost", m.Cost}} {

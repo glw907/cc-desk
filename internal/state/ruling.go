@@ -181,6 +181,35 @@ func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) erro
 	return nil
 }
 
+// StartConversation records a design conversation for a round of the live
+// release, and refuses a second for the same round or a round whose design
+// is written. DesignRound ends it.
+func StartConversation(project, round, desk string) Event {
+	return func(s *State, now time.Time) error {
+		rf, err := s.liveRelease(project)
+		if err != nil {
+			return err
+		}
+		i := slices.IndexFunc(rf.Rounds, func(r Round) bool { return r.Name == round })
+		if i < 0 {
+			return fmt.Errorf("round %q not found in project %q", round, project)
+		}
+		if desk == "" {
+			return errors.New("a conversation needs the desk's session id")
+		}
+		if rf.Rounds[i].DesignWritten {
+			return Refuse(fmt.Sprintf("round %q of project %q already has its design written", round, project))
+		}
+		if slices.ContainsFunc(s.Desks.Conversations, func(c Conversation) bool { return c.Project == project && c.Round == round }) {
+			return Refuse(fmt.Sprintf("round %q of project %q already has a conversation", round, project))
+		}
+		s.Desks.Conversations = append(s.Desks.Conversations, Conversation{Project: project, Round: round, Desk: desk, Started: now.UTC()})
+		s.Desks.Format = Format
+		s.desksDirty = true
+		return nil
+	}
+}
+
 // RegisterDesk adds a desk session, or replaces the entry with the same
 // session id. The Desk round calls it when a desk opens; no verb does.
 func RegisterDesk(d Desk) Event {

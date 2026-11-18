@@ -269,7 +269,10 @@
               "needs_reason": null,
               "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "r2",
@@ -388,7 +391,10 @@
               "needs_reason": null,
               "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         }
       ]
     },
@@ -459,7 +465,10 @@
               "needs_reason": "Routine cleanup.",
               "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "b2",
@@ -563,7 +572,10 @@
               "needs_reason": null,
               "closed": null
             }
-          ]
+          ],
+          "design": null,
+          "context": [],
+          "calls": []
         },
         {
           "name": "b3",
@@ -584,7 +596,10 @@
           "minutes_before": 480,
           "needed_time": "2026-11-21T07:00:00Z",
           "forecast_time": "2026-11-21T07:00:00Z",
-          "passes": []
+          "passes": [],
+          "design": null,
+          "context": [],
+          "calls": []
         }
       ]
     }
@@ -632,5 +647,6 @@
   "needs_you_now": [],
   "last_check": null,
   "check_log": [],
-  "reports": []
+  "reports": [],
+  "design_conversations": []
 }

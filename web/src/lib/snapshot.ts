@@ -83,6 +83,12 @@ export interface Round {
 	needed_time: Time | null;
 	forecast_time: Time | null;
 	passes: Pass[];
+	/** The design's path; null until one is recorded. */
+	design: string | null;
+	/** Paragraphs a desk reads before it asks. */
+	context: string[];
+	/** Decisions the design made. */
+	calls: Call[];
 }
 
 export interface Release {
@@ -271,6 +277,16 @@ export interface Snapshot {
 	check_log: CheckLogLine[];
 	/** Every report, oldest first. */
 	reports: Report[];
+	/** Each design conversation in progress, in the order they started. */
+	design_conversations: DesignConversation[];
+}
+
+/** A desk session talking a round's design through. */
+export interface DesignConversation {
+	project: string;
+	round: string;
+	desk: string;
+	started: Time;
 }
 
 /** What `/api/state` answers: everything the page draws and every banner it may show. */

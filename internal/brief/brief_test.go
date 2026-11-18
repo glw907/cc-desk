@@ -193,6 +193,22 @@ func TestBriefBuildRound(t *testing.T) {
 		t.Errorf("round brief holds the desk's sections:\n%s", out)
 	}
 
+	rf.Rounds[0].Design = "docs/specs/d.md"
+	rf.Rounds[0].Context = []string{"Read this first."}
+	rf.Rounds[0].Calls = []state.Call{{Call: "c", Chosen: "x", Other: "y", Why: "w"}}
+	out, err = BuildRound(s, clock, "p", "r1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"Design: docs/specs/d.md\n", "Context:\n  Read this first.\n", "Calls:\n  c: chose x over y. w\n"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("round brief with a design lacks %q:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "No design recorded yet.") {
+		t.Errorf("round brief says no design:\n%s", out)
+	}
+
 	for _, tt := range []struct{ project, round, want string }{
 		{"nope", "r1", `"nope"`},
 		{"p", "r9", `"r9"`},

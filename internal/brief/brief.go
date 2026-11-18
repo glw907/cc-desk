@@ -76,7 +76,11 @@ func BuildRound(s *state.State, now time.Time, project, round string) (string, e
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "Brief for %s / %s at %s\n\n", project, round, now.UTC().Format(time.RFC3339))
-	b.WriteString("No design recorded yet.\n\n")
+	for i := range rf.Rounds {
+		if rf.Rounds[i].Name == round {
+			writeDesign(&b, &rf.Rounds[i])
+		}
+	}
 	var es []entry
 	for _, e := range waiting(s, project) {
 		if e.round == round {
@@ -85,6 +89,30 @@ func BuildRound(s *state.State, now time.Time, project, round string) (string, e
 	}
 	writeWaiting(&b, es)
 	return b.String(), nil
+}
+
+// writeDesign prints a round's design path, context, and calls, or says
+// none is recorded.
+func writeDesign(b *strings.Builder, rd *state.Round) {
+	if rd.Design == "" {
+		b.WriteString("No design recorded yet.\n\n")
+		return
+	}
+	fmt.Fprintf(b, "Design: %s\n\n", rd.Design)
+	if len(rd.Context) > 0 {
+		b.WriteString("Context:\n")
+		for _, p := range rd.Context {
+			fmt.Fprintf(b, "  %s\n", p)
+		}
+		b.WriteString("\n")
+	}
+	if len(rd.Calls) > 0 {
+		b.WriteString("Calls:\n")
+		for _, c := range rd.Calls {
+			fmt.Fprintf(b, "  %s: chose %s over %s. %s\n", c.Call, c.Chosen, c.Other, c.Why)
+		}
+		b.WriteString("\n")
+	}
 }
 
 // waiting lists the unanswered questions a not-started pass rests on and

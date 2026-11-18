@@ -195,6 +195,14 @@ func Load(dir string) (*State, error) {
 				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("desk %d is missing session_id, pid, or started", i+1)}
 			}
 		}
+		for i, c := range desks.Conversations {
+			if c.Project == "" || c.Round == "" || c.Desk == "" || c.Started.IsZero() {
+				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("conversation %d is missing project, round, desk, or started", i+1)}
+			}
+			if slices.ContainsFunc(desks.Conversations[:i], func(o Conversation) bool { return o.Project == c.Project && o.Round == c.Round }) {
+				return nil, &FileError{File: "desks.json", Err: fmt.Errorf("round %s/%s has two conversations", c.Project, c.Round)}
+			}
+		}
 		s.Desks = desks
 	}
 

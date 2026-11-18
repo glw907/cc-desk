@@ -80,6 +80,11 @@ type Design struct {
 	Format    int        `json:"format"`
 	Passes    []Pass     `json:"passes"`
 	Questions []Question `json:"questions,omitempty"`
+	// Design, Context, and Calls are the round fields of the same names.
+	// All three are optional.
+	Design  string   `json:"design,omitempty"`
+	Context []string `json:"context,omitempty"`
+	Calls   []Call   `json:"calls,omitempty"`
 }
 
 // DecodeDesign strictly decodes a design input.
@@ -93,6 +98,9 @@ func DecodeDesign(data []byte) (*Design, error) {
 	}
 	if len(d.Passes) == 0 {
 		return nil, errors.New(`missing required field "passes"`)
+	}
+	if err := checkRoundNotes(d.Context, d.Calls); err != nil {
+		return nil, err
 	}
 	return &d, nil
 }
@@ -138,11 +146,22 @@ func DesignRound(project, round string, d *Design) Event {
 			next.Questions = append(next.Questions, q)
 		}
 		next.Rounds[i].DesignWritten = true
+		next.Rounds[i].Design = d.Design
+		next.Rounds[i].Context = slices.Clone(d.Context)
+		next.Rounds[i].Calls = slices.Clone(d.Calls)
 		if err := validateRelease(&next); err != nil {
 			return fmt.Errorf("design for round %q: %w", round, err)
 		}
 		rf.Release = next
 		rf.Dirty = true
+		if n := len(s.Desks.Conversations); n > 0 {
+			s.Desks.Conversations = slices.DeleteFunc(s.Desks.Conversations, func(c Conversation) bool {
+				return c.Project == project && c.Round == round
+			})
+			if len(s.Desks.Conversations) != n {
+				s.desksDirty = true
+			}
+		}
 		return nil
 	}
 }

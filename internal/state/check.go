@@ -64,6 +64,9 @@ func validateRelease(r *Release) error {
 		if rd.Summary == "" {
 			return fmt.Errorf(`round %q: missing required field "summary"`, rd.Name)
 		}
+		if err := checkRoundNotes(rd.Context, rd.Calls); err != nil {
+			return fmt.Errorf("round %q: %w", rd.Name, err)
+		}
 		if !rd.NeedsGeoff && rd.NoNeedReason == "" {
 			return fmt.Errorf(`round %q needs nothing from Geoff but gives no "no_need_reason"`, rd.Name)
 		}

@@ -515,4 +515,62 @@ func TestRecords(t *testing.T) {
 		delete(after, "snapshot-error.json")
 		sameFolder(t, before, after)
 	})
+	t.Run("design_context", func(t *testing.T) {
+		dir := newState(t)
+		if r := run(t, dir, workedClock, "round", "design", "beta", "b3", input(t, "design-b3-context.json")); r.code != 0 {
+			t.Fatalf("round design exit %d: %s", r.code, r.stderr)
+		}
+		var snap struct {
+			Releases []struct {
+				Project string `json:"project"`
+				Rounds  []struct {
+					Name    string   `json:"name"`
+					Design  *string  `json:"design"`
+					Context []string `json:"context"`
+					Calls   []struct {
+						Chosen string `json:"chosen"`
+					} `json:"calls"`
+				} `json:"rounds"`
+			} `json:"releases"`
+			DesignConversations []any `json:"design_conversations"`
+		}
+		if err := json.Unmarshal([]byte(folder(t, dir)["snapshot.json"]), &snap); err != nil {
+			t.Fatal(err)
+		}
+		found := false
+		for _, r := range snap.Releases {
+			for _, rd := range r.Rounds {
+				if r.Project != "beta" || rd.Name != "b3" {
+					continue
+				}
+				found = true
+				if rd.Design == nil || *rd.Design != "docs/specs/2026-11-20-beta-b3-design.md" || len(rd.Context) != 2 || len(rd.Calls) != 1 || rd.Calls[0].Chosen != "One pass" {
+					t.Errorf("beta/b3 = %+v", rd)
+				}
+			}
+		}
+		if !found {
+			t.Fatal("beta/b3 is not in the snapshot")
+		}
+		if snap.DesignConversations == nil || len(snap.DesignConversations) != 0 {
+			t.Errorf("design_conversations = %v, want []", snap.DesignConversations)
+		}
+		r := run(t, dir, workedClock, "brief", "beta", "b3")
+		if r.code != 0 {
+			t.Fatalf("brief exit %d: %s", r.code, r.stderr)
+		}
+		for _, want := range []string{"Design: docs/specs/2026-11-20-beta-b3-design.md\n", "  The choice below is the only one still open.\n", "  How the change ships: chose One pass over Two passes."} {
+			if !strings.Contains(r.stdout, want) {
+				t.Errorf("round brief lacks %q:\n%s", want, r.stdout)
+			}
+		}
+	})
+	t.Run("design_old_input", func(t *testing.T) {
+		dir := newState(t)
+		do(t, dir, workedClock, "round", "design", "beta", "b3", input(t, "design-b3.json"))
+		r := run(t, dir, workedClock, "brief", "beta", "b3")
+		if r.code != 0 || strings.Contains(r.stdout, "Design:") {
+			t.Errorf("brief exit %d:\n%s", r.code, r.stdout)
+		}
+	})
 }

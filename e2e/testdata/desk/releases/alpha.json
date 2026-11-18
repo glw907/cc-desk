@@ -11,7 +11,10 @@
     "stop_reason": "sign_in_expired", "stopped": "2026-11-20T22:00:00Z", "ended": "2026-11-20T22:05:00Z"
   },
   "rounds": [
-    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true},
+    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true,
+     "design": "docs/specs/2026-11-18-alpha-r1-design.md",
+     "context": ["Round r1 holds the free pass and the stopped one."],
+     "calls": [{"call": "Where the stop lives", "chosen": "On the pass", "other": "On the round", "why": "A stop belongs to the session that hit it."}]},
     {"name": "r2", "summary": "A closed pass and the pass held by it.", "needs_geoff": false, "no_need_reason": "Closed by a ruling.", "design_written": true}
   ],
   "passes": [

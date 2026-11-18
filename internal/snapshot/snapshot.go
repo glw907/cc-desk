@@ -39,6 +39,9 @@ type Snapshot struct {
 	// Reports is every report in file order, each with its passes folded
 	// from its release.
 	Reports []ReportEntry `json:"reports"`
+	// DesignConversations is each design conversation in progress, in the
+	// order they started.
+	DesignConversations []state.Conversation `json:"design_conversations"`
 }
 
 // ReportEntry is a report's record and the passes it covers. Round is null
@@ -147,6 +150,10 @@ type Round struct {
 	NeededTime     *time.Time `json:"needed_time"`
 	ForecastTime   *time.Time `json:"forecast_time"`
 	Passes         []Pass     `json:"passes"`
+	// Design is the design's path, null until one is recorded.
+	Design  *string      `json:"design"`
+	Context []string     `json:"context"`
+	Calls   []state.Call `json:"calls"`
 }
 
 // Needs says what a round needs from Geoff. Kind is questions, nothing,
@@ -288,6 +295,7 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
 	snap.Reports = buildReports(s)
+	snap.DesignConversations = append([]state.Conversation{}, s.Desks.Conversations...)
 	snap.CheckLog = []state.CheckLogLine{}
 	snap.CheckLog = append(snap.CheckLog, s.CheckLog[max(0, len(s.CheckLog)-CheckLogLimit):]...)
 	snap.GuessMinutesTotal = s.OpenGuessMinutes()
@@ -378,6 +386,11 @@ func buildRound(s *state.State, rf *state.ReleaseFile, rd *state.Round, question
 		After:          append([]string{}, rd.After...),
 		PlannedMinutes: rd.PlannedMinutes,
 		Passes:         []Pass{},
+		Context:        append([]string{}, rd.Context...),
+		Calls:          append([]state.Call{}, rd.Calls...),
+	}
+	if rd.Design != "" {
+		out.Design = &rd.Design
 	}
 	var ids []string
 	allDone, anyStarted := true, false

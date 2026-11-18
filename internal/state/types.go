@@ -219,6 +219,12 @@ type Round struct {
 	DesignWritten  bool `json:"design_written,omitempty"`
 	// Session is the design writer's session.
 	Session *Session `json:"session,omitempty"`
+	// Design is the path of the round's design, Context the paragraphs a
+	// desk reads before it asks, and Calls the decisions the design made.
+	// A design file sets all three.
+	Design  string   `json:"design,omitempty"`
+	Context []string `json:"context,omitempty"`
+	Calls   []Call   `json:"calls,omitempty"`
 }
 
 // Pass is one unit of work in a round.
@@ -395,8 +401,18 @@ const CheckLogFile = "check-log.jsonl"
 
 // Desks is desks.json: the desk sessions that may record a ruling.
 type Desks struct {
-	Format int    `json:"format"`
-	Desks  []Desk `json:"desks,omitempty"`
+	Format        int            `json:"format"`
+	Desks         []Desk         `json:"desks,omitempty"`
+	Conversations []Conversation `json:"conversations,omitempty"`
+}
+
+// Conversation is a design conversation in progress: a desk session talking
+// a round's design through. DesignRound ends it.
+type Conversation struct {
+	Project string    `json:"project"`
+	Round   string    `json:"round"`
+	Desk    string    `json:"desk"`
+	Started time.Time `json:"started"`
 }
 
 // ReportsFile is reports.json.
