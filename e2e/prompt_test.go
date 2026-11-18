@@ -229,6 +229,39 @@ func TestPromptHook(t *testing.T) {
 	requireRun(t, r.do(t, workedClock, "snapshot"))
 }
 
+// TestPromptHookRealInput feeds the hook the input a real session sent, whose
+// only suggestion is addDirectories, so no rule can be suggested.
+func TestPromptHookRealInput(t *testing.T) {
+	r := newLaunchRig(t)
+	r.addRelease(t, true, "a")
+	requireRun(t, r.do(t, workedClock, "pass", "start", "proj", "a"))
+	r.check(t, workedClock)
+	sessionID := r.sessionOf(t, "a")["session_id"].(string)
+	b, err := os.ReadFile("testdata/prompts/hook-add-directories.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const real = `"session_id": "6f7ef48d-7f68-41a0-a8d7-ca8e9f8258a6"`
+	if !bytes.Contains(b, []byte(real)) {
+		t.Fatalf("the fixture no longer holds %s", real)
+	}
+	in := strings.Replace(string(b), real, `"session_id": `+strconv.Quote(sessionID), 1)
+	got := r.runHook(t, in)
+	if got.code != 0 || got.stdout != "" {
+		t.Fatalf("hook: exit %d, stdout %q, stderr %q; want exit 0 and nothing on stdout", got.code, got.stdout, got.stderr)
+	}
+	ps := r.promptsOf(t)
+	if len(ps) != 1 {
+		t.Fatalf("prompts = %v, want one", ps)
+	}
+	if ps[0]["tool"] != "Bash" || !strings.HasPrefix(ps[0]["command"].(string), "date -u +%s") {
+		t.Errorf("prompt = %v, want Bash and the date command", ps[0])
+	}
+	if rule, _ := ps[0]["suggested_rule"].(string); rule != "" {
+		t.Errorf("suggested_rule = %q, want empty", rule)
+	}
+}
+
 // followUpPath names the follow-up file the answer wrote for pass a's prompt.
 func followUpPath(t *testing.T, r launchRig, dir string) string {
 	t.Helper()
