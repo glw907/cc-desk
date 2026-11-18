@@ -16,7 +16,7 @@ import (
 )
 
 // GuessMinutesLimit is the cap on work resting on open guesses.
-const GuessMinutesLimit = 300
+const GuessMinutesLimit = state.GuessMinutesCap
 
 // Snapshot is the content of snapshot.json.
 type Snapshot struct {

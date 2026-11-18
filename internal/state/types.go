@@ -72,10 +72,10 @@ type Pass struct {
 	Stops          []StopInterval `json:"stops,omitempty"`
 	StopReason     StopReason     `json:"stop_reason,omitempty"`
 	ActualMinutes  *int           `json:"actual_minutes,omitempty"`
-	// Limit says which limit a waiting pass waits on. Pass 3 writes it.
-	Limit *Limit `json:"limit,omitempty"`
-	// Guess records a pass started on an unanswered question. Pass 3
-	// writes it.
+	// Wait is set while the pass is waiting, and only then.
+	Wait *Wait `json:"wait,omitempty"`
+	// Guess records a pass started on an unanswered question. A guess
+	// start that waits carries it too.
 	Guess *Guess `json:"guess,omitempty"`
 }
 
@@ -86,10 +86,18 @@ type StopInterval struct {
 	End   *time.Time `json:"end,omitempty"`
 }
 
-// Limit names the limit a waiting pass waits on and since when.
-type Limit struct {
-	Kind  string    `json:"kind"`
-	Since time.Time `json:"since"`
+// The two limits a free pass can wait on.
+const (
+	LimitTwoPass = "two_pass_limit"
+	LimitUsage   = "usage"
+)
+
+// Wait records every limit that holds a waiting pass. Since is the time
+// the start was requested; settling takes the oldest request first and
+// never resets it.
+type Wait struct {
+	Since  time.Time `json:"since"`
+	Limits []string  `json:"limits"`
 }
 
 // Guess records the question a pass started on, the recommendation taken,
@@ -160,11 +168,13 @@ type Desk struct {
 	Started   time.Time `json:"started"`
 }
 
-// Usage is usage.json: the last usage reading.
+// Usage is usage.json: the last usage reading. A reading that could not
+// be parsed carries Error, with no percent and no reset text.
 type Usage struct {
 	Format    int       `json:"format"`
-	Percent   int       `json:"percent"`
-	ResetText string    `json:"reset_text"`
+	Error     string    `json:"error,omitempty"`
+	Percent   int       `json:"percent,omitempty"`
+	ResetText string    `json:"reset_text,omitempty"`
 	ReadAt    time.Time `json:"read_at"`
 }
 
@@ -173,6 +183,9 @@ type Settings struct {
 	Format           int `json:"format"`
 	UsageStopPercent int `json:"usage_stop_percent"`
 }
+
+// GuessMinutesCap is the most planned work that may rest on open guesses.
+const GuessMinutesCap = 300
 
 // DefaultUsageStop is the usage stop when settings.json is absent.
 const DefaultUsageStop = 100

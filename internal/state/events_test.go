@@ -40,7 +40,7 @@ func TestPassEvents(t *testing.T) {
 		t0, t1, n := at(9, 0), at(10, 0), 60
 		p.State, p.Started, p.Finished, p.ActualMinutes = Done, &t0, &t1, &n
 	}
-	waiting := func(p *Pass) { p.State = Waiting }
+	waiting := func(p *Pass) { p.State, p.Wait = Waiting, &Wait{Since: at(9, 0), Limits: []string{LimitUsage}} }
 	none := func(*Pass) {}
 
 	tests := []struct {
