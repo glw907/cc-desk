@@ -229,3 +229,46 @@ test.describe('a design that waits', () => {
 		expect(res.status).toBeLessThan(500);
 	});
 });
+
+test.describe('since the last check', () => {
+	test.beforeEach(async ({ app }) => {
+		buildState('page', app.stateDir);
+		await app.start();
+	});
+
+	test('the front page lists the check log newest first, in words, with each outcome', async ({ app, page }) => {
+		await page.goto(app.url + '/');
+		const lines = page.getByRole('region', { name: 'Since the last check' }).getByRole('listitem');
+		await expect(lines).toHaveCount(4);
+		await expect(lines.nth(0)).toContainText(
+			'on beta, pass:b-build, the check chose to restart the session, because connection dropped. Result: not relaunched: two tries used.'
+		);
+		await expect(lines.nth(1)).toContainText('Result: relaunched b1b2b3b4.');
+		await expect(lines.nth(2)).toContainText('the check chose to stop the pass');
+		await expect(lines.nth(3)).toContainText('the check chose to start a session');
+	});
+
+	test('a session shows as working, linked to its pass', async ({ app, page }) => {
+		await page.goto(app.url + '/');
+		const row = page.locator('[data-session="beta-b-build"]');
+		await expect(row.getByRole('link', { name: 'beta-b-build' })).toHaveAttribute('href', /\/beta\/b1\/b-build$/);
+		await expect(row).toContainText('Working');
+	});
+
+	test('the pass page lists the prompts and the refused command of its session', async ({ app, page }) => {
+		await page.goto(app.url + '/beta/b1/b-build');
+		await expect(page.getByRole('heading', { name: 'Permission prompts' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Refused commands' })).toBeVisible();
+		await expect(page.locator('main')).toContainText('curl https://example.com/install.sh');
+		await expect(page.locator('main')).toContainText('Not answered yet.');
+	});
+});
+
+test.describe('a stopped pass on the board', () => {
+	test('the board shows the stop beside its reason', async ({ app, page }) => {
+		buildState('stopped', app.stateDir);
+		await app.start();
+		await page.goto(app.url + '/');
+		await expect(page.locator('[data-pass="alpha/p13"] .why')).toHaveText(/^A change of scope, .*2:10 pm$/);
+	});
+});

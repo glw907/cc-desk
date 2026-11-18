@@ -5,9 +5,11 @@ waiting or stopped pass, opened to show its passes. A waiting pass shows why it 
 round lists its passes as plain links, so each pass is one click from the front page.
 -->
 <script lang="ts">
+	import { poll } from './poll.svelte.ts';
 	import ScaleBar from './ScaleBar.svelte';
 	import type { Release, Snapshot } from './snapshot';
 	import { count, doneCount, isOpen, needsGeoff, percentDone, roundParts } from './sums';
+	import { formatWhen } from './time';
 	import { word } from './words';
 
 	interface Props {
@@ -59,7 +61,9 @@ round lists its passes as plain links, so each pass is one click from the front 
 								<a class="t" href="/{release.project}/{round.name}/{pass.name}">{pass.name}</a>
 								<span class="s state {pass.state}">{word('passState', pass.state)}</span>
 								{#if pass.state === 'stopped' && pass.stop_reason}
-									<span class="why">{word('stopReason', pass.stop_reason)}</span>
+									<span class="why">
+										{word('stopReason', pass.stop_reason)}{#if pass.stopped_at}, {formatWhen(pass.stopped_at, poll.now)}{/if}
+									</span>
 								{/if}
 								{#if pass.state === 'waiting' && wait}
 									<span class="why">

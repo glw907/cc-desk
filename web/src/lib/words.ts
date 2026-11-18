@@ -38,15 +38,15 @@ const sessionStates: Record<string, string> = {
 };
 
 const checkDecisions: Record<string, string> = {
-	none: 'did nothing',
-	end: 'ended the session',
-	relaunch: 'restarted the session',
-	end_and_relaunch: 'ended the session and restarted it',
-	launch_again: 'tried the launch again',
-	launch: 'started a session',
-	stop: 'stopped the pass',
-	wait_usage: 'waited for the usage limit',
-	wait_link: 'waited for a terminal link'
+	none: 'do nothing',
+	end: 'end the session',
+	relaunch: 'restart the session',
+	end_and_relaunch: 'end the session and restart it',
+	launch_again: 'try the launch again',
+	launch: 'start a session',
+	stop: 'stop the pass',
+	wait_usage: 'wait for the usage limit',
+	wait_link: 'wait for a terminal link'
 };
 
 const checkReasons: Record<string, string> = {
