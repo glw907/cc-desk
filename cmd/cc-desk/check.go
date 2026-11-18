@@ -21,9 +21,8 @@ import (
 // between the two list reads, so a test never reaches them.
 type checkFlags struct {
 	launchFlags
-	dryRun     bool
-	probeURL   string
-	secondWait time.Duration
+	dryRun   bool
+	probeURL string
 }
 
 func newCheckCmd(f *rootFlags) *cobra.Command {
@@ -41,10 +40,7 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 	}
 	cmd.Flags().BoolVar(&cf.dryRun, "dry-run", false, "print the decisions and write nothing")
 	cmd.Flags().StringVar(&cf.probeURL, "probe-url", "https://api.anthropic.com/", "the address the network probe asks")
-	cmd.Flags().DurationVar(&cf.secondWait, "second-read-wait", 30*time.Second, "the wait before the second list read")
-	for _, name := range []string{"probe-url", "second-read-wait"} {
-		_ = cmd.Flags().MarkHidden(name)
-	}
+	_ = cmd.Flags().MarkHidden("probe-url")
 	cf.register(cmd)
 	return cmd
 }

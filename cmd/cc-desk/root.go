@@ -117,6 +117,6 @@ func newRootCmd() *cobra.Command {
 	_ = cmd.PersistentFlags().MarkHidden("now")
 	cmd.PersistentFlags().StringVar(&f.usageCommand, "usage-command", "", "the command that prints the usage result")
 	_ = cmd.PersistentFlags().MarkHidden("usage-command")
-	cmd.AddCommand(newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f))
+	cmd.AddCommand(newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f), newUsageCmd(&f), newFreeCmd(&f), newRulingCmd(&f), newCheckCmd(&f), newSessionCmd(&f), newPromptCmd(&f))
 	return cmd
 }

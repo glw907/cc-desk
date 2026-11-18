@@ -22,6 +22,10 @@ type launchFlags struct {
 	systemdRun string
 	jobsDir    string
 	rowWait    time.Duration
+	// secondWait is the check's wait before its second list read. The
+	// session verbs take the flag and ignore it, so one stand-in command line
+	// serves every verb.
+	secondWait time.Duration
 }
 
 func (lf *launchFlags) register(cmd *cobra.Command) {
@@ -29,7 +33,8 @@ func (lf *launchFlags) register(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&lf.systemdRun, "systemd-run-command", "systemd-run", "the command that runs systemd-run")
 	cmd.Flags().StringVar(&lf.jobsDir, "jobs-dir", "", "the folder of Claude Code's job state (default ~/.claude/jobs)")
 	cmd.Flags().DurationVar(&lf.rowWait, "launch-row-wait", 10*time.Second, "how long a launch waits for its session's row")
-	for _, name := range []string{"claude-command", "systemd-run-command", "jobs-dir", "launch-row-wait"} {
+	cmd.Flags().DurationVar(&lf.secondWait, "second-read-wait", 30*time.Second, "the wait before the check's second list read")
+	for _, name := range []string{"claude-command", "systemd-run-command", "jobs-dir", "launch-row-wait", "second-read-wait"} {
 		_ = cmd.Flags().MarkHidden(name)
 	}
 }
@@ -198,7 +203,7 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 
 	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: pl.worktree, Branch: pl.branch}
 	var undo func() error
-	if req.Kind == state.LaunchFirst && old == nil {
+	if _, statErr := os.Stat(pl.worktree); req.Kind == state.LaunchFirst && errors.Is(statErr, os.ErrNotExist) {
 		if undo, err = wt.Make(); err != nil {
 			return "", state.Refuse(err.Error())
 		}
