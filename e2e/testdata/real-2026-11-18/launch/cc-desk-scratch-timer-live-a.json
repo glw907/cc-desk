@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash scripts/gate.sh)",
+      "Bash(git add notes-timer-live-a.md)",
+      "Bash(git add notes-timer-live-b.md)",
+      "Bash(git add docs/follow-ups/*)",
+      "Bash(git commit -m *)",
+      "Bash(git push origin timer-live-a)",
+      "Bash(git push origin timer-live-b)",
+      "Bash(gh pr create --repo glw907/cc-desk-scratch *)",
+      "Bash(git rev-parse HEAD)",
+      "Bash(git log --oneline *)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass stop cc-desk-scratch timer-live-a --reason usage)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass stop cc-desk-scratch timer-live-a --reason irreversible)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass stop cc-desk-scratch timer-live-a --reason secret)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass stop cc-desk-scratch timer-live-a --reason auth_data)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass stop cc-desk-scratch timer-live-a --reason scope)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk followup cc-desk-scratch pass:timer-live-a *)",
+      "Bash(/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk pass ready cc-desk-scratch timer-live-a *)"
+    ],
+    "deny": [
+      "Bash(gh pr merge *)",
+      "Bash(approval-queue land *)"
+    ]
+  },
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/var/home/glw907/.local/share/cc-desk/bin/cc-desk --state-dir /var/home/glw907/.local/state/cc-desk prompt hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

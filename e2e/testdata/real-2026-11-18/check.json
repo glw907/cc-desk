@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "list_failures": 0,
+  "last_run": "2026-11-18T21:25:44.147255945Z",
+  "decisions": [
+    {
+      "project": "cc-desk-scratch",
+      "record": "pass:timer-live-a",
+      "session": "cc-desk-scratch-timer-live-a",
+      "decision": "none"
+    },
+    {
+      "project": "cc-desk-scratch",
+      "record": "pass:timer-live-b",
+      "session": "cc-desk-scratch-timer-live-b",
+      "decision": "none"
+    }
+  ]
+}
