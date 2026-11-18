@@ -203,7 +203,9 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 
 	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: pl.worktree, Branch: pl.branch}
 	var undo func() error
-	if _, statErr := os.Stat(pl.worktree); req.Kind == state.LaunchFirst && errors.Is(statErr, os.ErrNotExist) {
+	// A first launch takes over a folder only when this record's own ended
+	// session made it; any other existing folder or branch is refused.
+	if req.Kind == state.LaunchFirst && !(old != nil && old.Ended != nil && old.Worktree == pl.worktree) {
 		if undo, err = wt.Make(); err != nil {
 			return "", state.Refuse(err.Error())
 		}

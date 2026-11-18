@@ -187,6 +187,25 @@ func TestLaunchWorktreeHeldByAnotherRecord(t *testing.T) {
 	}
 }
 
+func TestLaunchRefusesAnUnrecordedFolder(t *testing.T) {
+	r := newLaunchRig(t)
+	r.addRelease(t, true, "a")
+	folder := filepath.Join(r.clone, ".claude", "worktrees", "a")
+	git(t, r.clone, "worktree", "add", "--no-track", folder, "-b", "a", "origin/main")
+	requireRun(t, r.do(t, workedClock, "pass", "start", "proj", "a"))
+
+	got := r.run(t, workedClock, "check")
+	if got.code != 2 || !strings.Contains(got.stderr, folder) {
+		t.Errorf("check: exit %d, stderr %q; want exit 2 naming %s", got.code, got.stderr, folder)
+	}
+	if n := len(r.launches(t)); n != 0 {
+		t.Errorf("%d launches into a folder no record names", n)
+	}
+	if p := r.passRecord(t, "a"); p["state"] != "stopped" || p["stop_reason"] != "launch_failed" {
+		t.Errorf("pass = %v, want stopped with launch_failed", p)
+	}
+}
+
 func TestLaunchNoCheckout(t *testing.T) {
 	r := newLaunchRig(t)
 	r.addRelease(t, false, "a")

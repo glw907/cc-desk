@@ -124,6 +124,12 @@ func TestRecoveryFinishedConductorStays(t *testing.T) {
 	if r.conductor(t)["ended"] == nil {
 		t.Errorf("conductor record not ended: %v", r.conductor(t))
 	}
+
+	// An ended record is replaced by a fresh start in its own worktree.
+	requireRun(t, r.run(t, minutes(t, 3), "session", "start", "conductor", "proj"))
+	if n := len(r.launches(t)); n != 2 {
+		t.Errorf("%d launches after restarting the ended conductor, want 2", n)
+	}
 }
 
 func TestRecoveryPassRowVanishesThreeTimes(t *testing.T) {
