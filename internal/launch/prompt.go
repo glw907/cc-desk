@@ -25,6 +25,9 @@ type Prompt struct {
 	// FollowUp is the command prefix that files a follow-up. It is never a
 	// report verb.
 	FollowUp string
+	// Ready is the command prefix a pass session reports its pull request
+	// ready with. It is empty for a design or conductor.
+	Ready string
 	// Relaunch is set on a relaunch. Count is the number of the relaunch.
 	Relaunch *RelaunchNote
 	// Answer is set on the relaunch that follows an answered permission

@@ -223,14 +223,19 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 
 	verbs := launch.Verbs(l.binary, l.dir, pl.promptKind, project, pl.pass, pl.round)
 	followUp := launch.FollowUpCommand(l.binary, l.dir, project, record)
-	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs,
-		"Bash("+followUp+" *)")
+	rules := []string{"Bash(" + followUp + " *)"}
+	var ready string
+	if pl.promptKind == "pass" {
+		ready = launch.ReadyCommand(l.binary, l.dir, project, pl.pass)
+		rules = append(rules, "Bash("+ready+" *)")
+	}
+	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs, rules)
 	if err != nil {
 		return "", err
 	}
 	p := launch.Prompt{
 		Kind: pl.promptKind, Name: pl.name, Project: project, Round: pl.round, Pass: pl.pass,
-		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp,
+		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp, Ready: ready,
 	}
 	var known []string
 	if old != nil {

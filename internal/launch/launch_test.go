@@ -41,7 +41,8 @@ func TestWriteSettings(t *testing.T) {
 	state := t.TempDir()
 	verbs := Verbs("/bin/cc-desk", state, "pass", "p", "w", "r")
 	followRule := "Bash(" + FollowUpCommand("/bin/cc-desk", state, "p", "pass:w") + " *)"
-	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, verbs, followRule)
+	readyRule := "Bash(" + ReadyCommand("/bin/cc-desk", state, "p", "w") + " *)"
+	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, verbs, []string{followRule, readyRule})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +57,7 @@ func TestWriteSettings(t *testing.T) {
 	if err := json.Unmarshal(data, &s); err != nil {
 		t.Fatal(err)
 	}
-	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 2+len(SessionReasons) {
+	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 3+len(SessionReasons) {
 		t.Errorf("allow = %v", s.Permissions.Allow)
 	}
 	if want := "Bash(/bin/cc-desk --state-dir " + state + " pass stop p w --reason usage)"; !slices.Contains(s.Permissions.Allow, want) {
@@ -64,6 +65,9 @@ func TestWriteSettings(t *testing.T) {
 	}
 	if !slices.Contains(s.Permissions.Allow, "Bash(/bin/cc-desk --state-dir "+state+" followup p pass:w *)") {
 		t.Errorf("allow lacks the follow-up rule: %v", s.Permissions.Allow)
+	}
+	if !slices.Contains(s.Permissions.Allow, "Bash(/bin/cc-desk --state-dir "+state+" pass ready p w *)") {
+		t.Errorf("allow lacks the ready rule: %v", s.Permissions.Allow)
 	}
 	if !slices.Equal(s.Permissions.Deny, []string{"Bash(gh pr merge *)", "Bash(approval-queue land *)"}) {
 		t.Errorf("deny = %v", s.Permissions.Deny)
@@ -76,7 +80,14 @@ func TestWriteSettings(t *testing.T) {
 	if strings.Contains(string(data), "matcher") {
 		t.Error("the hook has no matcher")
 	}
-	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, ""); err == nil {
+	design, err := WriteSettings(state, "/bin/cc-desk", "p-design", nil, nil, []string{followRule})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b, err := os.ReadFile(design); err != nil || strings.Contains(string(b), "pass ready") {
+		t.Errorf("a design launch's settings hold a ready rule: %q, %v", b, err)
+	}
+	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, nil); err == nil {
 		t.Error("a relative state folder must be refused")
 	}
 }
@@ -88,6 +99,7 @@ func TestTemplates(t *testing.T) {
 			Worktree: "/c/.claude/worktrees/x", Branch: "x-branch", Base: "main",
 			Verbs:    Verbs("/b/cc-desk", "/st", kind, "proj", "x", "rnd"),
 			FollowUp: FollowUpCommand("/b/cc-desk", "/st", "proj", "pass:x"),
+			Ready:    ReadyCommand("/b/cc-desk", "/st", "proj", "x"),
 		}
 		got, err := Fill(p)
 		if err != nil {
@@ -100,6 +112,13 @@ func TestTemplates(t *testing.T) {
 		} {
 			if !strings.Contains(got, want) {
 				t.Errorf("%s prompt lacks %q:\n%s", kind, want, got)
+			}
+		}
+		if kind == "pass" {
+			for _, want := range []string{"/b/cc-desk --state-dir /st pass ready proj x --pr <number>", "Do not merge it"} {
+				if !strings.Contains(got, want) {
+					t.Errorf("pass prompt lacks %q", want)
+				}
 			}
 		}
 		if strings.Contains(got, "relaunch") {

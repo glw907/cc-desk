@@ -33,7 +33,7 @@ func pass(t *testing.T, s *State) *Pass {
 
 const stoppedPass = `"started":"2026-11-20T10:00:00Z","stop_reason":"scope","stops":[{"start":"2026-11-20T10:20:00Z"}]`
 
-const readyPR =`{"number":7,"commit":"abc","verdict":"accept","inside_design":true,"ready":"2026-11-20T10:30:00Z","wait":"no_check","failures":["gate"],"question":"","merge_called":"2026-11-20T10:40:00Z"}`
+const readyPR = `{"number":7,"commit":"abc","verdict":"accept","inside_design":true,"ready":"2026-11-20T10:30:00Z","wait":"no_check","failures":["gate"],"question":"","merge_called":"2026-11-20T10:40:00Z"}`
 
 func TestReportReady(t *testing.T) {
 	tests := []struct {
