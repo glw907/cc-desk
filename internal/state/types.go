@@ -231,4 +231,9 @@ type State struct {
 	passEvent bool
 	// usageDirty is set when a fresh reading replaced usage.json's.
 	usageDirty bool
+	// newRuling is the ruling an event recorded, which Commit appends to
+	// rulings.jsonl before it writes any release file.
+	newRuling *Ruling
+	// desksDirty is set when an event changed desks.json.
+	desksDirty bool
 }

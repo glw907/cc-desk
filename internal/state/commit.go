@@ -25,8 +25,12 @@ const (
 // change, and any other error for a bad request.
 type Event func(s *State, now time.Time) error
 
-// ForecastFile is the append-only log of next-session forecasts.
-const ForecastFile = "forecasts.jsonl"
+// The append-only logs and desks.json, which Commit also writes.
+const (
+	ForecastFile = "forecasts.jsonl"
+	RulingFile   = "rulings.jsonl"
+	DesksFile    = "desks.json"
+)
 
 // Render turns the state into the bytes of snapshot.json and the forecast
 // line the same build gives for the next session. Commit stamps the line's
@@ -77,6 +81,15 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 	}
 	settle(s, now)
 
+	// The ruling line goes first: a crash before the release write leaves a
+	// ruling no question points at, which loads, never an answer that
+	// points at no ruling, which Check fails.
+	if s.newRuling != nil {
+		if err := appendLine(dir, RulingFile, s.newRuling); err != nil {
+			return nil, err
+		}
+	}
+
 	for _, rf := range s.Releases {
 		if !rf.Dirty {
 			continue
@@ -110,8 +123,17 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 	}
 	if s.passEvent {
 		fc.Format, fc.Made = Format, now.UTC()
-		if err := appendForecast(dir, fc); err != nil {
+		if err := appendLine(dir, ForecastFile, fc); err != nil {
 			return nil, err
+		}
+	}
+	if s.desksDirty {
+		data, err := marshal(s.Desks)
+		if err != nil {
+			return nil, fmt.Errorf("encode %s: %w", DesksFile, err)
+		}
+		if err := atomicfile.WriteFile(filepath.Join(dir, DesksFile), data, 0o644); err != nil {
+			return nil, fmt.Errorf("write %s: %w", DesksFile, err)
 		}
 	}
 	if err := atomicfile.WriteFile(filepath.Join(dir, SnapshotFile), snap, 0o644); err != nil {
@@ -183,25 +205,25 @@ func settle(s *State, now time.Time) {
 	}
 }
 
-// appendForecast adds one line to forecasts.jsonl by rewriting the whole
-// file atomically, so a crash never leaves half a line. A last line with no
+// appendLine adds one JSON line to the named log by rewriting the whole file
+// atomically, so a crash never leaves half a line. A last line with no
 // newline gets one first.
-func appendForecast(dir string, f Forecast) error {
-	line, err := json.Marshal(f)
+func appendLine(dir, file string, v any) error {
+	line, err := json.Marshal(v)
 	if err != nil {
-		return fmt.Errorf("encode forecast: %w", err)
+		return fmt.Errorf("encode line for %s: %w", file, err)
 	}
-	path := filepath.Join(dir, ForecastFile)
+	path := filepath.Join(dir, file)
 	data, err := os.ReadFile(path)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return fmt.Errorf("read %s: %w", ForecastFile, err)
+		return fmt.Errorf("read %s: %w", file, err)
 	}
 	if n := len(data); n > 0 && data[n-1] != '\n' {
 		data = append(data, '\n')
 	}
 	data = append(append(data, line...), '\n')
 	if err := atomicfile.WriteFile(path, data, 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", ForecastFile, err)
+		return fmt.Errorf("write %s: %w", file, err)
 	}
 	return nil
 }
