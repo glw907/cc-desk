@@ -7,7 +7,7 @@ Pass: desk-skills
 Class `runner`. Planned 75 minutes. The path below is 170 minutes, over twice the plan (150),
 so the pass parks at planning under the round's standing answer 14, as `round.md` "Parking at
 planning" says. The plan is otherwise complete, and its executor prompt assumes an estimate
-raised to 90 minutes, so its stop falls at 180. The estimate grew because the round plan priced
+raised to 105 minutes, so its stop falls at 210, 40 minutes above the path. The estimate grew because the round plan priced
 neither the prompt lines that pass 1 left to this pass nor the fixtures and the live wording
 loop. Design: `docs/specs/2026-11-18-desk-skills-design.md`, sections "The desk opens",
 "Rulings", "The two skills and the guide", "The passes", "Left to the builder", and done items
@@ -243,7 +243,7 @@ and the script ends with `result: pass` or `result: fail`. The checks:
 | Case | Check | Item 2 sentence |
 | --- | --- | --- |
 | every | The first tool call is a Read of the skill's path | "a fresh session given the desk skill" |
-| every | The result text isn't empty, and holds none of "Would you like", "Shall I", "Do you want", or "Should I" | "opens without being asked" |
+| every | The result text isn't empty, and outside the lines that end in `?` it holds none of "Would you like", "Shall I", "Do you want", or "Should I" | "opens without being asked" |
 | every | The opening holds no fixture question id, no `r-0042`, and nothing matching `\br-[0-9]{4}\b` | "holds no ruling id" |
 | none | The opening is one sentence (one terminal `.`, `?`, or `!` after trimming) | "the opening is one sentence" |
 | none | It matches `\b10:00 ?pm\b`, case ignored, and holds no "tomorrow" | "holds the fixture's forecast time" |
@@ -443,9 +443,10 @@ the launch's, the skills need the fixtures' briefs, and the live script needs bo
 ## The gate and CI
 
 The gate is `bash scripts/gate.sh`, run bare before every commit and never piped.
-`.github/workflows/gate.yml` runs on `pull_request` and on pushes to `main` only, so no run
-exists for `desk-skills` until its PR does. The executor opens the draft PR right after task 1's
-first push, before the first watch. After each push the watch runs in the background so the
+`.github/workflows/gate.yml` runs on `pull_request` and on pushes to `main` only, so a run
+exists for `desk-skills` only while its PR does. Draft PR #18 already holds this plan and its
+parking stop, and its first run (44417886312) started at 2026-11-18T23:07:05Z. The executor
+reuses it: it gives it the pass's title, replaces the body, and keeps it a draft until close. After each push the watch runs in the background so the
 next task isn't held:
 
 1. `gh run list --branch desk-skills --limit 3`

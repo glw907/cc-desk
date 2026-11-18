@@ -8,7 +8,7 @@ Geoff
 Geoff.s
 goldens
 gofmt
-subtest
+subtests?
 todo
 heredoc
 unallowed
@@ -16,3 +16,4 @@ unprobed
 wildcarded
 cmd
 mtime
+tellgrader
