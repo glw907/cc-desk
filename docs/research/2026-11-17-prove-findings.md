@@ -60,10 +60,39 @@ Held.
 
 ## Proof 1
 
-No session was launched, so no connection was cut. The plan's mechanism table shows no documented
-way to message or wake a blocked background session, and `claude respawn` and
-`claude --resume <id> --bg` are the two candidates the rerun tries. `daemon.log` shows no
-relaunch after a reboot.
+Usage before the launch: 86 percent of the weekly limit (all models).
+
+**Setup.** `spikes/1-wake/tunnel.py` is a CONNECT proxy on 127.0.0.1:18907 that logs hosts only and
+refuses every connection while a block file exists. The session launched through `own.sh` with
+`HTTPS_PROXY` in the launch settings' `env` block. The supervisor's environment held no proxy
+variable name, so the proxy reached the session through the settings file alone. Before the cut
+the tunnel carried 14 connections to `api.anthropic.com`, so the session's API traffic did go
+through it. The session ran a six-step prompt, each step a 90-second Bash call that appends a
+line to `progress.txt`.
+
+**The cut.** At 03:11:59 UTC two steps were done and the block file went in. Step 3 finished in
+the next minute, since the Bash call needs no network. The row stayed `working busy` for four
+more minutes while the session retried ("attempt n/10"), and at minute 5 it read `blocked idle`.
+The screen's last line then read "API Error: Couldn't connect through your proxy
+(ERR_PROXY_TUNNEL)". The state was made, and a lost connection takes about five minutes to show
+as `blocked`.
+
+**The wakes.** The link came back at 03:17:04.
+
+| Wake | Command | Three minutes later |
+| --- | --- | --- |
+| Nothing | none | Row `blocked idle`, 3 steps |
+| Respawn | `claude respawn <id>` | Row `blocked idle`, 3 steps. It printed "restarted 5305f47d" and a note that the session was already running, so it started a copy, `b2ddeeb4`. |
+| Resume | `claude --resume <sid> --bg` | Row `blocked idle`, 4 steps |
+
+No wake brought the row back to `working`. `progress.txt` still reached step 5 by 03:27, so
+something kept running the Bash calls after the respawn and the resume. I did not read a job file
+or transcript to say which process wrote steps 4 and 5, and `claude agents` never listed the copy
+as a row of its own. The one result is that the row, the only signal the later rounds can read,
+stayed `blocked idle` for 614 seconds after the link returned, whatever ran underneath.
+
+A real drop on the laptop (wifi lost, lid shut) was not tested. The tunnel models a refused
+connection, and a dropped one may behave otherwise. That test is filed as a follow-up.
 
 Fallback applies: the check ends the session and relaunches it from the files.
 

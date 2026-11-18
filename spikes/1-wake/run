@@ -43,6 +43,7 @@ print(re.sub(r"\s+", " ", t)[-700:])
 rm -rf "$SB" "$OUT/block" "$OUT/tunnel.log" "$OUT/rows.txt"
 mkdir -p "$SB"
 : >"$SB/progress.txt"
+cp "$HERE/step.sh" "$SB/step.sh"
 nohup python3 -I "$HERE/tunnel.py" --port "$PORT" --log "$OUT/tunnel.log" --block "$OUT/block" \
   >"$OUT/tunnel.out" 2>&1 &
 echo $! >"$OUT/tunnel.pid"

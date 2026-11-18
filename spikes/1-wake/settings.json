@@ -5,12 +5,12 @@
   "permissions": {
     "allow": [
       "Bash(cat progress.txt)",
-      "Bash(sleep 90 && echo step1 >> progress.txt)",
-      "Bash(sleep 90 && echo step2 >> progress.txt)",
-      "Bash(sleep 90 && echo step3 >> progress.txt)",
-      "Bash(sleep 90 && echo step4 >> progress.txt)",
-      "Bash(sleep 90 && echo step5 >> progress.txt)",
-      "Bash(sleep 90 && echo step6 >> progress.txt)"
+      "Bash(bash step.sh 1)",
+      "Bash(bash step.sh 2)",
+      "Bash(bash step.sh 3)",
+      "Bash(bash step.sh 4)",
+      "Bash(bash step.sh 5)",
+      "Bash(bash step.sh 6)"
     ]
   }
 }
