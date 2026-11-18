@@ -7,7 +7,7 @@ snapshot arrives.
 <script lang="ts">
 	import { poll } from '#lib/poll.svelte.ts';
 	import { questionText } from '#lib/sums.ts';
-	import { formatWhen } from '#lib/time.ts';
+	import { DASH, NONE, formatWhen } from '#lib/time.ts';
 
 	const snapshot = $derived(poll.answer?.snapshot ?? null);
 	const rulings = $derived(
@@ -19,10 +19,6 @@ snapshot arrives.
 		return questionText(snapshot, project, id) ?? null;
 	}
 </script>
-
-<svelte:head>
-	<title>Rulings · cc-desk</title>
-</svelte:head>
 
 {#if snapshot}
 	<main class="page">
@@ -43,9 +39,7 @@ snapshot arrives.
 								<tr>
 									<td>{formatWhen(ruling.time, poll.now)}</td>
 									<td>
-										{#if text}{text}{:else}<span aria-hidden="true">–</span><span class="sr-only"
-												>None</span
-											>{/if}
+										{#if text}{text}{:else}<span aria-hidden="true">{DASH}</span><span class="sr-only">{NONE}</span>{/if}
 									</td>
 									<td>{ruling.words}</td>
 								</tr>

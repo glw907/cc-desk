@@ -103,6 +103,12 @@ test.describe('a pass page', () => {
 		await expect(page.getByText('Which storage should the report use?')).toBeVisible();
 	});
 
+	test('a pass with no questions borrows its round’s reason', async ({ app, page }) => {
+		await show(app, page, 'twin', '/alder/r1/a-one');
+		await expect(page.getByRole('heading', { level: 1, name: 'a-one' })).toBeVisible();
+		await expect(page.getByText('Nothing. Routine upkeep.')).toBeVisible();
+	});
+
 	test('a stopped pass shows its reason and no since', async ({ app, page }) => {
 		await show(app, page, 'stopped', '/alpha/r2/p13');
 		await expect(page.locator('main .state')).toHaveText('Stopped');

@@ -24,10 +24,6 @@ snapshot arrives, then the not-found view when the address names no round.
 		iso === null ? null : formatWhen(iso, poll.now, about);
 </script>
 
-<svelte:head>
-	{#if found}<title>{found.round.name} · {found.release.project} · cc-desk</title>{/if}
-</svelte:head>
-
 {#if snapshot && !found}
 	<NotFound address={page.url.pathname} />
 {:else if found}
@@ -62,10 +58,10 @@ snapshot arrives, then the not-found view when the address names no round.
 				{:else if round.needs.kind === 'not_designed'}
 					<p>
 						{word('needsKind', 'not_designed')}.
-						{#if round.forecast_time}It is expected {when(round.forecast_time, true)}.{/if}
+						{#if round.forecast_time}Expected design: {when(round.forecast_time, true)}.{/if}
 					</p>
 				{:else}
-					<p>Nothing. {round.needs.reason ?? 'No reason recorded'}</p>
+					<p>Nothing. {round.needs.reason ?? 'No reason recorded.'}</p>
 				{/if}
 
 				<h2>Its passes</h2>

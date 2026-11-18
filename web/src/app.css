@@ -11,7 +11,7 @@
    mockup's copy of the sheet. Colors, type sizes, spacing, radii, and motion are Survey tokens.
    The gaps are these literals, filed in docs/follow-ups/survey-rail-muted-doc-measure.md: the
    three widths below, the 80rem breakpoint (a media query can't read a variable), the line
-   heights 1.25 and 1.35, and the font weight 600 (Survey's only weight token is 500). */
+   heights 1.25, 1.35, 1.5 and 1.55, and the font weight 600 (Survey's only weight token is 500). */
 :root {
 	--rail-width: 23rem;
 	--doc-measure: 36.5rem;

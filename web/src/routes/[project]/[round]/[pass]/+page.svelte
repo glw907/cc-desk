@@ -30,10 +30,6 @@ kind or reason, so a pass with none borrows its round's reason when the round ne
 	const minutes = (n: number | null) => (n === null ? null : formatMinutes(n));
 </script>
 
-<svelte:head>
-	{#if found}<title>{found.pass.name} · {found.release.project} · cc-desk</title>{/if}
-</svelte:head>
-
 {#if snapshot && !found}
 	<NotFound address={page.url.pathname} />
 {:else if found}
@@ -74,7 +70,7 @@ kind or reason, so a pass with none borrows its round's reason when the round ne
 					<p>
 						Nothing. {round.needs.kind === 'nothing' && round.needs.reason
 							? round.needs.reason
-							: 'No reason recorded'}
+							: 'No reason recorded.'}
 					</p>
 				{/if}
 

@@ -6,7 +6,7 @@ tokens, under a comment that names the gap.
 
 The same sheet carries a few literals Survey has no token for: the widths `--rail-width` (23rem),
 `--doc-measure` (36.5rem), and `--page-width` (76rem), the 80rem breakpoint for the two-column
-boards, the line heights 1.25 and 1.35, and the font weight 600. Survey's only weight token is
+boards, the line heights 1.25, 1.35, 1.5 and 1.55, and the font weight 600. Survey's only weight token is
 500.
 
 Fix by adding these to Survey and dropping the local copies from `app.css`. Found by
