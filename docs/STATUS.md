@@ -13,47 +13,40 @@
   session starts from the plan and branch. A pass runs with zero prompts under five allow rules.
 - Open tests are in `docs/follow-ups/2026-11-17-rerun-prove-proofs.md`.
 - No `BACKLOG.md`. Follow-ups are files in `docs/follow-ups/`.
-- The State and rules round is designed and approved (Geoff, 2026-11-17):
-  `docs/specs/2026-11-17-state-and-rules-design.md`. Its round plan is
-  `docs/plans/2026-11-17-state-rules-round.md`: four passes in one chain, 315 planned minutes,
-  round id `state-rules`. No pass has started.
-- The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
+- The State and rules round has landed (pull requests 3 to 6, 2026-11-18). Its design is
+  `docs/specs/2026-11-17-state-and-rules-design.md`, and its report is
+  `~/Projects/initiatives/cc-desk/reports/state-rules-report.md`.
+- The usage stop is 100 percent of the week. The figure read 91 percent on 2026-11-18.
 
 <!-- round-report state-rules -->
-**All four passes are built, and pass 4 waits on its pull request.** Passes 1 to 3 have landed as
-pull requests 3, 4, and 5. Pass 4 is pull request 6. The command keeps the state files, forecasts
-the next session with Geoff, starts, holds, or refuses a pass by the rules, and records a ruling
-from a registered desk session. Weekly usage read 91 percent on the live run, under the 100 percent
-stop. Nothing waits for Geoff.
+**The State and rules round has landed all four passes.** They are pull requests 3 to 6. The
+command keeps the state files, forecasts the next session with Geoff, starts, holds, or refuses a
+pass by the rules, and records a ruling only from a registered desk process with a terminal. The
+round took about 191 of its planned 315 minutes. Weekly usage read 91 percent, under the 100
+percent stop. Nothing waits for Geoff.
 
 Open documents: none.
-Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
 ## State and rules passes
 
-Passes 1 to 3 have landed. The snapshot holds each release's pace and range, each pass's and
-round's needed time, and the next session with `waits_for_geoff`. Each pass event appends a line
-to `forecasts.jsonl`.
-
-Pass 3 (`state-rules-order`) landed as pull request 5. A start now begins, waits on the two-pass
-limit or on usage, or is refused with every broken rule named. `cc-desk usage` and `cc-desk free`
-are new. Geoff kept the resume rule as built: a resumed stopped pass skips both limits.
-
-Pass 4 (`state-rules-rulings`) is pull request 6. `cc-desk ruling record` appends one line holding
-Geoff's words, and refuses with the failing test named unless the caller is under a registered desk
-process that has a terminal. A ruling answers its question, closes any guess on it as held or
-missed, and frees what waited. Two follow-ups are filed: the orphan ruling after a crash, and a desk
-that lives through a clock step.
+The snapshot holds each release's pace and range, each pass's and round's needed time, and the
+next session with `waits_for_geoff`. A start follows the waiting order, the two-pass limit, and
+the usage stop; a resumed stopped pass skips both limits (Geoff, "Yes as built"). `cc-desk ruling
+record` appends Geoff's words and frees what waited. Eight follow-ups from the round are in
+`docs/follow-ups/`. Two need Geoff's choice when taken up: `orphan-question-forecast.md` and
+`reading-errors-and-guess-on-resume.md`.
 
 ## Next action
 
-Run the State and rules round. Geoff starts the conductor in a fresh Opus session in his
-terminal, from `~/Projects/cc-desk`, with this prompt:
+Design the Sessions round and the Page round. The route (`docs/plans/2026-11-17-route.md`) lets
+them run side by side, since both rest only on the state files. Geoff starts a fresh Opus session
+in his terminal, from `~/Projects/cc-desk`, with this prompt:
 
 ```text
-You are the conductor of the cc-desk State and rules round. Read
-docs/plans/2026-11-17-state-rules-conductor-prompt.txt and follow it from its first line.
+Design the cc-desk Sessions round and the Page round. Read docs/STATUS.md, the route
+(docs/plans/2026-11-17-route.md), and the State and rules design, then follow pass-core
+to design each round with me, one question at a time.
 ```
 
 ## Open decisions
