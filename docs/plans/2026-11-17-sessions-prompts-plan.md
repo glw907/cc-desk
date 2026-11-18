@@ -127,7 +127,7 @@ write is inside the worktree or a test's `t.TempDir()`.
 | `internal/sessions/decide.go`, `decide_test.go` | 2 | A prompt stop's detail names the last unanswered prompt |
 | `internal/launch/settings.go`, `prompt.go`, `templates/*.txt`, `templates/answer.txt` (new), `launch_test.go` | 3 | The follow-up rule and line; the answer note and its template |
 | `cmd/cc-desk/launcher.go` | 3 | Passes the follow-up command; `launchRequest` carries the answer note |
-| `cmd/cc-desk/followup.go` (new), `root.go` | 4 | `followup`, and the shared writer the answer uses |
+| `cmd/cc-desk/followup.go` (new), `root.go`, `e2e/followup_test.go` (new) | 4 | `followup`, the shared writer the answer uses, and `TestFollowup` |
 | `cmd/cc-desk/rules.go` (new), `root.go` | 5 | `rules add` and `rules remove` |
 | `e2e/prompt_test.go` (new) | 6 | Done item 4, with its own argument helper |
 | `docs/STATUS.md`, `docs/follow-ups/*.md` | 7 | The close |
@@ -279,14 +279,17 @@ a missed stand-in flag can't reach the real `claude`. What each test asserts:
   nothing, and a `snapshot` run after them exits 0.
 - `TestPromptYes`: the record is seeded with one counted relaunch first. After the hook,
   `setRows` gives the row state `blocked` and `waitingFor` `"permission prompt"`, a check stops
-  the pass on the prompt, and the snapshot shows it. The test reads the settings file and
-  asserts the rule is absent, and notes the wall time. `prompt yes` under the desk exits 0. The
-  release's `allow_rules` holds `Bash(<command>)` and the prompt's answer is `yes`. `calls.log`
-  shows, in order, a list read, `stop <old id>`, a list read, and one `--bg` whose `--settings`
-  path names `<state>/launch/<name>.json`. That file's mtime is after the noted wall time and
-  its allow list holds the rule. The record's `Counted()` is 1 before and after, its last
+  the pass on the prompt, and the snapshot shows it. The test reads the settings file,
+  asserts the rule is absent, and notes the file's mtime. `prompt yes` under the desk exits 0.
+  The release's `allow_rules` holds `Bash(<command>)` and the prompt's answer is `yes`.
+  `calls.log` shows, in order, a list read, `stop <old id>`, a list read, and one `--bg` whose
+  `--settings` path names `<state>/launch/<name>.json`. That file's allow list now holds the
+  rule, which is the proof it was written after the yes; its mtime is not before the noted one.
+  A wall-clock comparison is left out, since a coarse file timestamp can lag `time.Now()`. The record's `Counted()` is 1 before and after, its last
   relaunch has cause `permission_yes` and `counted` false, and the pass is building. The
-  follow-up file exists under `--follow-ups`.
+  follow-up file exists under `--follow-ups`. The hook's command line carries no `--now`, so
+  the prompt's time is real time: the test reads it from the release file to build the
+  follow-up file's name.
 - `TestPromptNo`: the same with `prompt no`. `allow_rules` is unchanged, the answer is `no`, and
   the relaunch prompt holds the refused command.
 - `TestPromptGuard`: the same `prompt yes` run with no terminal, and run with an unregistered
@@ -363,10 +366,13 @@ first, then task 3, and the gate runs after each merge.
 
 - Outcome: `followup` writes as "The follow-up verb" says, and exports the writer task 5's step
   7 shares.
-- Files: `cmd/cc-desk/followup.go` (new), `cmd/cc-desk/root.go`.
+- Files: `cmd/cc-desk/followup.go` (new), `cmd/cc-desk/root.go`, `e2e/followup_test.go` (new).
 - Class: `ordinary`.
 - Check: `go test ./e2e/ -run TestFollowup -count=1 -v` prints `--- PASS: TestFollowup`.
-- Test: `TestFollowup` as `## Acceptance` lists it, plus unit cases for the slug.
+- Test: `TestFollowup` as `## Acceptance` lists it, plus unit cases for the slug. It launches
+  its record through the existing `launchRig` (`session start` with the stand-in flags), then
+  runs `followup` through `run()` with plain arguments: `followup` launches nothing, so it needs
+  no stand-in flag and never goes through `launchRig.args`.
 
 ### Task 5: the answer and rules verbs (25 minutes)
 
@@ -382,7 +388,8 @@ first, then task 3, and the gate runs after each merge.
 
 ### Task 6: done item 4 (25 minutes)
 
-- Outcome: the four e2e tests in `## Acceptance` pass.
+- Outcome: the four `TestPrompt*` tests in `## Acceptance` pass. `TestFollowup` landed in task
+  4.
 - Files: `e2e/prompt_test.go` (new).
 - Class: `runner`.
 - Check: `go test ./e2e/ -run 'TestPrompt' -count=1 -v` prints `--- PASS` for `TestPromptHook`,
@@ -458,6 +465,9 @@ pass adds:
 
 ## Decisions
 
+- [advisor] `TestFollowup` lives in `e2e/followup_test.go` with task 4, so task 4's check can
+  pass when it runs; the pre-launch advisor read found it had no file.
+  Call: mine (method).
 - [advisor] No live probe. The planner prompt allows one only if the auto-mode entry covers it,
   and it doesn't; the log also refused a spike settings file as Self-Modification on
   2026-11-18. The fixture is the documented example, and item 4's "recorded from a real
@@ -551,6 +561,6 @@ The plan-reviewer read of 2026-11-18, most severe first:
 15. Low: a resume skips the limits. Folded: the Decisions line citing its follow-up.
 16. Low: "Reviewed:" pointed at a missing list. Folded: this list.
 17. Low: the overrun answer cited answer 14. Folded: answer 39, with the unmet-bar case.
-18. Low: task 8 lacked two process lines. Folded: the CI verdict per task and the delta-read
+18. Low: the close task lacked two process lines. Folded: the CI verdict per task and the delta-read
     floor.
 19. Low: the `Counted()` check proved nothing from 0. Folded: a counted relaunch seeded first.
