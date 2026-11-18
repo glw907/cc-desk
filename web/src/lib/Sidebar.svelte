@@ -6,6 +6,7 @@ draws nothing under the forecast until the first good snapshot arrives.
 <script lang="ts">
 	import NextSession from './NextSession.svelte';
 	import ReleaseBlock from './ReleaseBlock.svelte';
+	import { terminalLink } from './link';
 	import type { Snapshot } from './snapshot';
 	import { count } from './sums';
 
@@ -24,10 +25,16 @@ draws nothing under the forecast until the first good snapshot arrives.
 <section class="rail-section" aria-labelledby="waiting-heading">
 	<h2 class="rail-heading" id="waiting-heading">Waiting for you</h2>
 	{#each snapshot.waits_for_geoff as wait (`${wait.project}/${wait.round}`)}
-		<a class="rail-row" href="/{wait.project}/{wait.round}">
-			{wait.project}/{wait.round}
-			<span class="sub">{count(wait.questions, 'question')}</span>
-		</a>
+		{@const href = terminalLink(wait.project, wait.round)}
+		<div class="rail-row waiting-row">
+			<a href="/{wait.project}/{wait.round}">
+				{wait.project}/{wait.round}
+				<span class="sub">{count(wait.questions, 'question')}</span>
+			</a>
+			{#if href}
+				<a class="term-link" {href}>Open {wait.project}/{wait.round} in a terminal</a>
+			{/if}
+		</div>
 	{:else}
 		<p class="rail-row muted">Nothing</p>
 	{/each}
