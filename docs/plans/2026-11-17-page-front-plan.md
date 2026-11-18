@@ -5,8 +5,9 @@ Round: page
 Pass: page-front
 
 Class `runner`, because the pass changes `scripts/gate.sh` and `.github/workflows/gate.yml`.
-Planned 90 minutes. The path below is 95, under the round's 180-minute park line. The State and
-rules round's passes took about 0.6 of their planned minutes.
+Planned 90 minutes. The path below is 125, under the round's 180-minute park line. The State and
+rules round's passes took about 0.6 of their planned minutes, so the path is likely to run near
+75.
 
 Design: `docs/specs/2026-11-17-page-design.md`, sections "The app", "What each page shows" (the
 sidebar, the front page, times, empty fields, themes, and state words), and the first four rows of
@@ -39,8 +40,9 @@ Every write is inside the worktree, a test's temporary folder, or `$CLAUDE_JOB_D
   check`, `npm run build`, `npx playwright test`, `go build`, `bash scripts/gate.sh`, `git push
   origin page-front`, `gh pr create`, `gh pr ready`, `gh pr checks`, and `gh run list`. No row
   refuses any of them run bare. The rows near them are in the table below.
-- Reviewed: one `standards:plan-reviewer` read of this plan; the `[review]` line under
-  `## Decisions` records its verdict and folds.
+- Reviewed: one `standards:plan-reviewer` read (Opus, medium effort) of this plan at `4be04f6`,
+  verdict "approve once the folds are in", no blockers, 4 majors and 13 minors, all folded; the
+  `[review]` line under `## Decisions` lists them.
 - Evidence: the mechanism table and the recorded searches below. Each acceptance check was run on
   today's code before any code was written; the outputs are under `## Acceptance`.
 
@@ -63,16 +65,17 @@ Every write is inside the worktree, a test's temporary folder, or `$CLAUDE_JOB_D
 
 | Mechanism | Source or probe, with what it printed |
 | --- | --- |
-| Survey installs from a public repo at tag `v1.7.0`, and the plain-app recipe takes the admin recipe's imports | `gh repo view glw907/survey --json visibility` printed `PUBLIC`. `~/Projects/survey/package.json` is `1.7.0`. `~/Projects/survey/DESIGN.md:226` gives the install line `npm install github:glw907/survey#v<version>` and the three Fontsource packages. `DESIGN.md:232` gives the entry sheet's order: Tailwind, the daisyUI plugin, then `survey/theme/fonts.css`, `survey/theme/survey.css`, `survey/theme/components.css`. `DESIGN.md:251-257` is the plain-app recipe |
-| `fonts.css` needs three Fontsource packages | `~/Projects/survey/theme/fonts.css:3-9` imports `@fontsource/spectral` (400, 400 italic, 500, 600), `@fontsource-variable/karla` with `wght-italic.css`, and `@fontsource/monaspace-neon/400.css` |
+| Survey installs from a public repo at tag `v1.7.0`, and the plain-app recipe takes the admin recipe's imports | `gh repo view glw907/survey --json visibility` printed `PUBLIC`. `~/Projects/survey/package.json` is `1.7.0`. `~/Projects/survey/DESIGN.md:226` gives the install line `npm install github:glw907/survey#v<version>` and the three `@fontsource` packages. `DESIGN.md:232` gives the entry sheet's order: Tailwind, the daisyUI plugin, then `survey/theme/fonts.css`, `survey/theme/survey.css`, `survey/theme/components.css`. `DESIGN.md:251-257` is the plain-app recipe |
+| `fonts.css` needs three `@fontsource` packages | `~/Projects/survey/theme/fonts.css:3-9` imports `@fontsource/spectral` (400, 400 italic, 500, 600), `@fontsource-variable/karla` with `wght-italic.css`, and `@fontsource/monaspace-neon/400.css` |
 | The lockfile resolves Survey over `git+ssh`, which a runner can't fetch, and one rewrite fixes it | `~/Projects/phonebook/package-lock.json:5298` reads `"resolved": "git+ssh://git@github.com/glw907/survey.git#..."`. `~/Projects/phonebook/.github/workflows/ci.yml:27-29` runs `git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"` before `npm ci`. `gh run list -R glw907/phonebook -L 3` showed three `success` runs, the latest 2026-11-18T06:20Z |
 | The mockup's Survey CSS is v1.7.0's, so the app can import the package and copy nothing | `diff -q` of the mockup's `src/lib/survey/` sheets against `~/Projects/survey/theme/` (`survey.css`, `components.css`, `fonts.css`, `survey-vars.css`) printed nothing |
 | Playwright 1.65.1 drives the installed `chromium-1255` headless shell | `ls ~/.cache/ms-playwright/` printed `chromium-1248`, `chromium-1255`, and a headless shell for each. A probe under `$CLAUDE_JOB_DIR/tmp/pw` on `@playwright/test` 1.65.1 with no browser path printed `Executable doesn't exist at /nonexistent/chromium_headless_shell-1255/...`, so 1.65.1 wants 1255. `npm view @playwright/test version` printed `1.65.1` |
 | A skipped Playwright test exits 0; the JSON report counts it | The same probe with three tests, one `test.skip`: `--list` printed `Total: 3 tests in 1 file`; the run printed `1 skipped`, `2 passed`, and exited 0. The JSON report's `stats` was `{"expected":2,"skipped":1,"unexpected":0,"flaky":0}` |
+| A plain `--list` rewrites the JSON report, so the count comes from `--list --reporter=list` | The plan-reviewer's probe on 1.65.1: a `--list` run with the JSON reporter configured wrote `{"expected":0,"skipped":3}` over the earlier report |
 | A run with no browser fails | The probe with `PLAYWRIGHT_BROWSERS_PATH=/nonexistent` printed `1 failed` and exited 1. The test that opened no page passed, so only tests that open a page fail |
-| Pinned versions | `npm view`: `@sveltejs/kit` 3.3.1, `@sveltejs/adapter-node` 6.0.4. `~/Projects/dubplate/web/package.json` pins `@sveltejs/vite-plugin-svelte` 7.3.1, `@tailwindcss/vite` and `tailwindcss` 4.3.5, `daisyui` 5.8.1, `svelte` 5.57.3, `svelte-check` 4.7.8, `typescript` 6.0.3, `vite` 8.3.8, and `playwright` 1.65.1. `node --version` printed `v26.13.1` |
-| `actions/setup-node` v7.1.0 is commit `949feb2413d6458794dcd2491c4babbbce0c15c1` | `gh api repos/actions/setup-node/git/ref/tags/v7.1.0` printed that sha, type `commit`. `cairn-cms` and `dubplate` workflows pin the same sha |
-| Server rendering would use the real clock, which Playwright can't pin | SvelteKit page options (Svelte MCP, `kit/page-options`, "ssr"): "If you add `export const ssr = false` to your root `+layout.js`, your entire app will only be rendered on the client". So the app renders in the browser only, and every time word comes from the browser's clock |
+| Pinned versions | `npm view`: `@sveltejs/kit` 3.3.1, `@sveltejs/adapter-node` 6.0.4. `~/Projects/dubplate/web/package.json` pins `@sveltejs/vite-plugin-svelte` 7.3.1, `@tailwindcss/vite` and `tailwindcss` 4.3.5, `daisyui` 5.8.1, `svelte` 5.57.3, `svelte-check` 4.7.8, `typescript` 6.0.3, `vite` 8.3.8, and `playwright` 1.65.1. `npm view` on 2026-11-18: `@types/node` 26.6.6, `@fontsource/spectral`, `@fontsource-variable/karla`, and `@fontsource/monaspace-neon` 5.3.0 each, `@lucide/svelte` 1.75.0; `phonebook` takes the same majors. `node --version` printed `v26.13.1` |
+| `actions/setup-node` v7.1.0 is commit `949feb2413d6458794dcd2491c4babbbce0c15c1` | `gh api repos/actions/setup-node/git/ref/tags/v7.1.0` printed that SHA, type `commit`. `cairn-cms` and `dubplate` workflows pin the same SHA |
+| Server rendering would use the real clock, which Playwright can't pin | SvelteKit page options (Svelte MCP, `kit/page-options`, the `ssr` option): "If you add `export const ssr = false` to your root `+layout.js`, your entire app will only be rendered on the client". So the app renders in the browser only, and every time word comes from the browser's clock |
 | `page.clock.setFixedTime` pins `Date` and keeps timers running, so the 2-second poll still fires | <https://playwright.dev/docs/api/class-clock#clock-set-fixed-time>: "Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running." `test.use({ timezoneId })` sets the browser's zone (<https://playwright.dev/docs/emulation#locale--timezone>) |
 | The real binary writes both files the server reads | `internal/state/commit.go:46-55`: a load failure writes `snapshot-error.json` and leaves every other file alone; a clean load removes it (`:74`); `snapshot.json` is rewritten last (`:140`). `:40-44` and `:232-237`: the error file is `{format, file, message}` |
 | A test can print every snapshot it needs by running verbs on a copy of a fixture | `e2e/main_test.go:69-71`: the binary runs as `--state-dir <dir> --now <RFC3339> --usage-command <abs path to e2e/testdata/usage40.sh>`, with `PATH=/usr/bin:/bin`. The probes below ran that way, from a binary built with `go build -o $CLAUDE_JOB_DIR/tmp/probe/cc-desk ./cmd/cc-desk` |
@@ -96,13 +99,15 @@ UTC in the snapshot; the Alaska column is what the page shows (AKST, UTC-9, on t
 | `big` | `order`: `snapshot` at 23:00Z | `ready_now`, time `2026-11-20T23:00:00Z`, range null, `rough` true, `question_count` 3 | Ready now |
 | `guess` | `order`: `pass start north n-free` at 23:00Z, `pass start north n-guess --guess north-q2` at 23:10Z | `open_guesses` `[{north, n-guess, north-q2, 200}]`, `guess_minutes_total` 200, `guess_minutes_limit` 300 | 200 of 300 minutes |
 | `two` | `order`: start `north n-free` 23:00Z, `south s-free` 23:01Z, `north n-two` 23:02Z, `south s-two` 23:03Z | `waiting` lists `n-two` then `s-two`, each `limits ["two_pass_limit"]`, `reset_text` null | Waiting, in each pass's row |
-| `stale` | `state`: `snapshot` at 23:00Z; `releases/alpha.json`'s `{\n  "format": 1,` made `{\n  "format": 1,,`; `pass start alpha p13` at 23:05Z | Exit 1. `snapshot-error.json` message `releases/alpha.json: invalid character ',' looking for beginning of object key string`. `snapshot.json` keeps `generated_at` `2026-11-20T23:00:00Z` | Last good at 2:00 pm |
+| `redraw` | `state` as copied (its `snapshot.json` is the 23:00Z one), then `pass start alpha p13` at 23:05Z | Before: time `05:00Z`, range `03:00Z` to `06:30Z`, p13 `not_started`. After: exit 0, `generated_at` `23:05Z`, time `05:05Z`, range `03:05Z` to `06:35Z`, p13 `building` | Before 8:00 pm, 6:00 pm to 9:30 pm. After 8:05 pm, 6:05 pm to 9:35 pm |
+| `stale` | `state` as copied; `releases/alpha.json`'s `{\n  "format": 1,` made `{\n  "format": 1,,`; `pass start alpha p13` at 23:05Z | Exit 1. `snapshot-error.json` message `releases/alpha.json: invalid character ',' looking for beginning of object key string`. `snapshot.json` keeps `generated_at` `2026-11-20T23:00:00Z` | Last good at 2:00 pm |
 
 Codes across these snapshots: round states `building`, `done`, `not_started`; pass states
 `building`, `done`, `not_started`, `waiting`; needs kinds `nothing`, `questions`; answer kinds
 `carried`, `ruling`; limit `two_pass_limit`; next-session states `scheduled`, `ready_now`. No
-`stop_reason` or `guess_outcome` is set in any of them, so the words test also prints a stopped
-pass (`pass stop alpha p13 --reason scope` after `started`).
+`guess_outcome` is set in any of them, and only a stopped pass (`pass stop alpha p13 --reason
+scope` after `started`) sets a `stop_reason`. Most codes never appear in a fixture, so the words
+test also checks the written-out list in task 3.
 
 ## Recorded searches
 
@@ -128,7 +133,7 @@ needs no change.
 
 | File | Change |
 | --- | --- |
-| `web/package.json`, `web/package-lock.json` | New. Exact versions from the mechanism table, `@playwright/test` 1.65.1, Survey from `github:glw907/survey#v1.7.0`, the three Fontsource packages, and `@lucide/svelte` if an icon is drawn |
+| `web/package.json`, `web/package-lock.json` | New. Exact versions from the mechanism table, `@playwright/test` 1.65.1, Survey from `github:glw907/survey#v1.7.0`, the three `@fontsource` packages, and `@lucide/svelte` if an icon is drawn |
 | `web/svelte.config.js`, `web/vite.config.ts`, `web/tsconfig.json`, `web/src/app.html`, `web/src/app.css`, `web/src/app.d.ts` | New. The Node adapter; `plugins: [tailwindcss(), sveltekit()]` as the mockup's `vite.config.ts`; the entry sheet in the recipe's order, then the app's own token-only rules |
 | `web/src/hooks.server.ts` | New. Every method but `GET` and `HEAD` gets 405 |
 | `web/src/lib/server/state.ts` | New. Finds the folder, reads both files read-only on each call, keeps the last good snapshot in memory |
@@ -141,6 +146,7 @@ needs no change.
 | `web/src/lib/*.svelte` | New. The components; the split is the executor's |
 | `web/playwright.config.ts` | New. `retries: 0`, `forbidOnly: true`, the JSON reporter to a file, a global setup |
 | `web/tests/global-setup.ts`, `web/tests/state.ts`, `web/tests/app.ts` | New. Build the binary once; copy a fixture and run verbs on it; start and stop the built app per test |
+| `web/tests/screenshots.ts` | New. Takes the light and dark front-page screenshots for the PR, run by path outside the suite |
 | `web/tests/*.spec.ts` | New. The tests named in the tasks |
 | `web/scripts/check-playwright-report.sh` | New. Fails unless the report's passed count equals the listed count and skipped, unexpected, and flaky are 0 |
 | `scripts/gate.sh` | The page block after vale and before `gate: ok`, run only when `web/package.json` is tracked. The Go checks are unchanged |
@@ -189,9 +195,12 @@ worktree printed `ls: cannot access 'web': No such file or directory`, so the ch
 
 ### The strings the tests write out
 
-The browser zone is `Europe/London` in every page test. At these instants London's date differs
-from Alaska's, so a page that takes "Today" or the hour from the browser's zone fails. The clock
-is pinned to the snapshot's `generated_at` unless the row says otherwise.
+The browser zone is `Europe/London` in every page test. A page that takes the hour from the
+browser's zone fails every row. For `started` and `fast`, London's date also differs from
+Alaska's, so a page that takes "Today" from the browser's zone fails there too. For `slow` the
+two dates agree, and only the hour tells the zones apart. The clock is pinned to the snapshot's
+`generated_at` unless the row says otherwise. Each time word below is "Today" because the
+session falls on the clock's Alaska date.
 
 | State | Widget | Tab title | Elsewhere |
 | --- | --- | --- | --- |
@@ -202,11 +211,19 @@ is pinned to the snapshot's `generated_at` unless the row says otherwise.
 | `big` | "Ready now" | "Ready now · cc-desk" | |
 | `guess` | | | The front page: n-guess with "200 of 300 minutes"; after the test sets `guess_minutes_total` to 250, "250 of 300 minutes" |
 | `two` | | | The rows of n-two and s-two: "Waiting" and the two-pass limit's words |
-| `stale` | | | "Stale", `releases/alpha.json: invalid character ',' looking for beginning of object key string`, and "2:00 pm", over the `started`-era snapshot |
+| `redraw` | Before "Today, about 8:00 pm", "6:00 pm to 9:30 pm"; after "Today, about 8:05 pm", "6:05 pm to 9:35 pm" (clock pinned at 23:00Z throughout) | | p13's row goes from the `not_started` words to "Building" |
+| `stale` | Still "Today, about 8:00 pm" under the banner | | "Stale", `releases/alpha.json: invalid character ',' looking for beginning of object key string`, and the last good time "Today, 2:00 pm" |
+| Not JSON | Still the last snapshot's widget | | "Stale" and the app's fixed phrase, with "Today, 2:00 pm" |
+| No snapshot | | "No state yet · cc-desk" | "No state yet" alone; on a later non-JSON write, "No state yet" and the fixed phrase |
+| Server stopped | Still the last widget | | "Not connected" and the last answer's time as "Today, 2:00 pm" |
+
+The executor may reword a banner's surrounding text to Survey's writing standard. The words the
+design quotes ("Stale", "No state yet", "Not connected", the five pass words, the four widget
+states) stay exact, and the test writes out whatever wording lands.
 
 ## Tasks
 
-The path is the sum, 95 minutes, since the tasks run in order. Each task commits by path, runs
+The path is the sum, 125 minutes, since the tasks run in order. Each task commits by path, runs
 the gate bare before the commit, and pushes. Each task's report names the gate run's conclusion
 on its pushed commit from `gh run list --branch page-front`, or "no run yet" with the link.
 
@@ -223,28 +240,34 @@ gate and CI run its checks before anything is drawn.
   bg-base-100 text-base-content` as the mockup's `app.html` does.
 - The root `+layout.ts` sets `ssr = false`. The page reads "cc-desk" and nothing else.
 - `playwright.config.ts`: `retries: 0`, `forbidOnly: true`, one Chromium project, a JSON report
-  to a file in `test-results/`, and `webServer` left out, since the fixture in task 2 starts the
-  app.
+  to a file in `test-results/`, and `webServer` left out, since `tests/app.ts` starts the app.
+- `tests/app.ts` is a Playwright fixture that starts `node build` on a free port with
+  `HOST=127.0.0.1` and `CC_DESK_STATE_DIR` set to a fresh `mkdtemp` folder, waits for it to
+  answer, and stops it at teardown. Task 2 extends it.
 - One test, `tests/empty.spec.ts`, opens the built app and finds "cc-desk".
 - `scripts/gate.sh` gains the page block after vale and before `gate: ok`, run only when
   `git ls-files --error-unmatch web/package.json` succeeds. It runs, in `web/`, `npm ci`,
-  `npm run check`, `npm run build`, `npx playwright test --list` (keeping the count from its
-  `Total:` line, singular or plural), then `npx playwright test`, then
+  `npm run check`, `npm run build`, `npx playwright test --list --reporter=list` (keeping the
+  count from its `Total:` line, singular or plural), then `npx playwright test`, then
   `web/scripts/check-playwright-report.sh <report> <count>`. A missing or zero count fails. The
-  header comment names the page steps.
+  `--reporter=list` matters: a plain `--list` rewrites the JSON report with every test skipped.
+  The gate runs `npm ci` itself even though CI ran it a step earlier; the cost is about 30
+  seconds, and it keeps the local gate and CI the same. The header comment names the page steps.
 - `web/scripts/check-playwright-report.sh` fails, naming the figure, unless `stats.expected`
-  equals the count and `stats.skipped`, `stats.unexpected`, and `stats.flaky` are 0. It uses
-  `jq`, which the gate already requires.
+  equals the count and `stats.skipped`, `stats.unexpected`, and `stats.flaky` are 0. It also
+  fails when any file under `web/tests/` calls `test.fail` or `test.fixme`, since a `test.fail`
+  test counts as expected. It uses `jq`, which the gate already requires.
 - `gate.yml`: after `setup-go`, `actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 #
   v7.1.0` with `node-version: 26`; the step `git config --global url."https://github.com/".insteadOf
-  "ssh://git@github.com/"` with phonebook's comment; `npm ci` in `web/`; then `npx playwright
+  "ssh://git@github.com/"` with the comment from `phonebook`; `npm ci` in `web/`; then `npx playwright
   install --with-deps chromium` in `web/`. `timeout-minutes` goes to 30.
 - `.gitignore` gains the three `web/` paths.
 - Run `find web/node_modules -name '*.go' | wc -l` and record it. A count above 0 takes
   standing answer 24.
 
 Files: `web/` config files, `web/src/app.*`, `web/src/routes/+layout.ts`, `+page.svelte`,
-`web/playwright.config.ts`, `web/tests/empty.spec.ts`, `web/scripts/check-playwright-report.sh`,
+`web/playwright.config.ts`, `web/tests/app.ts`, `web/tests/empty.spec.ts`,
+`web/scripts/check-playwright-report.sh`,
 `scripts/gate.sh`, `.github/workflows/gate.yml`, `.gitignore`. Class `runner`.
 
 Test: `tests/empty.spec.ts`, and `go test -count=1 ./e2e -run TestGateFailsOnSkip`, which must
@@ -255,7 +278,7 @@ web build`, `gate: web tests`, and `gate: ok`. The draft PR exists, and the gate
 task's commit is `success` in `gh run list --branch page-front`. That green run proves the
 install, the browser, and the rewrite on a runner before anything is drawn.
 
-### Task 2: the server, the snapshot type, and the test harness (20 minutes)
+### Task 2: the server, the snapshot type, and the test helpers (20 minutes)
 
 Outcome: the server reads the state folder read-only and answers the poll, and the snapshot type
 matches what the real binary prints.
@@ -268,7 +291,7 @@ matches what the real binary prints.
   file's, or the last good one), the error file's message or the app's parse-error text, the last
   good snapshot's `generated_at`, and whether no snapshot has ever been read. The app's
   parse-error text starts with a fixed phrase the app writes, such as "snapshot.json isn't valid
-  JSON:", followed by the parser's message. Tests match the fixed phrase only, since the parser's
+  JSON:", followed by the message from `JSON.parse`. Tests match the fixed phrase only, since that message's
   wording changes with Node.
 - `hooks.server.ts` answers 405 to every method but `GET` and `HEAD`.
 - `src/lib/snapshot.ts` mirrors every field of `internal/snapshot/snapshot.go`'s `Snapshot`,
@@ -276,15 +299,17 @@ matches what the real binary prints.
   `OpenGuess`, and the ruling in `internal/state/types.go`, with `null` where Go has a pointer and
   `omitempty` fields optional. Codes are `string`, so a new code from the Sessions round still
   type-checks.
-- The harness: `tests/global-setup.ts` runs `go build -o <temp>/cc-desk ./cmd/cc-desk` from the
+- The test helpers: `tests/global-setup.ts` runs `go build -o <temp>/cc-desk ./cmd/cc-desk` from the
   repo root once. `tests/state.ts` copies a fixture from `e2e/testdata/` into a fresh `mkdtemp`
   folder and runs verbs on it as the mechanism table says, with the usage stand-in and `PATH` of
-  `/usr/bin:/bin`. `tests/app.ts` is a Playwright fixture that starts `node build` on a free port
-  with `HOST=127.0.0.1` and `CC_DESK_STATE_DIR` set to the test's folder, waits for it to answer,
-  and offers `stop()` and `start()` on the same port. Teardown stops it and removes the folder.
+  `/usr/bin:/bin`. It writes any file a test edits (the 250 total, the non-JSON text, a restored
+  release) to a temporary name in the same folder and renames it over the target, as the binary
+  does, so the server never reads half a file. `tests/app.ts` gains the test's state folder and
+  `stop()` and `start()` on the same port. If `start()` finds the port taken, it starts on a
+  fresh port once and moves the page there. Teardown stops the server and removes the folder.
 - `tests/snapshot-type.spec.ts` prints every state in the binary table, plus a stopped pass,
   writes each as a `.ts` file holding `<json> satisfies Snapshot` under a temporary folder, and
-  runs `tsc --noEmit` on them. It fails with tsc's output.
+  runs `tsc --noEmit` on them. It fails with the output of `tsc`.
 - `tests/server.spec.ts`: `POST` and `PUT` to `/` and `/api/state` get 405, `HEAD` gets 200.
 
 Files: `web/src/lib/server/state.ts`, `web/src/routes/api/state/+server.ts`,
@@ -294,7 +319,7 @@ Files: `web/src/lib/server/state.ts`, `web/src/routes/api/state/+server.ts`,
 
 Acceptance check: `npx playwright test tests/snapshot-type.spec.ts tests/server.spec.ts` passes.
 Then, once each and reverted before the commit, remove one field from the type and add one field
-to it. Each run fails with tsc's `TS2353` and `TS2741` lines; paste both into the task's report.
+to it. The first run fails with `tsc` error `TS2353` and the second with `TS2741`; paste both lines into the task's report.
 
 ### Task 3: the words and the times (10 minutes)
 
@@ -307,16 +332,21 @@ Outcome: one table words every code, and one formatter words every time.
   "midnight". "Today" and "Tomorrow" come from comparing Alaska dates of the browser's clock and
   the time. A range shows its two times, bare, joined by "to". A null shows an en dash with
   "None" as its screen-reader text.
-- `tests/words.spec.ts` collects every code from every snapshot task 2's type test prints and
-  fails naming each code with no entry. It also checks the five pass words exactly.
+- `tests/words.spec.ts` does two checks. First, it asserts an entry for every code in the
+  written-out list below, which the test copies from the Go constants rather than reading Go.
+  Second, it collects every value of the code fields from every snapshot task 2's type test
+  prints and fails naming each one with no entry. The code fields are pass and round `state`,
+  `stop_reason`, `needs.kind`, `limits[]`, `guess_outcome`, `answer_kind`, and
+  `next_session.state`. `why_not`, `next_session.reasons`, and `needs.reason` hold prose and are
+  shown as written. It also checks the five pass words exactly.
 
 Key codes, from `internal/snapshot/snapshot.go` and `internal/state/types.go`: pass states
 `not_started`, `waiting`, `building`, `stopped`, `done`; round states `not_designed`,
 `not_started`, `building`, `done`; stop reasons `usage`, `irreversible`, `secret`, `auth_data`,
 `scope`; limits `two_pass_limit`, `usage`; needs kinds `questions`, `nothing`, `not_designed`;
-guess outcomes and answer kinds `ruling`, `carried`; next-session states `needs_you_now`,
-`ready_now`, `scheduled`, `nothing_waiting`. The executor checks this list against the Go source
-as it stands and adds any code it finds.
+guess outcomes `held`, `missed` (`snapshot.go:378-379`); answer kinds `ruling`, `carried`;
+next-session states `needs_you_now`, `ready_now`, `scheduled`, `nothing_waiting`. The executor
+checks this list against the Go source as it stands after a rebase and adds any code it finds.
 
 Files: `web/src/lib/words.ts`, `web/src/lib/time.ts`, `web/tests/words.spec.ts`. Class
 `ordinary`.
@@ -324,7 +354,7 @@ Files: `web/src/lib/words.ts`, `web/src/lib/time.ts`, `web/tests/words.spec.ts`.
 Acceptance check: `npx playwright test tests/words.spec.ts` passes. Remove one entry and it fails
 naming that code; paste the line into the task's report and restore the entry.
 
-### Task 4: the sidebar and the front page (25 minutes)
+### Task 4: the sidebar and the front page (35 minutes)
 
 Outcome: the sidebar and the front page draw the snapshot as the design's "What each page shows"
 says, laid out as the mockup is.
@@ -334,10 +364,21 @@ says, laid out as the mockup is.
   `mock.css`, `app.css`, and `screens/front-page.png`. The mockup settles the layout. Its rules
   that use tokens only may be carried over; its copy of Survey stays behind, and so do "Reports
   to read", "In review", and "Stalled".
-- The sidebar, about 23rem wide, in the design's order: the next-session widget (the only box),
-  "Waiting for you" (each line links to `/<project>/<round>`, which pass 2 builds; empty, it
-  reads "Nothing"), and "Running" with one block per release. The scale bar's segments grow by
-  planned minutes. "Rough" sits beside the release name when its `rough` is set.
+- The sidebar, about 23rem wide, in the design's order.
+  1. The next-session widget, the only box: the state in words, then the time and its range,
+     then the count of questions, rounds, and projects, and any round in `not_designed` named as
+     not designed yet. The four states read "Needs you now", "Ready now", the time, and
+     "Nothing waiting". "Needs you now" lists each of `next_session.reasons` as written. "Rough"
+     sits beside the time when `next_session.rough` is true (standing answer 28).
+  2. "Waiting for you": one line per `waits_for_geoff` entry, each linking to
+     `/<project>/<round>`, which pass 2 builds. Empty, it reads "Nothing".
+  3. "Running", one block per release: the scale bar with a segment per round as wide as its
+     share of planned minutes, "N of M rounds done", and the percent of planned minutes done
+     (standing answer 33). "Rough" sits beside the release name when its `rough` is true. A
+     small triangle under a segment marks a round that needs Geoff: one not `done` whose
+     `needs.kind` is `not_designed`, or is `questions` with at least one question whose
+     `answered` is false (`snapshot.go:327-340`). Each round with a pass building
+     shows under the bar with a bar of its passes and its state in words.
 - The front page: what the next session covers (each round, its question texts, and its needed
   time), then a board per release with running rounds opened to their passes. Waiting passes
   show their limits' words and the reset text when there is one. Open guesses show their minutes
@@ -348,29 +389,49 @@ says, laid out as the mockup is.
   written out in the test. The `variant` state edits `releases/beta.json` in the test's copy of
   the fixture, never in `e2e/`. The `guess` test edits `guess_minutes_total` in the copy's
   `snapshot.json`, then waits for the redraw.
+- `tests/sidebar.spec.ts` asserts, on `started`, each release block's "N of M rounds done" and
+  percent, the triangle under each round that needs Geoff and under no other, the building
+  round shown under alpha's bar, and "Waiting for you" reading "Nothing" (that list is empty in
+  `state`). On `big` it asserts the two "Waiting for you" lines and their links. The executor
+  reads each figure from the printed snapshot by hand once, then writes it out in the test.
 
 Files: `web/src/routes/+layout.svelte`, `web/src/routes/+page.svelte`, `web/src/lib/*.svelte`,
-`web/src/app.css`, `web/tests/estimate.spec.ts`, `web/tests/order.spec.ts`. Class `ordinary`.
+`web/src/app.css`, `web/tests/estimate.spec.ts`, `web/tests/order.spec.ts`,
+`web/tests/sidebar.spec.ts`, `web/tests/screenshots.ts`. Class `ordinary`.
 
-Acceptance check: `npx playwright test tests/estimate.spec.ts tests/order.spec.ts` passes. Take
-one screenshot of the `started` front page in light and one in dark, and put them in the PR.
+Acceptance check: `npx playwright test tests/estimate.spec.ts tests/order.spec.ts
+tests/sidebar.spec.ts` passes. `tests/screenshots.ts`, a script run by path and outside the
+suite, takes the `started` front page with `page.emulateMedia({ colorScheme: 'light' })` and
+`'dark'` and writes both under `$CLAUDE_JOB_DIR/tmp/shots/`, never in the repo. Upload both to
+the PR body.
 
-### Task 5: the poll and the banners (10 minutes)
+### Task 5: the poll and the banners (15 minutes)
 
 Outcome: the page redraws within 5 seconds of a change and shows the four banners.
 
-- `src/lib/poll.svelte.ts` fetches `/api/state` every 2 seconds with a 5-second timeout. A
-  failed fetch shows "Not connected" with the time of the last answer and keeps the last state
-  drawn. The next good answer clears it.
+- `src/lib/poll.svelte.ts` fetches `/api/state` every 2 seconds, with
+  `AbortSignal.timeout(5000)` on each fetch. A failed or timed-out fetch shows "Not connected"
+  with the time of the last answer and keeps the last state drawn. The next good answer clears
+  it. The connection state comes from whether each fetch succeeds, never from a `Date`
+  difference, because `page.clock.setFixedTime` freezes `Date.now()` while timers still run.
 - The banners, from the design's table: "Stale" with the message and the last good time over the
-  last good snapshot; "No state yet" alone; the same "Stale" banner for text that isn't JSON; and
-  "Not connected".
-- `tests/redraw.spec.ts`, one test per sentence of done item 5. The replace step runs `pass
-  start alpha p13` on the open `started`-era copy and waits for the new state. The stale step
-  breaks `releases/alpha.json` as the `stale` row says and runs a verb. The clear step restores
-  the file and runs `snapshot`, which removes the error file. The non-JSON step writes text over
-  `snapshot.json`. "No state yet" starts the app on a copy of `order`, which has no
-  `snapshot.json`. The stop step calls the fixture's `stop()` and `start()`.
+  last good snapshot; "No state yet" alone; the same "Stale" banner for text that isn't JSON over
+  the last snapshot; "No state yet" with the parse error when no good snapshot was ever read;
+  and "Not connected".
+- `tests/redraw.spec.ts`, one test per sentence of done item 5, each on a fresh copy of `state`
+  unless it says otherwise, with the strings in the `redraw` and banner rows above.
+  1. Replace: open the page, then run `pass start alpha p13` at 23:05Z, and wait for "Today,
+     about 8:05 pm" and p13's "Building".
+  2. Stale: break `releases/alpha.json` as the `stale` row says, run `pass start alpha p13` at
+     23:05Z, and wait for the banner over the 23:00Z snapshot.
+  3. Clear: after step 2's state, restore the file, run `snapshot` at 23:00Z (which removes the
+     error file), and wait for the banner to go.
+  4. Not JSON: write text over `snapshot.json` and wait for the banner over the last snapshot.
+  5. No state: start the app on a copy of `order`, which has no `snapshot.json`, and find "No
+     state yet". Then write text over `snapshot.json` and find "No state yet" with the fixed
+     phrase.
+  6. Stopped: call the fixture's `stop()`, wait for "Not connected", call `start()`, and wait for
+     it to clear.
 - The 5-second and 10-second limits are the tests' timeouts for those assertions.
 
 Files: `web/src/lib/poll.svelte.ts`, `web/src/routes/+layout.svelte`, `web/src/lib/*.svelte`,
@@ -378,7 +439,7 @@ Files: `web/src/lib/poll.svelte.ts`, `web/src/routes/+layout.svelte`, `web/src/l
 
 Acceptance check: `npx playwright test tests/redraw.spec.ts` passes.
 
-### Task 6: the gate's failures, the review, and the PR (5 minutes)
+### Task 6: the gate's failures, the review, and the PR (20 minutes)
 
 Outcome: done item 10 has its evidence, the branch is reviewed, and the PR is ready.
 
@@ -386,9 +447,10 @@ Outcome: done item 10 has its evidence, the branch is reviewed, and the PR is re
 2. With one test changed to `test.skip`, uncommitted: `bash scripts/gate.sh` fails naming the
    skipped figure. Revert.
 3. `PLAYWRIGHT_BROWSERS_PATH=/nonexistent bash scripts/gate.sh` fails at the Playwright run.
-4. A short run: `npx playwright test --grep redraw` from `web/`, then
-   `bash web/scripts/check-playwright-report.sh <its report> <the full listed count>` fails naming
-   the count.
+4. A short run: take the full count first, from `npx playwright test --list --reporter=list`
+   in `web/`. Then run `npx playwright test --grep redraw`, and
+   `bash web/scripts/check-playwright-report.sh <its report> <that count>` fails naming the
+   count.
 5. Rebase on `origin/main`; a Sessions snapshot change takes standing answer 16.
 6. One whole-branch `standards:diff-reviewer` read, folded. Then the PR body and ready.
 
@@ -436,6 +498,12 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
   seen. No literal values.
 - **32. The path runs past 180 minutes.** Round standing answer 14: the pass parks under
   `## Stop` in `docs/STATUS.md`.
+- **33. "Does no other arithmetic" and the Running block.** The design's sidebar asks for
+  segments as wide as each round's share of planned minutes, "2 of 17 rounds done", and the
+  percent of planned minutes done, and `Release` carries none of them (`snapshot.go:37-44`). The
+  page counts and sums these from the snapshot's rounds for display. The rule bars the page from
+  deriving any estimate, time, or rule outcome, which all come from the snapshot. This never
+  falls to standing answer 26.
 
 ## Decisions
 
@@ -459,6 +527,31 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
 - [planner] No `[advisor]` line in the State and rules PRs (#3 to #6) changes this pass. Two it
   builds on: `ready_now` can carry a time and a null range (#4), and `next_session.reasons` is
   `[]` when empty (#5).
+
+- [review] The plan-reviewer's read at `4be04f6`, folded:
+  1. Task 5's replace step now runs on a fresh `state` copy, with its probed before and after
+     strings in a new `redraw` row.
+  2. `tests/app.ts` moves into task 1, so the empty test can open the built app.
+  3. Task 4 lists every sidebar item the design names, with `tests/sidebar.spec.ts`, and
+     standing answer 33 settles the display sums.
+  4. The guess outcomes are `held` and `missed`, the words test also checks the written list,
+     and it names the code fields.
+  5. The count comes from `--list --reporter=list`, before any short run.
+  6. A bad-JSON write with no good snapshot gets its own step.
+  7. Test writes rename a temporary file over the target.
+  8. The strings table now has the banners and their times, and the zone claim is narrowed to
+     `started` and `fast`.
+  9. The poll judges the connection by fetch result and `AbortSignal.timeout`.
+  10. The screenshots get a script, `emulateMedia`, and a path outside the repo.
+  11. Task 4 goes to 35 minutes, task 5 to 15, task 6 to 20, and the path to 125.
+  12. The pinned versions now include `@types/node`, the `@fontsource` packages, and `@lucide/svelte`.
+  13. This line exists.
+  14. The gate's second `npm ci` stays, with its reason.
+  15. The report check also rejects `test.fail` and `test.fixme`.
+  16. `start()` moves to a fresh port once if the old one is taken.
+  17. The executor prompt points at the worktree's copies.
+  The reviewer also reported that one of its probes ran `npm cache clean --force`, which emptied
+  the user npm cache. It refills on the next install, and nothing in the repo changed.
 
 ## Planning misses
 
