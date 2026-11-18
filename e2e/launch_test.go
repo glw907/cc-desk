@@ -150,7 +150,7 @@ func TestLaunchFreePass(t *testing.T) {
 	}
 
 	sess := r.sessionOf(t, "a")
-	if sess["name"] != "proj-a" || sess["branch"] != "a" || sess["worktree"] != worktree || sess["short_id"] == "" || sess["session_id"] == "" {
+	if sess["name"] != "proj-a" || sess["branch"] != "a" || sess["worktree"] != worktree || sess["short_id"] != "b0000001" || sess["session_id"] != "b0000001-0000" {
 		t.Errorf("session record = %v", sess)
 	}
 }
