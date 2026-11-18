@@ -51,8 +51,11 @@ or `$CLAUDE_JOB_DIR/tmp`.
   alternatives.
 - Reviewed: no review before code, as the `ordinary` class sets (`pass-core` "Plan review
   lens"). The close gets one whole-branch `standards:diff-reviewer` read.
-- Evidence: the mechanism table and the recorded searches below. Each acceptance check was run
-  on today's code before any code was written; the outputs are under `## Acceptance`.
+- Evidence: the mechanism table and the recorded searches below. Both acceptance checks were run
+  on today's code before any code was written: `bash scripts/gate.sh` and `npx playwright test
+  tests/items.spec.ts`. Their outputs, with the built-app probe, are under `## Acceptance`. One
+  mechanism is quoted but not probed, `getByLabel` on a `dd`; standing answer 44 holds its
+  fallback.
 
 ### Refused commands and their alternatives
 
@@ -85,7 +88,8 @@ or `$CLAUDE_JOB_DIR/tmp`.
 | A stopped pass carries a reason and no stop time | `snapshot.go:357-360` sets `StopReason`; `docs/follow-ups/snapshot-stop-times.md` says no stop time is in the snapshot |
 | `ruling record` runs only from a registered desk, so a fixture's rulings are input files | `cc-desk ruling record --help`: "A session that is not a registered desk, a command that does not run under the desk's process, and a desk process with no terminal are each refused." `e2e/testdata/state/` holds `rulings.jsonl` and `desks.json` as input |
 | The doc-page classes live in the mockup, not in Survey or the app | `.page`, `.page-main`, `.doc-meta`, `.doc-title`, and `.prose-doc` are at `docs/specs/2026-11-17-cc-desk-mockups/src/lib/survey/app.css:120-205`, `.calls li` at `src/lib/mock.css:208`. `git grep` finds none of them in `web/src` or in Survey's `theme/` sheets. `web/src/app.css:17` already defines `--doc-measure` |
-| Labeled figures can be read by label | Playwright's `getByLabel` matches an element by `aria-labelledby` or `aria-label`, as well as form controls. Task 2 uses `aria-labelledby` from each figure to its term |
+| Labeled figures can be read by label | Quoted, not probed. `web/node_modules/playwright-core/types/types.d.ts:3100`: "Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the `aria-label` attribute." The docs speak of input elements, so a `dd` with `aria-labelledby` is unproven; task 2 checks it first, and standing answer 44 holds the fallback |
+| Existing tests the new links can break | `sidebar.spec.ts:42` expects no link inside the "Waiting for you" region on `started`, so the rulings link sits outside that region. `empty.spec.ts:6` finds the link named "cc-desk", which a "Rulings" link doesn't match. `redraw.spec.ts:28` expects no `data-pass` row for `alpha/p13` before it starts. No board test counts links or matches a round row's whole text |
 
 ### What the binary prints for each test state
 
@@ -159,7 +163,8 @@ The two items, word for word from the page design.
    en dash.
    - Met by tasks 1 to 3. Shown by `npx playwright test tests/items.spec.ts` in `web/`, run by
      the gate.
-   - Before: `tests/items.spec.ts` doesn't exist. The probe above printed 404 for `/alpha/r1`.
+   - Before: `npx playwright test tests/items.spec.ts`, run in `web/` at `893ceab`, printed
+     `Error: No tests found.` and exited 1. The probe above printed 404 for `/alpha/r1`.
      `ReleaseBoard.svelte:58` draws a pass name as `<span class="t">`, with no link, and a
      closed round draws no pass at all.
 10. **The gate.** `bash scripts/gate.sh` passes, and it now runs the page's checks. A
@@ -308,8 +313,11 @@ Outcome: every round and pass has a page at its address showing what the design 
   summary; its state in words, and for a stopped pass the reason in words
   (`word('stopReason', …)`) and no "since"; the figures; what it needs; and the same command,
   with the pass's round.
-- The figures are a `dl`. Each value carries `aria-labelledby` pointing at its term, so a test
-  reads it with `getByLabel`. A round shows planned minutes, actual minutes, minutes of work
+- The figures are a `dl`. Each `dd` itself carries `aria-labelledby` pointing at its `dt`'s id,
+  so a test reads it with `getByLabel`. Never put the label on an inner `span` or `div`: a
+  generic element can't be named, and pass 3's accessibility walk would flag it. Before writing
+  the rest of the tests, check with one figure that `getByLabel` finds the `dd`; if it doesn't,
+  standing answer 44. A round shows planned minutes, actual minutes, minutes of work
   before it, and needed time; a not-designed round also shows its forecast time. A pass shows
   planned, actual, before, and needed. A null value is the en dash with "None" as `sr-only` text,
   as the front page does. Figures take a thousands comma. Times use `formatWhen` from
@@ -350,7 +358,7 @@ Outcome: every round and every pass has a link on the front page whose address i
   `a[href]` values and fails naming each item with no link. For each item it then opens the
   link, checks the `h1` is the item's name, and checks the planned and before figures by label
   against the snapshot's numbers (with the en dash for null). On `started` that is 5 rounds and
-  19 passes; on `twin`, 4 rounds and 3 passes.
+  19 passes; on `twin`, 4 rounds and 4 passes.
 
 Files: `web/src/lib/ReleaseBoard.svelte`, `web/tests/items.spec.ts`. Class `ordinary`.
 
@@ -367,7 +375,8 @@ home.
   (`formatWhen`), its question's text from the question-text finder or the en dash with "None"
   when it has no question, and Geoff's words. With no rulings it reads "No rulings yet".
 - The rail gains a "Rulings" link to `/rulings`, after the "Waiting for you" and "Running"
-  sections or beside the app's name, as the executor finds reads best.
+  sections or beside the app's name, as the executor finds reads best. It never sits inside the
+  "Waiting for you" region, which `sidebar.spec.ts:42` expects to hold no link on `started`.
 - `web/src/routes/+error.svelte`: for a 404, a heading that reads not found and a link to `/`;
   any other status shows its message with the same link.
 - Tests: `tests/rulings.spec.ts` (the two rulings rows of the strings table, and the order) and
@@ -431,6 +440,13 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
 - **43. `page-front` lands or moves mid-pass.** Merge `origin/page-front` (or `origin/main` once
   it holds pull request 7) into `page-items`, run the gate, and go on. Never rebase a pushed
   branch.
+- **44. `getByLabel` doesn't find a `dd`.** Keep `aria-labelledby` on the `dd` and read the
+  figure with `getByRole('definition', { name: <label> })`. If that finds nothing either, put
+  `aria-label` with the same words on the `dd` and try both locators once more. Never move the
+  label to an inner element, and never fall back to a test id. Record which locator landed under
+  `## Decisions`.
+- **45. The click-ahead test times out.** Split it into one test per release and state, so no
+  single test opens all 24 pages of `started`. Never raise the global timeout or add retries.
 
 ## Decisions
 
