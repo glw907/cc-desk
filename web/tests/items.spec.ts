@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from './app';
 import { show } from './page';
@@ -108,3 +110,74 @@ test.describe('a pass page', () => {
 		await expect(page.locator('main')).not.toContainText('since');
 	});
 });
+
+// The click-ahead: every round and pass in the snapshot is one link from the front page.
+interface Item {
+	address: string;
+	name: string;
+	planned: number | null;
+	before: number | null;
+}
+interface Counts {
+	releases: {
+		project: string;
+		rounds: {
+			name: string;
+			planned_minutes: number | null;
+			minutes_before: number | null;
+			passes: { name: string; planned_minutes: number | null; minutes_before: number | null }[];
+		}[];
+	}[];
+}
+
+/** Minutes as the page writes them: a thousands comma, and one minute in the singular. */
+const written = (n: number | null) =>
+	n === null ? '–' : n === 1 ? '1 minute' : `${n.toLocaleString('en-US')} minutes`;
+
+for (const [state, rounds, passes] of [
+	['started', 5, 19],
+	['twin', 4, 4]
+] as const) {
+	test(`every item on ${state} has a front-page link to its own page`, async ({ app, page }) => {
+		await show(app, page, state);
+		const snapshot = JSON.parse(
+			readFileSync(path.join(app.stateDir, 'snapshot.json'), 'utf8')
+		) as Counts;
+		const items: Item[] = [];
+		for (const { project, rounds: rs } of snapshot.releases) {
+			for (const r of rs) {
+				items.push({
+					address: `/${project}/${r.name}`,
+					name: r.name,
+					planned: r.planned_minutes,
+					before: r.minutes_before
+				});
+				for (const p of r.passes) {
+					items.push({
+						address: `/${project}/${r.name}/${p.name}`,
+						name: p.name,
+						planned: p.planned_minutes,
+						before: p.minutes_before
+					});
+				}
+			}
+		}
+		expect(items.length).toBe(rounds + passes);
+
+		await expect(page.locator('main a[href]').first()).toBeVisible();
+		const hrefs = await page
+			.locator('main a[href]')
+			.evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+		const missing = items.filter((i) => !hrefs.includes(i.address)).map((i) => i.address);
+		expect(missing, `items with no front-page link: ${missing.join(', ')}`).toEqual([]);
+
+		for (const item of items) {
+			await page.goto(app.url + item.address);
+			await expect(page.getByRole('heading', { level: 1 }), item.address).toHaveText(item.name);
+			await expect(figure(page, 'Planned'), item.address).toContainText(written(item.planned));
+			await expect(figure(page, 'Work before it'), item.address).toContainText(
+				written(item.before)
+			);
+		}
+	});
+}

@@ -212,6 +212,8 @@ a.rail-row:hover {
 }
 .ahead a:hover,
 .rounds a.t:hover,
+.pass-links a:hover,
+.passes a.t:hover,
 .branch-title:hover {
 	text-decoration: underline;
 }
@@ -272,6 +274,15 @@ a.rail-row:hover {
 }
 .passes .t {
 	flex: 1;
+}
+/* The passes of a round that is not open: small, muted, and run together under its line. */
+.pass-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-4px) var(--spacing-12px);
+	margin-block: var(--spacing-2px);
+	font-size: var(--text-step-4);
+	color: var(--color-muted);
 }
 .passes .why {
 	flex-basis: 100%;

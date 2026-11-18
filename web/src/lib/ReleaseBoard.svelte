@@ -1,7 +1,8 @@
 <!--
 @component
 One release on the front page: every round in order, with a building round, or one holding a
-waiting or stopped pass, opened to show its passes. A waiting pass shows why it waits.
+waiting or stopped pass, opened to show its passes. A waiting pass shows why it waits. Every other
+round lists its passes as plain links, so each pass is one click from the front page.
 -->
 <script lang="ts">
 	import ScaleBar from './ScaleBar.svelte';
@@ -55,7 +56,7 @@ waiting or stopped pass, opened to show its passes. A waiting pass shows why it 
 						{#each round.passes as pass (pass.name)}
 							{@const wait = waitingFor(pass.name)}
 							<li class={pass.state} data-pass="{release.project}/{pass.name}">
-								<span class="t">{pass.name}</span>
+								<a class="t" href="/{release.project}/{round.name}/{pass.name}">{pass.name}</a>
 								<span class="s state {pass.state}">{word('passState', pass.state)}</span>
 								{#if pass.state === 'stopped' && pass.stop_reason}
 									<span class="why">{word('stopReason', pass.stop_reason)}</span>
@@ -68,6 +69,12 @@ waiting or stopped pass, opened to show its passes. A waiting pass shows why it 
 							</li>
 						{/each}
 					</ol>
+				{:else if round.passes.length > 0}
+					<ul class="pass-links">
+						{#each round.passes as pass (pass.name)}
+							<li><a href="/{release.project}/{round.name}/{pass.name}">{pass.name}</a></li>
+						{/each}
+					</ul>
 				{/if}
 			</li>
 		{/each}
