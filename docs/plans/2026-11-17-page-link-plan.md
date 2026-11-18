@@ -19,9 +19,9 @@ skill (round standing answer 19).
 
 Worktree `/var/home/glw907/Projects/cc-desk/.claude/worktrees/page-link`, branch `page-link`,
 cut from `origin/page-surface` at `31b712f` (pull request 11, open, which carries pull requests 9
-and 7, open). The branch tracks `origin/page-surface`, so every push names its target:
-`git push -u origin page-link`, then `git push origin page-link`. A bare `git push` would land on
-pull request 11's branch. PR base: `main`. Before the PR is ready, merge `origin/page-surface` in
+and 7, open). The plan's commit is already on `origin/page-link`, and the branch tracks it.
+Every push still names its target, `git push origin page-link`, so no push can land on pull
+request 11's branch. PR base: `main`. Before the PR is ready, merge `origin/page-surface` in
 again if it moved, and `origin/main` if main moved. The Sessions round runs beside this one. This
 pass edits no Go file, nothing under `e2e/`, `internal/`, or `cmd/`, and neither
 `scripts/gate.sh` nor the workflow, and it messages none of that round's sessions.
@@ -34,9 +34,10 @@ it, as the design's "Steps only Geoff can do" says (see `## Decisions`). The aut
 `cc-desk-page-surface` and `cc-desk-page-link` may install and enable the user unit
 cc-desk-page.service, listening on 127.0.0.1:7908, and register a desktop handler for the
 cc-desk:// scheme." Every other write is inside the worktree, a test's `mkdtemp` folder,
-`$CLAUDE_JOB_DIR/tmp`, `~/.local/share/cc-desk/link/`, or the one file
+`$CLAUDE_JOB_DIR/tmp`, `~/.local/share/cc-desk/link/`, the one file
 `~/.local/share/applications/cc-desk.desktop` and the cache `update-desktop-database` rewrites
-beside it.
+beside it, and, through `install-page.sh` in task 3, `~/.local/share/cc-desk/page/` and a
+restart of `cc-desk-page.service`, both covered by the same entry.
 
 - Permissions checked: `~/.local/state/claude-denials.jsonl`, read again on 2026-11-18 for this
   pass over 2026-10-19 to 2026-11-18. 130 rows, 2026-11-01T00:55:05Z to 2026-11-18T06:27:23Z,
@@ -51,7 +52,9 @@ beside it.
   build`, `npx playwright test`, `bash scripts/gate.sh`, `bash web/scripts/install-link.sh`
   (`install`, `desktop-file-validate`, `update-desktop-database`), `bash
   web/scripts/check-link.sh` (`xdg-open`, which starts the handler and through it `ptyxis -x`),
-  `xdg-mime query default`, `jq` reading Chromium's `Preferences` file, `git push -u origin
+  `xdg-mime query default`, `jq` reading Chromium's `Preferences` file, `bash
+  web/scripts/install-page.sh` (`npm run build`, `systemctl --user restart`), `go build -o` into
+  `$CLAUDE_JOB_DIR/tmp`, `node tests/screenshots.ts` run by path, `curl` of `127.0.0.1:7908`, `git push -u origin
   page-link`, `gh pr create --draft`, `gh pr ready`, `gh pr checks`, and `gh run list`. A search
   of the rows' targets for `xdg-open`, `xdg-mime`, `xdg-settings`, `update-desktop-database`,
   `desktop-file-validate`, `ptyxis`, `.desktop`, `applications`, and `Preferences` found none.
@@ -169,7 +172,7 @@ The two items, word for word from the page design.
       above 91 that holds `link.spec.ts`'s tests, and `gate: ok`; by `git diff 31b712f --
       scripts/gate.sh web/scripts/check-playwright-report.sh .github` printing nothing, so the
       skipped-test and no-browser failures pull request 11 showed still hold; and by the short
-      run in task 4 step 2.
+      run in task 4 step 5.
     - Before: `bash scripts/gate.sh`, run bare at `31b712f` on 2026-11-18, printed `gate:
       gofmt`, `gate: go vet`, `gate: go test` (seven `ok` packages), `gate: vale`, `gate: web
       install`, `gate: web check`, `gate: web build`, `gate: web tests`, `91 passed (1.5m)`, and
@@ -191,15 +194,15 @@ and if Survey's standard changes one, the PR names the old and new words.
 
 ## Tasks
 
-The path is the sum, 52 minutes, since the tasks run in order. Before task 1, write the start
-time from `date -u` into the draft PR's body, so standing answer 58 can be measured. Every
+The path is the sum, 52 minutes, since the tasks run in order. The executor's first act is
+`gh pr create --draft --base main --head page-link`, since the plan's commit is already pushed,
+with the start time from `date -u` in the body, so standing answer 58 can be measured. Every
 command names its working folder: `(cd web && …)` for `npx`, and the repo root for `bash
 scripts/…` and `bash web/scripts/…`.
 
 Each task runs its named specs, commits by path, and pushes with `git push origin page-link`.
 The full gate, `bash scripts/gate.sh` bare, runs before task 2's commit and twice in task 4.
-Task 1's first push is `git push -u origin page-link`; then `gh pr create --draft --base main
---head page-link` opens the PR, since CI runs on pull requests only. Each task's report names
+CI runs on pull requests only, so the draft PR comes first. Each task's report names
 the gate run's conclusion on its pushed commit from `gh run list --branch page-link`, or "no
 run yet" with the link.
 
@@ -380,7 +383,8 @@ reviewed, and the PR is ready.
    fails naming the count. Then `git diff 31b712f -- scripts/gate.sh
    web/scripts/check-playwright-report.sh .github` prints nothing.
 6. One whole-branch `standards:diff-reviewer` read, folded. If the fold changes any file, run
-   the gate once more, bare. Then the PR body and ready.
+   the gate once more, bare. If it changes `web/src`, run `bash web/scripts/install-page.sh`
+   again so the live page matches the branch. Then the PR body and ready.
 
 Files: the two follow-ups, and fixes. Class `ordinary`.
 
@@ -390,13 +394,13 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20 and pass 3's p
 where they apply, and these.
 
 - **58. The pass runs long.** Measure from the start time in the PR body, at two points only.
-  Before task 2, if the minutes so far plus 42 pass 75, and before task 3, if the minutes so far
-  plus 25 pass 75, take round standing answer 17's road: finish the "Copy command" button and
+  Before task 2, if the minutes so far plus 42 pass 60, and before task 3, if the minutes so far
+  plus 25 pass 60, take round standing answer 17's road, with its 60 minutes: finish the "Copy command" button and
   its tests, take the terminal link out of the page, and ship no handler. If the handler was
   registered, remove `~/.local/share/applications/cc-desk.desktop` and
   `~/.local/share/cc-desk/link/` by name and run `update-desktop-database` again. Record it under
   `## Decisions`. Once task 3's check passes, finish the pass whatever the clock says. If the
-  button alone still can't land by 90 minutes, park under `## Stop`.
+  button alone still can't land by 75 minutes, park under `## Stop`.
 - **59. Auto mode refuses a step of the install or the check.** Use the alternatives table once.
   If it still refuses, ship the code, and put the install and check commands with their
   expected output under `## Before merge`, as round standing answer 13 does for pass 3. Never
@@ -435,7 +439,8 @@ where they apply, and these.
   can't start with `-`. The design's own rule takes `cc-desk://--help/r1` and would hand
   `cc-desk` a flag from any page that links to it. Every name the design's rule refuses is still
   refused, and the first-character rule is the one `events.go:13` sets for project names.
-  [review]
+  The plan reviewer named it a fork for Geoff. [advisor] Call: the link takes a narrower rule
+  than the design states.
 - The handler test runs the `alphä` address under `LANG=en_US.UTF-8`, and task 1 plants the
   missing `LC_ALL=C` to show the test catches it. [review]
 - `check-link.sh` proves each refusal by the handler's stderr line, since `xdg-open` exits 0
