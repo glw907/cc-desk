@@ -383,6 +383,45 @@ type Desks struct {
 	Desks  []Desk `json:"desks,omitempty"`
 }
 
+// ReportsFile is reports.json.
+const ReportsFile = "reports.json"
+
+// Call is one decision a pass or round made: what it chose, the other
+// option, and why.
+type Call struct {
+	Call   string `json:"call"`
+	Chosen string `json:"chosen"`
+	Other  string `json:"other"`
+	Why    string `json:"why"`
+}
+
+// Miss is something the plan missed and what it cost.
+type Miss struct {
+	Miss string `json:"miss"`
+	Cost string `json:"cost"`
+}
+
+// Report is what a conductor writes when a round ends, or a release when
+// it does. Read is null until Geoff marks it read. Calls and Misses are
+// written as [] when empty.
+type Report struct {
+	ID      string     `json:"id"`
+	Project string     `json:"project"`
+	Round   string     `json:"round,omitempty"`
+	Title   string     `json:"title"`
+	Summary string     `json:"summary"`
+	Calls   []Call     `json:"calls"`
+	Misses  []Miss     `json:"misses"`
+	Sent    time.Time  `json:"sent"`
+	Read    *time.Time `json:"read"`
+}
+
+// Reports is reports.json.
+type Reports struct {
+	Format  int      `json:"format"`
+	Reports []Report `json:"reports,omitempty"`
+}
+
 // Desk is one desk session and the process that runs it.
 type Desk struct {
 	SessionID string    `json:"session_id"`
@@ -443,6 +482,7 @@ type State struct {
 	// Releases holds the live releases by sorted name, then the done ones.
 	Releases  []*ReleaseFile
 	Desks     Desks
+	Reports   Reports
 	Settings  Settings
 	Usage     *Usage
 	Rulings   []Ruling
@@ -464,6 +504,8 @@ type State struct {
 	newRuling *Ruling
 	// desksDirty is set when an event changed desks.json.
 	desksDirty bool
+	// reportsDirty is set when an event changed reports.json.
+	reportsDirty bool
 	// checkDirty is set when an event changed check.json.
 	checkDirty bool
 	// noSettle tells Commit to skip settle, so a failed list read starts no

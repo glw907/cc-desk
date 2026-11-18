@@ -204,6 +204,44 @@ export interface CheckLogLine {
 	detail?: string;
 }
 
+/** One decision a pass or round made, and the other way it could have gone. */
+export interface Call {
+	call: string;
+	chosen: string;
+	other: string;
+	why: string;
+}
+
+/** Something the plan missed, and what it cost. */
+export interface Miss {
+	miss: string;
+	cost: string;
+}
+
+/** One pass in a report's folded detail. */
+export interface ReportPass {
+	name: string;
+	state: string;
+	planned_minutes: number;
+	actual_minutes: number | null;
+	pull_request: number | null;
+}
+
+/** A report from a round or a release. `read` is null until it is marked read. */
+export interface Report {
+	id: string;
+	project: string;
+	/** Null for a release's report. */
+	round: string | null;
+	title: string;
+	summary: string;
+	calls: Call[];
+	misses: Miss[];
+	sent: Time;
+	read: Time | null;
+	passes: ReportPass[];
+}
+
 export interface Snapshot {
 	format: number;
 	generated_at: Time;
@@ -220,6 +258,8 @@ export interface Snapshot {
 	last_check: LastCheck | null;
 	/** The last 50 lines of the check log, oldest first. */
 	check_log: CheckLogLine[];
+	/** Every report, oldest first. */
+	reports: Report[];
 }
 
 /** What `/api/state` answers: everything the page draws and every banner it may show. */

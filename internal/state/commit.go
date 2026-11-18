@@ -158,6 +158,15 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 			return nil, fmt.Errorf("write %s: %w", DesksFile, err)
 		}
 	}
+	if s.reportsDirty {
+		data, err := marshal(s.Reports)
+		if err != nil {
+			return nil, fmt.Errorf("encode %s: %w", ReportsFile, err)
+		}
+		if err := atomicfile.WriteFile(filepath.Join(dir, ReportsFile), data, 0o644); err != nil {
+			return nil, fmt.Errorf("write %s: %w", ReportsFile, err)
+		}
+	}
 	if err := atomicfile.WriteFile(filepath.Join(dir, SnapshotFile), snap, 0o644); err != nil {
 		return nil, fmt.Errorf("write %s: %w", SnapshotFile, err)
 	}

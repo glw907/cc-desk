@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "reports": [
+    {
+      "id": "rep-0001",
+      "project": "beta",
+      "round": "b2",
+      "title": "Round b2: the report verbs",
+      "summary": "The report verbs landed and the snapshot carries them.",
+      "calls": [
+        {"call": "Where the report lives", "chosen": "reports.json", "other": "one file per report", "why": "One file reads and writes in one step."}
+      ],
+      "misses": [
+        {"miss": "The plan said every refusal exits 1.", "cost": "Ten minutes to find that the code exits 2."}
+      ],
+      "sent": "2026-11-20T22:50:00Z",
+      "read": null
+    }
+  ]
+}

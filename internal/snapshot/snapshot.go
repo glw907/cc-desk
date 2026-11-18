@@ -36,6 +36,69 @@ type Snapshot struct {
 	LastCheck         *LastCheck     `json:"last_check"`
 	// CheckLog is the last CheckLogLimit lines of check-log.jsonl, oldest first.
 	CheckLog []state.CheckLogLine `json:"check_log"`
+	// Reports is every report in file order, each with its passes folded
+	// from its release.
+	Reports []ReportEntry `json:"reports"`
+}
+
+// ReportEntry is a report's record and the passes it covers. Round is null
+// for a release's report, and Passes is empty when the release is gone.
+type ReportEntry struct {
+	ID      string       `json:"id"`
+	Project string       `json:"project"`
+	Round   *string      `json:"round"`
+	Title   string       `json:"title"`
+	Summary string       `json:"summary"`
+	Calls   []state.Call `json:"calls"`
+	Misses  []state.Miss `json:"misses"`
+	Sent    time.Time    `json:"sent"`
+	Read    *time.Time   `json:"read"`
+	Passes  []ReportPass `json:"passes"`
+}
+
+// ReportPass is one pass in a report's detail.
+type ReportPass struct {
+	Name           string `json:"name"`
+	State          string `json:"state"`
+	PlannedMinutes int    `json:"planned_minutes"`
+	ActualMinutes  *int   `json:"actual_minutes"`
+	PullRequest    *int   `json:"pull_request"`
+}
+
+// buildReports folds each report's passes from s.Releases, which holds the
+// done releases the rest of the snapshot skips. A release report covers every
+// pass of the project's first release; a round's covers that round's passes
+// in the first release that has the round.
+func buildReports(s *state.State) []ReportEntry {
+	out := []ReportEntry{}
+	for _, r := range s.Reports.Reports {
+		e := ReportEntry{ID: r.ID, Project: r.Project, Title: r.Title, Summary: r.Summary,
+			Calls: r.Calls, Misses: r.Misses, Sent: r.Sent, Read: r.Read, Passes: []ReportPass{}}
+		if r.Round != "" {
+			round := r.Round
+			e.Round = &round
+		}
+		for _, rf := range s.Releases {
+			if rf.Project != r.Project || (r.Round != "" && !slices.ContainsFunc(rf.Rounds, func(rd state.Round) bool { return rd.Name == r.Round })) {
+				continue
+			}
+			for i := range rf.Passes {
+				p := &rf.Passes[i]
+				if r.Round != "" && p.Round != r.Round {
+					continue
+				}
+				rp := ReportPass{Name: p.Name, State: string(p.State), PlannedMinutes: p.PlannedMinutes, ActualMinutes: p.ActualMinutes}
+				if p.PullRequest != nil && p.PullRequest.Number > 0 {
+					n := p.PullRequest.Number
+					rp.PullRequest = &n
+				}
+				e.Passes = append(e.Passes, rp)
+			}
+			break
+		}
+		out = append(out, e)
+	}
+	return out
 }
 
 // CheckLogLimit is how many check log lines the snapshot carries.
@@ -207,6 +270,7 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	snap.Reports = buildReports(s)
 	snap.CheckLog = []state.CheckLogLine{}
 	snap.CheckLog = append(snap.CheckLog, s.CheckLog[max(0, len(s.CheckLog)-CheckLogLimit):]...)
 	snap.GuessMinutesTotal = s.OpenGuessMinutes()

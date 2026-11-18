@@ -197,6 +197,20 @@ func Load(dir string) (*State, error) {
 		s.Desks = desks
 	}
 
+	s.Reports = Reports{Format: Format}
+	var reports Reports
+	if found, err := readJSON(dir, ReportsFile, &reports); err != nil {
+		return nil, err
+	} else if found {
+		if err := checkFormat(reports.Format); err != nil {
+			return nil, &FileError{File: ReportsFile, Err: err}
+		}
+		if err := validateReports(&reports); err != nil {
+			return nil, &FileError{File: ReportsFile, Err: err}
+		}
+		s.Reports = reports
+	}
+
 	var settings Settings
 	if found, err := readJSON(dir, "settings.json", &settings); err != nil {
 		return nil, err

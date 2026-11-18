@@ -1,0 +1,10 @@
+{
+  "title": "Round r1: the first build",
+  "summary": "The first round landed with every check green.",
+  "calls": [
+    {"call": "Name of the verb", "chosen": "report", "other": "handoff", "why": "The desk already says report."}
+  ],
+  "misses": [
+    {"miss": "The plan left out the empty-list case.", "cost": "Five minutes."}
+  ]
+}

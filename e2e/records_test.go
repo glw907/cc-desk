@@ -291,4 +291,228 @@ func TestRecords(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("report_add", func(t *testing.T) {
+		dir := newState(t)
+		in := input(t, "report.json")
+		r := run(t, dir, workedClock, "report", "add", "alpha", in, "--round", "r1")
+		if r.code != 0 || !strings.Contains(r.stderr, "recorded report rep-0001") {
+			t.Fatalf("report add exit %d: %s", r.code, r.stderr)
+		}
+		files := folder(t, dir)
+		var saved struct {
+			Format  int `json:"format"`
+			Reports []struct {
+				ID, Project, Round, Title string
+				Calls, Misses             []any
+				Read                      *string
+			} `json:"reports"`
+		}
+		if err := json.Unmarshal([]byte(files["reports.json"]), &saved); err != nil {
+			t.Fatal(err)
+		}
+		if saved.Format != 1 || len(saved.Reports) != 1 || saved.Reports[0].Round != "r1" || saved.Reports[0].Read != nil ||
+			len(saved.Reports[0].Calls) != 1 || len(saved.Reports[0].Misses) != 1 {
+			t.Fatalf("reports.json = %s", files["reports.json"])
+		}
+
+		var snap struct {
+			Reports []struct {
+				ID     string  `json:"id"`
+				Round  *string `json:"round"`
+				Read   *string `json:"read"`
+				Passes []struct {
+					Name  string `json:"name"`
+					State string `json:"state"`
+				} `json:"passes"`
+			} `json:"reports"`
+		}
+		if err := json.Unmarshal([]byte(files["snapshot.json"]), &snap); err != nil {
+			t.Fatal(err)
+		}
+		if len(snap.Reports) != 1 || snap.Reports[0].Round == nil || *snap.Reports[0].Round != "r1" || snap.Reports[0].Read != nil {
+			t.Fatalf("snapshot reports = %+v", snap.Reports)
+		}
+		for _, p := range snap.Reports[0].Passes {
+			if p.State == "" {
+				t.Errorf("a folded pass has no state: %+v", p)
+			}
+		}
+		if len(snap.Reports[0].Passes) == 0 {
+			t.Error("the report's passes were not folded from the release")
+		}
+
+		before := files
+		if r := run(t, dir, workedClock, "report", "add", "alpha", in, "--round", "r1"); r.code != 2 {
+			t.Errorf("a second report for the round exit %d, want 2: %s", r.code, r.stderr)
+		}
+		sameFolder(t, before, folder(t, dir))
+		if r := run(t, dir, workedClock, "report", "add", "alpha", in, "--round", "r9"); r.code == 0 || !strings.Contains(r.stderr, "r9") {
+			t.Errorf("a round that does not exist: exit %d, stderr %q", r.code, r.stderr)
+		}
+		if r := run(t, dir, workedClock, "report", "add", "nope", in); r.code == 0 || !strings.Contains(r.stderr, "nope") {
+			t.Errorf("a project that does not exist: exit %d, stderr %q", r.code, r.stderr)
+		}
+		sameFolder(t, before, folder(t, dir))
+		if r := run(t, dir, workedClock, "report", "add", "alpha", in); r.code != 0 {
+			t.Errorf("the release's own report exit %d: %s", r.code, r.stderr)
+		}
+	})
+
+	t.Run("report_empty_lists", func(t *testing.T) {
+		dir := newState(t)
+		if r := run(t, dir, workedClock, "report", "add", "alpha", input(t, "report-empty.json"), "--round", "r2"); r.code != 0 {
+			t.Fatalf("report add exit %d: %s", r.code, r.stderr)
+		}
+		files := folder(t, dir)
+		if !strings.Contains(files["reports.json"], `"calls": []`) || !strings.Contains(files["reports.json"], `"misses": []`) {
+			t.Errorf("reports.json prints an empty list as null:\n%s", files["reports.json"])
+		}
+		if !strings.Contains(files["snapshot.json"], `"calls": []`) {
+			t.Errorf("snapshot.json prints an empty list as null")
+		}
+	})
+
+	t.Run("report_missing_parts", func(t *testing.T) {
+		dir := newState(t)
+		before := folder(t, dir)
+		data, err := os.ReadFile(input(t, "report.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		cases := []struct {
+			name, want string
+			edit       func(m map[string]any)
+		}{
+			{"no title", `"title"`, func(m map[string]any) { delete(m, "title") }},
+			{"no summary", `"summary"`, func(m map[string]any) { delete(m, "summary") }},
+			{"no calls", `"calls"`, func(m map[string]any) { delete(m, "calls") }},
+			{"null calls", `"calls"`, func(m map[string]any) { m["calls"] = nil }},
+			{"no misses", `"misses"`, func(m map[string]any) { delete(m, "misses") }},
+			{"null misses", `"misses"`, func(m map[string]any) { m["misses"] = nil }},
+			{"call without why", `calls[0]`, func(m map[string]any) {
+				m["calls"] = []any{map[string]any{"call": "c", "chosen": "a", "other": "b"}}
+			}},
+			{"miss without cost", `misses[0]`, func(m map[string]any) {
+				m["misses"] = []any{map[string]any{"miss": "m"}}
+			}},
+			{"unknown key", "extra", func(m map[string]any) { m["extra"] = 1 }},
+		}
+		for _, c := range cases {
+			m := map[string]any{}
+			if err := json.Unmarshal(data, &m); err != nil {
+				t.Fatal(err)
+			}
+			c.edit(m)
+			out, err := json.Marshal(m)
+			if err != nil {
+				t.Fatal(err)
+			}
+			file := filepath.Join(t.TempDir(), "bad.json")
+			if err := os.WriteFile(file, out, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			r := run(t, dir, workedClock, "report", "add", "alpha", file, "--round", "r1")
+			if r.code == 0 || !strings.Contains(r.stderr, c.want) {
+				t.Errorf("%s: exit %d, stderr %q, want a refusal naming %s", c.name, r.code, r.stderr, c.want)
+			}
+		}
+		sameFolder(t, before, folder(t, dir))
+	})
+
+	t.Run("report_done_release", func(t *testing.T) {
+		dir := newState(t)
+		if err := os.MkdirAll(filepath.Join(dir, "releases", "done"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(filepath.Join(dir, "releases", "alpha.json"), filepath.Join(dir, "releases", "done", "alpha.json")); err != nil {
+			t.Fatal(err)
+		}
+		if r := run(t, dir, workedClock, "report", "add", "alpha", input(t, "report.json"), "--round", "r1"); r.code != 0 {
+			t.Fatalf("a done release's report exit %d: %s", r.code, r.stderr)
+		}
+		var snap struct {
+			Reports []struct {
+				Passes []struct{ Name string } `json:"passes"`
+			} `json:"reports"`
+		}
+		if err := json.Unmarshal([]byte(folder(t, dir)["snapshot.json"]), &snap); err != nil {
+			t.Fatal(err)
+		}
+		if len(snap.Reports) != 1 || len(snap.Reports[0].Passes) == 0 {
+			t.Errorf("a done release's report has no passes: %+v", snap.Reports)
+		}
+	})
+
+	t.Run("report_read", func(t *testing.T) {
+		dir := newStateFrom(t, "desk")
+		r := run(t, dir, briefClock, "report", "read", "rep-0001")
+		if r.code != 0 {
+			t.Fatalf("report read exit %d: %s", r.code, r.stderr)
+		}
+		files := folder(t, dir)
+		if !strings.Contains(files["reports.json"], `"read": "2026-11-20T23:00:00Z"`) {
+			t.Errorf("reports.json after a read:\n%s", files["reports.json"])
+		}
+		before := files
+		if r := run(t, dir, "2026-11-21T08:00:00Z", "report", "read", "rep-0001"); r.code != 0 {
+			t.Fatalf("a second read exit %d: %s", r.code, r.stderr)
+		}
+		if got := folder(t, dir)["reports.json"]; got != before["reports.json"] {
+			t.Errorf("a second read changed reports.json:\n%s", got)
+		}
+		if r := run(t, dir, briefClock, "report", "read", "rep-0009"); r.code != 2 {
+			t.Errorf("an unknown id exit %d, want 2: %s", r.code, r.stderr)
+		}
+	})
+
+	t.Run("report_read_bad_id", func(t *testing.T) {
+		dir := newStateFrom(t, "desk")
+		before := folder(t, dir)
+		for _, id := range []string{"", "a/b", "../reports"} {
+			if r := run(t, dir, briefClock, "report", "read", id); r.code == 0 {
+				t.Errorf("report read %q exit 0, want a refusal", id)
+			}
+		}
+		if r := run(t, dir, briefClock, "report", "read", "--", "-x"); r.code == 0 {
+			t.Error("report read -x exit 0, want a refusal")
+		}
+		sameFolder(t, before, folder(t, dir))
+	})
+
+	t.Run("report_read_no_usage", func(t *testing.T) {
+		dir := newStateFrom(t, "desk")
+		marker := filepath.Join(t.TempDir(), "ran")
+		script := filepath.Join(t.TempDir(), "usage.sh")
+		if err := os.WriteFile(script, []byte("#!/bin/sh\ntouch "+marker+"\nexit 1\n"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		before := folder(t, dir)
+		if r := runWith(t, script, dir, briefClock, "report", "read", "rep-0001"); r.code != 0 {
+			t.Fatalf("report read exit %d: %s", r.code, r.stderr)
+		}
+		if _, err := os.Stat(marker); err == nil {
+			t.Error("report read ran the usage command")
+		}
+		after := folder(t, dir)
+		if after["usage.json"] != before["usage.json"] {
+			t.Error("report read changed usage.json")
+		}
+	})
+
+	t.Run("report_broken_file", func(t *testing.T) {
+		dir := newStateFrom(t, "desk")
+		writeIn(t, dir, "reports.json", `{"format":1,"reports":[{"id":"rep-0001"}]}`)
+		before := folder(t, dir)
+		r := run(t, dir, briefClock, "report", "read", "rep-0001")
+		if r.code == 0 || !strings.Contains(r.stderr, "reports.json") {
+			t.Errorf("a broken reports.json: exit %d, stderr %q", r.code, r.stderr)
+		}
+		after := folder(t, dir)
+		if _, ok := after["snapshot-error.json"]; !ok {
+			t.Error("no snapshot-error.json was written for the broken file")
+		}
+		delete(after, "snapshot-error.json")
+		sameFolder(t, before, after)
+	})
 }
