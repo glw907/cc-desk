@@ -3,7 +3,7 @@
 A bar of segments, each as wide as its share of the planned minutes. A part still to do that
 needs Geoff gets a small triangle beneath its segment. A part with no planned minutes draws no
 segment, so give every part a planned figure. Each segment holds its state's words as hidden
-text, and "Needs Geoff" where it has a triangle, so no state reaches a reader by color alone.
+text, and "Needs you" where it has a triangle, so no state reaches a reader by color alone.
 -->
 <script lang="ts">
 	import type { Part } from './sums';
@@ -26,7 +26,7 @@ text, and "Needs Geoff" where it has a triangle, so no state reaches a reader by
 <div class="scale" class:slim role="list" aria-label={label}>
 	{#each parts as part, i (i)}
 		<span class="seg {part.state}" class:asks={part.asks} role="listitem" style="flex-grow: {part.minutes}"
-			><span class="sr-only">{word(words, part.state)}{part.asks ? ', Needs Geoff' : ''}</span></span
+			><span class="sr-only">{word(words, part.state)}{part.asks ? ', Needs you' : ''}</span></span
 		>
 	{/each}
 </div>

@@ -1,6 +1,5 @@
 [Unit]
 Description=cc-desk page: the read-only status page on 127.0.0.1:7908
-After=default.target
 
 [Service]
 Environment=HOST=127.0.0.1 PORT=7908

@@ -82,8 +82,8 @@ function missingWords(found: Colored[], address: string): string[] {
 		if (!c.text.includes(STATE_WORDS[c.code])) {
 			lines.push(`${address}: ${c.where} holds "${c.text}", not "${STATE_WORDS[c.code]}"`);
 		}
-		if (c.asks && !c.text.includes('Needs Geoff')) {
-			lines.push(`${address}: ${c.where} asks but holds "${c.text}", not "Needs Geoff"`);
+		if (c.asks && !c.text.includes('Needs you')) {
+			lines.push(`${address}: ${c.where} asks but holds "${c.text}", not "Needs you"`);
 		}
 	}
 	return lines;
@@ -144,7 +144,7 @@ test.describe('words with color', () => {
 
 	test('every state in the tables is shown by a builder', () => {
 		const passes = new Set(Object.values(SHOWN_BY).flatMap((s) => s.pass));
-		const rounds = new Set(Object.values(SHOWN_BY).flatMap((s) => s.round.concat(s.pass)));
+		const rounds = new Set(Object.values(SHOWN_BY).flatMap((s) => s.round));
 		const widgets = new Set(Object.values(SHOWN_BY).flatMap((s) => s.widget));
 		for (const code of Object.keys(PASS_WORDS)) expect(passes, `no builder shows pass ${code}`).toContain(code);
 		for (const code of Object.keys(ROUND_WORDS)) expect(rounds, `no builder shows round ${code}`).toContain(code);
