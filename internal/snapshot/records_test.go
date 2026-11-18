@@ -1,6 +1,7 @@
 package snapshot
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -140,5 +141,19 @@ func TestSessionRefusals(t *testing.T) {
 	snap = Build(&state.State{Releases: []*state.ReleaseFile{rf}}, clock)
 	if r := snap.Sessions[0].Refusals; len(r) != 1 || r[0].Tool != "Bash" || r[0].Target != "rm -r build" {
 		t.Errorf("refusals = %+v", r)
+	}
+}
+
+func TestCheckLogLimit(t *testing.T) {
+	st := &state.State{}
+	for i := range CheckLogLimit + 7 {
+		st.CheckLog = append(st.CheckLog, state.CheckLogLine{Format: 1, Time: clock, Project: "a", Record: "pass:x", Decision: "launch", Outcome: fmt.Sprintf("line %d", i)})
+	}
+	got := Build(st, clock).CheckLog
+	if len(got) != CheckLogLimit || got[0].Outcome != "line 7" || got[len(got)-1].Outcome != fmt.Sprintf("line %d", CheckLogLimit+6) {
+		t.Errorf("check_log holds %d lines from %q to %q, want the last %d, oldest first", len(got), got[0].Outcome, got[len(got)-1].Outcome, CheckLogLimit)
+	}
+	if empty := Build(&state.State{}, clock).CheckLog; empty == nil || len(empty) != 0 {
+		t.Errorf("an empty log prints %v, want []", empty)
 	}
 }

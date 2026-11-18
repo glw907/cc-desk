@@ -360,6 +360,23 @@ type Decision struct {
 	Outcome  string `json:"outcome,omitempty"`
 }
 
+// CheckLogLine is one line of check-log.jsonl: a stop the session check
+// applied, or a non-empty outcome of a decision it carried out. Reason and
+// Detail repeat the decision's, so a reader can say why a session restarted.
+type CheckLogLine struct {
+	Format   int       `json:"format"`
+	Time     time.Time `json:"time"`
+	Project  string    `json:"project"`
+	Record   string    `json:"record"`
+	Decision string    `json:"decision"`
+	Outcome  string    `json:"outcome"`
+	Reason   string    `json:"reason,omitempty"`
+	Detail   string    `json:"detail,omitempty"`
+}
+
+// CheckLogFile is the append-only log of what the session check did.
+const CheckLogFile = "check-log.jsonl"
+
 // Desks is desks.json: the desk sessions that may record a ruling.
 type Desks struct {
 	Format int    `json:"format"`
@@ -431,7 +448,12 @@ type State struct {
 	Rulings   []Ruling
 	Forecasts []Forecast
 	Check     CheckFile
+	// CheckLog holds the lines of check-log.jsonl as loaded.
+	CheckLog []CheckLogLine
 
+	// newCheckLog holds the lines an event added, which Commit appends to
+	// check-log.jsonl after the ruling and before any release file.
+	newCheckLog []CheckLogLine
 	// passEvent is set by a pass start, finish, or stop, and tells Commit
 	// to append a forecast line.
 	passEvent bool

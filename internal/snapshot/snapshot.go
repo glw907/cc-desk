@@ -34,7 +34,12 @@ type Snapshot struct {
 	Sessions          []SessionEntry `json:"sessions"`
 	NeedsYouNow       []NeedEntry    `json:"needs_you_now"`
 	LastCheck         *LastCheck     `json:"last_check"`
+	// CheckLog is the last CheckLogLimit lines of check-log.jsonl, oldest first.
+	CheckLog []state.CheckLogLine `json:"check_log"`
 }
+
+// CheckLogLimit is how many check log lines the snapshot carries.
+const CheckLogLimit = 50
 
 // Release is one live release.
 type Release struct {
@@ -202,6 +207,8 @@ func build(s *state.State, now time.Time) (*Snapshot, *item) {
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	snap.CheckLog = []state.CheckLogLine{}
+	snap.CheckLog = append(snap.CheckLog, s.CheckLog[max(0, len(s.CheckLog)-CheckLogLimit):]...)
 	snap.GuessMinutesTotal = s.OpenGuessMinutes()
 	pcs := paces(s)
 	var ctxs []*relCtx

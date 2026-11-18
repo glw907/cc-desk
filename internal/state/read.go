@@ -258,6 +258,15 @@ func Load(dir string) (*State, error) {
 			return nil, &FileError{File: "rulings.jsonl", Line: i + 1, Err: errors.New("missing id, time, desk, or words")}
 		}
 	}
+	if s.CheckLog, err = readJSONL(dir, CheckLogFile, func(l *CheckLogLine) int { return l.Format }); err != nil {
+		return nil, err
+	}
+	for i := range s.CheckLog {
+		l := &s.CheckLog[i]
+		if l.Time.IsZero() || l.Project == "" || l.Record == "" || l.Decision == "" || l.Outcome == "" {
+			return nil, &FileError{File: CheckLogFile, Line: i + 1, Err: errors.New("needs time, project, record, decision, and outcome")}
+		}
+	}
 	if s.Forecasts, err = readJSONL(dir, "forecasts.jsonl", func(f *Forecast) int { return f.Format }); err != nil {
 		return nil, err
 	}

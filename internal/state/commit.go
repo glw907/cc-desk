@@ -96,6 +96,12 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		}
 	}
 
+	for _, l := range s.newCheckLog {
+		if err := appendLine(dir, CheckLogFile, l); err != nil {
+			return nil, err
+		}
+	}
+
 	for _, rf := range s.Releases {
 		if !rf.Dirty {
 			continue

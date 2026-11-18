@@ -193,6 +193,9 @@ func RecordOutcomes(outcomes []string) Event {
 		}
 		for i := range s.Check.Decisions {
 			s.Check.Decisions[i].Outcome = outcomes[i]
+			if outcomes[i] != "" {
+				s.logCheck(now, s.Check.Decisions[i], outcomes[i])
+			}
 		}
 		s.checkDirty = true
 		return nil

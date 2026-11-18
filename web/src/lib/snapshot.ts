@@ -192,6 +192,18 @@ export interface LastCheck {
 	decisions: Decision[];
 }
 
+/** One thing the session check did: a stop it applied or an outcome it carried out. */
+export interface CheckLogLine {
+	format: number;
+	time: Time;
+	project: string;
+	record: string;
+	decision: string;
+	outcome: string;
+	reason?: string;
+	detail?: string;
+}
+
 export interface Snapshot {
 	format: number;
 	generated_at: Time;
@@ -206,6 +218,8 @@ export interface Snapshot {
 	sessions: SessionEntry[];
 	needs_you_now: NeedEntry[];
 	last_check: LastCheck | null;
+	/** The last 50 lines of the check log, oldest first. */
+	check_log: CheckLogLine[];
 }
 
 /** What `/api/state` answers: everything the page draws and every banner it may show. */
