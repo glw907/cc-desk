@@ -47,9 +47,10 @@ type snapshotError struct {
 // waiting up to wait, then loads and checks every file. A load or check
 // failure writes snapshot-error.json and leaves every other file alone.
 // A clean load removes that file, so a refusal clears it too. Commit
-// then applies ev, settles, writes each changed release and a changed
-// usage.json atomically, appends a forecast line when ev started, finished, or stopped a pass,
-// and rewrites snapshot.json. It returns the snapshot's bytes. A nil ev
+// then applies ev, settles, appends a ruling line when ev recorded one,
+// writes each changed release and a changed usage.json atomically, appends
+// a forecast line when ev started, finished, or stopped a pass, writes a
+// changed desks.json, and rewrites snapshot.json last. It returns the snapshot's bytes. A nil ev
 // changes nothing.
 func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Render) ([]byte, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {

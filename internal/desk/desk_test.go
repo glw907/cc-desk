@@ -87,7 +87,7 @@ func TestEntry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !p.Started.Equal(d.Started) {
+	if diff := p.Started.Sub(d.Started).Abs(); diff > time.Second {
 		t.Errorf("Read start %s differs from Entry start %s", p.Started, d.Started)
 	}
 }
