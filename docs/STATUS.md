@@ -42,6 +42,10 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
   request 10, carries out its decisions: a launch in a worktree the command makes, and the check's
   end, confirm, and relaunch. Round items 6 and 7 are not Go tests; they belong to pass 5, and its
   script output goes there.
+- Pass 3 (sessions-prompts), pull request 12, records a permission prompt from the hook, answers it
+  with `prompt yes` or `prompt no` from a desk session, adds `rules add` and `rules remove`, and
+  files each answered prompt and each session's follow-up (`followup`). No verb registers a desk
+  yet (`docs/follow-ups/desk-registration-gap.md`). Pass 4 merges.
 
 ## Next action
 
