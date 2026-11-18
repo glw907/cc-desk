@@ -137,3 +137,82 @@ func TestRealCopy(t *testing.T) {
 		}
 	}
 }
+
+// TestRecords holds one subtest for each record the desk round adds. Each
+// later pass of the round adds its own.
+func TestRecords(t *testing.T) {
+	t.Run("question_fields", func(t *testing.T) {
+		dir := newState(t)
+		in := input(t, "question-q9.json")
+		if r := run(t, dir, workedClock, "question", "add", "alpha", "r2", in); r.code != 0 {
+			t.Fatalf("question add exit %d: %s", r.code, r.stderr)
+		}
+		files := folder(t, dir)
+		var snap any
+		if err := json.Unmarshal([]byte(files["snapshot.json"]), &snap); err != nil {
+			t.Fatal(err)
+		}
+		// A question is printed wherever a pass or a need lists it, so find it by its id.
+		var found []map[string]any
+		var walk func(v any)
+		walk = func(v any) {
+			switch x := v.(type) {
+			case map[string]any:
+				if x["id"] == "alpha-q9" {
+					found = append(found, x)
+				}
+				for _, c := range x {
+					walk(c)
+				}
+			case []any:
+				for _, c := range x {
+					walk(c)
+				}
+			}
+		}
+		walk(snap)
+		if len(found) == 0 {
+			t.Fatal("alpha-q9 is not in the snapshot")
+		}
+		for _, q := range found {
+			bg, _ := q["background"].([]any)
+			causes, _ := q["causes"].(map[string]any)
+			if len(bg) != 2 || len(causes) != 2 || q["reason"] != "Why the recommendation." || q["never_guess"] != true {
+				t.Errorf("question fields in the snapshot = %v", q)
+			}
+		}
+
+		if r := run(t, dir, workedClock, "question", "add", "alpha", "r2", in); r.code != 2 {
+			t.Errorf("a second add exit %d, want 2: %s", r.code, r.stderr)
+		}
+		before := folder(t, dir)
+
+		bad := filepath.Join(t.TempDir(), "bad.json")
+		if err := os.WriteFile(bad, []byte(`{"id":"alpha-q8","text":"T?","options":["a","b"],"recommended":"a","passes":["p14"]}`), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		r := run(t, dir, workedClock, "question", "add", "alpha", "r2", bad)
+		if r.code == 0 || !strings.Contains(r.stderr, `"background"`) {
+			t.Errorf("a file with no background: exit %d, stderr %q", r.code, r.stderr)
+		}
+		sameFolder(t, before, folder(t, dir))
+	})
+
+	t.Run("question_never_guess", func(t *testing.T) {
+		dir := newState(t)
+		file := filepath.Join(t.TempDir(), "q.json")
+		q := `{"id":"alpha-q9","text":"T?","options":["yes","no"],"recommended":"yes","background":["B."],"causes":{"yes":"Y.","no":"N."},"reason":"R.","never_guess":true,"passes":["p13"]}`
+		if err := os.WriteFile(file, []byte(q), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if r := run(t, dir, workedClock, "question", "add", "alpha", "r2", file); r.code != 0 {
+			t.Fatalf("question add exit %d: %s", r.code, r.stderr)
+		}
+		before := folder(t, dir)
+		r := run(t, dir, workedClock, "pass", "start", "alpha", "p13", "--guess", "alpha-q9")
+		if r.code != 2 || !strings.Contains(r.stderr, "alpha-q9") || !strings.Contains(r.stderr, "never guessed") {
+			t.Errorf("guess start: exit %d, stderr %q", r.code, r.stderr)
+		}
+		sameFolder(t, before, folder(t, dir))
+	})
+}

@@ -24,6 +24,10 @@ export interface Question {
 	recommended: string;
 	answered: boolean;
 	answer_kind: string | null;
+	background: string[];
+	causes: Record<string, string>;
+	reason: string | null;
+	never_guess: boolean;
 }
 
 export interface Needs {

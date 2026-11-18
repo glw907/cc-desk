@@ -84,6 +84,9 @@ func validateRelease(r *Release) error {
 		if !slices.Contains(q.Options, q.Recommended) {
 			return fmt.Errorf("question %q recommends %q, which is not one of its options", q.ID, q.Recommended)
 		}
+		if err := validateCauses(q); err != nil {
+			return err
+		}
 		if err := validateAnswer(q); err != nil {
 			return err
 		}
@@ -109,6 +112,25 @@ func validateRelease(r *Release) error {
 		return err
 	}
 	return findLoop(r)
+}
+
+// validateCauses holds a question's causes to its options: when it has any,
+// it has one for each option and none for anything else.
+func validateCauses(q *Question) error {
+	if len(q.Causes) == 0 {
+		return nil
+	}
+	for k := range q.Causes {
+		if !slices.Contains(q.Options, k) {
+			return fmt.Errorf("question %q: causes has %q, which is not one of its options", q.ID, k)
+		}
+	}
+	for _, o := range q.Options {
+		if q.Causes[o] == "" {
+			return fmt.Errorf("question %q: causes has nothing for option %q", q.ID, o)
+		}
+	}
+	return nil
 }
 
 func validateAnswer(q *Question) error {

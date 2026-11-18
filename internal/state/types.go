@@ -271,6 +271,16 @@ type Question struct {
 	Options     []string `json:"options"`
 	Recommended string   `json:"recommended"`
 	Answer      *Answer  `json:"answer,omitempty"`
+	// Background is the paragraphs that tell a reader what the question is
+	// about, and Causes says what each option sets going. Reason is why the
+	// recommendation is the one. All three are optional in a release file, so
+	// a file written before they existed still reads.
+	Background []string          `json:"background,omitempty"`
+	Causes     map[string]string `json:"causes,omitempty"`
+	Reason     string            `json:"reason,omitempty"`
+	// NeverGuess keeps a pass from starting on this question's recommendation
+	// while it is unanswered.
+	NeverGuess bool `json:"never_guess,omitempty"`
 }
 
 // Answer is a ruling reference or a carried-over answer, never both.

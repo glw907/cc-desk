@@ -185,6 +185,8 @@ func start(project, pass, guess string) Event {
 				return Refuse(fmt.Sprintf("cannot start %s/%s: pass %q does not rest on question %q", project, pass, pass, guess))
 			case q.Answer != nil:
 				return Refuse(fmt.Sprintf("cannot start %s/%s: question %q is already answered", project, pass, guess))
+			case q.NeverGuess:
+				return Refuse(fmt.Sprintf("cannot start %s/%s: question %q is never guessed; it waits for a ruling", project, pass, guess))
 			}
 		}
 		t := now.UTC()

@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "project": "alpha",
+  "name": "v1",
+  "repo": "glw907/alpha",
+  "rounds": [
+    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true}
+  ],
+  "passes": [
+    {"name": "a-free", "summary": "Free now.", "round": "r1", "planned_minutes": 10, "state": "not_started", "questions": ["qa"]}
+  ],
+  "questions": [
+    {
+      "id": "qa",
+      "text": "Should the report keep its old name?",
+      "options": ["keep", "rename"],
+      "recommended": "keep",
+      "background": ["The report has had one name since the first release.", "A rename touches every link to it."],
+      "causes": {"keep": "Links keep working.", "rename": "Every link is rewritten."},
+      "reason": "A rename costs more than the name is worth."
+    }
+  ]
+}

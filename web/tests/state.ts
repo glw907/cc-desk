@@ -157,6 +157,10 @@ const builders: Record<string, Builder> = {
 		}
 		return T('23:00');
 	},
+	desk(dir) {
+		copyFixture('desk', dir);
+		return T('23:00');
+	},
 	stopped(dir) {
 		started(dir);
 		run(dir, T('23:10'), 'pass', 'stop', 'alpha', 'p13', '--reason', 'scope');

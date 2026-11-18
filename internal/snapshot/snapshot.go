@@ -9,6 +9,7 @@ package snapshot
 
 import (
 	"encoding/json"
+	"maps"
 	"slices"
 	"time"
 
@@ -100,6 +101,12 @@ type Question struct {
 	Recommended string   `json:"recommended"`
 	Answered    bool     `json:"answered"`
 	AnswerKind  *string  `json:"answer_kind"`
+	// Background, Causes, Reason, and NeverGuess carry the question's own
+	// fields: empty lists, an empty map, and a null reason when it has none.
+	Background []string          `json:"background"`
+	Causes     map[string]string `json:"causes"`
+	Reason     *string           `json:"reason"`
+	NeverGuess bool              `json:"never_guess"`
 }
 
 // NextSession is the next decision session. State is needs_you_now,
@@ -413,6 +420,13 @@ func buildQuestion(q *state.Question) Question {
 		Text:        q.Text,
 		Options:     append([]string{}, q.Options...),
 		Recommended: q.Recommended,
+		Background:  append([]string{}, q.Background...),
+		Causes:      map[string]string{},
+		NeverGuess:  q.NeverGuess,
+	}
+	maps.Copy(out.Causes, q.Causes)
+	if q.Reason != "" {
+		out.Reason = &q.Reason
 	}
 	if q.Answer != nil {
 		out.Answered = true

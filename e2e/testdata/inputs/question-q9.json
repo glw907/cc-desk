@@ -1,0 +1,11 @@
+{
+  "id": "alpha-q9",
+  "text": "Should cc-desk notice by itself that you fixed the problem?",
+  "options": ["yes", "no"],
+  "recommended": "yes",
+  "background": ["One paragraph.", "Another."],
+  "causes": {"yes": "What a yes causes.", "no": "What a no causes."},
+  "reason": "Why the recommendation.",
+  "never_guess": true,
+  "passes": ["p14"]
+}

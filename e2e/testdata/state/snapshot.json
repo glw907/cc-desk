@@ -247,7 +247,11 @@
                 ],
                 "recommended": "files",
                 "answered": false,
-                "answer_kind": null
+                "answer_kind": null,
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               }
             ]
           },
@@ -308,7 +312,11 @@
                   ],
                   "recommended": "files",
                   "answered": false,
-                  "answer_kind": null
+                  "answer_kind": null,
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 }
               ],
               "minutes_before": 300,
@@ -409,7 +417,11 @@
                 ],
                 "recommended": "drop",
                 "answered": true,
-                "answer_kind": "ruling"
+                "answer_kind": "ruling",
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               },
               {
                 "id": "beta-q2",
@@ -420,7 +432,11 @@
                 ],
                 "recommended": "cc-desk",
                 "answered": true,
-                "answer_kind": "carried"
+                "answer_kind": "carried",
+                "background": [],
+                "causes": {},
+                "reason": null,
+                "never_guess": false
               }
             ]
           },
@@ -447,7 +463,11 @@
                   ],
                   "recommended": "drop",
                   "answered": true,
-                  "answer_kind": "ruling"
+                  "answer_kind": "ruling",
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 },
                 {
                   "id": "beta-q2",
@@ -458,7 +478,11 @@
                   ],
                   "recommended": "cc-desk",
                   "answered": true,
-                  "answer_kind": "carried"
+                  "answer_kind": "carried",
+                  "background": [],
+                  "causes": {},
+                  "reason": null,
+                  "never_guess": false
                 }
               ],
               "minutes_before": 0,
