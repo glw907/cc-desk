@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "project": "chk",
+  "name": "v1",
+  "repo": "glw907/chk",
+  "rounds": [
+    {"name": "r1", "summary": "One pass waiting on the usage limit.", "needs_geoff": false, "no_need_reason": "A fixture.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "w1", "summary": "Waiting.", "round": "r1", "planned_minutes": 60, "state": "waiting", "wait": {"since": "2026-11-20T10:00:00Z", "limits": ["usage"]}}
+  ]
+}

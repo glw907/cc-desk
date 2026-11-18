@@ -1,0 +1,15 @@
+{
+  "format": 1,
+  "project": "chk",
+  "name": "v1",
+  "repo": "glw907/chk",
+  "rounds": [
+    {"name": "r1", "summary": "Two passes whose sessions the list never shows.", "needs_geoff": false, "no_need_reason": "A fixture.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "s10", "summary": "Launched once, no row.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T22:55:00Z",
+     "session": {"name": "chk-s10", "kind": "pass", "short_id": "c0000010", "session_id": "c0000010-0000", "worktree": "/w/chk/s10", "branch": "s10", "launched": "2026-11-20T22:55:00Z", "launch_tries": 1}},
+    {"name": "s11", "summary": "Launched twice, no row.", "round": "r1", "planned_minutes": 60, "state": "building", "started": "2026-11-20T22:50:00Z",
+     "session": {"name": "chk-s11", "kind": "pass", "short_id": "c0000011", "session_id": "c0000011-0000", "worktree": "/w/chk/s11", "branch": "s11", "launched": "2026-11-20T22:55:00Z", "launch_tries": 2}}
+  ]
+}

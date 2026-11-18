@@ -29,6 +29,42 @@ var verbs = []verb{
 	{"round design", func(t *testing.T) []string {
 		return []string{"round", "design", "beta", "b3", input(t, "design-b3.json")}
 	}},
+	{"check", func(t *testing.T) []string {
+		return newRig(t, "check-launch", "http://127.0.0.1:1/").flags()
+	}},
+}
+
+// TestBrokenCheckFile breaks check.json, which the base fixture does not
+// carry, and runs every verb on it.
+func TestBrokenCheckFile(t *testing.T) {
+	for _, v := range verbs {
+		t.Run(v.name, func(t *testing.T) {
+			dir := newState(t)
+			writeIn(t, dir, "check.json", "{\n  \"format\": 1,,\n")
+			before := folder(t, dir)
+			requireSnapshot(t, before)
+
+			got := run(t, dir, workedClock, v.args(t)...)
+			if got.code != 1 {
+				t.Fatalf("exit %d, want 1; stderr: %s", got.code, got.stderr)
+			}
+			if !strings.Contains(got.stderr, "check.json") {
+				t.Errorf("stderr does not name check.json: %s", got.stderr)
+			}
+			after := folder(t, dir)
+			if after["snapshot.json"] != before["snapshot.json"] {
+				t.Error("snapshot.json changed")
+			}
+			if !strings.Contains(after["snapshot-error.json"], "check.json") {
+				t.Errorf("snapshot-error.json does not name check.json: %q", after["snapshot-error.json"])
+			}
+			for name, content := range after {
+				if name != "snapshot-error.json" && content != before[name] {
+					t.Errorf("%s changed", name)
+				}
+			}
+		})
+	}
 }
 
 func TestBrokenFile(t *testing.T) {
