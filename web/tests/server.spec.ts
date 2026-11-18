@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, test } from './app';
@@ -177,5 +177,55 @@ test.describe('Mark as read with a binary that fails', () => {
 		});
 		expect(none.status).toBe(415);
 		expect(existsSync(marker)).toBe(false);
+	});
+});
+
+test.describe('a design that waits', () => {
+	test.beforeEach(async ({ app }) => {
+		buildState('page', app.stateDir);
+		await app.start();
+	});
+
+	test('the round page shows the design folded, with no script, image, or odd link', async ({ app, page }) => {
+		await page.goto(app.url + '/alpha/r1');
+		const details = page.locator('details.design');
+		await expect(details).not.toHaveAttribute('open', '');
+		await details.locator('summary').click();
+		const body = details.locator('.design-body');
+		await expect(body.getByRole('heading', { name: 'Alpha r1 design' })).toBeVisible();
+		await expect(body.getByRole('link', { name: 'the issue' })).toHaveAttribute(
+			'href',
+			'https://example.com/alpha/issue'
+		);
+		await expect(body.getByRole('link', { name: 'here' })).toHaveCount(0);
+		await expect(body.locator('script, img')).toHaveCount(0);
+		expect(await page.evaluate(() => (window as unknown as { pwned?: number }).pwned)).toBeUndefined();
+	});
+
+	test('a release with no checkout draws the sentence and the rest of the page', async ({ app, page }) => {
+		const file = path.join(app.stateDir, 'releases', 'alpha.json');
+		const release = JSON.parse(readFileSync(file, 'utf8'));
+		delete release.checkout;
+		writeFileSync(file, JSON.stringify(release));
+		await page.goto(app.url + '/alpha/r1');
+		await expect(page.getByText("The design file isn't readable here:")).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Its passes' })).toBeVisible();
+	});
+
+	test('a design path that leaves the checkout draws the sentence', async ({ app, page }) => {
+		const file = path.join(app.stateDir, 'snapshot.json');
+		const text = readFileSync(file, 'utf8').replace(
+			'docs/specs/2026-11-18-alpha-r1-design.md',
+			'../../../../../../etc/hostname'
+		);
+		writeFileSync(file, text);
+		await page.goto(app.url + '/alpha/r1');
+		await expect(page.getByText("The design file isn't readable here: it lies outside the checkout.")).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Its passes' })).toBeVisible();
+	});
+
+	test('a project name that is not one reads no file', async ({ app }) => {
+		const res = await fetch(app.url + '/..%2F..%2Fx/r1/__data.json');
+		expect(res.status).toBeLessThan(500);
 	});
 });
