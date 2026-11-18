@@ -45,11 +45,32 @@ type result struct {
 	code           int
 }
 
-// run executes cc-desk on the state folder at the given clock.
+// run executes cc-desk on the state folder at the given clock, with the
+// default stand-in for the usage command.
 func run(t *testing.T, dir, now string, args ...string) result {
 	t.Helper()
-	full := append([]string{"--state-dir", dir, "--now", now}, args...)
+	return runWith(t, usageStandIn(t), dir, now, args...)
+}
+
+// usageStandIn is the absolute path of the default stand-in, which prints
+// a 40 percent result.
+func usageStandIn(t *testing.T) string {
+	t.Helper()
+	p, err := filepath.Abs(filepath.Join("testdata", "usage40.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p
+}
+
+// runWith is run with the usage command named. The binary gets a PATH of
+// /usr/bin and /bin only, so a run that misses the flag finds no claude and
+// reads an error instead of the real figure.
+func runWith(t *testing.T, usageCommand, dir, now string, args ...string) result {
+	t.Helper()
+	full := append([]string{"--state-dir", dir, "--now", now, "--usage-command", usageCommand}, args...)
 	cmd := exec.Command(binary, full...)
+	cmd.Env = append(os.Environ(), "PATH=/usr/bin:/bin")
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
 	err := cmd.Run()
