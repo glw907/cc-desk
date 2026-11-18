@@ -217,6 +217,9 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	if err := validatePassSession(p); err != nil {
 		return err
 	}
+	if err := validateClosed(p); err != nil {
+		return err
+	}
 	if err := validatePullRequest(p, questions); err != nil {
 		return err
 	}
@@ -234,6 +237,23 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	}
 	if p.StopReason != "" && !ValidStopReason(p.StopReason) {
 		return fmt.Errorf("pass %q has stop reason %q, which is not a stop reason", p.Name, p.StopReason)
+	}
+	return nil
+}
+
+// validateClosed checks a pass's closed mark: a done pass with a ruling and
+// a time, and no merged pull request.
+func validateClosed(p *Pass) error {
+	c := p.Closed
+	switch {
+	case c == nil:
+		return nil
+	case p.State != Done:
+		return fmt.Errorf("pass %q is %s but is marked closed", p.Name, p.State)
+	case c.Ruling == "" || c.Time.IsZero():
+		return fmt.Errorf(`pass %q: closed needs a "ruling" and a "time"`, p.Name)
+	case p.PullRequest != nil && p.PullRequest.Merged != nil:
+		return fmt.Errorf("pass %q is marked closed but its pull_request is merged", p.Name)
 	}
 	return nil
 }
@@ -427,8 +447,8 @@ func findLoop(r *Release) error {
 	return nil
 }
 
-// checkAnswers verifies every ruling answer in r points at a ruling that
-// exists.
+// checkAnswers verifies every ruling answer, and every closed pass's ruling,
+// in r points at a ruling that exists.
 func checkAnswers(r *Release, rulings []Ruling) error {
 	for i := range r.Questions {
 		q := &r.Questions[i]
@@ -437,6 +457,12 @@ func checkAnswers(r *Release, rulings []Ruling) error {
 		}
 		if !slices.ContainsFunc(rulings, func(g Ruling) bool { return g.ID == q.Answer.Ruling }) {
 			return fmt.Errorf("question %q is answered by ruling %q, which is not in rulings.jsonl", q.ID, q.Answer.Ruling)
+		}
+	}
+	for i := range r.Passes {
+		p := &r.Passes[i]
+		if p.Closed != nil && !slices.ContainsFunc(rulings, func(g Ruling) bool { return g.ID == p.Closed.Ruling }) {
+			return fmt.Errorf("pass %q is closed by ruling %q, which is not in rulings.jsonl", p.Name, p.Closed.Ruling)
 		}
 	}
 	return nil

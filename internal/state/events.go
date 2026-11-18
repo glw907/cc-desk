@@ -268,6 +268,51 @@ func FinishPass(project, pass string) Event {
 	}
 }
 
+// ClosePass records a building or stopped pass as closed by a ruling: done,
+// with its finish time and actual minutes, any open stop closed, and no merge.
+// A pass that has not started, is waiting, or is done has no pull request to
+// close and is refused. Only a unit test calls it; the verb is pass 3's.
+func ClosePass(project, pass, rulingID string) Event {
+	return func(s *State, now time.Time) error {
+		rf, p, err := findPass(s, project, pass)
+		if err != nil {
+			return err
+		}
+		switch p.State {
+		case Building, Stopped:
+		case Done:
+			return Refuse(fmt.Sprintf("pass %q is already done", pass))
+		default:
+			return Refuse(fmt.Sprintf("pass %q is %s and has no pull request to close", pass, p.State))
+		}
+		if !slices.ContainsFunc(s.Rulings, func(g Ruling) bool { return g.ID == rulingID }) {
+			return fmt.Errorf("ruling %q not found", rulingID)
+		}
+		t := now.UTC()
+		if t.Before(*p.Started) {
+			return fmt.Errorf("the clock %s is before pass %q started at %s", t.Format(time.RFC3339), pass, p.Started.Format(time.RFC3339))
+		}
+		if p.State == Stopped {
+			last := &p.Stops[len(p.Stops)-1]
+			if t.Before(last.Start) {
+				return fmt.Errorf("the clock %s is before pass %q stopped at %s", t.Format(time.RFC3339), pass, last.Start.Format(time.RFC3339))
+			}
+			last.End = &t
+			p.StopReason, p.StopDetail = "", ""
+		}
+		elapsed := t.Sub(*p.Started)
+		for _, st := range p.Stops {
+			elapsed -= st.End.Sub(st.Start)
+		}
+		minutes := int(math.Round(elapsed.Minutes()))
+		p.Finished, p.ActualMinutes, p.State = &t, &minutes, Done
+		p.Closed = &Closed{Ruling: rulingID, Time: t}
+		rf.Dirty = true
+		s.passEvent = true
+		return nil
+	}
+}
+
 // StopPass stops a building pass for one of the stop reasons and opens a
 // stop interval.
 func StopPass(project, pass string, reason StopReason) Event {

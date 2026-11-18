@@ -10,6 +10,7 @@ import (
 // are the design's words and appear in a refusal exactly as written.
 const (
 	BreakUnfinished = "unfinished work before it"
+	BreakClosed     = "a pass before it was closed"
 	BreakQuestion   = "an unanswered question"
 	BreakOnePass    = "the one-pass rule"
 	BreakMinutes    = "the 300-minute rule"
@@ -127,8 +128,12 @@ func (s *State) Breaks(rf *ReleaseFile, p *Pass, guess string) []Broken {
 			unfinished = append(unfinished, "round "+r.Name+" has no design written")
 		}
 	}
+	var closed []string
 	for _, q := range before {
-		if q.State != Done {
+		switch {
+		case q.Closed != nil:
+			closed = append(closed, "pass "+q.Name+" was closed")
+		case q.State != Done:
 			unfinished = append(unfinished, "pass "+q.Name+" is not done")
 		}
 	}
@@ -137,6 +142,9 @@ func (s *State) Breaks(rf *ReleaseFile, p *Pass, guess string) []Broken {
 	}
 	if len(unfinished) > 0 {
 		out = append(out, Broken{BreakUnfinished, strings.Join(unfinished, ", ")})
+	}
+	if len(closed) > 0 {
+		out = append(out, Broken{BreakClosed, strings.Join(closed, ", ")})
 	}
 
 	if ids := rf.Unanswered(p, guess); len(ids) > 0 {

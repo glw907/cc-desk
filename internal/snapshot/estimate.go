@@ -50,7 +50,8 @@ func paces(s *state.State) map[string]pace {
 	for _, rf := range s.Releases {
 		for i := range rf.Passes {
 			p := &rf.Passes[i]
-			if p.State != state.Done || p.ActualMinutes == nil || p.Finished == nil {
+			// A closed pass's minutes don't measure a merged pass.
+			if p.State != state.Done || p.Closed != nil || p.ActualMinutes == nil || p.Finished == nil {
 				continue
 			}
 			byProject[rf.Project] = append(byProject[rf.Project],
@@ -266,6 +267,10 @@ func fillRelease(out *Release, v *releaseView, pc pace, now time.Time) map[strin
 			if p.State != string(state.NotStarted) && p.State != string(state.Waiting) {
 				continue
 			}
+			// A pass held by a closed pass never starts, so it has no forecast.
+			if before, _ := v.rf.Before(v.passes[p.Name]); slices.ContainsFunc(before, func(q *state.Pass) bool { return q.Closed != nil }) {
+				continue
+			}
 			t := timeOf(v.beforePass(v.passes[p.Name]), pc, now)
 			passTimes[p.Name] = t
 			setTiming(&p.MinutesBefore, &p.NeededTime, t)
@@ -353,6 +358,24 @@ func (c *relCtx) questionItem(q *state.Question, now time.Time) item {
 	return it
 }
 
+// held reports whether every pass resting on q is held by a closed pass: it
+// never starts, so nothing waits on the question. fillRelease leaves such a
+// pass out of times.
+func (c *relCtx) held(q *state.Question) bool {
+	n := 0
+	for i := range c.rf.Passes {
+		p := &c.rf.Passes[i]
+		if !slices.Contains(p.Questions, q.ID) {
+			continue
+		}
+		if _, ok := c.times[p.Name]; ok || (p.State != state.NotStarted && p.State != state.Waiting) {
+			return false
+		}
+		n++
+	}
+	return n > 0
+}
+
 // fillSession sets next_session and waits_for_geoff from every live
 // release, and returns the item that sets the session's time, or nil.
 func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time, unreadable bool) *item {
@@ -366,7 +389,7 @@ func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time, unreadable bool)
 			}
 		}
 		for i := range c.rf.Questions {
-			if c.rf.Questions[i].Answer == nil {
+			if c.rf.Questions[i].Answer == nil && !c.held(&c.rf.Questions[i]) {
 				questions = append(questions, c.questionItem(&c.rf.Questions[i], now))
 			}
 		}

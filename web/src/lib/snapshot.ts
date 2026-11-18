@@ -59,6 +59,14 @@ export interface Pass {
 	needs_kind: string;
 	/** The pass's own reason it needs nothing, else its round's, else null. */
 	needs_reason: string | null;
+	/** Set for a pass a ruling closed without a merge. */
+	closed: Closed | null;
+}
+
+/** The ruling that closed a pass, and when. */
+export interface Closed {
+	ruling: string;
+	time: Time;
 }
 
 export interface Round {
@@ -227,6 +235,7 @@ export interface ReportPass {
 	planned_minutes: number;
 	actual_minutes: number | null;
 	pull_request: number | null;
+	closed: Closed | null;
 }
 
 /** A report from a round or a release. `read` is null until it is marked read. */

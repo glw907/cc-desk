@@ -248,6 +248,16 @@ type Pass struct {
 	Guess       *Guess       `json:"guess,omitempty"`
 	Session     *Session     `json:"session,omitempty"`
 	PullRequest *PullRequest `json:"pull_request,omitempty"`
+	// Closed marks a done pass whose pull request Geoff's ruling closed
+	// without a merge. It is a mark on a done pass, never a sixth state, so
+	// an older file reads as it did.
+	Closed *Closed `json:"closed,omitempty"`
+}
+
+// Closed is the ruling that closed a pass and when.
+type Closed struct {
+	Ruling string    `json:"ruling"`
+	Time   time.Time `json:"time"`
 }
 
 // StopInterval is one stretch a pass spent stopped. End is nil while the

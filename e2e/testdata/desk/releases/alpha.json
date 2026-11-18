@@ -10,7 +10,8 @@
     "stop_reason": "sign_in_expired", "stopped": "2026-11-20T22:00:00Z", "ended": "2026-11-20T22:05:00Z"
   },
   "rounds": [
-    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true}
+    {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true},
+    {"name": "r2", "summary": "A closed pass and the pass held by it.", "needs_geoff": false, "no_need_reason": "Closed by a ruling.", "design_written": true}
   ],
   "passes": [
     {"name": "a-free", "summary": "Free now.", "round": "r1", "planned_minutes": 10, "state": "not_started", "questions": ["qa"]},
@@ -18,7 +19,13 @@
       "name": "a-stopped", "summary": "Stopped on scope.", "round": "r1", "planned_minutes": 15, "state": "stopped",
       "started": "2026-11-20T21:00:00Z", "stop_reason": "scope", "stops": [{"start": "2026-11-20T22:40:00Z"}],
       "no_need_reason": "It only renames files."
-    }
+    },
+    {
+      "name": "a-closed", "summary": "Closed without a merge.", "round": "r2", "planned_minutes": 30, "state": "done",
+      "started": "2026-11-20T20:00:00Z", "finished": "2026-11-20T20:40:00Z", "actual_minutes": 40,
+      "closed": {"ruling": "r-0001", "time": "2026-11-20T20:40:00Z"}
+    },
+    {"name": "a-held", "summary": "Held by the closed pass.", "round": "r2", "planned_minutes": 20, "state": "not_started", "after": ["a-closed"]}
   ],
   "questions": [
     {

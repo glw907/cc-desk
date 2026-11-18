@@ -63,6 +63,21 @@ type ReportPass struct {
 	PlannedMinutes int    `json:"planned_minutes"`
 	ActualMinutes  *int   `json:"actual_minutes"`
 	PullRequest    *int   `json:"pull_request"`
+	// Closed is set for a pass Geoff's ruling closed without a merge.
+	Closed *Closed `json:"closed"`
+}
+
+// Closed is the ruling that closed a pass and when.
+type Closed struct {
+	Ruling string    `json:"ruling"`
+	Time   time.Time `json:"time"`
+}
+
+func closedOf(p *state.Pass) *Closed {
+	if p.Closed == nil {
+		return nil
+	}
+	return &Closed{Ruling: p.Closed.Ruling, Time: p.Closed.Time.UTC()}
 }
 
 // buildReports folds each report's passes from s.Releases, which holds the
@@ -87,7 +102,7 @@ func buildReports(s *state.State) []ReportEntry {
 				if r.Round != "" && p.Round != r.Round {
 					continue
 				}
-				rp := ReportPass{Name: p.Name, State: string(p.State), PlannedMinutes: p.PlannedMinutes, ActualMinutes: p.ActualMinutes}
+				rp := ReportPass{Name: p.Name, State: string(p.State), PlannedMinutes: p.PlannedMinutes, ActualMinutes: p.ActualMinutes, Closed: closedOf(p)}
 				if p.PullRequest != nil && p.PullRequest.Number > 0 {
 					n := p.PullRequest.Number
 					rp.PullRequest = &n
@@ -165,6 +180,8 @@ type Pass struct {
 	// round's, else null.
 	NeedsKind   string  `json:"needs_kind"`
 	NeedsReason *string `json:"needs_reason"`
+	// Closed is set for a pass Geoff's ruling closed without a merge.
+	Closed *Closed `json:"closed"`
 }
 
 // Question is a question with whether it is answered. AnswerKind is
@@ -442,6 +459,7 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		Finished:       utc(p.Finished),
 		Questions:      []Question{},
 		WhyNot:         []string{},
+		Closed:         closedOf(p),
 	}
 	if p.StopReason != "" {
 		reason := string(p.StopReason)
