@@ -16,9 +16,16 @@
 
 ## Next action
 
-Design the State and rules round from the findings, in Geoff's terminal session. The second run's
-pull request (branch `worktree-cc-desk-prove-run2`) carries the proofs and lands through
-`approval-queue land` once its checks and review pass.
+Design the State and rules round in a fresh session in Geoff's terminal. The Prove pass closed with
+pull request 2 on 2026-11-17. Launch prompt, run from `~/Projects/cc-desk`:
+
+```text
+Read docs/STATUS.md, then design the State and rules round of the cc-desk route with me, using the
+standards:brainstorming skill. Start from the round's row in docs/plans/2026-11-17-route.md, the
+design in docs/specs/2026-11-17-cc-desk-design.md, and the findings in
+docs/research/2026-11-17-prove-findings.md, with the open tests in
+docs/follow-ups/2026-11-17-rerun-prove-proofs.md. Proof 7 decides how the usage stop reads its figure.
+```
 
 ## Open decisions
 
