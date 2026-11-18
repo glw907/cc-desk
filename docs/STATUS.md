@@ -30,11 +30,15 @@ Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
 <!-- /round-report -->
 
-## Pass state-rules-files
+## Pass state-rules-estimate
 
-All eight tasks are built and pushed on `state-rules-files`; pull request 3 carries the evidence.
-The pass fills the snapshot's pass 1 fields only, and `settle` in `internal/state/commit.go` is an
-empty function for pass 3. Pass 2 adds its builder in `internal/snapshot/estimate.go`.
+All five tasks are built and pushed on `state-rules-estimate`; pull request 4 carries the evidence.
+The snapshot now holds each release's pace, range, and rough mark, the minutes before and needed
+time of each pass and round, and the next session with `waits_for_geoff`. Each pass start, finish,
+or stop appends a line to `forecasts.jsonl`. `internal/snapshot/estimate.go` holds the pace, the
+needed times, and `fillSession`, which builds the next session. `settle` in
+`internal/state/commit.go` is still empty for pass 3, which also adds the unreadable usage figure
+to "Needs you now".
 
 ## Next action
 
