@@ -4,7 +4,7 @@ Initiative: cc-desk
 Round: sessions
 Pass: sessions-launch
 
-Class `runner`. Planned 90 minutes; the path below is 160. Design:
+Class `runner`. Planned 90 minutes; the path below is 175. Design:
 `docs/specs/2026-11-17-sessions-design.md` (approved 2026-11-17), sections "What the command
 records", "Launching", "The check", "When something goes wrong", "Left to the builder", and the
 second row of "The passes". Round plan: `docs/plans/2026-11-17-sessions-round.md`. Pass 1's plan,
@@ -46,8 +46,10 @@ in a repo and a bare remote each test makes.
   chained `kill`); `gate.sh` 0; `git push` 4 (chained or destructive); `gh pr create` and
   `gh pr ready` 0; a Claude settings file named in the target 10 (Self-Modification and the
   server classifier). The alternative for each is in the table below.
-- Reviewed: one `standards:plan-reviewer` read of this plan (Opus, medium), as the round plan's
-  Pre-flight asks of every pass. Its findings and how each was folded are under `## Decisions`.
+- Reviewed: one `standards:plan-reviewer` read of this plan (Opus, medium), 2026-11-18, as the
+  round plan's Pre-flight asks of every pass. It returned 2 blockers, 4 high, 7 medium, and 4
+  low findings, each checked against the code before it was folded. How each was folded is the
+  last list under `## Decisions`.
 - Evidence: the mechanism table and the recorded searches below. Each acceptance check was run on
   today's code before any code was written; the outputs are under `## Acceptance`.
 
@@ -58,7 +60,7 @@ in a repo and a bare remote each test makes.
 | `claude --bg` from a session | Only the built binary launches, and only in a test, against the `claude` stand-in. No task launches a real session |
 | A chained `claude stop` | The binary runs `claude stop <id>` alone, through `exec.Command`. No task stops a real session |
 | `claude agents --json` piped into a script | Tests use the stand-in. A live look, if ever needed, redirects to a file in `$CLAUDE_JOB_DIR/tmp` |
-| A chained `git worktree add` or `remove` | The binary runs each git command alone, in a test's repo. The executor runs no `git worktree` but the ones `EnterWorktree` and the close make |
+| A chained `git worktree add` or `remove` | The binary runs each git command alone, in a test's repo. The executor runs no `git worktree` of its own: `EnterWorktree`, the pair dispatch in `executor.md` (the Agent tool's worktree isolation), and the close make the only ones |
 | A chained `git fetch` or `git push` | Fetch and push `sessions-launch` alone |
 | A write to a Claude settings file | The executor edits no settings file. The binary writes each session's file under the state folder, `<state>/launch/<name>.json`, and in tests that folder is a `t.TempDir()` |
 | `kill` or `pkill` around `go test` | Stop a background command with `TaskStop` |
@@ -72,24 +74,25 @@ in a repo and a bare remote each test makes.
 | --- | --- |
 | The verbs today | `go build -o $CLAUDE_JOB_DIR/tmp/cc-desk ./cmd/cc-desk`, then `cc-desk conductor start x`: `unknown command "conductor" for "cc-desk"`, exit 1. `cc-desk round start x y`: `unknown command "start" for "cc-desk round"`, exit 1. `cc-desk --help` lists `check`, `free`, `pass`, `release`, `round`, `ruling`, `snapshot`, `usage` |
 | `pass start` records and launches nothing | The `writers` fixture copied to a temp folder: `cc-desk pass start east e-1` prints `pass "e-1" is building and cannot start`, exit 2. The release holds `e-1` to `e-7` building with no `session` key and no `checkout` |
-| No fixture has a checkout | A scan of every `e2e/testdata/*/releases/*.json`: none carries `checkout`, the three `check*` fixtures included. Only `writers` holds building passes with no session (seven in each of `east` and `west`) |
+| No fixture has a checkout | A scan of every `e2e/testdata/*/releases/*.json`: none carries `checkout`, the three `check*` fixtures included. `writers` holds building passes with no session (seven in each of `east` and `west`). `check-fail/releases/chk.json` holds `w1`, waiting on usage: with the default 40 percent stand-in, the record commit's settle starts it, so `TestCheckFailedReads`' good run (`e2e/check_test.go:507`) is a pass 1 test that meets a `launch` decision (the plan-reviewer's probe: exit 0, `w1` building, no session) |
+| A record with no session | `internal/state/checkrun.go:45-52` `applyRecorded` finds the record through `LiveSessions` and returns `no session record pass:w1 in project "chk"` when there is none; `:75` would then dereference the nil session on a stop. So `RecordCheck` must take a pass record with no session before the `launch` decision exists (task 2) |
 | The old tests call `pass start` | `grep -rnE '"pass", "start"' e2e`: about 25 calls in `estimate_test.go`, `events_test.go`, `order_test.go`, `ruling_test.go`, `lock_test.go`, and `broken_test.go`, all on releases with no checkout. So `pass start` stays a recording verb (Decisions) |
 | The start refusal text | `internal/state/events.go:205` `pass %q is %s and cannot start`. Tests assert on substrings only: `start_test.go:162` "is waiting and cannot start", `events_test.go:178` a done pass refused |
-| The claude flags | `claude --help > $CLAUDE_JOB_DIR/tmp/claude-help.txt` on Claude Code 2.1.327 lists `--bg, --background` ("Prints the id that `claude attach`, `logs`, `stop` and `rm` take"), `-n, --name`, `--model`, `--effort`, `--permission-mode`, `--settings <file-or-json>`, and `--disallowedTools <tools...>` |
+| The `claude` flags | `claude --help > $CLAUDE_JOB_DIR/tmp/claude-help.txt` on Claude Code 2.1.327 lists `--bg, --background` ("Prints the id that `claude attach`, `logs`, `stop` and `rm` take"), `-n, --name`, `--model`, `--effort`, `--permission-mode`, `--settings <file-or-json>`, and `--disallowedTools <tools...>` |
 | What a launch prints | `spikes/*/out/launch*.txt`: `backgrounded · 0c026eb1 · ccd-spike-2-idle`, and eight more of that shape. One line, from a `resume`, reads `backgrounded · e3b28ac7` with no name. The short id is the token after `backgrounded · ` |
 | The session id | `spikes/own.sh:146-165` saves the list before and after the launch and takes the one new row with the name, giving `id` and `sessionId`. A job's `~/.claude/jobs/<short id>/state.json` also carries `sessionId` (its keys read on this machine: `backend`, `children`, `cliVersion`, `createdAt`, `cwd`, `detail`, `name`, `sessionId`, `state`, and 15 more) |
 | A failed launch | `pass-core` `references/planner.md` "Launch": "`needs: \"send a prompt to start\"` is a failed launch" |
 | The prompt before the tools | `docs/research/2026-11-17-prove-findings.md`, proof 3: `--disallowedTools` "takes every word after it"; leaving out Artifact, SendFeedback, Workflow, AskUserQuestion, and ReportFindings saved about 19,000 tokens a request |
 | Auto mode and allow rules | `docs/research/2026-11-17-prove-findings.md`, proof 4: auto mode with `--settings` allow rules ran a pass with zero prompts, and `approval-queue land` ran with no rule, so the deny rules are needed. Spike settings shape: `spikes/4-permissions/settings.json` `{"permissions": {"allow": ["Bash(git -C scratch *)", ...]}}` |
-| The deny rule form | [Configure permissions](https://code.claude.com/docs/en/permissions): "Bash(ls *) matches ls", so a space before a trailing `*` also matches the bare command; `Bash(ls*)` with no space matches `lsof` too. A deny rule "isn't a security boundary around the program": `claude-merge-guard` stays the merge's guard. So the rules are `Bash(gh pr merge *)` and `Bash(approval-queue land *)`. A bare `gh pr merge` merges the current branch's PR, which the space form catches |
+| The deny rule form | [Configure permissions](https://code.claude.com/docs/en/permissions): "Bash(ls *) matches ls", so a space before a trailing `*` also matches the bare command; `Bash(ls*)` with no space matches `lsof` too. A deny rule "isn't a security boundary around the program": `claude-merge-guard` stays the guard on merges. So the rules are `Bash(gh pr merge *)` and `Bash(approval-queue land *)`. A bare `gh pr merge` merges the current branch's PR, which the space form catches |
 | The hook entry | `spikes/4-permissions/answer-settings.json`: `{"hooks": {"PermissionRequest": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "...", "timeout": 150}]}]}}`. [Hooks reference](https://code.claude.com/docs/en/hooks): a `PermissionRequest` hook that exits 0 with no output makes no decision, and the call goes through the normal permission flow. Proof 4: with no hook, a background session's prompt shows and the row reads `waitingFor: "permission prompt"`, which pass 1's check stops on. So the stub verb that prints nothing leaves every prompt as it is today |
-| The scope | `systemd-run --version`: systemd 259. `systemd-run --help` lists `--user`, `--scope`, `-q --quiet`. `systemd-run --user --scope -q /bin/sh -c 'pwd; echo "args: $*"' sh "a prompt" --disallowedTools X` printed its cwd and `args: a prompt --disallowedTools X`, exit 0. Run with no `--working-directory` from a folder, `/bin/pwd` printed that folder: the scope keeps the caller's cwd, so `exec.Cmd.Dir` sets the worktree. Round plan, shared assumptions: the scope outlives the starting unit (probed 2026-11-17) |
+| The scope | `systemd-run --version`: systemd 259. `systemd-run --help` lists `--user`, `--scope`, `-q --quiet`. `systemd-run --user --scope -q /bin/sh -c 'pwd; echo "args: $*"' sh "a prompt" --disallowedTools X` printed its working folder and `args: a prompt --disallowedTools X`, exit 0. Run with no `--working-directory` from a folder, `/bin/pwd` printed that folder: the scope keeps the caller's working folder, so `exec.Cmd.Dir` sets the worktree. Round plan, shared assumptions: the scope outlives the starting unit (probed 2026-11-17) |
 | `git worktree add` | A probe repo with a bare remote, in `$CLAUDE_JOB_DIR/tmp/wt`: an add into an existing empty folder succeeds (exit 0), so git won't refuse an empty folder and the command must stat the path first. An add whose branch exists fails, `fatal: a branch named 'p2' already exists`, exit 255. An add into a non-empty folder fails, `fatal: '.claude/worktrees/p5' already exists`, exit 128, and leaves the branch `p5` it made. So a failed add can leave a branch behind, and the command cleans up only a branch this call made |
 | Tracking | The same probe: a plain add prints "branch 'p1' set up to track 'origin/main'". With `--no-track` it prints no tracking line; a bare `git push` then fails with "has no upstream branch", and `git push -u origin p6` sets `origin/p6`. So the add uses `--no-track`, and the prompt names `git push -u origin <branch>` |
 | The validators | `internal/state/check.go:219` `validateSession` requires `name`, `short_id`, `session_id`, `branch`, an absolute `worktree`, a nonzero `launched`, and `launch_tries` of 1 or 2. `check.go:421` `checkSessionsUnique` refuses two live records naming one worktree or one session name. So a conductor and a design writer each get a worktree of their own, never the main checkout |
-| The commit path | `internal/state/commit.go` `Commit(dir, now, wait, ev, render)` and `WithReading(u, forced, ev)`: fold the reading, `settle`, then `ev`. A waiting pass that `settle` starts becomes building with no session inside the check's record commit, so the launch decision is made in that same event, after `settle` |
-| The two-pass slot | `internal/state/rules.go:188` `Building()` counts building passes only. A relaunch of a building pass changes no pass state, so it keeps its slot. A usage-stopped pass is `stopped` and holds no slot |
-| The check today | `cmd/cc-desk/check.go:36-37` Long help: "A launch, an end, or a relaunch is decided and printed, never carried out." `check.go:101-120`: the record commit, then one JSON line per decision. `check.go:20-27` `checkFlags{dryRun, claude, jobsDir, probeURL, secondWait}` |
+| The commit path | `internal/state/commit.go` `Commit(dir, now, wait, ev, render)` and `WithReading(u, forced, ev)`: fold the reading, `settle`, then `ev`. A waiting pass that `settle` starts becomes building with no session inside the check's record commit, so the launch decision is made in that same event, after `settle`. `Commit` settles once more after `ev` (`commit.go:86-88`), so a slot that a stop in `ev` frees starts a waiting pass that gets its `launch` at the next run. `Commit` writes what `ev` leaves without running `Check` again (`commit.go:81-114`), while every later `Load` does (`read.go:273`); `DesignRound` guards this by calling `validateRelease` itself (`events.go:141`) |
+| The two-pass slot | `internal/state/rules.go:188` `Building()` counts building passes only, and `Limits()` (`rules.go:216`) adds `two_pass` at two. A relaunch of a building pass changes no pass state, so it keeps its slot. A usage-stopped pass is `stopped` and holds no slot. `start()` resumes a stopped pass before it reads `Limits()` (`events.go:192-202`), as Geoff ruled "Yes as built" on 2026-11-18 (`docs/plans/2026-11-17-state-rules-order-plan.md`, commit 1c128e6). `settle` (`commit.go:194`) starts each waiting pass while `Limits()` is empty. So if the usage relaunch resumed after `settle`, two waiting passes would start first and two resumed passes would make four building; the resume runs before `settle` (Decisions) |
+| The check today | `cmd/cc-desk/check.go:36-37` Long help: "A launch, an end, or a relaunch is decided and printed, never carried out." `check.go:109-128`: the record commit, then one JSON line per decision. `check.go:111-112`: the dry run calls `Decide` on the folded state with no settle, so a waiting pass that a real run would start gets no decision. `check.go:75` takes `check.lock` (`state.CheckLockFile`, `lock.go:25`) for the whole run. `check.go:22-28` `checkFlags{dryRun, claude, jobsDir, probeURL, secondWait}` |
 | What pass 1's check tests assert after a run | `e2e/check_test.go:259` and `:331`: `releases/chk.json` holds no `"relaunches"`. `:438` `"launch_tries": 1` and `:469` `"launch_tries": 2` unchanged. `:271`, `:281`, `:328`: relaunch and end-and-relaunch decisions. Their release has no checkout and their worktrees, `/w/chk/s01` to `/w/chk/s11`, don't exist |
 | The decision code | `internal/sessions/decide.go:130-165` `early`: an ended record or a done pass is `none`; a finished conductor or design writer is `end`; a usage stop is `wait_usage` under the hold, otherwise an uncounted `relaunch`. `:194-212`: a missing row gives `launch_again`, `stop launch_failed`, `stop relaunch_limit`, `wait_usage`, or a counted `relaunch` |
 | The needs-you-now entry | `internal/snapshot/sessions.go:85-120`: a session with a stop gives an entry with its round and cause. A pass stopped with no session gives an entry with `session` null and its round. `todoFor(launch_failed)` reads "read the launch error, then start the pass again" |
@@ -110,6 +113,7 @@ in a repo and a bare remote each test makes.
 | `never carried out` | 1 | `check.go:37`: the Long help, rewritten (task 4) |
 | `claudeStandIn` | 3 | `check_test.go:40,43,70`: left. The launch tests get a stand-in of their own (task 1); answer 16 keeps the old one byte for byte |
 | `Session != nil\|Session == nil` | 9 | `events.go:48,56,129`: the new-release and design refusals, left. `snapshot/sessions.go:112`: left. Five test hits: left |
+| `sess == nil\|sess != nil` (added after the plan-reviewer's read) | 4 | `checkrun.go:50`: the sessionless-record error, changed (task 2). `snapshot/sessions.go:106`, `check.go:407,412`: left |
 | `cannot start` | 6 | `events.go:205` gains the live record's name when the pass has a session (task 2). `events.go:185,187,213`: left. `start_test.go:74,162`: left, since they match substrings |
 | `StopLaunchFailed` | 5 | `decide.go:199`, `snapshot/sessions.go:64`, `types.go:36,42`: left. The check stops a pass with it when a launch fails (task 4) |
 | `DryRun\|dryRun` | 6 | `check.go:23,41,87,101,111`: the dry run still carries out nothing (task 4). `check_test.go:548`: left |
@@ -121,11 +125,13 @@ in a repo and a bare remote each test makes.
 | --- | --- | --- |
 | `e2e/launch_rig_test.go` (new) | 1 | The git repo with a bare remote, the `claude` and `systemd-run` stand-ins, and the rig that runs the binary with both |
 | `internal/state/types.go`, `check.go` | 2 | `Release.AllowRules`, `Pass.Model` and `Pass.Effort`, `Decision.Outcome`; strict checks on them |
-| `internal/state/events.go`, `checkrun.go` | 2 | The refusal names the live record; events that record a launch, a relaunch, an end, and a finish |
+| `internal/state/events.go`, `checkrun.go` | 2 | The refusal names the live record; events that record a launch, a relaunch, an end, and a finish; `RecordCheck` takes a pass record with no session; `Pass.StopDetail` set and cleared |
+| `internal/snapshot/sessions.go` | 2 | A stopped pass with no session shows its stop detail as the cause |
 | `internal/launch/` (new): `worktree.go`, `settings.go`, `prompt.go`, `run.go`, `templates/*.txt` | 3 | The worktree, the settings file, the prompt from an embedded template, the launch and its ids |
 | `internal/sessions/decide.go` | 4 | A `launch` decision for a building pass with no session |
 | `cmd/cc-desk/check.go` | 4 | Carries the decisions out after the record commit, and its help says so |
 | `cmd/cc-desk/session.go`, `prompt.go` (new), `root.go` | 5 | `session start` and `session finish` for a conductor and a design writer; `prompt hook`, the stub |
+| `e2e/guard_test.go` (new) | 5 | A copy of the `check` fixture through the new stand-ins: no `--bg`, no `stop`, no relaunch written |
 | `e2e/launch_test.go` (new) | 6 | Done item 1 |
 | `e2e/recovery_test.go` (new) | 7 | Done item 2 |
 | `docs/STATUS.md`, `docs/follow-ups/*.md` | 8 | The close |
@@ -137,7 +143,12 @@ in a repo and a bare remote each test makes.
 A release gains `allow_rules`, a list of exact Claude Code permission rules. It can arrive in the
 input file at `release add`; nothing in this pass changes it afterward, and pass 3 adds the guarded
 verb. A pass gains optional `model` and `effort`, which override Opus at high for its session. A
-check decision gains `outcome`, empty until the carry-out writes what happened.
+check decision gains `outcome`, empty until the carry-out writes what happened. A pass gains
+`stop_detail`, allowed only while it is stopped. A failed first launch sets it to the launch
+error, `start()` clears it on a resume, and the needs-you-now entry for a stopped pass with no
+session shows it as the cause (`snapshot/sessions.go:120`). The error then outlives `check.json`,
+which each run replaces (`checkrun.go:36`). A `launch` decision's `session` field is the name the
+launch will use.
 
 The launch writes the session record in one commit after `claude --bg` returns: the name, kind,
 model, effort, both ids, worktree, branch, and launch time. A first launch sets `launch_tries` to
@@ -203,8 +214,13 @@ The launch, in order, with each command run alone:
    ```
 6. Take the short id from `backgrounded · <id>` in its output. Take the session id from the row
    with that id in one `claude agents --json --all` read, or else from the job's `state.json`
-   `sessionId`. Fail the launch when its `needs` reads `send a prompt to start`.
-7. Commit the record.
+   `sessionId`. Fail the launch when its `needs` reads `send a prompt to start`. When the output
+   holds no id, take the one new row with the session's name from that list read, as
+   `spikes/own.sh:146-165` does, and stop it.
+7. Commit the record. The commit's event first checks that the state still allows it: for a
+   pass, still building with no live record, or still the record it replaces; for a conductor
+   or design writer, no live record. It then runs `validateSession` and `checkSessionsUnique` on
+   the result, so a bad record is refused before `Commit` writes it. A refusal goes to answer 33.
 
 A failure after step 2 on a first launch undoes what this call made:
 
@@ -213,7 +229,9 @@ A failure after step 2 on a first launch undoes what this call made:
    `origin/<default>`.
 
 A failure after step 5 has also started a session, so the launch first runs `claude stop <id>`
-on that session. A failed undo leaves the folder and names it in the error.
+on that session. A failed undo leaves the folder and names it in the error. A
+`worktree remove` with no force fails once the session has written an untracked file there, such
+as `.claude/`; that is a failed undo too.
 
 The templates live in `internal/launch/templates/` as `pass.txt`, `design.txt`, `conductor.txt`,
 and `relaunch.txt`, embedded with `embed`, and filled with `text/template`. Each names:
@@ -233,28 +251,62 @@ it stands; the commits on it are yours."
 
 ### The check carries out
 
-The record commit stays as pass 1 built it. Inside the same event, after `settle`, `Decide` adds
-a `launch` decision for each building pass with no session record: `wait_usage` under the usage
-hold, otherwise `launch`. After that commit, still under `check.lock` and outside the state lock,
-the check carries out each decision in the order printed:
+Pass 1's record commit changes in three places. Evidence is still gathered before the lock, and
+each record still gets one decision.
+
+1. **The order inside the event.** The record event runs in this order:
+   1. Fold the usage reading.
+   2. Run `Decide` on that state, before any settle. This gives every record pass 1's decision,
+      since settle touches only waiting passes, which carry no session.
+   3. Resume each pass whose decision is the uncounted usage `relaunch`, through `StartPass`.
+      That closes its stop interval and puts it back to building before any waiting pass can
+      take its slot.
+   4. Settle.
+   5. Add one `launch` decision for each building pass with no session record: `wait_usage`
+      under the usage hold, otherwise `launch`.
+   6. Record.
+
+   The check builds this event itself, because `WithReading` settles before its `ev`. A unit
+   test shows two usage-stopped passes and two waiting ones ending with the two resumed passes
+   building and the two waiting ones still waiting.
+2. **A record with no session.** `RecordCheck` takes a decision for `pass:<name>` whose pass has
+   no session record. A `launch` or `wait_usage` decision writes only the decision, and
+   `applyRecorded` never dereferences a nil session. Any other decision for a missing record
+   stays an error.
+3. **The dry run.** The dry run runs the same steps 1 to 5 on its in-memory copy and writes
+   nothing, so it prints what a real run would decide.
+
+`Commit`'s own settle after the event can still start a waiting pass when a stop in the event
+frees a slot. That pass gets its `launch` at the next run. After the record commit, still under
+`check.lock` and outside the state lock, the check carries out each decision in the order
+printed:
 
 | Decision | What runs |
 | --- | --- |
 | `launch` | The launch, first kind. A refusal or a failure stops the pass as `launch_failed`, with the error in the outcome |
 | `launch_again` | The launch on the recorded worktree, `launch_tries` 2 |
 | `relaunch` with both reads missing | The launch on the recorded worktree, with the relaunch entry |
-| `relaunch` for a usage stop | One list read. A live row for the old id goes through the end below first. Then the pass resumes through `StartPass`, which closes its stop interval, and launches. While two passes are building, it waits (standing answer 34) |
+| `relaunch` for a usage stop | The pass already resumed in the record commit. One list read: a live row for the old id goes through `end_and_relaunch`'s stop and confirm first. Then the launch on the recorded worktree. A failed stop or a failed launch stops the pass again as `launch_failed`, with the error as its `stop_detail`, in the commit that records the failure. A conductor or design writer has no pass to resume; its launch replaces the record's ids and clears its stop |
 | `end_and_relaunch` | `claude stop <old id>`, one list read, and the launch only when the old row is missing or reads `stopped`, `done`, or `failed`. A failed stop or a row still live launches nothing this run |
 | `end` | `claude stop <id>`, then the record's `ended` |
 | `none`, `stop`, `wait_usage`, `wait_link` | Nothing more; pass 1 already recorded them |
 
-Before any side effect, each action checks its release's checkout and, for a relaunch, the
-recorded worktree. An action on a release with no checkout does nothing, and its outcome reads
-`not carried out: project <p> has no checkout recorded`. That keeps pass 1's fixtures, whose
-release has none, at their recorded results. Each outcome is written to `check.json` in one last
-commit, and each printed decision line carries it. A dry run carries out nothing and prints no
-outcome. The check exits 0 when every action ran or was held, and 2 when a launch was refused,
-naming the record in the error.
+Before any side effect (a list read, a stop, a git command, a launch), each action checks its
+release's checkout and, for a relaunch, the recorded worktree. An action on a release with no
+checkout does nothing: no state change, no stop, and exit 0. Its outcome reads `not carried out:
+project <p> has no checkout recorded`. That keeps pass 1's fixtures, whose release has none, at
+their recorded results. In `check-fail`, `w1` ends the good run building with no session and a
+`launch` decision not carried out. A usage-stopped pass on such a release isn't resumed in step
+3 either, so the check guard and the resume agree.
+
+Each outcome is written to `check.json` in one last commit, and each printed decision line
+carries it. A dry run carries out nothing and prints no outcome. The exit codes are:
+
+| Result of the run | Exit |
+| --- | --- |
+| Every action ran, was held, or was not carried out for want of a checkout | 0 |
+| A launch was refused (a live record, an unrecorded folder, an existing branch) or failed (`claude --bg`, the ids, a missing worktree), after the rest ran | 2, with each pass stopped `launch_failed` and the error naming the record or the folder |
+| A commit or the list read failed | 1, as pass 1 does |
 
 ### Session verbs
 
@@ -263,6 +315,8 @@ naming the record in the error.
   - A live record, finished or not, is refused, and the error names it.
   - An ended record is replaced by a fresh launch that reuses its worktree and branch.
   - A release with no checkout is refused.
+  - It takes `check.lock` for its whole run, as the check does, so a start never races a check
+    between the check's record commit and its launches.
 - `cc-desk session finish conductor <project>` and `cc-desk session finish design <project>
   <round>` set `finished`. The next check ends the session and never relaunches it.
 
@@ -289,9 +343,14 @@ Copied from the design's "What done looks like", items 1, 2, and 8, word for wor
 Item 1's clauses map to tests this way. "Starting a free fixture pass" is `pass start` on a
 release with a checkout and then one `check`: the check is the launch, since "Work that became
 free" is the check's row in the design. "A second start" is `pass start` again, refused naming
-the session. "A launch whose worktree another record holds" is a check whose new pass's path a
-live design writer's record names. "A start for a release with no checkout" is `session start
-conductor`, refused, plus a check whose `launch` outcome reads not carried out. Item 2's
+the session. "A launch whose worktree another record holds" is a release with round `r1` and a
+pass named `r1-design`: `session start design <project> r1` launches the design writer at
+`.claude/worktrees/r1-design`, then `pass start` and a check try to launch the pass at the same
+path. The check exits 2, the pass stops `launch_failed`, and the error names the design writer's
+record. "A start for a release with no checkout" is `session start conductor`, refused, plus a
+check whose `launch` outcome reads not carried out. Every item 1 test is named `TestLaunch…` and
+every item 2 test `TestRecovery…`; task 1's rig test is `TestRigProbe`, so neither check matches
+it. Item 2's
 "stub conductor" is a conductor record made through `session start conductor` against the
 stand-in. Each `--- PASS` line goes under `## Acceptance` in the PR body with its test name.
 Items 6 and 7 are pass 5's; this PR's body says so in one line.
@@ -309,31 +368,36 @@ No task holds code. Each test is table-driven where it has cases, and every new 
   check of its shared assumption.
 - Files: `e2e/launch_rig_test.go`.
 - Class: `ordinary`.
-- Check: `go test ./e2e/ -run TestLaunchRig -count=1 -v` prints `--- PASS: TestLaunchRig`.
+- Check: `go test ./e2e/ -run TestRigProbe -count=1 -v` prints `--- PASS: TestRigProbe`.
 - Test: the rig does the following.
   - `git init --bare` a remote, clone it, commit once, and push `main`.
-  - Write the `claude` stand-in as a heredoc script. On `--bg` it appends its argv as one JSON
-    array line to `calls.log`, with its cwd. It adds a working row to `rows.json`, prints
+  - Write the `claude` stand-in as a heredoc script. On `--bg` it appends its arguments as one JSON
+    array line to `calls.log`, with its working folder. It adds a working row to `rows.json`, prints
     `backgrounded · <id> · <name>` with ids from a counter, and writes `<jobs>/<id>/state.json`
     holding `sessionId`.
   - On `agents --json --all` the stand-in logs a read and prints `rows.json`. A test edits that
-    file to make a row vanish or come back, or scripts a sequence of lists.
+    file to make a row vanish or come back, or scripts a sequence of lists (`lists/1.json`,
+    `lists/2.json`, and so on, one per read, falling back to `rows.json`). Task 1 builds every
+    one of these controls, so tasks 6 and 7 never edit the rig.
+  - On `--bg` with `no-id` present it prints nothing, for answer 32's fallback.
   - On `stop <id>` it logs the call and marks the row `stopped`. It exits 1 when `stop-fails`
     exists.
-  - The `systemd-run` stand-in logs its own flags and cwd to `scope.log`, then drops `--user`,
+  - The `systemd-run` stand-in logs its own flags and working folder to `scope.log`, then drops `--user`,
     `--scope`, and `-q` and execs the rest.
   - The probe: `git worktree add` in the test, then the binary's launch path runs from it. The
-    stand-in's cwd is the worktree, and `scope.log` holds `--user --scope`.
+    stand-in's working folder is the worktree, and `scope.log` holds `--user --scope`.
 
   Since the binary has no launch yet, the probe at this task runs the `systemd-run` stand-in
   with the `claude` stand-in through `exec.Command` from the worktree. Task 6 replaces it with
   the binary.
 
-### Task 2: the record fields and events (25 minutes)
+### Task 2: the record fields and events (30 minutes)
 
 - Outcome: the release, pass, and decision fields; the events that record a launch, a relaunch,
-  an end, and a finish; and the refusal naming the live record.
-- Files: `internal/state/types.go`, `check.go`, `events.go`, `checkrun.go`, and their tests.
+  an end, and a finish; the refusal naming the live record; `RecordCheck` taking a
+  pass record with no session; and `stop_detail` on a pass.
+- Files: `internal/state/types.go`, `check.go`, `events.go`, `checkrun.go`,
+  `internal/snapshot/sessions.go`, and their tests.
 - Class: `runner`.
 - Check: `go test ./internal/state/ -count=1 -v`, read for the new cases.
 - Test: unit tables cover the following.
@@ -343,7 +407,14 @@ No task holds code. Each test is table-driven where it has cases, and every new 
     `fable`, `haiku`, or a full `claude-*` id; `effort` takes `low`, `medium`, `high`, `xhigh`,
     or `max`.
   - `RecordLaunch` makes a record with `launch_tries` 1, a launch again gives 2, and a relaunch
-    appends its entry and resets the tries and `last_seen`.
+    appends its entry and resets the tries and `last_seen`. It refuses when the pass is no
+    longer building, when another live record names the worktree or the name, and when the
+    result fails `validateSession` or `checkSessionsUnique`.
+  - `checkrun_test.go`: a `launch` and a `wait_usage` decision for a pass with no session record
+    write the decision only. A `relaunch` for one is an error, as today.
+  - `stop_detail` on a pass that isn't stopped is refused by the strict check. A resume clears
+    it, and the snapshot's needs-you-now entry for a stopped pass with no session uses it as
+    the cause.
   - `EndSession` sets `ended`, and `FinishSession` sets `finished` on a conductor or a round.
   - `pass start` on a building pass with a session reads `pass "x" is building and cannot start:
     session alpha-x is live`.
@@ -358,7 +429,7 @@ No task holds code. Each test is table-driven where it has cases, and every new 
 - Class: `runner`.
 - Check: `go test ./internal/launch/ -count=1 -v`, read for each case below.
 - Test:
-  - The argv puts the prompt before `--disallowedTools` and the five tools after it. It holds
+  - The argument list puts the prompt before `--disallowedTools` and the five tools after it. It holds
     `--permission-mode auto` and `--settings <file>`, and neither `bypassPermissions` nor
     `--dangerously-skip-permissions`. Its first words are `--user --scope -q claude --bg`.
   - The settings file decodes to the allow rules, the two deny rules, and the hook entry.
@@ -374,10 +445,13 @@ No task holds code. Each test is table-driven where it has cases, and every new 
     `backgrounded · e3b28ac7`. A missing row falls back to `state.json` `sessionId`, and neither
     found fails the launch with a `claude stop`.
 
-### Task 4: the check carries out (35 minutes)
+### Task 4: the check carries out (40 minutes)
 
-- Outcome: the check makes the `launch` decision and carries out every action in the table under
-  "The check carries out", in the order end, confirm, launch, and records each outcome.
+- Outcome: the record event runs in the order "The check carries out" gives (decide, resume,
+  settle, `launch` decisions), the dry run runs the same steps on its copy, and the check
+  carries out every action in that section's table, in the order end, confirm, launch, and
+  records each outcome. This task owns every edit to `cmd/cc-desk/check.go`; a fix found there
+  during tasks 6 and 7 waits for both to merge, then lands here on the branch.
 - Files: `internal/sessions/decide.go` and its test, `cmd/cc-desk/check.go`.
 - Class: `runner`.
 - Check: `go test ./internal/sessions/ ./e2e/ -run 'TestDecide|TestCheck' -count=1 -v`. Every
@@ -385,24 +459,34 @@ No task holds code. Each test is table-driven where it has cases, and every new 
 - Test:
   - `decide_test.go` gains the `launch` rows: a building pass with no session, under the hold
     and not, with and without a checkout.
+  - A unit test of the record event: two usage-stopped passes and two waiting ones, hold
+    clear, end with the two resumed passes building and the two waiting ones waiting.
+  - `TestCheckFailedReads` passes unchanged, with `w1` building and its `launch` not carried
+    out.
   - The carry-out's e2e cases come in tasks 6 and 7.
   - `check --help` no longer says "never carried out".
 
-### Task 5: the session verbs and the hook stub (20 minutes, beside task 4 in a pair)
+### Task 5: the session verbs, the hook stub, and the guard test (25 minutes, beside task 4 in a pair)
 
-- Outcome: `session start` and `session finish` for a conductor and a design writer, and
-  `prompt hook`.
-- Files: `cmd/cc-desk/session.go`, `cmd/cc-desk/prompt.go`, `root.go`.
+- Outcome: `session start` and `session finish` for a conductor and a design writer, taking
+  `check.lock`; `prompt hook`; and one e2e test that a check on a release with no checkout
+  carries out nothing.
+- Files: `cmd/cc-desk/session.go`, `cmd/cc-desk/prompt.go`, `root.go`, `e2e/guard_test.go`.
 - Class: `runner`.
 - Check: `cc-desk session --help` and `cc-desk prompt hook --help` print their usage, and `echo
-  '{}' | cc-desk prompt hook` prints nothing and exits 0.
-- Test: the e2e cases come in tasks 6 and 7. The pair works in its own worktree off task 3's
-  commit, and its commit merges into the branch before task 6.
+  '{}' | cc-desk prompt hook` prints nothing and exits 0. After task 4 merges, `go test ./e2e/
+  -run TestGuard -count=1 -v` prints `--- PASS: TestGuard`.
+- Test: `TestGuard` copies the `check` fixture to a temp folder, runs `check` with task 1's
+  stand-ins, and asserts that `calls.log` holds no `--bg` and no `stop`, that `scope.log` is
+  empty, and that s05, s06, and s07 hold no `relaunches`. Before task 4 merges it passes
+  trivially; it guards against a carry-out that runs ahead of the checkout check. The other e2e
+  cases come in tasks 6 and 7. The pair works in the worktree `executor.md`'s pair dispatch
+  makes, off task 3's commit; the executor merges its commit into the branch before task 6.
 
 ### Task 6: done item 1 (20 minutes, beside task 7 in a pair)
 
 - Outcome: item 1 passes end to end.
-- Files: `e2e/launch_test.go`, `e2e/launch_rig_test.go`.
+- Files: `e2e/launch_test.go`. The rig is task 1's and is not edited here.
 - Class: `ordinary`.
 - Check: `go test ./e2e/ -run TestLaunch -count=1 -v`, read for one `--- PASS` line per clause.
 - Test: each clause in the mapping under `## Acceptance`, through the built binary and the rig.
@@ -412,7 +496,7 @@ No task holds code. Each test is table-driven where it has cases, and every new 
     HEAD equals that commit.
   - The settings file is read back from `<state>/launch/`.
 
-### Task 7: done item 2 (30 minutes, beside task 6 in a pair)
+### Task 7: done item 2 (35 minutes, beside task 6 in a pair)
 
 - Outcome: item 2 passes end to end.
 - Files: `e2e/recovery_test.go`.
@@ -422,10 +506,20 @@ No task holds code. Each test is table-driven where it has cases, and every new 
 - Test: each clause of item 2 through the built binary, with `--second-read-wait 1ms` and a
   short `--launch-row-wait`.
   - The branch tip is `git -C <worktree> rev-parse HEAD` before and after each relaunch.
-  - The relaunch prompt is the argv in `calls.log`.
+  - The relaunch prompt is the argument list in `calls.log`.
   - The usage stand-in is the one `e2e/standin_test.go` already writes, read at 100 percent.
-  - The three-pass case builds its release through the verbs, since no old fixture changes
-    (answer 16).
+  - The vanish sequence. A relaunch clears `last_seen`, and a missing row with `last_seen`
+    empty gives `launch_again`, not a counted relaunch (`decide.go:198-203`). So the pass
+    case runs seven checks: launch; working; vanish (relaunch 1); working; vanish (relaunch 2);
+    working; vanish (stop `relaunch_limit`, "Needs you now" naming the round, no `--bg` in
+    `calls.log`). Each "working" check sees the new row working, which sets `last_seen`.
+  - The three-pass case: a release built through the verbs, with `pass start a`, `pass start
+    b`, `pass stop a --reason scope`, `pass start c`, and `pass start a`. That leaves three
+    passes building, because a resume skips both limits (Geoff, "Yes as built"). The test then
+    launches each through one check, runs one check that sees all three working, makes all
+    three rows vanish, and runs the next check with
+    the usage stand-in at 100 percent (no relaunch) and then at 40 (one relaunch each). No old
+    fixture changes (answer 16).
 
 ### Task 8: close (15 minutes)
 
@@ -437,8 +531,10 @@ No task holds code. Each test is table-driven where it has cases, and every new 
 - Test: none of its own. One whole-branch `standards:diff-reviewer` read (class `runner`).
 
 Path: tasks 1 to 4 in order, task 5 beside task 4, then tasks 6 and 7 side by side, then task 8:
-20 + 25 + 35 + 35 + 30 + 15 = 160 minutes. The tasks sum to 200. At the last round's pace of about
-0.6, the path is about 95 minutes. Both are under the 180-minute park line.
+20 + 30 + 35 + 40 + 35 + 15 = 175 minutes. The tasks sum to 220. The path rose from 160 when the
+plan-reviewer's findings were folded in, and these estimates are not trimmed to fit. At the last
+round's pace of about 0.6, the path is about 105 minutes. Both are under the 180-minute park
+line, the path by 5 minutes, so a task that runs long is the first sign to watch.
 
 The CI watch, run bare after each push: `gh run list --repo glw907/cc-desk --branch
 sessions-launch --limit 3`, then `gh run watch <id> --repo glw907/cc-desk --exit-status` on the
@@ -452,23 +548,29 @@ doesn't replace them: 23 and 27 are replaced by 30 below. The last round's 19 to
 Go test skips; a field name is the builder's; a path past 180 stops. This pass adds:
 
 - **30. What a check writes now.** Everything pass 1's check wrote, plus each carried-out
-  action's record and outcome. A release with no checkout gets nothing carried out, so pass 1's
-  fixtures and their assertions stand byte for byte. A pass 1 test that fails is a bug in this
-  pass, never a reason to edit that test.
+  action's record and outcome. A release with no checkout gets nothing carried out, so every
+  assertion in pass 1's tests stands. The one change in their state is `check-fail`'s good run,
+  where `check.json` gains a `launch` decision for `w1`, not carried out. A pass 1 test that
+  fails is a bug in this pass, never a reason to edit that test.
 - **31. A relaunch whose recorded worktree is missing or on another branch.** The launch fails
   before any side effect. A pass stops as `launch_failed` with the path in the outcome. A
   conductor or design writer takes the stop on its session record. Nothing is recreated.
 - **32. `claude --bg` fails, or its id or session id can't be read.** The launch runs `claude
-  stop` on any id it printed. A first launch undoes the worktree and branch it made. The pass
-  stops as `launch_failed`. Never retry inside one run.
+  stop` on any id it printed. With none printed, it reads the list once for a new row with the
+  session's name and stops that one. A first launch undoes the worktree and branch it made. The
+  pass stops as `launch_failed`, with the error as its `stop_detail`. Never retry inside one run.
 - **33. The record commit fails after a session is live.** Run `claude stop <id>` on it, then
   undo a first launch's worktree and branch, and exit with both errors. If the undo fails, the
   next check finds an unrecorded folder and refuses it, which is the design's row.
-- **34. A usage relaunch while two passes are building.** The pass stays stopped and the outcome
-  reads `held: two passes building`. The next run tries again. The relaunch is still uncounted,
-  as PR 8 built it.
-- **35. The `writers` fixture or any fixture with building passes and no checkout.** A check
-  decides `launch` for each and carries out none. Never add a checkout to an old fixture.
+- **34. A usage relaunch and the two-pass limit.** The usage relaunch resumes the pass through
+  `StartPass`, which skips both limits, as Geoff ruled "Yes as built" on 2026-11-18. Don't add
+  a hold on `Building()`. The design's "a restart never puts a third pass in flight" holds on
+  the check's path because the resume runs before `settle`, so a waiting pass never takes the
+  slot first. Don't move the resume after `settle`, even where a reading of the design seems to
+  ask for it. The relaunch stays uncounted, as PR 8 built it.
+- **35. The `writers` fixture, `check-fail`'s `w1`, or any building pass with no checkout.** A
+  check decides `launch` for each and carries out none, and the pass stays building. Never add
+  a checkout to an old fixture.
 - **36. A real `claude` or `systemd-run` would run.** Every e2e call to `check` or `session start`
   passes both stand-in flags. A test helper that could omit them refuses to build the command
   line. `PATH=/usr/bin:/bin` holds the real `systemd-run`, so the flag is the only guard.
@@ -500,9 +602,30 @@ Go test skips; a field name is the builder's; a path past 180 stops. This pass a
 - Builds on PR 8's flagged call: a usage-stop relaunch counts nothing. Pass 1 decides it as an
   uncounted `relaunch`, and this pass carries that out as decided, resuming the pass through
   `StartPass`. If Geoff rules for holding until the reset time, the change sits in pass 1's
-  `early` and touches none of this pass's carry-out. Answer 34 adds a hold when two passes are
-  building, so the resume never puts a third pass in flight.
+  `early` and touches none of this pass's carry-out.
   Call: Geoff's (product), already filed as `docs/follow-ups/usage-relaunch-loop-on-a-model-limit.md`.
+- The usage resume skips both limits, as Geoff ruled "Yes as built" on 2026-11-18 (commit
+  1c128e6, `docs/plans/2026-11-17-state-rules-order-plan.md`). The record event resumes it
+  before `settle` runs, so a waiting pass never takes the slot the resumed pass held. That keeps
+  design line 172, "a restart never puts a third pass in flight", on the check's path without a
+  hold. The plan's first draft held the relaunch while two passes were building; the review
+  showed that contradicts the ruling, and the order fix replaces it. Three building passes can
+  still arise from Geoff's own `pass start` on a stopped pass, as the ruling allows.
+  Call: mine (method, within Geoff's ruling).
+- A release with no checkout gets nothing carried out: no state change, exit 0, and an outcome
+  line. The plan-reviewer found the first draft both refused and left alone such a release.
+  This keeps every pass 1 assertion and `check-fail`'s `w1` building. A building pass with no
+  checkout gets no needs-you-now entry in this pass; task 8 files that as a follow-up.
+  Call: mine (method).
+- `RecordCheck` takes a `launch` or `wait_usage` decision for a pass with no session record and
+  writes only the decision, because the new `launch` row has no record to look up.
+  Call: mine (method).
+- A launch error lasts as `Pass.stop_detail`, set only while stopped and cleared by a resume, so
+  the needs-you-now entry can name the cause after the run ends.
+  Call: mine (schema field, standing answer 21).
+- The dry run runs the record event's decide, resume, settle, and `launch` steps on its copy, so
+  it prints what a real run would decide.
+  Call: mine (method).
 - Builds on PR 8's `[advisor]` lines: evidence is gathered outside the state lock and decided
   inside it, and the carry-out runs after the record commit under `check.lock` with each launch
   recorded by its own commit. Blocked-before-idle and the `noSettle` failed read stand. A
