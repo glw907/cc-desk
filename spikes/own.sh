@@ -74,8 +74,14 @@ refuse_bypass() {
     case $arg in
       *bypass* | *dangerously*) die "$cmd refused: $arg turns permission checks off" ;;
     esac
-    if [ "$prev" = --settings ] && [ -f "$arg" ] && grep -qiE 'bypass|dangerously' "$arg"; then
-      die "$cmd refused: settings file $arg turns permission checks off"
+    local file=""
+    if [ "$prev" = --settings ]; then
+      file=$arg
+    elif [[ $arg == --settings=* ]]; then
+      file=${arg#--settings=}
+    fi
+    if [ -n "$file" ] && [ -f "$file" ] && grep -qiE 'bypass|dangerously' "$file"; then
+      die "$cmd refused: settings file $file turns permission checks off"
     fi
     prev=$arg
   done
@@ -145,13 +151,14 @@ cmd_launch() {
   local row
   row=$(python3 -I -c '
 import json, sys
-existing = {r["id"] for r in json.load(open(sys.argv[2]))}
+# An interactive row has no id; it is never a launch and never owned.
+existing = {r.get("id") for r in json.load(open(sys.argv[2]))}
 new = [r for r in json.load(open(sys.argv[1]))
-       if r.get("name") == sys.argv[3] and r["id"] not in existing]
+       if r.get("id") and r.get("name") == sys.argv[3] and r["id"] not in existing]
 if len(new) == 1:
     print("\t".join([new[0]["id"], new[0].get("sessionId", "")]))
 ' "$list" "$before" "$name")
-  [ -n "$row" ] || die "not exactly one new row named $name in the session list; output saved to $out"
+  [ -n "$row" ] || die "not exactly one new row named $name in the session list, so nothing was owned; a session it started may still be live and need a stop by hand; output saved to $out and the list to $list"
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "${row%%$'\t'*}" "${row#*$'\t'}" "$name" "$folder" \
     "claude --bg --name $name $*" "$(now)" >>"$OWNED"
   cat "$out"
@@ -172,6 +179,7 @@ cmd_resume() {
   require_owned resume "$id"
   local sid
   sid=$(awk -F'\t' -v id="$id" '$1 == id {print $2}' "$OWNED")
+  [ -n "$sid" ] || die "resume refused: $id has no session id in owned.tsv"
   log_ran resume "$id"
   local out=$STATE_DIR/resume-$id-$(date -u +%H%M%S).out
   "$CLAUDE_BIN" --resume "$sid" --bg "$@" 2>&1 | tee "$out"
@@ -185,8 +193,8 @@ owned = {l.split("\t")[0] for l in open(sys.argv[2]) if l.strip()}
 text = open(sys.argv[3]).read()
 note = " ".join(l for l in text.splitlines() if "note:" in l)
 for r in json.load(open(sys.argv[1])):
-    sid = r.get("sessionId", "")
-    if r["id"] not in owned and (r["id"] in note or (sid and sid in note)):
+    rid, sid = r.get("id"), r.get("sessionId", "")
+    if rid and rid not in owned and (rid in note or (sid and sid in note)):
         print("\t".join([r["id"], r.get("sessionId", "")]))
 ' "$list" "$OWNED" "$out" | while IFS=$'\t' read -r nid nsid; do
       printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$nid" "$nsid" "copy-of-$id" "?" "resume $sid" "$(now)" >>"$OWNED"

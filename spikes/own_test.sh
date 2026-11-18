@@ -16,8 +16,23 @@ mkdir -p "$T/bin" "$T/state" "$T/proc" "$T/wt/sub"
 cat >"$T/bin/claude" <<'E'
 #!/usr/bin/env bash
 # Stub claude: prints FAKE_LIST for the session list, and records every other call.
+# With FAKE_NEW_ID set, a --bg launch adds that row to the list under its --name.
+# With FAKE_NOTE_ID set, a --resume prints a note: line and adds that row as the copy.
 if [ "$1" = agents ]; then cat "$FAKE_LIST"; exit 0; fi
 echo "$*" >>"$FAKE_CALLS"
+addrow() {
+  python3 -I -c '
+import json, sys
+rows = json.load(open(sys.argv[1]))
+rows.append({"id": sys.argv[2], "sessionId": "s-" + sys.argv[2], "name": sys.argv[3],
+             "pid": 0, "cwd": "/x", "state": "working", "startedAt": "t9"})
+json.dump(rows, open(sys.argv[1], "w"))' "$FAKE_LIST" "$1" "$2"
+}
+if [ "$1" = --bg ] && [ "$2" = --name ] && [ -n "${FAKE_NEW_ID:-}" ]; then addrow "$FAKE_NEW_ID" "$3"; fi
+if [ "$1" = --resume ] && [ -n "${FAKE_NOTE_ID:-}" ]; then
+  addrow "$FAKE_NOTE_ID" copy
+  echo "note: started a copy as $FAKE_NOTE_ID"
+fi
 E
 chmod +x "$T/bin/claude"
 
@@ -45,7 +60,8 @@ cat >"$FAKE_LIST" <<E
  {"id":"cccc3333","sessionId":"s-c","name":"ccd-spike-z","pid":302,"cwd":"$T/wt/sub","state":"working","startedAt":"t1"},
  {"id":"dddd4444","sessionId":"s-d","name":"ccd-spike-w","pid":302,"cwd":"$T/wt/sub","state":"working","startedAt":"t1"},
  {"id":"eeee5555","sessionId":"s-e","name":"ccd-spike-v","pid":303,"cwd":"/elsewhere","state":"working","startedAt":"t1"},
- {"id":"ffff6666","sessionId":"s-f","name":"stranger","pid":999,"cwd":"/elsewhere","state":"idle","startedAt":"t0"}
+ {"id":"ffff6666","sessionId":"s-f","name":"stranger","pid":999,"cwd":"/elsewhere","state":"idle","startedAt":"t0"},
+ {"pid":2811137,"kind":"interactive","name":"someone-else","cwd":"/elsewhere"}
 ]
 E
 
@@ -90,12 +106,26 @@ check "resume with a bypass flag is refused" test $? -ne 0
 printf '{"permissions": {"defaultMode": "bypassPermissions"}}\n' >"$T/bad-settings.json"
 bash "$HERE/own.sh" launch x "$T/wt" --settings "$T/bad-settings.json" 2>/dev/null
 check "launch with a bypass settings file is refused" test $? -ne 0
+bash "$HERE/own.sh" launch x "$T/wt" "--settings=$T/bad-settings.json" 2>/dev/null
+check "launch with a bypass settings file in --settings= form is refused" test $? -ne 0
 check "no claude command ran for any refusal" test ! -s "$FAKE_CALLS"
 
 # A launch adopts only a row that is new, never a pre-existing row of the same name.
 bash "$HERE/own.sh" launch stranger "$T/wt" >/dev/null 2>&1
 check "launch does not adopt a pre-existing row of the same name" test $? -ne 0
 check "the pre-existing row is not in owned.tsv" bash -c "! grep -q ffff6666 '$T/state/owned.tsv'"
+: >"$FAKE_CALLS"
+
+# A launch adopts exactly the one new row, with an id-less interactive row in the list.
+FAKE_NEW_ID=nnnn7777 bash "$HERE/own.sh" launch ccd-spike-new "$T/wt" >/dev/null 2>&1
+check "a launch with an interactive row in the list succeeds" test $? -eq 0
+check "the launch adds exactly its new row to owned.tsv" test "$(grep -c '^nnnn7777	s-nnnn7777	ccd-spike-new	' "$T/state/owned.tsv")" = 1
+
+# A resume that starts a copy records the copy as owned.
+printf '%s\ts-a\tn\t%s\tl\t%s\n' aaaa1111 "$T/wt/sub" "$now" >"$T/state/owned.tsv"
+FAKE_NOTE_ID=rrrr8888 bash "$HERE/own.sh" resume aaaa1111 >/dev/null 2>&1
+check "a resume with an interactive row in the list succeeds" test $? -eq 0
+check "the resume's copy is in owned.tsv" grep -q '^rrrr8888	' "$T/state/owned.tsv"
 : >"$FAKE_CALLS"
 
 # A good stop is logged and runs.
