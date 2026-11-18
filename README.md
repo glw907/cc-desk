@@ -18,8 +18,9 @@ working mockup of the page beside it. [`docs/STATUS.md`](docs/STATUS.md) says wh
 ## The page
 
 The page in `web/` is a status page that only reads. It shows the releases, rounds, and passes in
-the state folder and the forecast of the next decision session. It holds no form and no button
-but "Copy command", and its server answers every request but GET and HEAD with 405.
+the state folder and the forecast of the next decision session. It holds one form, "Mark as read" on a
+report's page, and no button but "Copy command". Its server answers every other write with 405,
+or 403 from another origin.
 
 Run `bash web/scripts/install-page.sh` to install it, or to serve a newer build. The script builds
 the page, copies the build to `~/.local/share/cc-desk/page`, and installs and restarts the user

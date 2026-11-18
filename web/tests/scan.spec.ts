@@ -35,7 +35,7 @@ test('the two themes paint the page two different backgrounds', async ({ app, pa
 /** One scan test per state and theme, so no test holds dozens of scans. */
 for (const theme of THEMES) {
 	// The states whose every reachable page is scanned.
-	for (const state of ['started', 'twin']) {
+	for (const state of ['started', 'twin', 'page']) {
 		test(`every page on ${state} passes the scan in ${theme}`, async ({ app, page }) => {
 			test.slow();
 			const clock = buildState(state, app.stateDir);
@@ -44,6 +44,8 @@ for (const theme of THEMES) {
 			await app.start();
 			const found: string[] = [];
 			await crawl(page, app.url, async (address) => {
+				// A folded design body or report table is scanned only once it is open.
+				await page.locator('details').evaluateAll((all) => all.forEach((d) => ((d as HTMLDetailsElement).open = true)));
 				found.push(...(await violations(page, address)));
 			});
 			expect(found).toEqual([]);

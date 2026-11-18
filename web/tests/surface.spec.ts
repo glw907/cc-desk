@@ -5,7 +5,7 @@ import path from 'node:path';
 import { expect, test } from './app';
 import { crawl, openDrawn } from './crawl';
 import { hashTree } from './hash';
-import { buildState } from './state';
+import { buildState, checkoutOf } from './state';
 import type { Snapshot } from '../src/lib/snapshot';
 
 /** Sets the mode of `root`, every folder under it, and every file under it. */
@@ -99,6 +99,55 @@ test.describe('a reading surface', () => {
 			// A failed walk would leave read-only folders the fixture cannot remove.
 			writable(app.stateDir);
 			writable(appCopy);
+			rmSync(appCopy, { recursive: true, force: true });
+		}
+	});
+
+	test('on the page state the one form is Mark as read, on a report page, and the walk writes nothing', async ({
+		app,
+		page
+	}) => {
+		const appCopy = mkdtempSync(path.join(tmpdir(), 'cc-desk-app-'));
+		cpSync(path.resolve(import.meta.dirname, '..', 'build'), appCopy, { recursive: true });
+		const clock = buildState('page', app.stateDir);
+		const checkout = checkoutOf(app.stateDir);
+		const snapshot = JSON.parse(readFileSync(path.join(app.stateDir, 'snapshot.json'), 'utf8')) as Snapshot;
+		const roots = [app.stateDir, appCopy, checkout];
+		const before = roots.map((root) => hashTree(root));
+		try {
+			for (const root of roots) readOnly(root);
+			await page.clock.setFixedTime(new Date(clock));
+			await app.start(appCopy);
+
+			// The walk never clicks. A report page holds the one form; no other page holds any.
+			const visited = await crawl(page, app.url, async (address) => {
+				const onReport = /^\/reports\/rep-\d+$/.test(address);
+				expect(await page.locator('form').count(), `${address} forms`).toBe(onReport ? 1 : 0);
+				for (const selector of ['input', 'select', 'textarea', '[contenteditable]']) {
+					expect(await page.locator(selector).count(), `${address} holds ${selector}`).toBe(0);
+				}
+				for (const button of await page.getByRole('button').all()) {
+					const name = await button.evaluate((el) => el.getAttribute('aria-label') ?? el.textContent?.trim() ?? '');
+					const allowed = onReport && name === 'Mark as read' ? name : 'Copy command';
+					expect(name, `${address} holds a button named "${name}"`).toBe(allowed);
+				}
+			});
+
+			const named = ['/', '/rulings', '/reports/rep-0001'];
+			for (const release of snapshot.releases) {
+				for (const round of release.rounds) {
+					named.push(`/${release.project}/${round.name}`);
+					for (const pass of round.passes) named.push(`/${release.project}/${round.name}/${pass.name}`);
+				}
+			}
+			expect(named.length).toBeGreaterThan(10);
+			for (const address of named) expect(visited, `the walk missed ${address}`).toContain(address);
+
+			await app.stop();
+			expect(app.stderr).toBe('');
+			roots.forEach((root, i) => expect(hashTree(root), root).toEqual(before[i]));
+		} finally {
+			for (const root of roots) writable(root);
 			rmSync(appCopy, { recursive: true, force: true });
 		}
 	});
