@@ -20,10 +20,11 @@
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 <!-- round-report state-rules -->
-**The start rules have landed, and the last pass is in planning.** Passes 1 to 3 have landed as
-pull requests 3, 4, and 5. The command keeps the state files, forecasts the next session with
-Geoff, and starts, holds, or refuses a pass by the rules. Pass 4, which records rulings, is being
-planned. Weekly usage read 90 percent, under the 100 percent stop. Nothing waits for Geoff.
+**All four passes are built, and pass 4 waits on its pull request.** Passes 1 to 3 have landed as
+pull requests 3, 4, and 5. Pass 4 is pull request 6. The command keeps the state files, forecasts
+the next session with Geoff, starts, holds, or refuses a pass by the rules, and records a ruling
+from a registered desk session. Weekly usage read 91 percent on the live run, under the 100 percent
+stop. Nothing waits for Geoff.
 
 Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
@@ -38,6 +39,12 @@ to `forecasts.jsonl`.
 Pass 3 (`state-rules-order`) landed as pull request 5. A start now begins, waits on the two-pass
 limit or on usage, or is refused with every broken rule named. `cc-desk usage` and `cc-desk free`
 are new. Geoff kept the resume rule as built: a resumed stopped pass skips both limits.
+
+Pass 4 (`state-rules-rulings`) is pull request 6. `cc-desk ruling record` appends one line holding
+Geoff's words, and refuses with the failing test named unless the caller is under a registered desk
+process that has a terminal. A ruling answers its question, closes any guess on it as held or
+missed, and frees what waited. Two follow-ups are filed: the orphan ruling after a crash, and a desk
+that lives through a clock step.
 
 ## Next action
 
