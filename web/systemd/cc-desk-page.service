@@ -1,0 +1,17 @@
+[Unit]
+Description=cc-desk page: the read-only status page on 127.0.0.1:7908
+After=default.target
+
+[Service]
+Environment=HOST=127.0.0.1 PORT=7908
+# A user unit's PATH has no mise shims, so Node is named by its full path. The lts symlink is
+# what `mise which node` prints. No state folder is set: the server reads the live one.
+ExecStart=%h/.local/share/mise/installs/node/lts/bin/node %h/.local/share/cc-desk/page
+Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+# The page writes nothing, so the whole file system is read-only to it.
+ProtectSystem=strict
+
+[Install]
+WantedBy=default.target
