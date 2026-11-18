@@ -6,10 +6,10 @@
       "project": "alpha",
       "name": "v1",
       "repo": "glw907/alpha",
-      "pace": null,
-      "pace_low": null,
-      "pace_high": null,
-      "rough": null,
+      "pace": 1.2,
+      "pace_low": 0.8,
+      "pace_high": 1.5,
+      "rough": false,
       "rounds": [
         {
           "name": "r1",
@@ -251,8 +251,8 @@
               }
             ]
           },
-          "minutes_before": null,
-          "needed_time": null,
+          "minutes_before": 0,
+          "needed_time": "2026-11-20T23:00:00Z",
           "forecast_time": null,
           "passes": [
             {
@@ -265,8 +265,8 @@
               "finished": null,
               "stop_reason": null,
               "questions": [],
-              "minutes_before": null,
-              "needed_time": null,
+              "minutes_before": 0,
+              "needed_time": "2026-11-20T23:00:00Z",
               "free": null,
               "why_not": [],
               "guess_outcome": null
@@ -281,8 +281,8 @@
               "finished": null,
               "stop_reason": null,
               "questions": [],
-              "minutes_before": null,
-              "needed_time": null,
+              "minutes_before": 100,
+              "needed_time": "2026-11-21T01:00:00Z",
               "free": null,
               "why_not": [],
               "guess_outcome": null
@@ -309,8 +309,8 @@
                   "answer_kind": null
                 }
               ],
-              "minutes_before": null,
-              "needed_time": null,
+              "minutes_before": 300,
+              "needed_time": "2026-11-21T05:00:00Z",
               "free": null,
               "why_not": [],
               "guess_outcome": null
@@ -323,10 +323,10 @@
       "project": "beta",
       "name": "v2",
       "repo": "glw907/beta",
-      "pace": null,
+      "pace": 1,
       "pace_low": null,
       "pace_high": null,
-      "rough": null,
+      "rough": true,
       "rounds": [
         {
           "name": "b1",
@@ -387,7 +387,7 @@
           "after": [
             "b1"
           ],
-          "planned_minutes": 60,
+          "planned_minutes": 480,
           "actual_minutes": null,
           "started": null,
           "finished": null,
@@ -419,15 +419,15 @@
               }
             ]
           },
-          "minutes_before": null,
-          "needed_time": null,
+          "minutes_before": 0,
+          "needed_time": "2026-11-20T23:00:00Z",
           "forecast_time": null,
           "passes": [
             {
               "name": "b-three",
               "summary": "Needed later.",
               "state": "not_started",
-              "planned_minutes": 60,
+              "planned_minutes": 480,
               "actual_minutes": null,
               "started": null,
               "finished": null,
@@ -456,8 +456,8 @@
                   "answer_kind": "carried"
                 }
               ],
-              "minutes_before": null,
-              "needed_time": null,
+              "minutes_before": 0,
+              "needed_time": "2026-11-20T23:00:00Z",
               "free": null,
               "why_not": [],
               "guess_outcome": null
@@ -480,9 +480,9 @@
             "reason": null,
             "questions": []
           },
-          "minutes_before": null,
-          "needed_time": null,
-          "forecast_time": null,
+          "minutes_before": 480,
+          "needed_time": "2026-11-21T07:00:00Z",
+          "forecast_time": "2026-11-21T07:00:00Z",
           "passes": []
         }
       ]

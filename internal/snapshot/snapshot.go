@@ -149,8 +149,8 @@ func Render(s *state.State, now time.Time) ([]byte, error) {
 	return append(data, '\n'), nil
 }
 
-// Build fills the fields pass 1 owns and leaves the rest at their empty
-// forms. Only live releases appear; done ones feed the pace.
+// Build fills the fields passes 1 and 2 own and leaves the rest at their
+// empty forms. Only live releases appear; done ones feed the pace.
 func Build(s *state.State, now time.Time) *Snapshot {
 	snap := &Snapshot{
 		Format:            state.Format,
@@ -164,10 +164,18 @@ func Build(s *state.State, now time.Time) *Snapshot {
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	pcs := paces(s)
 	for _, rf := range s.Releases {
-		if !rf.Done {
-			snap.Releases = append(snap.Releases, buildRelease(&rf.Release))
+		if rf.Done {
+			continue
 		}
+		out := buildRelease(&rf.Release)
+		pc, ok := pcs[rf.Project]
+		if !ok {
+			pc = roughPace
+		}
+		fillRelease(&out, newReleaseView(rf), pc, now)
+		snap.Releases = append(snap.Releases, out)
 	}
 	return snap
 }
