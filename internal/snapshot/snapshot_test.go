@@ -65,12 +65,15 @@ func TestSnapshotEveryFieldPresent(t *testing.T) {
 	if err := json.Unmarshal(m["next_session"], &next); err != nil {
 		t.Fatalf("next_session is not an object: %s", m["next_session"])
 	}
-	for _, k := range []string{"state", "time", "range", "rough", "question_count"} {
+	for _, k := range []string{"time", "range", "rough"} {
 		if string(next[k]) != "null" {
 			t.Errorf("next_session.%s = %s, want null", k, next[k])
 		}
 	}
-	for _, k := range []string{"rounds", "projects", "not_designed"} {
+	if string(next["state"]) != `"nothing_waiting"` || string(next["question_count"]) != "0" {
+		t.Errorf("next_session state = %s, question_count = %s; want nothing_waiting, 0", next["state"], next["question_count"])
+	}
+	for _, k := range []string{"rounds", "projects", "not_designed", "waiting_on_design"} {
 		if string(next[k]) != "[]" {
 			t.Errorf("next_session.%s = %s, want []", k, next[k])
 		}

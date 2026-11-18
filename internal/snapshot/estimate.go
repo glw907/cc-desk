@@ -286,3 +286,164 @@ func setTiming(minutes **int, needed **time.Time, t timing) {
 	n := t.mid.UTC()
 	*minutes, *needed = &m, &n
 }
+
+// relCtx is what the next-session step needs of one live release.
+type relCtx struct {
+	idx   int
+	rf    *state.ReleaseFile
+	v     *releaseView
+	pc    pace
+	times map[string]timing
+}
+
+const (
+	kindQuestion = iota
+	kindRound
+)
+
+// item is something Geoff's session is waiting to take up: a written,
+// unanswered question, or a round with no design whose start is ahead.
+type item struct {
+	rel, ri        int
+	kind           int
+	project, round string
+	time           time.Time
+	low, high      time.Time
+	rough          bool
+}
+
+func (it *item) name() string { return it.project + "/" + it.round }
+
+func cmpItems(a, b item) int {
+	if c := a.time.Compare(b.time); c != 0 {
+		return c
+	}
+	if a.rel != b.rel {
+		return a.rel - b.rel
+	}
+	if a.ri != b.ri {
+		return a.ri - b.ri
+	}
+	return a.kind - b.kind
+}
+
+// questionItem times a question by the earliest of the passes resting on
+// it that are yet to start. With none, it is needed now. Its round is the
+// first round, in round order, that holds a pass resting on it.
+func (c *relCtx) questionItem(q *state.Question, now time.Time) item {
+	it := item{rel: c.idx, kind: kindQuestion, project: c.rf.Project, rough: c.pc.rough,
+		ri: len(c.rf.Rounds), time: now, low: now, high: now}
+	var best *timing
+	for i := range c.rf.Passes {
+		p := &c.rf.Passes[i]
+		if !slices.Contains(p.Questions, q.ID) {
+			continue
+		}
+		ri := slices.IndexFunc(c.rf.Rounds, func(r state.Round) bool { return r.Name == p.Round })
+		if ri < it.ri {
+			it.ri, it.round = ri, p.Round
+		}
+		if t, ok := c.times[p.Name]; ok && (best == nil || t.mid.Before(best.mid)) {
+			best = &t
+		}
+	}
+	if best != nil {
+		it.time, it.low, it.high = best.mid, best.low, best.high
+	}
+	return it
+}
+
+// fillSession sets next_session and waits_for_geoff from every live
+// release, and returns the item that sets the session's time, or nil.
+func fillSession(snap *Snapshot, ctxs []*relCtx, now time.Time) *item {
+	var items, questions, rounds []item
+	var onDesign []string
+	stopped := false
+	for _, c := range ctxs {
+		for i := range c.rf.Passes {
+			if c.rf.Passes[i].State == state.Stopped {
+				stopped = true
+			}
+		}
+		for i := range c.rf.Questions {
+			if c.rf.Questions[i].Answer == nil {
+				questions = append(questions, c.questionItem(&c.rf.Questions[i], now))
+			}
+		}
+		for ri, rd := range snap.Releases[c.idx].Rounds {
+			if rd.State != "not_designed" || rd.Needs.Kind != "not_designed" {
+				continue
+			}
+			t := timeOf(c.v.beforeRound(c.v.rounds[rd.Name]), c.pc, now)
+			it := item{rel: c.idx, ri: ri, kind: kindRound, project: c.rf.Project, round: rd.Name,
+				rough: c.pc.rough, time: t.mid, low: t.low, high: t.high}
+			if t.mid.After(now) {
+				rounds = append(rounds, it)
+			} else {
+				onDesign = append(onDesign, it.name())
+			}
+		}
+	}
+	items = append(append(items, questions...), rounds...)
+	slices.SortStableFunc(items, cmpItems)
+
+	next := &snap.NextSession
+	slices.SortStableFunc(questions, func(a, b item) int {
+		if a.rel != b.rel {
+			return a.rel - b.rel
+		}
+		return a.ri - b.ri
+	})
+	for _, q := range questions {
+		if !slices.Contains(next.Projects, q.project) {
+			next.Projects = append(next.Projects, q.project)
+		}
+		if q.round == "" {
+			continue
+		}
+		if !slices.Contains(next.Rounds, q.name()) {
+			next.Rounds = append(next.Rounds, q.name())
+		}
+		if q.time.After(now) {
+			continue
+		}
+		if n := len(snap.WaitsForGeoff); n > 0 && snap.WaitsForGeoff[n-1].Project == q.project && snap.WaitsForGeoff[n-1].Round == q.round {
+			snap.WaitsForGeoff[n-1].Questions++
+		} else {
+			snap.WaitsForGeoff = append(snap.WaitsForGeoff, WaitEntry{Project: q.project, Round: q.round, Questions: 1})
+		}
+	}
+	for _, r := range rounds {
+		next.NotDesigned = append(next.NotDesigned, r.name())
+	}
+	next.WaitingOnDesign = append(next.WaitingOnDesign, onDesign...)
+
+	var setter *item
+	if len(items) > 0 {
+		setter = &items[0]
+	}
+	count := len(questions)
+	next.QuestionCount = &count
+	set := func(s string) { next.State = &s }
+	switch {
+	case stopped:
+		set("needs_you_now")
+	case setter != nil && setter.kind == kindQuestion && !setter.time.After(now):
+		set("ready_now")
+	case setter != nil:
+		set("scheduled")
+	case len(onDesign) > 0:
+		set("ready_now")
+	default:
+		set("nothing_waiting")
+	}
+	if setter == nil {
+		return nil
+	}
+	t, rough := setter.time.UTC(), setter.rough
+	next.Time, next.Rough = &t, &rough
+	if !rough {
+		next.Range = &Range{Low: setter.low.UTC(), High: setter.high.UTC()}
+	}
+	return setter
+}

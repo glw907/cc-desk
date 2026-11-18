@@ -502,14 +502,24 @@
     }
   ],
   "next_session": {
-    "state": null,
-    "time": null,
-    "range": null,
-    "rough": null,
-    "question_count": null,
-    "rounds": [],
-    "projects": [],
-    "not_designed": []
+    "state": "scheduled",
+    "time": "2026-11-21T05:00:00Z",
+    "range": {
+      "low": "2026-11-21T03:00:00Z",
+      "high": "2026-11-21T06:30:00Z"
+    },
+    "rough": false,
+    "question_count": 1,
+    "rounds": [
+      "alpha/r2"
+    ],
+    "projects": [
+      "alpha"
+    ],
+    "not_designed": [
+      "beta/b3"
+    ],
+    "waiting_on_design": []
   },
   "waits_for_geoff": [],
   "waiting": [],

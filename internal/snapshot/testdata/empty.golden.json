@@ -4,14 +4,15 @@
   "releases": [],
   "rulings": [],
   "next_session": {
-    "state": null,
+    "state": "nothing_waiting",
     "time": null,
     "range": null,
     "rough": null,
-    "question_count": null,
+    "question_count": 0,
     "rounds": [],
     "projects": [],
-    "not_designed": []
+    "not_designed": [],
+    "waiting_on_design": []
   },
   "waits_for_geoff": [],
   "waiting": [],

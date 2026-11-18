@@ -450,3 +450,7 @@ This pass adds:
   no longer caps retries; task 3 raised to 25 minutes; every `go test -run` check names its new
   tests; case 6 carries clocks; the close caps review rounds and reruns the gate after the last
   edit.
+
+## Rulings
+
+- Geoff, 2026-11-18, terminal session, via conductor-cc-desk: on the round that needs Geoff with no design and no item left, ready_now with a null time or nothing_waiting, "Those both work." The built ready_now stands.
