@@ -167,16 +167,22 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 // succeeded.
 func WithReading(u Usage, forced bool, ev Event) Event {
 	return func(s *State, now time.Time) error {
-		u.Format = Format
-		if forced || s.Usage == nil || s.Usage.ReadAt.Before(u.ReadAt) || s.Usage.ReadAt.After(now) {
-			s.Usage = &u
-			s.usageDirty = true
-		}
+		s.FoldUsage(u, forced, now)
 		settle(s, now)
 		if ev == nil {
 			return nil
 		}
 		return ev(s, now)
+	}
+}
+
+// FoldUsage keeps one reading as WithReading describes, without settling.
+// The session check uses it to learn the usage hold before it locks.
+func (s *State) FoldUsage(u Usage, forced bool, now time.Time) {
+	u.Format = Format
+	if forced || s.Usage == nil || s.Usage.ReadAt.Before(u.ReadAt) || s.Usage.ReadAt.After(now) {
+		s.Usage = &u
+		s.usageDirty = true
 	}
 }
 
