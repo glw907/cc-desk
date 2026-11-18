@@ -54,11 +54,17 @@ func Verbs(binary, stateDir string, kind, project, pass, round string) []string 
 	return verbs
 }
 
+// FollowUpCommand gives the command prefix a session files a follow-up with:
+// the title and --body-file follow it. binary and stateDir must be absolute.
+func FollowUpCommand(binary, stateDir, project, record string) string {
+	return binary + " --state-dir " + stateDir + " followup " + project + " " + record
+}
+
 // WriteSettings writes <stateDir>/launch/<name>.json fresh and gives its
-// path. The allow list is the release's rules plus one exact rule per report
-// verb. binary is passed in, never read from os.Executable here, because a
+// path. The allow list is the release's rules, one exact rule per report
+// verb, and followUp, the follow-up rule, which ends in a wildcard. binary is passed in, never read from os.Executable here, because a
 // test's executable is not the command.
-func WriteSettings(stateDir, binary, name string, allow, verbs []string) (string, error) {
+func WriteSettings(stateDir, binary, name string, allow, verbs []string, followUp string) (string, error) {
 	if !filepath.IsAbs(stateDir) || !filepath.IsAbs(binary) {
 		return "", fmt.Errorf("settings need an absolute state folder and binary, got %q and %q", stateDir, binary)
 	}
@@ -67,6 +73,7 @@ func WriteSettings(stateDir, binary, name string, allow, verbs []string) (string
 	for _, v := range verbs {
 		s.Permissions.Allow = append(s.Permissions.Allow, "Bash("+v+")")
 	}
+	s.Permissions.Allow = append(s.Permissions.Allow, followUp)
 	s.Permissions.Deny = Deny
 	s.Hooks.PermissionRequest = []hookGroup{{Hooks: []hookCommand{{
 		Type: "command", Command: binary + " --state-dir " + stateDir + " prompt hook", Timeout: 30,

@@ -22,8 +22,21 @@ type Prompt struct {
 	Branch   string
 	Base     string
 	Verbs    []string
+	// FollowUp is the command prefix that files a follow-up. It is never a
+	// report verb.
+	FollowUp string
 	// Relaunch is set on a relaunch. Count is the number of the relaunch.
 	Relaunch *RelaunchNote
+	// Answer is set on the relaunch that follows an answered permission
+	// prompt. It takes the place of Relaunch.
+	Answer *AnswerNote
+}
+
+// AnswerNote fills the answer paragraph. On a yes, Rule is the rule added;
+// on a no, Command is the command that was refused.
+type AnswerNote struct {
+	Yes           bool
+	Command, Rule string
 }
 
 // RelaunchNote fills the relaunch paragraph.
@@ -36,11 +49,18 @@ type RelaunchNote struct {
 func (p Prompt) PushCommand() string { return "git push origin " + p.Branch }
 
 // Fill renders the prompt for the kind, with the relaunch paragraph on a
-// relaunch.
+// relaunch or the answer paragraph after an answered prompt. It refuses a
+// prompt that sets both.
 func Fill(p Prompt) (string, error) {
+	if p.Relaunch != nil && p.Answer != nil {
+		return "", fmt.Errorf("prompt for %s sets both a relaunch and an answer", p.Name)
+	}
 	files := []string{p.Kind + ".txt"}
 	if p.Relaunch != nil {
 		files = append(files, "relaunch.txt")
+	}
+	if p.Answer != nil {
+		files = append(files, "answer.txt")
 	}
 	var out bytes.Buffer
 	for i, f := range files {

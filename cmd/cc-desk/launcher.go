@@ -167,6 +167,9 @@ type launchRequest struct {
 	Cause    string
 	Counted  bool
 	Replaces string
+	// Answer is set on the relaunch after an answered permission prompt, and
+	// replaces the relaunch note in the prompt.
+	Answer *launch.AnswerNote
 }
 
 // Launch carries out one launch, in the design's order: refuse before any
@@ -219,13 +222,15 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	}()
 
 	verbs := launch.Verbs(l.binary, l.dir, pl.promptKind, project, pl.pass, pl.round)
-	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs)
+	followUp := launch.FollowUpCommand(l.binary, l.dir, project, record)
+	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, verbs,
+		"Bash("+followUp+" *)")
 	if err != nil {
 		return "", err
 	}
 	p := launch.Prompt{
 		Kind: pl.promptKind, Name: pl.name, Project: project, Round: pl.round, Pass: pl.pass,
-		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs,
+		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp,
 	}
 	var known []string
 	if old != nil {
@@ -239,7 +244,11 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 				count = old.Counted() + 1
 			}
 		}
-		p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause)}
+		if req.Answer != nil {
+			p.Answer = req.Answer
+		} else {
+			p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause)}
+		}
 	}
 	text, err := launch.Fill(p)
 	if err != nil {
