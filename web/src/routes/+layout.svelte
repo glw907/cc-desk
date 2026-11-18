@@ -40,6 +40,7 @@ poll that keeps the state fresh.
 	<div class="drawer-side">
 		<nav class="rail min-h-full p-4" aria-label="Status">
 			<a href="/" class="wordmark block px-3 pb-6 pt-2 text-xl">cc-desk</a>
+			<a href="/rulings" class="rail-row">Rulings</a>
 			{#if poll.answer?.snapshot}
 				<Sidebar snapshot={poll.answer.snapshot} now={poll.now} />
 			{/if}

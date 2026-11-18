@@ -1,12 +1,13 @@
 // State folders for tests. A state is a copy of a fixture from e2e/testdata/ with the real
 // cc-desk binary's verbs run on it, so a test never draws a snapshot the binary would not write.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Snapshot } from '../src/lib/snapshot';
 
 const testdata = path.resolve(import.meta.dirname, '..', '..', 'e2e', 'testdata');
+const fixtures = path.resolve(import.meta.dirname, 'fixtures');
 
 /** The clock of the fixture's own `snapshot.json`: 2:00 pm Alaska time. */
 export const WORKED_CLOCK = '2026-11-20T23:00:00Z';
@@ -16,10 +17,14 @@ export function input(name: string): string {
 	return path.join(testdata, 'inputs', name);
 }
 
-/** Copies a fixture folder (`state`, `order`, or `writers`) into a fresh temporary folder. */
+/**
+ * Copies a fixture folder into a fresh temporary folder. A name is looked up under
+ * `e2e/testdata/` (`state`, `order`, `writers`) first, then under `web/tests/fixtures/` (`twin`).
+ */
 export function copyFixture(fixture: string, into?: string): string {
 	const dir = into ?? path.join(mkdtempSync(path.join(tmpdir(), 'cc-desk-fixture-')), 'state');
-	cpSync(path.join(testdata, fixture), dir, { recursive: true });
+	const root = existsSync(path.join(testdata, fixture)) ? testdata : fixtures;
+	cpSync(path.join(root, fixture), dir, { recursive: true });
 	return dir;
 }
 
@@ -136,6 +141,10 @@ const builders: Record<string, Builder> = {
 		copyFixture('state', dir);
 		run(dir, T('23:05'), 'pass', 'start', 'alpha', 'p13');
 		return T('23:05');
+	},
+	twin(dir) {
+		copyFixture('twin', dir);
+		return WORKED_CLOCK;
 	},
 	stopped(dir) {
 		started(dir);

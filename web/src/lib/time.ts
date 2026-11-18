@@ -36,6 +36,13 @@ export function formatRange(low: string, high: string): string {
 	return `${formatTime(low)} to ${formatTime(high)}`;
 }
 
+const wholeNumber = new Intl.NumberFormat('en-US');
+
+/** "1,800 minutes", with a comma at the thousands and "1 minute" for one. */
+export function formatMinutes(minutes: number): string {
+	return `${wholeNumber.format(minutes)} ${minutes === 1 ? 'minute' : 'minutes'}`;
+}
+
 function alaskaDate(d: Date): string {
 	return day.format(d);
 }

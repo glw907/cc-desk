@@ -5,14 +5,19 @@ import { buildState } from './state';
 
 /**
  * Fills the app's state folder with `name`, starts the server, pins the browser's clock to the
- * state's own clock before the page loads, and opens the front page. The zone is
+ * state's own clock before the page loads, and opens `address`, the front page by default. The zone is
  * `Europe/London` from the config, so a page that read the browser's zone would show the wrong hour.
  */
-export async function show(app: App, page: Page, name: string): Promise<string> {
+export async function show(
+	app: App,
+	page: Page,
+	name: string,
+	address = '/'
+): Promise<string> {
 	const clock = buildState(name, app.stateDir);
 	await page.clock.setFixedTime(new Date(clock));
 	await app.start();
-	await page.goto(app.url);
+	await page.goto(app.url + address);
 	return clock;
 }
 
