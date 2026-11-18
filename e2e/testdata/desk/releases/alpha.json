@@ -3,6 +3,7 @@
   "project": "alpha",
   "name": "v1",
   "repo": "glw907/alpha",
+  "ask_rules": ["Bash(date *)"],
   "conductor": {
     "name": "alpha-conductor", "kind": "conductor", "short_id": "a1b2c3d4", "session_id": "a1b2c3d4-0000",
     "worktree": "/w/alpha", "branch": "alpha-conductor", "launched": "2026-11-20T21:00:00Z", "launch_tries": 1,

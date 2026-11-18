@@ -186,7 +186,9 @@ func AnswerPrompt(c Caller, project, record, answer, rule string, out *Answered)
 			return err
 		}
 		(*slot).Prompts[a.Index].Answer = answer
-		if a.Rule != "" && !slices.Contains(rf.AllowRules, a.Rule) {
+		// A rule the release asks about stays out of allow_rules: the yes
+		// covers this prompt only.
+		if a.Rule != "" && !slices.Contains(rf.AllowRules, a.Rule) && !slices.Contains(rf.AskRules, a.Rule) {
 			rf.AllowRules = append(rf.AllowRules, a.Rule)
 		}
 		rf.Dirty = true
@@ -208,6 +210,9 @@ func AddRule(c Caller, project, rule string) Event {
 		}
 		if slices.Contains(rf.AllowRules, rule) {
 			return Refuse(rulesPrefix + fmt.Sprintf("project %q already allows %q", project, rule))
+		}
+		if slices.Contains(rf.AskRules, rule) {
+			return Refuse(rulesPrefix + fmt.Sprintf("project %q asks about %q, so it can't also allow it", project, rule))
 		}
 		rf.AllowRules = append(rf.AllowRules, rule)
 		rf.Dirty = true

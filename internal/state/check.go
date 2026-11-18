@@ -42,6 +42,14 @@ func validateRelease(r *Release) error {
 	if r.Repo == "" {
 		return errors.New(`missing required field "repo"`)
 	}
+	for i, rule := range r.AskRules {
+		if rule == "" {
+			return fmt.Errorf(`ask_rules %d: the rule is empty`, i+1)
+		}
+		if slices.Contains(r.AllowRules, rule) {
+			return fmt.Errorf("rule %q is in both allow_rules and ask_rules", rule)
+		}
+	}
 
 	rounds := map[string]*Round{}
 	for i := range r.Rounds {

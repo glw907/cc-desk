@@ -129,7 +129,9 @@ func TestValidateClosed(t *testing.T) {
 		{name: "a closed done pass reads"},
 		{
 			name: "closed on a building pass", wantErr: "is building but is marked closed",
-			setup: func(rf *ReleaseFile) { rf.Passes[0].State, rf.Passes[0].Finished, rf.Passes[0].ActualMinutes = Building, nil, nil },
+			setup: func(rf *ReleaseFile) {
+				rf.Passes[0].State, rf.Passes[0].Finished, rf.Passes[0].ActualMinutes = Building, nil, nil
+			},
 		},
 		{
 			name: "closed with no ruling", wantErr: `closed needs a "ruling" and a "time"`,

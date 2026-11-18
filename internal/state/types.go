@@ -195,11 +195,14 @@ type Release struct {
 	DefaultBranch string `json:"default_branch,omitempty"`
 	// AllowRules are exact Claude Code permission rules the launch writes
 	// into each session's settings file, beside the report verbs.
-	AllowRules []string   `json:"allow_rules,omitempty"`
-	Conductor  *Session   `json:"conductor,omitempty"`
-	Rounds     []Round    `json:"rounds,omitempty"`
-	Passes     []Pass     `json:"passes,omitempty"`
-	Questions  []Question `json:"questions,omitempty"`
+	AllowRules []string `json:"allow_rules,omitempty"`
+	// AskRules are rules the launch writes under permissions.ask, so a
+	// session asks before each use. No rule is in both lists.
+	AskRules  []string   `json:"ask_rules,omitempty"`
+	Conductor *Session   `json:"conductor,omitempty"`
+	Rounds    []Round    `json:"rounds,omitempty"`
+	Passes    []Pass     `json:"passes,omitempty"`
+	Questions []Question `json:"questions,omitempty"`
 }
 
 // Round is a group of passes that share a design.

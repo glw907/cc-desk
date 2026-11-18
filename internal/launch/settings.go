@@ -30,6 +30,7 @@ type hookGroup struct {
 type settings struct {
 	Permissions struct {
 		Allow []string `json:"allow"`
+		Ask   []string `json:"ask,omitempty"`
 		Deny  []string `json:"deny"`
 	} `json:"permissions"`
 	Hooks struct {
@@ -72,7 +73,7 @@ func ReadyCommand(binary, stateDir, project, pass string) string {
 // verb, and prefixRules, whole rules that end in a wildcard. binary is
 // passed in, never read from os.Executable here, because a test's
 // executable is not the command.
-func WriteSettings(stateDir, binary, name string, allow, verbs, prefixRules []string) (string, error) {
+func WriteSettings(stateDir, binary, name string, allow, ask, verbs, prefixRules []string) (string, error) {
 	if !filepath.IsAbs(stateDir) || !filepath.IsAbs(binary) {
 		return "", fmt.Errorf("settings need an absolute state folder and binary, got %q and %q", stateDir, binary)
 	}
@@ -82,6 +83,7 @@ func WriteSettings(stateDir, binary, name string, allow, verbs, prefixRules []st
 		s.Permissions.Allow = append(s.Permissions.Allow, "Bash("+v+")")
 	}
 	s.Permissions.Allow = append(s.Permissions.Allow, prefixRules...)
+	s.Permissions.Ask = ask
 	s.Permissions.Deny = Deny
 	s.Hooks.PermissionRequest = []hookGroup{{Hooks: []hookCommand{{
 		Type: "command", Command: binary + " --state-dir " + stateDir + " prompt hook", Timeout: 30,
