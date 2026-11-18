@@ -170,6 +170,7 @@ func StartPass(project, pass string) Event {
 		}
 		p.State = Building
 		rf.Dirty = true
+		s.passEvent = true
 		return nil
 	}
 }
@@ -205,6 +206,7 @@ func FinishPass(project, pass string) Event {
 		p.ActualMinutes = &minutes
 		p.State = Done
 		rf.Dirty = true
+		s.passEvent = true
 		return nil
 	}
 }
@@ -230,6 +232,7 @@ func StopPass(project, pass string, reason StopReason) Event {
 		p.StopReason = reason
 		p.State = Stopped
 		rf.Dirty = true
+		s.passEvent = true
 		return nil
 	}
 }

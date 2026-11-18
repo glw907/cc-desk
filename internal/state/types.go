@@ -135,13 +135,16 @@ type Ruling struct {
 	Option   string    `json:"option,omitempty"`
 }
 
-// Forecast is one line of forecasts.jsonl.
+// Forecast is one line of forecasts.jsonl: when the next decision session
+// was forecast to start, made at a pass start, finish, or stop. Project,
+// Round, and Time are set together or all absent; Time encodes as null
+// when absent.
 type Forecast struct {
-	Format  int       `json:"format"`
-	Made    time.Time `json:"made"`
-	Project string    `json:"project"`
-	Round   string    `json:"round"`
-	Time    time.Time `json:"time"`
+	Format  int        `json:"format"`
+	Made    time.Time  `json:"made"`
+	Project string     `json:"project,omitempty"`
+	Round   string     `json:"round,omitempty"`
+	Time    *time.Time `json:"time"`
 }
 
 // Desks is desks.json: the desk sessions that may record a ruling.
@@ -194,4 +197,8 @@ type State struct {
 	Usage     *Usage
 	Rulings   []Ruling
 	Forecasts []Forecast
+
+	// passEvent is set by a pass start, finish, or stop, and tells Commit
+	// to append a forecast line.
+	passEvent bool
 }

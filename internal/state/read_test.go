@@ -83,6 +83,8 @@ func TestReadFailures(t *testing.T) {
 		{"rulings syntax on line 2", "rulings.jsonl", `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}` + "\n{bad\n", "rulings.jsonl line 2:"},
 		{"rulings duplicate id", "rulings.jsonl", `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}` + "\n" + `{"format":1,"id":"a","time":"2026-11-20T23:00:00Z","desk":"d","words":"go"}`, `rulings.jsonl line 2: ruling id "a" appears twice`},
 		{"forecasts incomplete", "forecasts.jsonl", `{"format":1}`, "forecasts.jsonl line 1:"},
+		{"forecast project without time", "forecasts.jsonl", `{"format":1,"made":"2026-11-20T23:00:00Z","project":"a","round":"r","time":null}`, "forecasts.jsonl line 1:"},
+		{"forecast time without round", "forecasts.jsonl", `{"format":1,"made":"2026-11-20T23:00:00Z","project":"a","time":"2026-11-21T00:00:00Z"}`, "forecasts.jsonl line 1:"},
 		{"answer without ruling", "releases/alpha.json", strings.Replace(goodRelease, `"passes"`, `"questions": [{"id":"q1","text":"t","options":["a"],"recommended":"a","answer":{"ruling":"nope"}}], "passes"`, 1), `releases/alpha.json: question "q1" is answered by ruling "nope"`},
 	}
 	for _, tt := range tests {

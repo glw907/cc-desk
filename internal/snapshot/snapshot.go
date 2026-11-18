@@ -99,16 +99,19 @@ type Question struct {
 	AnswerKind  *string  `json:"answer_kind"`
 }
 
-// NextSession is the next decision session. Pass 2 fills it.
+// NextSession is the next decision session. State is needs_you_now,
+// ready_now, scheduled, or nothing_waiting. WaitingOnDesign names the
+// rounds with no design whose start has arrived.
 type NextSession struct {
-	State         *string    `json:"state"`
-	Time          *time.Time `json:"time"`
-	Range         *Range     `json:"range"`
-	Rough         *bool      `json:"rough"`
-	QuestionCount *int       `json:"question_count"`
-	Rounds        []string   `json:"rounds"`
-	Projects      []string   `json:"projects"`
-	NotDesigned   []string   `json:"not_designed"`
+	State           *string    `json:"state"`
+	Time            *time.Time `json:"time"`
+	Range           *Range     `json:"range"`
+	Rough           *bool      `json:"rough"`
+	QuestionCount   *int       `json:"question_count"`
+	Rounds          []string   `json:"rounds"`
+	Projects        []string   `json:"projects"`
+	NotDesigned     []string   `json:"not_designed"`
+	WaitingOnDesign []string   `json:"waiting_on_design"`
 }
 
 // Range is the low and high ends of a forecast time.
@@ -117,7 +120,7 @@ type Range struct {
 	High time.Time `json:"high"`
 }
 
-// WaitEntry is a round with needed written questions. Pass 2 fills it.
+// WaitEntry is a round with written questions needed now.
 type WaitEntry struct {
 	Project   string `json:"project"`
 	Round     string `json:"round"`
@@ -140,36 +143,61 @@ type OpenGuess struct {
 	Minutes  int    `json:"minutes"`
 }
 
-// Render builds the state's snapshot and encodes it as indented JSON.
-func Render(s *state.State, now time.Time) ([]byte, error) {
-	data, err := json.MarshalIndent(Build(s, now), "", "  ")
+// Render builds the state's snapshot once and returns it as indented JSON
+// with the forecast line for the same next session. The line names the
+// round that sets the session's time. Without one, its time is null.
+func Render(s *state.State, now time.Time) ([]byte, state.Forecast, error) {
+	snap, setter := build(s, now)
+	data, err := json.MarshalIndent(snap, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, state.Forecast{}, err
 	}
-	return append(data, '\n'), nil
+	var fc state.Forecast
+	if setter != nil && setter.round != "" {
+		t := setter.time.UTC()
+		fc.Project, fc.Round, fc.Time = setter.project, setter.round, &t
+	}
+	return append(data, '\n'), fc, nil
 }
 
-// Build fills the fields pass 1 owns and leaves the rest at their empty
-// forms. Only live releases appear; done ones feed the pace.
+// Build fills the fields passes 1 and 2 own and leaves the rest at their
+// empty forms. Only live releases appear; done ones feed the pace.
 func Build(s *state.State, now time.Time) *Snapshot {
+	snap, _ := build(s, now)
+	return snap
+}
+
+// build is Build plus the item that sets the next session's time.
+func build(s *state.State, now time.Time) (*Snapshot, *item) {
 	snap := &Snapshot{
 		Format:            state.Format,
 		GeneratedAt:       now.UTC(),
 		Releases:          []Release{},
 		Rulings:           []state.Ruling{},
-		NextSession:       NextSession{Rounds: []string{}, Projects: []string{}, NotDesigned: []string{}},
+		NextSession:       NextSession{Rounds: []string{}, Projects: []string{}, NotDesigned: []string{}, WaitingOnDesign: []string{}},
 		WaitsForGeoff:     []WaitEntry{},
 		Waiting:           []WaitingPass{},
 		OpenGuesses:       []OpenGuess{},
 		GuessMinutesLimit: GuessMinutesLimit,
 	}
 	snap.Rulings = append(snap.Rulings, s.Rulings...)
+	pcs := paces(s)
+	var ctxs []*relCtx
 	for _, rf := range s.Releases {
-		if !rf.Done {
-			snap.Releases = append(snap.Releases, buildRelease(&rf.Release))
+		if rf.Done {
+			continue
 		}
+		out := buildRelease(&rf.Release)
+		pc, ok := pcs[rf.Project]
+		if !ok {
+			pc = roughPace
+		}
+		v := newReleaseView(rf)
+		times := fillRelease(&out, v, pc, now)
+		ctxs = append(ctxs, &relCtx{idx: len(snap.Releases), rf: rf, v: v, pc: pc, times: times})
+		snap.Releases = append(snap.Releases, out)
 	}
-	return snap
+	return snap, fillSession(snap, ctxs, now)
 }
 
 func buildRelease(r *state.Release) Release {

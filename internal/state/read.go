@@ -240,8 +240,10 @@ func Load(dir string) (*State, error) {
 	}
 	for i := range s.Forecasts {
 		f := &s.Forecasts[i]
-		if f.Made.IsZero() || f.Project == "" || f.Round == "" || f.Time.IsZero() {
-			return nil, &FileError{File: "forecasts.jsonl", Line: i + 1, Err: errors.New("missing made, project, round, or time")}
+		named := f.Project != "" && f.Round != "" && f.Time != nil
+		none := f.Project == "" && f.Round == "" && f.Time == nil
+		if f.Made.IsZero() || !(named || none) {
+			return nil, &FileError{File: "forecasts.jsonl", Line: i + 1, Err: errors.New("needs made, and project, round, and time together or none")}
 		}
 	}
 
