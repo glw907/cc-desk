@@ -45,6 +45,7 @@ func newPassCmd(f *rootFlags) *cobra.Command {
 				return nil
 			}
 			fmt.Fprintf(cmd.ErrOrStderr(), "started %s/%s\n", args[0], args[1])
+			f.kick(cmd)
 			return nil
 		},
 	}
@@ -98,6 +99,7 @@ func newPassCmd(f *rootFlags) *cobra.Command {
 				return err
 			}
 			fmt.Fprintf(cmd.ErrOrStderr(), "ready %s/%s: pull request %d at %s\n", args[0], args[1], rd.pr, rd.commit)
+			f.kick(cmd)
 			return nil
 		},
 	}

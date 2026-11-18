@@ -43,6 +43,9 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 				return err
 			}
 			fmt.Fprintf(cmd.ErrOrStderr(), "recorded ruling %s\n", id)
+			if req.Question != "" {
+				f.kick(cmd)
+			}
 			return nil
 		},
 	}
