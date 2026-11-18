@@ -71,7 +71,8 @@ Every write is inside the worktree, a test's temporary folder, or `$CLAUDE_JOB_D
 | The mockup's Survey CSS is v1.7.0's, so the app can import the package and copy nothing | `diff -q` of the mockup's `src/lib/survey/` sheets against `~/Projects/survey/theme/` (`survey.css`, `components.css`, `fonts.css`, `survey-vars.css`) printed nothing |
 | Playwright 1.65.1 drives the installed `chromium-1255` headless shell | `ls ~/.cache/ms-playwright/` printed `chromium-1248`, `chromium-1255`, and a headless shell for each. A probe under `$CLAUDE_JOB_DIR/tmp/pw` on `@playwright/test` 1.65.1 with no browser path printed `Executable doesn't exist at /nonexistent/chromium_headless_shell-1255/...`, so 1.65.1 wants 1255. `npm view @playwright/test version` printed `1.65.1` |
 | A skipped Playwright test exits 0; the JSON report counts it | The same probe with three tests, one `test.skip`: `--list` printed `Total: 3 tests in 1 file`; the run printed `1 skipped`, `2 passed`, and exited 0. The JSON report's `stats` was `{"expected":2,"skipped":1,"unexpected":0,"flaky":0}` |
-| A plain `--list` rewrites the JSON report, so the count comes from `--list --reporter=list` | The plan-reviewer's probe on 1.65.1: a `--list` run with the JSON reporter configured wrote `{"expected":0,"skipped":3}` over the earlier report |
+| A plain `--list` rewrites the JSON report, so the count comes from `--list --reporter=list` | The plan-reviewer's probe on 1.65.1: a `--list` run with the JSON reporter configured wrote `{"expected":0,"skipped":3}` over the earlier report. The `$CLAUDE_JOB_DIR/tmp/pw` probe: after a full run, `--list --reporter=list` printed `Total: 3 tests in 1 file` and left `report.json`'s `stats` as it was, `{"expected":2,"skipped":1,...}` |
+| The triangle rule picks the rounds the session covers | `jq` over the `started` snapshot: the rounds not `done` whose `needs.kind` is `not_designed`, or `questions` with an unanswered question, are `alpha/r2` and `beta/b3`, the same as `next_session.rounds` (`not_designed` is `[]`) |
 | A run with no browser fails | The probe with `PLAYWRIGHT_BROWSERS_PATH=/nonexistent` printed `1 failed` and exited 1. The test that opened no page passed, so only tests that open a page fail |
 | Pinned versions | `npm view`: `@sveltejs/kit` 3.3.1, `@sveltejs/adapter-node` 6.0.4. `~/Projects/dubplate/web/package.json` pins `@sveltejs/vite-plugin-svelte` 7.3.1, `@tailwindcss/vite` and `tailwindcss` 4.3.5, `daisyui` 5.8.1, `svelte` 5.57.3, `svelte-check` 4.7.8, `typescript` 6.0.3, `vite` 8.3.8, and `playwright` 1.65.1. `npm view` on 2026-11-18: `@types/node` 26.6.6, `@fontsource/spectral`, `@fontsource-variable/karla`, and `@fontsource/monaspace-neon` 5.3.0 each, `@lucide/svelte` 1.75.0; `phonebook` takes the same majors. `node --version` printed `v26.13.1` |
 | `actions/setup-node` v7.1.0 is commit `949feb2413d6458794dcd2491c4babbbce0c15c1` | `gh api repos/actions/setup-node/git/ref/tags/v7.1.0` printed that SHA, type `commit`. `cairn-cms` and `dubplate` workflows pin the same SHA |
@@ -402,8 +403,10 @@ Files: `web/src/routes/+layout.svelte`, `web/src/routes/+page.svelte`, `web/src/
 Acceptance check: `npx playwright test tests/estimate.spec.ts tests/order.spec.ts
 tests/sidebar.spec.ts` passes. `tests/screenshots.ts`, a script run by path and outside the
 suite, takes the `started` front page with `page.emulateMedia({ colorScheme: 'light' })` and
-`'dark'` and writes both under `$CLAUDE_JOB_DIR/tmp/shots/`, never in the repo. Upload both to
-the PR body.
+`'dark'` and writes both under `$CLAUDE_JOB_DIR/tmp/shots/`, never in the repo. Open both with
+the Read tool and check the layout against `screens/front-page.png` before the commit. They are
+a self-check only: no done item in this pass asks for screenshots, `gh` can't attach them, and
+pass 5's polish takes the screenshots the PR keeps.
 
 ### Task 5: the poll and the banners (15 minutes)
 
@@ -501,7 +504,12 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
 - **33. "Does no other arithmetic" and the Running block.** The design's sidebar asks for
   segments as wide as each round's share of planned minutes, "2 of 17 rounds done", and the
   percent of planned minutes done, and `Release` carries none of them (`snapshot.go:37-44`). The
-  page counts and sums these from the snapshot's rounds for display. The rule bars the page from
+  page counts and sums these from the snapshot's rounds for display, as the mockup's `mock.ts`
+  does. The done count is the rounds whose `state` is `done`. The percent is
+  `Math.round(100 × the planned minutes of done rounds ÷ the planned minutes of all rounds)`,
+  shown as "77% of the work" (`mock.ts:109`, `ReleaseBlock.svelte:20`). On `started` that gives
+  alpha "1 of 2 rounds done" and 77% (1200 of 1560), and beta "1 of 3 rounds done" and 14% (90
+  of 660). A pass's bar under its round counts passes the same way. The rule bars the page from
   deriving any estimate, time, or rule outcome, which all come from the snapshot. This never
   falls to standing answer 26.
 
@@ -527,6 +535,14 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
 - [planner] No `[advisor]` line in the State and rules PRs (#3 to #6) changes this pass. Two it
   builds on: `ready_now` can carry a time and a null range (#4), and `next_session.reasons` is
   `[]` when empty (#5).
+- [advisor] The page computes the scale bar's widths, the done count, and the percent from the
+  snapshot's rounds (standing answer 33). The design's sidebar names all three, `Release` holds
+  none of them, and this pass changes no Go. "Does no other arithmetic" bars estimates and rule
+  outcomes. This is a method call, so it carries no `Call:`.
+- [advisor] A `ready_now` session with `rough` set reads "Ready now" with "Rough" beside it, and
+  the time shows only for `scheduled` (standing answer 28).
+- [advisor] The task 4 screenshots are a self-check kept under `$CLAUDE_JOB_DIR/tmp/shots/`, not
+  PR content: no done item here asks for them and `gh` can't attach images.
 
 - [review] The plan-reviewer's read at `4be04f6`, folded:
   1. Task 5's replace step now runs on a fresh `state` copy, with its probed before and after
@@ -542,7 +558,7 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, and these.
   8. The strings table now has the banners and their times, and the zone claim is narrowed to
      `started` and `fast`.
   9. The poll judges the connection by fetch result and `AbortSignal.timeout`.
-  10. The screenshots get a script, `emulateMedia`, and a path outside the repo.
+  10. The screenshots get a script, `emulateMedia`, and a path outside the repo, as a self-check.
   11. Task 4 goes to 35 minutes, task 5 to 15, task 6 to 20, and the path to 125.
   12. The pinned versions now include `@types/node`, the `@fontsource` packages, and `@lucide/svelte`.
   13. This line exists.
