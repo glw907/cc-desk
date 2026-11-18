@@ -153,6 +153,15 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 			return fmt.Errorf("pass %q is done and needs start, finish, and actual minutes", p.Name)
 		}
 	}
+	for i, st := range p.Stops {
+		open := st.End == nil
+		if open != (p.State == Stopped && i == len(p.Stops)-1) {
+			return fmt.Errorf("pass %q: only the last stop of a stopped pass may be open", p.Name)
+		}
+	}
+	if p.State == Stopped && len(p.Stops) == 0 {
+		return fmt.Errorf("pass %q is stopped and needs an open stop interval", p.Name)
+	}
 	if p.State == Stopped && !ValidStopReason(p.StopReason) {
 		return fmt.Errorf("pass %q is stopped with reason %q, which is not one of the five", p.Name, p.StopReason)
 	}

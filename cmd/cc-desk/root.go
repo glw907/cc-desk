@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/glw907/cc-desk/internal/snapshot"
+	"github.com/glw907/cc-desk/internal/state"
 	"github.com/spf13/cobra"
 )
 
@@ -47,6 +49,20 @@ func (f *rootFlags) clock() (time.Time, error) {
 	return t.UTC(), nil
 }
 
+// commit runs one event through state.Commit on the state folder and
+// the clock the flags name, and returns the snapshot's bytes.
+func (f *rootFlags) commit(ev state.Event) ([]byte, error) {
+	dir, err := f.dir()
+	if err != nil {
+		return nil, err
+	}
+	now, err := f.clock()
+	if err != nil {
+		return nil, err
+	}
+	return state.Commit(dir, now, state.LockWait, ev, snapshot.Render)
+}
+
 func newRootCmd() *cobra.Command {
 	var f rootFlags
 	cmd := &cobra.Command{
@@ -60,5 +76,6 @@ func newRootCmd() *cobra.Command {
 		"state folder (default $XDG_STATE_HOME/cc-desk, else ~/.local/state/cc-desk)")
 	cmd.PersistentFlags().StringVar(&f.now, "now", "", "the time to use, in RFC 3339")
 	_ = cmd.PersistentFlags().MarkHidden("now")
+	cmd.AddCommand(newReleaseCmd(&f), newRoundCmd(&f), newPassCmd(&f), newSnapshotCmd(&f))
 	return cmd
 }
