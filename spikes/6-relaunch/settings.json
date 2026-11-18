@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log --oneline)",
+      "Bash(bash ccd-step.sh 1)",
+      "Bash(bash ccd-step.sh 2)",
+      "Bash(bash ccd-step.sh 3)",
+      "Bash(bash ccd-step.sh 4)",
+      "Bash(bash ccd-step.sh 5)"
+    ]
+  }
+}

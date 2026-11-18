@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Proof 6: relaunch a killed session from its branch. Takes about 20 minutes.
+# Run from the repo root. The sandbox is a linked worktree of this repo (a nested
+# git init is its own trust root and is refused), on branch ccd-spike-6.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+ROOT=$(cd "$HERE/../.." && pwd)
+OWN=$HERE/../own.sh
+OUT=$HERE/out
+SB=$HERE/sandbox
+rm -rf "$OUT"
+mkdir -p "$OUT"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+commits() { git -C "$SB" log --oneline 2>/dev/null | grep -c ' Step [0-9]$' || true; }
+# rows <label>: every row in the sandbox folder, one line each.
+rows() {
+  claude agents --json --all >"$OUT/list.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("cwd") == sys.argv[2]:
+        print(" ".join(str(r.get(k, "")) for k in ("id", "pid", "state", "status")))
+' "$OUT/list.json" "$SB"
+}
+snap() { # snap <label>: log the rows and the commit count, save the rows
+  local r
+  r=$(rows)
+  ev "$1: commits=$(commits) rows=[$(echo "$r" | tr '\n' ';')]"
+  { echo "# $(date -u +%H:%M:%S) $1"; echo "$r"; } >>"$OUT/rows.txt"
+  echo "$r" | grep -cE ' (working|blocked) ' || true
+}
+
+ev "usage: $(claude -p '/usage' --model haiku </dev/null | grep 'Current week (all')"
+git worktree remove "$SB" 2>/dev/null
+git branch -D ccd-spike-6 2>/dev/null
+git worktree add -q -b ccd-spike-6 "$SB" origin/main || { ev "worktree add failed"; exit 1; }
+cp "$HERE/step.sh" "$SB/ccd-step.sh"
+PROMPT=$(cat "$HERE/prompt.txt")
+
+# 1. Launch and wait for two commits.
+bash "$OWN" launch ccd-spike-6-relaunch "$SB" --model sonnet --effort low --permission-mode auto \
+  --settings "$HERE/settings.json" "$PROMPT" >"$OUT/launch.txt" 2>&1 || { ev "launch failed"; exit 1; }
+ID=$(tail -1 "$OUT/launch.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/')
+ev "launched $ID"
+for i in $(seq 1 40); do
+  sleep 10
+  [ "$(commits)" -ge 2 ] && break
+done
+snap "before kill"
+git -C "$SB" log --oneline >"$OUT/log-at-kill.txt"
+bash "$OWN" kill "$ID" >"$OUT/kill.txt" 2>&1
+ev "kill: $(cat "$OUT/kill.txt")"
+
+# 2. Does anything relaunch it by itself? Watch two minutes.
+MAX=0
+for i in $(seq 1 12); do
+  sleep 10
+  n=$(snap "after kill $i" | tail -1)
+  [ "${n:-0}" -gt "$MAX" ] && MAX=$n
+done
+ev "max live rows after the kill with no wake: $MAX"
+
+wait_five() { # wait_five <label> <seconds>: poll until five commits or the time is up
+  local end=$(( $(date +%s) + $2 ))
+  while [ "$(date +%s)" -lt "$end" ]; do
+    sleep 10
+    n=$(snap "$1" | tail -1)
+    [ "${n:-0}" -gt "$MAX" ] && MAX=$n
+    [ "$(commits)" -ge 5 ] && return 0
+  done
+  return 1
+}
+worked=
+# 3. Respawn.
+bash "$OWN" respawn "$ID" >"$OUT/respawn.txt" 2>&1
+ev "respawn ran: $(head -2 "$OUT/respawn.txt" | tr '\n' ' ')"
+wait_five "respawn" 330 && worked=respawn
+# 4. Resume with a prompt.
+if [ -z "$worked" ]; then
+  bash "$OWN" resume "$ID" "Carry on from the last commit." >"$OUT/resume.txt" 2>&1
+  ev "resume ran: $(head -2 "$OUT/resume.txt" | tr '\n' ' ')"
+  wait_five "resume" 330 && worked=resume
+fi
+# 5. A fresh launch on the same branch.
+if [ -z "$worked" ]; then
+  bash "$OWN" launch ccd-spike-6-fresh "$SB" --model sonnet --effort low --permission-mode auto \
+    --settings "$HERE/settings.json" "$PROMPT
+Carry on from the branch: the earlier steps are already committed." >"$OUT/fresh.txt" 2>&1
+  ev "fresh launch ran"
+  wait_five "fresh" 330 && worked=fresh
+fi
+ev "result: worked=${worked:-none}; commits=$(commits); max live rows at once=$MAX"
+git -C "$SB" log --oneline >"$OUT/log-end.txt"
