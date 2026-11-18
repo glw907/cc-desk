@@ -87,7 +87,10 @@ type Session struct {
 	LastState   string      `json:"last_state,omitempty"`
 	LastWorking *time.Time  `json:"last_working,omitempty"`
 	Prompts     []Prompt    `json:"prompts,omitempty"`
-	Finished    *time.Time  `json:"finished,omitempty"`
+	// Refusals are the calls the session's settings turned away. The prompt
+	// pass fills it; a file without it reads as none.
+	Refusals []Refusal  `json:"refusals,omitempty"`
+	Finished *time.Time `json:"finished,omitempty"`
 	// StopReason and Stopped are set on a conductor's or design writer's
 	// record only. A pass's stop stays on the pass.
 	StopReason StopReason `json:"stop_reason,omitempty"`
@@ -115,6 +118,15 @@ type Relaunch struct {
 	Time    time.Time `json:"time"`
 	Cause   string    `json:"cause"`
 	Counted bool      `json:"counted"`
+}
+
+// Refusal is one call a session's settings turned away: the tool, what it
+// aimed at, and why the rule refused it.
+type Refusal struct {
+	Time   time.Time `json:"time"`
+	Tool   string    `json:"tool"`
+	Target string    `json:"target"`
+	Reason string    `json:"reason"`
 }
 
 // Prompt is one permission prompt a session stopped on.
@@ -214,6 +226,9 @@ type Pass struct {
 	PlannedMinutes int      `json:"planned_minutes"`
 	After          []string `json:"after,omitempty"`
 	Questions      []string `json:"questions,omitempty"`
+	// NoNeedReason says why this pass needs nothing from Geoff when it rests
+	// on no question. The round's own reason stands in when it is empty.
+	NoNeedReason string `json:"no_need_reason,omitempty"`
 	// Model and Effort override the launch's default of opus at high.
 	Model      string         `json:"model,omitempty"`
 	Effort     string         `json:"effort,omitempty"`

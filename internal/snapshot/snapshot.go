@@ -90,6 +90,13 @@ type Pass struct {
 	Free           *bool      `json:"free"`
 	WhyNot         []string   `json:"why_not"`
 	GuessOutcome   *string    `json:"guess_outcome"`
+	// StoppedAt is when the open stop began, null unless the pass is stopped.
+	StoppedAt *time.Time `json:"stopped_at"`
+	// NeedsKind is questions when the pass rests on any, else nothing.
+	// NeedsReason is the pass's own reason it needs nothing, else its
+	// round's, else null.
+	NeedsKind   string  `json:"needs_kind"`
+	NeedsReason *string `json:"needs_reason"`
 }
 
 // Question is a question with whether it is answered. AnswerKind is
@@ -373,6 +380,19 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		out.Questions = append(out.Questions, buildQuestion(questions[id]))
 	}
 	out.GuessOutcome = guessOutcome(s, p, questions)
+	out.StoppedAt = openStop(p)
+	out.NeedsKind = "nothing"
+	if len(p.Questions) > 0 {
+		out.NeedsKind = "questions"
+	}
+	out.NeedsReason = strp(p.NoNeedReason)
+	if out.NeedsReason == nil {
+		for _, rd := range rf.Rounds {
+			if rd.Name == p.Round {
+				out.NeedsReason = strp(rd.NoNeedReason)
+			}
+		}
+	}
 	if p.State == state.NotStarted {
 		broken := s.Breaks(rf, p, "")
 		free := len(broken) == 0
@@ -382,6 +402,18 @@ func buildPass(s *state.State, rf *state.ReleaseFile, p *state.Pass, questions m
 		}
 	}
 	return out
+}
+
+// openStop is when the pass's open stop began, or nil when it has none.
+func openStop(p *state.Pass) *time.Time {
+	if p.State != state.Stopped || len(p.Stops) == 0 {
+		return nil
+	}
+	last := p.Stops[len(p.Stops)-1]
+	if last.End != nil {
+		return nil
+	}
+	return utc(&last.Start)
 }
 
 // The two outcomes of a closed guess.

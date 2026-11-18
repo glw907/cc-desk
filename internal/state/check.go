@@ -309,6 +309,11 @@ func validateSession(s *Session, want SessionKind, place string) error {
 			return fmt.Errorf(`%s: prompt %d needs "time" and "tool"`, place, i+1)
 		}
 	}
+	for i, r := range s.Refusals {
+		if r.Time.IsZero() || r.Tool == "" {
+			return fmt.Errorf(`%s: refusal %d needs "time" and "tool"`, place, i+1)
+		}
+	}
 	if (s.StopReason == "") != (s.Stopped == nil) {
 		return fmt.Errorf(`%s: "stop_reason" and "stopped" are set together`, place)
 	}

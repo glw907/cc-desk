@@ -215,4 +215,80 @@ func TestRecords(t *testing.T) {
 		}
 		sameFolder(t, before, folder(t, dir))
 	})
+
+	t.Run("needs_you_now", func(t *testing.T) {
+		dir := newStateFrom(t, "desk")
+		r := run(t, dir, workedClock, "snapshot")
+		if r.code != 0 {
+			t.Fatalf("snapshot exit %d: %s", r.code, r.stderr)
+		}
+		var snap struct {
+			NeedsYouNow []struct {
+				Project string  `json:"project"`
+				Round   *string `json:"round"`
+				Reason  string  `json:"reason"`
+			} `json:"needs_you_now"`
+			Sessions []struct {
+				Name      string  `json:"name"`
+				StoppedAt *string `json:"stopped_at"`
+				Refusals  []struct {
+					Tool   string `json:"tool"`
+					Target string `json:"target"`
+				} `json:"refusals"`
+			} `json:"sessions"`
+			Releases []struct {
+				Project string `json:"project"`
+				Rounds  []struct {
+					Passes []struct {
+						Name        string  `json:"name"`
+						StoppedAt   *string `json:"stopped_at"`
+						NeedsKind   string  `json:"needs_kind"`
+						NeedsReason *string `json:"needs_reason"`
+					} `json:"passes"`
+				} `json:"rounds"`
+			} `json:"releases"`
+		}
+		if err := json.Unmarshal([]byte(r.stdout), &snap); err != nil {
+			t.Fatal(err)
+		}
+
+		got := map[string]string{}
+		for _, n := range snap.NeedsYouNow {
+			got[n.Project] = n.Reason
+		}
+		// alpha's conductor ended on an expired sign-in, so only its stopped
+		// pass asks; beta's design writer ended on a failed launch, which stays.
+		if len(snap.NeedsYouNow) != 2 || got["alpha"] != "scope" || got["beta"] != "launch_failed" {
+			t.Errorf("needs_you_now = %+v, want alpha scope and beta launch_failed", snap.NeedsYouNow)
+		}
+
+		for _, s := range snap.Sessions {
+			if s.Name == "alpha-conductor" {
+				if s.StoppedAt == nil || len(s.Refusals) != 1 || s.Refusals[0].Tool != "Bash" || s.Refusals[0].Target != "rm -r build" {
+					t.Errorf("alpha-conductor entry = %+v", s)
+				}
+			}
+			if s.Refusals == nil {
+				t.Errorf("session %s prints refusals as null, want a list", s.Name)
+			}
+		}
+
+		for _, rel := range snap.Releases {
+			for _, rd := range rel.Rounds {
+				for _, p := range rd.Passes {
+					switch p.Name {
+					case "a-stopped":
+						if p.StoppedAt == nil || *p.StoppedAt != "2026-11-20T22:40:00Z" || p.NeedsKind != "nothing" ||
+							p.NeedsReason == nil || *p.NeedsReason != "It only renames files." {
+							t.Errorf("a-stopped = %+v", p)
+						}
+					case "a-free":
+						if p.StoppedAt != nil || p.NeedsKind != "questions" || p.NeedsReason != nil {
+							t.Errorf("a-free = %+v", p)
+						}
+					}
+				}
+			}
+		}
+	})
 }

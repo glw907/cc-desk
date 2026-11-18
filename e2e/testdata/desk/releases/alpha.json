@@ -3,11 +3,22 @@
   "project": "alpha",
   "name": "v1",
   "repo": "glw907/alpha",
+  "conductor": {
+    "name": "alpha-conductor", "kind": "conductor", "short_id": "a1b2c3d4", "session_id": "a1b2c3d4-0000",
+    "worktree": "/w/alpha", "branch": "alpha-conductor", "launched": "2026-11-20T21:00:00Z", "launch_tries": 1,
+    "refusals": [{"time": "2026-11-20T21:30:00Z", "tool": "Bash", "target": "rm -r build", "reason": "an ask rule"}],
+    "stop_reason": "sign_in_expired", "stopped": "2026-11-20T22:00:00Z", "ended": "2026-11-20T22:05:00Z"
+  },
   "rounds": [
     {"name": "r1", "summary": "A round with one free pass.", "needs_geoff": true, "design_written": true}
   ],
   "passes": [
-    {"name": "a-free", "summary": "Free now.", "round": "r1", "planned_minutes": 10, "state": "not_started", "questions": ["qa"]}
+    {"name": "a-free", "summary": "Free now.", "round": "r1", "planned_minutes": 10, "state": "not_started", "questions": ["qa"]},
+    {
+      "name": "a-stopped", "summary": "Stopped on scope.", "round": "r1", "planned_minutes": 15, "state": "stopped",
+      "started": "2026-11-20T21:00:00Z", "stop_reason": "scope", "stops": [{"start": "2026-11-20T22:40:00Z"}],
+      "no_need_reason": "It only renames files."
+    }
   ],
   "questions": [
     {

@@ -43,7 +43,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p02",
@@ -59,7 +62,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p03",
@@ -75,7 +81,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p04",
@@ -91,7 +100,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p05",
@@ -107,7 +119,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p06",
@@ -123,7 +138,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p07",
@@ -139,7 +157,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p08",
@@ -155,7 +176,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p09",
@@ -171,7 +195,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p10",
@@ -187,7 +214,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p11",
@@ -203,7 +233,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p12",
@@ -219,7 +252,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             }
           ]
         },
@@ -273,7 +309,10 @@
               "needed_time": "2026-11-20T23:00:00Z",
               "free": true,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p14",
@@ -291,7 +330,10 @@
               "why_not": [
                 "unfinished work before it"
               ],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": null
             },
             {
               "name": "p15",
@@ -326,7 +368,10 @@
                 "unfinished work before it",
                 "an unanswered question"
               ],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "questions",
+              "needs_reason": null
             }
           ]
         }
@@ -373,7 +418,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": "Routine cleanup."
             },
             {
               "name": "b-two",
@@ -389,7 +437,10 @@
               "needed_time": null,
               "free": null,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "nothing",
+              "needs_reason": "Routine cleanup."
             }
           ]
         },
@@ -489,7 +540,10 @@
               "needed_time": "2026-11-20T23:00:00Z",
               "free": true,
               "why_not": [],
-              "guess_outcome": null
+              "guess_outcome": null,
+              "stopped_at": null,
+              "needs_kind": "questions",
+              "needs_reason": null
             }
           ]
         },

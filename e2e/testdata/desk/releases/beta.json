@@ -4,7 +4,14 @@
   "name": "v2",
   "repo": "glw907/beta",
   "rounds": [
-    {"name": "b1", "summary": "A building pass with two after it.", "needs_geoff": true, "design_written": true}
+    {
+      "name": "b1", "summary": "A building pass with two after it.", "needs_geoff": true, "design_written": true,
+      "session": {
+        "name": "beta-b1-design", "kind": "design", "short_id": "b1b2b3b4", "session_id": "b1b2b3b4-0000",
+        "worktree": "/w/beta", "branch": "beta-b1-design", "launched": "2026-11-20T20:00:00Z", "launch_tries": 2,
+        "stop_reason": "launch_failed", "stopped": "2026-11-20T20:05:00Z", "ended": "2026-11-20T20:06:00Z"
+      }
+    }
   ],
   "passes": [
     {"name": "b-build", "summary": "Building now.", "round": "b1", "planned_minutes": 20, "state": "building", "started": "2026-11-20T22:30:00Z"},

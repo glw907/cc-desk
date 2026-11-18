@@ -51,6 +51,12 @@ export interface Pass {
 	free: boolean | null;
 	why_not: string[];
 	guess_outcome: string | null;
+	/** When the open stop began; null unless the pass is stopped. */
+	stopped_at: Time | null;
+	/** `questions` when the pass rests on any, else `nothing`. */
+	needs_kind: string;
+	/** The pass's own reason it needs nothing, else its round's, else null. */
+	needs_reason: string | null;
 }
 
 export interface Round {
@@ -128,6 +134,14 @@ export interface Prompt {
 	answer?: string;
 }
 
+/** A call a session's settings turned away, as `internal/state/types.go` records it. */
+export interface Refusal {
+	time: Time;
+	tool: string;
+	target: string;
+	reason: string;
+}
+
 /** One session record of a live release. Pass is null for a conductor and a design writer; round is null for a conductor. */
 export interface SessionEntry {
 	project: string;
@@ -142,6 +156,9 @@ export interface SessionEntry {
 	relaunches: number;
 	stop_reason: string | null;
 	prompts: Prompt[];
+	/** When the session's stop began; null when it is not stopped. */
+	stopped_at: Time | null;
+	refusals: Refusal[];
 	/** The note a merged pass's cleanup left: what stayed in place. */
 	cleanup?: string;
 }

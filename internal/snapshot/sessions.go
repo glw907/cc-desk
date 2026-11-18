@@ -39,6 +39,10 @@ type SessionEntry struct {
 	Relaunches  int            `json:"relaunches"`
 	StopReason  *string        `json:"stop_reason"`
 	Prompts     []state.Prompt `json:"prompts"`
+	// StoppedAt is when the session's stop began: a conductor's or round's
+	// stop time, or the open stop of a pass's. Null when it is not stopped.
+	StoppedAt *time.Time      `json:"stopped_at"`
+	Refusals  []state.Refusal `json:"refusals"`
 	// Cleanup is the note a merged pass's cleanup left: what stayed in place.
 	Cleanup string `json:"cleanup,omitempty"`
 }
@@ -94,16 +98,20 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 		if rf.Done {
 			continue
 		}
-		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string) {
+		// add records a session. A conductor's or round's record that has
+		// ended with a stop leaves needs_you_now, unless the stop is a launch
+		// that failed. A pass's stop stays, ended session or not.
+		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string, stoppedAt *time.Time, mayEnd bool) {
 			e := SessionEntry{
 				Project: rf.Project, Round: strp(round), Pass: strp(pass),
 				Kind: string(sess.Kind), Name: sess.Name, ShortID: sess.ShortID,
 				LastState: strp(sess.LastState), LastSeen: utc(sess.LastSeen), LastWorking: utc(sess.LastWorking),
 				Relaunches: sess.Counted(), StopReason: strp(string(stop)),
 				Prompts: append([]state.Prompt{}, sess.Prompts...), Cleanup: cleanup,
+				StoppedAt: stoppedAt, Refusals: append([]state.Refusal{}, sess.Refusals...),
 			}
 			snap.Sessions = append(snap.Sessions, e)
-			if stop != "" {
+			if stop != "" && !(mayEnd && sess.Ended != nil && stop != state.StopLaunchFailed) {
 				snap.NeedsYouNow = append(snap.NeedsYouNow, NeedEntry{
 					Project: rf.Project, Round: e.Round, Session: strp(sess.Name),
 					Reason: string(stop), Cause: causeOf(sess.StopDetail, stop), Todo: todoFor(stop),
@@ -111,11 +119,11 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 			}
 		}
 		if c := rf.Conductor; c != nil {
-			add("", "", c, c.StopReason, "")
+			add("", "", c, c.StopReason, "", utc(c.Stopped), true)
 		}
 		for i := range rf.Rounds {
 			if sess := rf.Rounds[i].Session; sess != nil {
-				add(rf.Rounds[i].Name, "", sess, sess.StopReason, "")
+				add(rf.Rounds[i].Name, "", sess, sess.StopReason, "", utc(sess.Stopped), true)
 			}
 		}
 		for i := range rf.Passes {
@@ -135,7 +143,7 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 				if p.PullRequest != nil {
 					cleanup = p.PullRequest.CleanupNote
 				}
-				add(p.Round, p.Name, p.Session, p.StopReason, cleanup)
+				add(p.Round, p.Name, p.Session, p.StopReason, cleanup, openStop(p), false)
 				continue
 			}
 			if p.State == state.Stopped {
