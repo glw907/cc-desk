@@ -5,7 +5,7 @@ Round: page
 Pass: page-surface
 
 Class `runner`: the pass installs a user unit on the workstation. Planned 60 minutes. The path
-below is 90, under the 120-minute park line (twice the planned minutes, round standing answer
+below is 105, under the 120-minute park line (twice the planned minutes, round standing answer
 14).
 
 Design: `docs/specs/2026-11-17-page-design.md`, "The app" (the server paragraph and the unit
@@ -58,7 +58,7 @@ worktree, a test's temporary folder, `$CLAUDE_JOB_DIR/tmp`, the deploy folder
   a test folder. No row refuses any of this pass's commands run bare. The table below holds the
   alternatives.
 - Reviewed: one `standards:plan-reviewer` read before code, as the `runner` class sets
-  (`pass-core` "Plan review lens"), folded on 2026-11-18; its line is under `## Decisions`. The
+  (`pass-core` "Plan review lens"), folded on 2026-11-18; its `[review]` line is under `## Decisions`. The
   close gets one whole-branch `standards:diff-reviewer` read.
 - Evidence: the mechanism table and the recorded searches below. Every acceptance check was run
   on today's code before any code was written. The outputs are under `## Acceptance`.
@@ -132,10 +132,15 @@ Run with `git grep -c` over `web/src` and `web/tests` at `f8536e5` unless marked
 | --- | --- |
 | `web/src/routes/+layout.svelte` | The drawer and its toggle give way to a plain two-column layout, the rail first in the source as today's drawer-side is not |
 | `web/src/app.css` | The layout's grid in tokens; the scan's two fixes; `.sr-only` use only if Tailwind's isn't enough |
-| `web/src/lib/ScaleBar.svelte` | Each segment holds its state's words, and an `asks` segment the triangle's words, as screen-reader text |
-| `web/src/lib/ReleaseBoard.svelte`, `web/src/routes/rulings/+page.svelte` | Only if the scan fixes can't be made from `app.css` alone |
+| `web/src/lib/ScaleBar.svelte` | A list of segments, each holding its state's words, and an `asks` segment the triangle's words, as visually hidden text; a prop names the words table |
+| `web/src/lib/ReleaseBlock.svelte` | Passes the bar its words table; maybe a scan fix |
+| `web/src/lib/ReleaseBoard.svelte` | Passes the bar its words table; maybe a scan fix |
+| `web/src/routes/rulings/+page.svelte` | Only if the scan fix can't be made from `app.css` alone |
 | `web/package.json`, `web/package-lock.json` | `@axe-core/playwright` 4.14.0, exact, as a dev dependency |
 | `web/tests/app.ts` | The fixture captures the server's output and can start from another app folder |
+| `web/tests/crawl.ts` (or a name the executor picks) | New. The crawl helper with its draw wait, shared by the walk and the scan |
+| `web/tests/state.ts` | Only for a builder standing answer 56 adds |
+| `web/tests/sidebar.spec.ts`, and `order.spec.ts` or `redraw.spec.ts` if the grep finds them | A state-word assert scoped to the state span, so a bar's words can't satisfy it |
 | `web/tests/surface.spec.ts` | New. The walk, the methods, the read-only run, the log, and the source search |
 | `web/tests/scan.spec.ts` | New. The theme check and the axe-core scan |
 | `web/tests/color.spec.ts` | New. Words with color, no color literal, no copy of Survey |
@@ -178,14 +183,14 @@ The four items, word for word from the page design.
    `127.0.0.1` and to no other address.
    - Amended check (`Call:` under `## Decisions`). The page is drawn in the browser
      (`ssr = false`), so `GET /` holds no project name, and the live state folder doesn't exist
-     yet. The check runs against a state folder made from `e2e/testdata/state` by the real
-     binary, pointed at by a drop-in that is removed afterward. After the install script runs,
+     yet. The check runs against a copy of `e2e/testdata/state`, pointed at by a drop-in that is
+     removed afterward. After the install script runs,
      `curl -s http://127.0.0.1:7908/` returns 200 with the app's shell, and `curl -s
      http://127.0.0.1:7908/api/state` returns the snapshot holding `"project":"alpha"`. Both
      hold again after `systemctl --user restart cc-desk-page.service`. `ss -ltn` shows 7908 on
      `127.0.0.1` only. With the drop-in removed and the unit restarted, `systemctl --user show
      -p Environment cc-desk-page.service` names no `CC_DESK_STATE_DIR`, and `/api/state` reads
-     `"noState":true` from the live folder.
+     `"noState":true` from the live folder, or the live snapshot if the folder exists by then.
    - Met by task 4. Shown by the run in task 4, pasted into the PR. CI has no user manager, so
      this check runs once on the workstation and isn't in the gate.
    - Before: `curl -s http://127.0.0.1:7908/` exited 7. `systemctl --user status
@@ -202,11 +207,25 @@ The four items, word for word from the page design.
       check` (`348 FILES 0 ERRORS 0 WARNINGS`), `gate: web build`, `gate: web tests`, `60 passed
       (37.5s)`, and `gate: ok`.
 
+## The strings the tests write out
+
+Every expected string below is written out in the test that reads it, never imported from
+`web/src/`.
+
+| Where | Words |
+| --- | --- |
+| A pass segment, and `.state.<code>` for a pass | `not_started` Not started, `waiting` Waiting, `building` Building, `stopped` Stopped, `done` Done |
+| A round segment, and `.state.<code>` for a round | `not_designed` Not designed yet, `not_started` Not started, `building` Building, `done` Done |
+| The triangle, added to an `asks` segment's words | Needs Geoff (the design's phrase at "a round that needs Geoff"; checked through the `survey` skill's writing standard before the first commit, and changed in the plan's place in the PR if Survey's standard says otherwise) |
+| The widget, `[data-testid=session-state]` | `needs_you_now` Needs you now, `ready_now` Ready now, `nothing_waiting` Nothing waiting, and for `scheduled` the formatted time, such as `Today, about 8:00 pm` on `started` (`estimate.spec.ts:8`), never the word Scheduled |
+| The banners, in the `<strong>` | `not-connected` Not connected, `no-state` No state yet, `stale` Stale |
+
 ## Tasks
 
-The path is the sum, 90 minutes, since the tasks run in order. Each task commits by path, runs
+The path is the sum, 105 minutes, since the tasks run in order. Each task commits by path, runs
 the gate bare before the commit, and pushes. Each task's report names the gate run's conclusion
-on its pushed commit from `gh run list --branch page-surface`, or "no run yet" with the link.
+on its pushed commit from `gh run list --branch page-surface`, or "no run yet" with the link,
+and also the conclusion on the previous task's head. The close names the last head's.
 
 ### Task 1: the walk and the read-only run (25 minutes)
 
@@ -222,40 +241,57 @@ file.
 - `tests/app.ts`: the fixture keeps the server's stdout and stderr (piped, kept in memory) and
   exposes them, and `start` can take another app folder than `web/build`. Existing tests use it
   unchanged.
+- A crawl helper in a new file under `web/tests/`, shared with task 2. It pins the browser clock
+  as `show()` does, opens a page, and waits for it to draw before reading it: the first
+  `/api/state` response, then `nav [data-release]` or the page's `h1`, or
+  `[data-banner="no-state"]` on the no-state page. It collects every `a[href]` on this site and
+  visits each once.
 - `tests/surface.spec.ts`, one test for the walk:
   1. Build `started` into a state folder. Copy `web/build` into a `mkdtemp` folder. Hash every
-     file in both folders (SHA-256 by relative path). `chmod -R a-w` both.
-  2. Start the app from the copy. Crawl from `/`: open each page, collect every `a[href]` that is
-     on this site, and visit each once. On every page, count `form`, `input`, `select`,
-     `textarea`, and `[contenteditable]`, and every `getByRole('button')` whose name isn't "Copy
-     command"; each count must be 0, and the failure names the page and the element.
-  3. On every address visited, plus `/api/state` and an address that names nothing, send `POST`,
-     `PUT`, `PATCH`, `DELETE`, and `OPTIONS` with Playwright's `request`; each must be 405 with
-     `allow: GET, HEAD`.
+     file in both folders (SHA-256 by relative path). `chmod -R a-w` both. Then write a file
+     into each folder and expect `EACCES`, so a run as root, where `a-w` does nothing, fails here
+     instead of passing the read-only claim with nothing proved.
+  2. Start the app from the copy and crawl from `/`. On every page, count `form`, `input`,
+     `select`, `textarea`, and `[contenteditable]`, and every `getByRole('button')` whose name
+     isn't "Copy command"; each count must be 0, and the failure names the page and the element.
+  3. On every address visited, plus `/api/state`, an address that names nothing, and one
+     `/_app/immutable/` asset taken from the page's own `script[src]`, send `POST`, `PUT`,
+     `PATCH`, `DELETE`, and `OPTIONS` with Playwright's `request`; each must be 405 with
+     `allow: GET, HEAD`. The asset's 405 comes from adapter-node's handler
+     (`build/server/adapter-node-handler.js`), the rest from `hooks.server.ts`.
   4. Keep one page open until it has sent at least three `/api/state` requests (count them with
      `page.on('request')`), so the poll has run against the read-only folders.
-  5. Stop the app. Its stderr is empty, and no stdout line matches `/error/i`. Restore the write
-     bits, hash again, and compare: every file the same, no file added or gone. Remove both
-     folders.
-  The walk on `started` reached 26 pages in planning; the test asserts at least 26, so a broken
-  crawl can't pass by visiting one page.
-- `tests/surface.spec.ts`, one test for the source: read every file under `web/src/lib/server/`,
-  `web/src/hooks.server.ts`, and every `+server.ts` and `+page.server.ts` or `+layout.server.ts`
-  under `web/src/routes/`, and fail on any import of `node:child_process`, any import from
-  `node:fs` or `node:fs/promises` other than `readFile`, `stat`, or `access`, and any of
-  `writeFile`, `appendFile`, `createWriteStream`, `mkdir`, `rename`, `unlink`, `rm`, `copyFile`,
-  `open(` with a write flag, `spawn`, or `exec`. The patterns are written out in the test.
+  5. Stop the app. Its stderr is empty, and no stdout line matches `/error/i`. Hash again and
+     compare: every file the same, no file added or gone.
+  6. In a `finally`, whatever failed: restore the write bits on both folders, then remove them.
+     A failing walk otherwise leaves read-only folders the fixture can't remove (`rmSync` throws
+     `EACCES`).
+  The test asserts it visited every address the snapshot names (`/`, `/rulings`, and each
+  release's rounds and passes at `/<project>/<round>` and `/<project>/<round>/<pass>`), built
+  from the snapshot in the test, so a broken crawl can't pass by visiting one page and a fixture
+  change from the Sessions round moves the floor with it. Planning reached 26 pages on `started`.
+- `tests/surface.spec.ts`, one test for the source: read every `.ts`, `.js`, and `.svelte` file
+  under `web/src` and fail on any of these, each written out in the test:
+  - an import or `require` of `(node:)?(fs|fs/promises|child_process)` that names anything but
+    `readFile`, `stat`, or `access`;
+  - a default or namespace import of `fs` or `fs/promises` (`import fs from`, `import * as fs`);
+  - a call, matched as the name then `\s*\(`, of `writeFile`, `writeFileSync`, `appendFile`,
+    `createWriteStream`, `mkdir`, `mkdirSync`, `rename`, `unlink`, `rm`, `rmSync`, `rmdir`,
+    `copyFile`, `cp`, `open`, `spawn`, `exec`, `execSync`, `execFile`, or `fork`, with a word
+    boundary before the name so `format(` and `execute(` don't hit.
+  The `open(` match is allowed only where the file holds no `node:fs` import, since `window.open`
+  isn't a file call; the test says so in a comment.
 
-Files: `web/src/routes/+layout.svelte`, `web/src/app.css`, `web/tests/app.ts`,
-`web/tests/surface.spec.ts`. Class `ordinary`.
+Files: `web/src/routes/+layout.svelte`, `web/src/app.css`, `web/tests/app.ts`, the crawl
+helper, `web/tests/surface.spec.ts`. Class `ordinary`.
 
 Test: `tests/surface.spec.ts`, with `tests/server.spec.ts` and `tests/sidebar.spec.ts` unchanged.
 
 Acceptance check: `npx playwright test tests/surface.spec.ts tests/server.spec.ts
 tests/sidebar.spec.ts` passes. Then, once each and reverted before the commit: put an `<input>`
-back in the layout, and the walk fails naming it; add `import { writeFile } from
-'node:fs/promises'` to `state.ts`, and the source test fails naming the file. Paste both failing
-lines into the task's report.
+back in the layout, and the walk fails naming it and leaves no folder behind; add `import {
+writeFile } from 'node:fs/promises'` to `state.ts`, and the source test fails naming the file.
+Paste both failing lines into the task's report.
 
 ### Task 2: the scan in both themes (25 minutes)
 
@@ -264,74 +300,97 @@ two themes differ.
 
 - `npm install --save-dev --save-exact @axe-core/playwright@4.14.0` in `web/`, alone and bare.
   Commit `package.json` and `package-lock.json`.
-- `tests/scan.spec.ts`, one test per theme (`test.use({ colorScheme })` or
-  `page.emulateMedia`):
-  1. Open `/` on `started` in light and in dark, read the computed `background-color` of `body`
-     in each, and fail if they are equal. The light test does this before scanning, so a dark
-     run that matched light fails at once.
-  2. Scan with `new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa',
-     'wcag22aa'])` on every page the task 1 crawl reaches on `started` and on `twin`, then on
-     `/` for `stopped`, `two`, and `guess`, on `/` with a `snapshot-error.json` (the stale
-     banner), on `/` with no snapshot ("No state yet"), and on `/alpha/zz` and `/a/b/c/d`. The
-     failure lists each violation's id, the page, and the first target of each node.
-  The crawl helper is shared with task 1, in a file under `web/tests/`.
+- `tests/scan.spec.ts`:
+  1. First, one test opens `/` on `started` in light and in dark (`page.emulateMedia({
+     colorScheme })`), reads the computed `background-color` of `body` in each, and fails if they
+     are equal.
+  2. Then one test per state and theme from the start, so no test holds dozens of scans: scan with
+     `new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa',
+     'wcag22aa'])`, after the crawl helper's draw wait, on every page the crawl reaches on
+     `started` and on `twin`; on `/` for `stopped`, `two`, and `guess`; on `/` with a
+     `snapshot-error.json` (the stale banner); on `/` with no snapshot ("No state yet"); and on
+     `/alpha/zz` and `/a/b/c/d`. The failure lists each violation's id, the page, and the first
+     target of each node.
 - Fix what the scan finds, within Survey's tokens:
   - `target-size` on `a.t` and `.pass-links a`: give those links a 24px minimum target from
     `var(--spacing-24px)` (a minimum block size with inline-flex, or padding, as reads best).
     Check the board and the sidebar still look as they did; a screenshot of `/` before and after
     goes in the report.
-  - `color-contrast` on the rulings `th`: set their ink to `var(--color-muted)`. Write
-    `docs/follow-ups/survey-table-header-contrast.md` naming what was measured (`#777a7b` on
-    `#f7f7f3`, 4.02), the fix used, and that Survey's daisyUI table header needs it, for the
-    conductor to file in Survey's backlog.
+  - `color-contrast` on the rulings `th`: set their ink to `var(--color-muted)` (`#5d5f58` on
+    `#f7f7f3` is 6.03). Write `docs/follow-ups/survey-table-header-contrast.md` naming what was
+    measured (`#777a7b` on `#f7f7f3`, 4.02), the fix used, and that Survey's daisyUI table header
+    needs it, for the conductor to file in Survey's backlog.
   - Any other finding takes standing answer 47.
 
-Files: `web/package.json`, `web/package-lock.json`, `web/tests/scan.spec.ts`, the shared crawl
-file, `web/src/app.css`, maybe `web/src/lib/ReleaseBoard.svelte` and
+Files: `web/package.json`, `web/package-lock.json`, `web/tests/scan.spec.ts`, the crawl helper,
+`web/src/app.css`, maybe `web/src/lib/ReleaseBoard.svelte` and
 `web/src/routes/rulings/+page.svelte`, `docs/follow-ups/survey-table-header-contrast.md`. Class
 `ordinary`.
 
 Acceptance check: `npx playwright test tests/scan.spec.ts` passes. Before the fixes it fails
 listing `target-size` and `color-contrast`; paste that failing list into the report.
 
-### Task 3: words with color, no literal, no copy (15 minutes)
+### Task 3: words with color, no literal, no copy (20 minutes)
 
-Outcome: every state shown in color carries its words in the same element, and the app's CSS
-holds no color literal and no copy of Survey.
+Outcome: every state shown in color carries its words in the same element, a screen reader
+hears them, and the app's CSS holds no color literal and no copy of Survey.
 
-- `ScaleBar.svelte`: each segment holds its state's words from the words table
-  (`word('passState', …)` or `word('roundState', …)`, as the bar's parts are passes or rounds),
-  and an `asks` segment also holds words for the triangle ("Needs you", or what Survey's writing
-  standard gives), as `sr-only` text. The bar keeps its `aria-label`. If axe or `svelte-check`
-  objects to text inside `role="img"`, standing answer 50.
+- `ScaleBar.svelte`: the bar becomes a `role="list"` with its `aria-label`, and each segment a
+  `role="listitem"` holding its state's words, and for an `asks` segment the triangle's words
+  too, as visually hidden text. Children of `role="img"` are presentational, so words inside
+  today's bar would reach no screen reader. A new prop names which table the parts' codes come
+  from (`passState` for `passParts`, `roundState` for `roundParts`), since a `Part` carries only
+  its code. `ReleaseBlock.svelte` and `ReleaseBoard.svelte` pass it. The `@component` comment
+  and the `label` prop's comment change to match.
+- `sidebar.spec.ts:35`: `round.toContainText('Building')` reads the whole round item, which will
+  then hold p13's segment word "Building" too. Scope it to the round's own state span
+  (`round.locator('.figures .state')`, or whatever selector the markup gives). Grep every other
+  `toContainText` of a state word over a release block or a board row (`order.spec.ts:29`,
+  `order.spec.ts:37`, `redraw.spec.ts:34` today) and scope each the same way where a bar now sits
+  inside the located element.
 - `tests/color.spec.ts`:
-  1. **Words with color.** On each state that shows it (written out in the test), find each
-     colored element and check its `textContent` holds the words, written out in the test:
-     `.seg.<state>` in the sidebar and on the board for each of the five pass states, and the
-     round states the bar draws; `.state.<state>` on the board and the item pages; an `asks`
-     segment for the triangle; `.banner[data-banner=…]` for `stale`, `no-state`, and
-     `not-connected` (stop the server for the last); and the widget's four states, by standing
-     answer 51. Which fixture shows which state is the executor's to find; pass 1's tests hold
-     a state for each widget word.
-  2. **No color literal.** Read every `.css` and `.svelte` file under `web/src` and fail on a
-     hex color (`#` and 3, 4, 6, or 8 hex digits), `rgb(`, `rgba(`, `hsl(`, `hsla(`, `hwb(`,
-     `lab(`, `lch(`, `oklab(`, `oklch(`, `color(`, a CSS color keyword, and a Tailwind arbitrary
-     color such as `bg-[#fff]` or `text-[rgb(…)]`, in a stylesheet, a `<style>` block, a `style`
-     attribute, or a `class`. The keyword list is CSS's named colors, written out in the test,
-     with `transparent` and `currentColor` allowed and the match on whole words, so
-     `white-space` doesn't hit. Each failure names the file, the line, and the literal.
+  1. **Words with color.** For each state in "The strings the tests write out", find a builder in
+     `tests/state.ts` that shows it, and check each colored element's `textContent` holds its
+     words: `.seg.<code>` in the sidebar and on the board for every pass and round code; an
+     `asks` segment for the triangle; `.state.<code>` on the board and the item pages;
+     `.banner[data-banner=…]` for each banner (stop the server for `not-connected`); and the
+     widget by standing answer 51. The test lists, written out, which builder shows which state,
+     and fails on any listed state no builder shows, rather than skipping it. Planning found
+     `ready_now` on `big` and `scheduled` on `started`; standing answer 56 covers a state no
+     builder reaches.
+  2. **No color literal.** Read every `.css` and `.svelte` file under `web/src` and fail on any
+     of these, each written out in the test, in a stylesheet, a `<style>` block, a `style`
+     attribute, or a `class`:
+     - a hex color, `#([0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])`, with the
+       trailing boundary so `{#each` doesn't hit;
+     - a color function: `rgb(`, `rgba(`, `hsl(`, `hsla(`, `hwb(`, `lab(`, `lch(`, `oklab(`,
+       `oklch(`, `color(`, `color-mix(`, or `light-dark(`;
+     - one of the 148 CSS named colors (the list in `node_modules/tailwindcss/dist/lib.js`),
+       minus `transparent` and `currentcolor`, matched case-blind with the hyphen-aware boundary
+       `(?<![\w-])(names)(?![\w-])`, so `white-space` doesn't hit. CSS system colors are left
+       out, since `mark` hits two comments today;
+     - a Tailwind arbitrary color such as `bg-[#fff]` or `text-[rgb(…)]`;
+     - a Tailwind palette class in a `class` attribute,
+       `(bg|text|border|ring|outline|fill|stroke|decoration|accent|caret|shadow|from|via|to)-(<named>|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white)(-\d+)?`,
+       since Survey resets no `--color-*` and those classes would compile.
+     Each failure names the file, the line, and the literal. Planning ran the hex and keyword
+     patterns with these boundaries over today's tree: 0 hits.
   3. **No copy of Survey.** Hash every file under `web/node_modules/survey/` and every file in
      `web/` outside `node_modules/`, `build/`, `.svelte-kit/`, and `test-results/`; fail on any
-     match. Also fail on any file there that holds a line of Survey's `theme/*.css` longer than
-     40 characters, so an edited copy is caught too. The thresholds are written out in the test.
+     match. Also fail on any file there that holds a trimmed line of Survey's `theme/*.css`
+     longer than 40 characters, so an edited copy is caught too. The thresholds are written out
+     in the test. Planning ran both over today's 55 files: 0 hits.
 
-Files: `web/src/lib/ScaleBar.svelte`, `web/tests/color.spec.ts`. Class `ordinary`.
+Files: `web/src/lib/ScaleBar.svelte`, `web/src/lib/ReleaseBlock.svelte`,
+`web/src/lib/ReleaseBoard.svelte`, `web/tests/sidebar.spec.ts`, and any of
+`web/tests/order.spec.ts` and `web/tests/redraw.spec.ts` the grep finds, `web/tests/color.spec.ts`.
+Class `ordinary`.
 
-Acceptance check: `npx playwright test tests/color.spec.ts tests/sidebar.spec.ts` passes. Then,
-once each and reverted before the commit: empty a segment's words, and the words test fails
-naming it; add `color: #fff;` to `app.css`, and the literal test fails naming the line; copy
-`node_modules/survey/theme/survey-vars.css` into `web/src/`, and the copy test fails naming it.
-Paste the three failing lines into the report.
+Acceptance check: `npx playwright test tests/color.spec.ts tests/sidebar.spec.ts tests/scan.spec.ts`
+passes. Then, once each and reverted before the commit: empty a segment's words, and the words
+test fails naming it; add `color: #fff;` to `app.css`, and the literal test fails naming the
+line; copy `node_modules/survey/theme/survey-vars.css` into `web/src/`, and the copy test fails
+naming it. Paste the three failing lines into the report.
 
 ### Task 4: the service (15 minutes)
 
@@ -344,44 +403,55 @@ Outcome: a user unit runs the built page on 127.0.0.1:7908, and a script install
   which node` prints. No state folder is set, so the server reads the live one.
 - `web/scripts/install-page.sh`, Bash with `set -euo pipefail`, safe to run again:
   1. In `web/`: `npm ci` if `node_modules` is missing, then `npm run build`.
-  2. Copy `build/` to a new folder beside `~/.local/share/cc-desk/page`, then move it into place,
-     removing only the old `page` folder.
+  2. Build every path from `share="${HOME:?}/.local/share/cc-desk"`. Copy `build/` to
+     `$share/page.new`, move any `$share/page` to `$share/page.old`, move `page.new` to `page`,
+     and remove only `$share/page.old` by that name.
   3. Copy the unit to `~/.config/systemd/user/`, run `systemd-analyze --user verify` on it, and
      `systemctl --user daemon-reload`.
-  4. `systemctl --user enable --now cc-desk-page.service`, then `systemctl --user restart` so a
-     re-run serves the new build.
-  5. Wait for `curl -sf http://127.0.0.1:7908/` with `curl --retry 10 --retry-connrefused
-     --retry-delay 1`, and print the address.
+  4. `systemctl --user enable --now cc-desk-page.service`, then `systemctl --user restart
+     cc-desk-page.service` so a re-run serves the new build.
+  5. Wait with `curl -sf --retry 10 --retry-connrefused --retry-delay 1 -o /dev/null
+     http://127.0.0.1:7908/`, and print the address.
 - `README.md`: a short section on the page: what it is, `bash web/scripts/install-page.sh` to
   install it or to serve a newer build, the address, and that the Move round records the
   install in the workstation repo.
 - Run done item 8's amended check on the workstation, in this order, and paste every command
-  with what it printed into the PR:
+  with what it printed into the PR. Any stop after step 3 first removes the drop-in, as
+  standing answer 57 says.
   1. `bash web/scripts/install-page.sh`.
-  2. Make a state folder under `$CLAUDE_JOB_DIR/tmp/` from `e2e/testdata/state` with the real
-     binary at the worked clock, as `tests/state.ts` does for `started` (a script file, run by
-     path).
-  3. Write `~/.config/systemd/user/cc-desk-page.service.d/zz-check.conf` with
-     `[Service]` and `Environment=CC_DESK_STATE_DIR=<that folder>`, then `daemon-reload` and
-     `restart`.
-  4. `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:7908/` prints 200, and `curl -s
-     http://127.0.0.1:7908/api/state` holds `"project":"alpha"`.
-  5. `systemctl --user restart cc-desk-page.service`, and step 4 again.
-  6. `ss -ltn` shows `127.0.0.1:7908` and no other line with `:7908`.
-  7. Remove the drop-in file and its folder, `daemon-reload`, `restart`. `systemctl --user show
-     -p Environment cc-desk-page.service` names no `CC_DESK_STATE_DIR`, and `/api/state` holds
-     `"noState":true`.
-  8. `systemctl --user is-enabled cc-desk-page.service` prints `enabled`, and `is-active` prints
-     `active`. The unit stays installed.
+  2. `cp -r e2e/testdata/state "$CLAUDE_JOB_DIR/tmp/page-check-state"`, from the worktree's
+     root. Its `snapshot.json` already holds `"project": "alpha"`, and the server reads only
+     `snapshot.json`, so no binary run is needed for a check that isn't a test.
+  3. Write `~/.config/systemd/user/cc-desk-page.service.d/zz-check.conf` holding `[Service]` and
+     `Environment=CC_DESK_STATE_DIR=<that folder, written out in full>`. Then `systemctl --user
+     daemon-reload` and `systemctl --user restart cc-desk-page.service`.
+  4. `curl -s -o /dev/null -w '%{http_code}' --retry 10 --retry-connrefused --retry-delay 1
+     http://127.0.0.1:7908/` prints `200`, and `curl -s http://127.0.0.1:7908/api/state` holds
+     `"project":"alpha"`.
+  5. `systemctl --user restart cc-desk-page.service`. Then `curl -s -o /dev/null -w
+     '%{http_code}' --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:7908/`
+     prints `200` again, and `curl -s http://127.0.0.1:7908/api/state` holds `"project":"alpha"`
+     again.
+  6. `ss -ltn` shows `127.0.0.1:7908`, and `ss -ltn | grep -c ':7908 '` prints `1`.
+  7. `ls -la ~/.local/state/cc-desk`, recorded. Remove `zz-check.conf` and its folder, then
+     `systemctl --user daemon-reload` and `systemctl --user restart cc-desk-page.service`.
+     `systemctl --user show -p Environment cc-desk-page.service` prints `Environment=HOST=127.0.0.1
+     PORT=7908` with no `CC_DESK_STATE_DIR`. If the live folder was missing, `curl -s
+     http://127.0.0.1:7908/api/state` holds `"noState":true`. If it exists by then (the Sessions
+     round runs beside this one), the snapshot's `generated_at` in that answer equals the one in
+     `~/.local/state/cc-desk/snapshot.json`, and the PR says which case ran.
+  8. `systemctl --user is-enabled cc-desk-page.service` prints `enabled`, and `systemctl --user
+     is-active cc-desk-page.service` prints `active`. The unit stays installed.
 
 Files: `web/systemd/cc-desk-page.service`, `web/scripts/install-page.sh`, `README.md`. Class
 `runner`.
 
 Acceptance check: the eight steps above print what they name.
 
-### Task 5: the gate's evidence, the review, and the PR (10 minutes)
+### Task 5: the gate's evidence, the review, and the PR (20 minutes)
 
-Outcome: done item 10 has its evidence, the branch is reviewed, and the PR is ready.
+Outcome: done item 10 has its evidence, the branch is reviewed, and the PR is ready. The new
+suite adds a 26-page crawl and about 60 scans, so each gate run is longer than pass 2's.
 
 1. `bash scripts/gate.sh`, bare: paste the page lines, the new passed count, and `gate: ok`.
 2. With one test changed to `test.skip`, uncommitted: `bash scripts/gate.sh` fails naming the
@@ -392,8 +462,10 @@ Outcome: done item 10 has its evidence, the branch is reviewed, and the PR is re
    web/scripts/check-playwright-report.sh web/test-results/report.json <that count>` fails naming
    the count.
 5. Merge `origin/page-items` in if it moved and `origin/main` if main moved, then run the gate
-   again. If either brought a change to `web/`, run `bash web/scripts/install-page.sh` again and
-   step 4 of task 4's check once.
+   again. If either brought a change to `web/`, run `bash web/scripts/install-page.sh` again.
+   Then `curl -s -o /dev/null -w '%{http_code}' --retry 10 --retry-connrefused --retry-delay 1
+   http://127.0.0.1:7908/` prints `200`, and `curl -s http://127.0.0.1:7908/api/state` holds what
+   task 4 step 7 found (`"noState":true`, or the live `generated_at`).
 6. One whole-branch `standards:diff-reviewer` read, folded. Then the PR body and ready.
 
 Paste each command and the lines it printed under `## Acceptance` in the PR.
@@ -412,42 +484,51 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, pull request 
   and the PR lists the old and new values. If no token passes, write one follow-up for Survey
   under `docs/follow-ups/` and use the nearest passing token. Never disable an axe rule, and
   never exclude an element from the scan.
-- **48. The crawl or the scan times out.** Split the test into one test per state, and the scan
-  into one test per state and theme. Never raise the global timeout or add retries. A single
-  test may call `test.slow()`.
+- **48. A scan or the crawl still times out.** The scan is already one test per state and theme.
+  Split further by page if one still runs long. Never raise the global timeout or add retries. A
+  single test may call `test.slow()`.
 - **49. Auto mode refuses a step of the install or the check.** Use the alternatives table once.
   If it still refuses, stop running the check: the PR carries the install script's command, the
   eight steps, and their expected output under `## Before merge`, as round standing answer 13
   says, and waits for Geoff's approve. Never edit a settings file or an auto-mode entry.
-- **50. Text inside `role="img"` draws an axe or `svelte-check` finding.** Change the bar to a
-  `role="list"` of `role="listitem"` segments, each with its words as `sr-only` text, and drop the
-  `aria-label` in favor of a visually hidden heading or keep it on the list. Record the change
-  under `## Decisions`.
-- **51. The widget's state has no color.** The test checks that each of the four widget words
-  sits in `[data-testid=session-state]`, and that its computed color equals the page's
-  base-content ink, so a state color added later without words fails. Record this reading under
-  `## Decisions`.
+- **50. The list form of the bar draws an axe or `svelte-check` finding.** Keep the words as
+  visually hidden text in each segment and fix the markup the finding names. If the list roles
+  can't pass, use `role="img"` with an `aria-label` that names each segment's state and the
+  triangle in order, keep the words in the segments for the `textContent` test, and record the
+  change under `## Decisions`.
+- **51. The widget's state has no color.** The test checks that each widget state's words (the
+  word, or the formatted time for `scheduled`) sit in `[data-testid=session-state]`, and that
+  its computed color equals the page's base-content ink, so a state color added later without
+  words fails.
 - **52. The removed drawer changes the look.** Match the old layout by computed widths and the
   screenshot. If a difference remains that the eye can see, keep the plain grid (the walk needs
   it) and list the difference under `## Decisions` for pass 5's polish.
 - **53. The install leaves a server that won't start.** Read `journalctl --user -u
   cc-desk-page.service -n 50`. A path or environment fault is fixed in the unit or the script.
-  Anything else stops, with the journal lines under `## Stop`.
+  Anything else stops, by standing answer 57, with the journal lines under `## Stop`.
 - **54. Something already listens on 7908 when task 4 starts.** Stop; never stop a process you
   didn't start. Write what `ss -ltnp` shows under `## Stop`.
 - **55. `@axe-core/playwright` 4.14.0 won't install, or its `axe-core` 4.14.1 breaks.** Pin
-  `axe-core` to 4.14.0 with an `overrides` entry in `package.json` and try once more. Failing that,
-  stop.
+  `axe-core` to 4.14.0 (published 2026-10-05) with an `overrides` entry in `package.json` and try
+  once more. Failing that, stop.
+- **56. No builder in `tests/state.ts` shows a state the words test lists.** Find the verbs that
+  reach it on a fixture copy and add a builder for it, as `variant` and `stopped` do; the
+  builders are in `web/tests/`, inside this pass's files. If the binary can't reach it from any
+  fixture, keep the state in the test's list marked as unreachable with the reason in a comment,
+  and record it in `## Planning misses` as `[design-gap]`. Never write a `snapshot.json` by hand.
+- **57. A stop after task 4 step 3.** First remove `zz-check.conf` and its folder, then
+  `systemctl --user daemon-reload` and `systemctl --user restart cc-desk-page.service`, so the
+  unit never points at a folder in `$CLAUDE_JOB_DIR`. Then write `## Stop`.
 
 ## Decisions
 
 - [advisor] Done item 8's check is amended, and its words stay as the design has them above it.
   `GET /` returns the shell, and `/api/state` holds the project name, both after install and
-  after restart, against a state folder the run makes, since the live folder doesn't exist. The
+  after restart, against a copy of `e2e/testdata/state`, since the live folder doesn't exist. The
   readings passed over were turning on server rendering, which overturns pass 1's `ssr = false`,
   and a headless browser on 7908, which adds a browser to a check the design wrote as `curl`.
   Call: done item 8 reads its project name from `/api/state`, not from the page's HTML, and runs
-  against a test state folder; Geoff sees it in the PR's `## Acceptance`.
+  against a test state folder. It goes under `## Calls for Geoff` in the PR.
 - [advisor] The unit runs a copy of the build in `~/.local/share/cc-desk/page`, never a checkout's
   `web/build`. The worktree is removed after landing, main has no `web/` until pull requests 7
   and 9 land, and every gate run rebuilds `web/build` under a live server. The script redeploys on
@@ -465,6 +546,9 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, pull request 
 - [planner] The daisyUI drawer goes. Its toggle is an `input` on every page, which done item 4
   forbids, and daisyUI shows the side panel only through that toggle. The mockup has the same
   toggle, so the layout departs from the mockup's markup and keeps its look.
+- [planner] The bar becomes a list of segments with their words, in place of `role="img"`.
+  Children of an image role are presentational, so words there would pass a `textContent` test
+  and reach no screen reader, and axe wouldn't flag it. The triangle reads "Needs Geoff".
 - [planner] The scan's two fixes touch pull request 9's call (closed rounds list their passes as
   muted links): those links get a 24px target and stay muted and small in type. If Geoff
   overturns that call, the `.pass-links` rule goes with it.
@@ -475,20 +559,37 @@ The twelve in `round-run.md` hold, with the round plan's 13 to 20, pull request 
   state yet", which the scan and the banner check use.
 - [planner] The file list goes past the round plan's (`web/tests/`, `web/systemd/`,
   `web/scripts/`, the README): the walk needs `+layout.svelte` and `app.css`, the words test needs
-  `ScaleBar.svelte`, the scan's fixes need `app.css`, and axe-core needs `package.json` and the
-  lockfile. Each is named in the file list.
+  `ScaleBar.svelte` and the two components that pass it a table, the scan's fixes need `app.css`,
+  and axe-core needs `package.json` and the lockfile. Each is named in the file list.
 - [planner] Done item 8 runs once on the workstation and isn't in the gate: CI has no user
   manager, and no pass after pass 1 edits `scripts/gate.sh`.
 - [planner] The unit stays installed and enabled when the pass ends, serving this branch's build
-  until a later run of the script replaces it. It reads the live state folder, which is empty
-  until the command writes there, so the page reads "No state yet".
+  until a later run of the script replaces it. Call: until the command writes the live state
+  folder, the page at http://127.0.0.1:7908/ reads "No state yet". It goes under `## Calls for
+  Geoff` in the PR.
 - [planner] The Survey gap (the table header's contrast) goes to `docs/follow-ups/` for the
   conductor to carry to Survey's backlog, as `survey-rail-muted-doc-measure.md` did, rather than
   this executor committing to Survey's `main`.
 - [planner] Pull request 7's planning misses hold: SvelteKit 3 has no `svelte.config.js`; `#lib`
   imports carry the extension; `Handle` comes from `@sveltejs/kit/hooks`; TypeScript 6 reports
   TS1360 under `satisfies`, so a type test uses a typed `const`.
+- [review] One `standards:plan-reviewer` read on 2026-11-18 returned 23 findings and a format
+  note, and all are folded: the hex and keyword boundaries, the `scheduled` widget words, the
+  rerun after a merge, the bar's roles, the scoped sidebar assert, the draw wait, the `finally`
+  and the `EACCES` self-check, the wider source search, the live-folder case, the drop-in on a
+  stop, task 5's minutes, one scan test per state and theme, the missing lines below, the call
+  channel, the plain `cp` of the fixture, the state-to-builder list, commands written out, the
+  previous head's CI verdict, the guarded install paths, an asset in the method checks, a floor
+  from the snapshot, and the strings table.
 
 ## Planning misses
 
-None yet.
+- [design-gap] Done item 8 says `curl /` returns a page holding a project's name, but pass 1's
+  `ssr = false` draws the page in the browser, so the HTML holds none. The check is amended above.
+- [design-gap] Done item 4 forbids every `input`, and the mockup's daisyUI drawer puts one on
+  every page. The drawer goes.
+- [file-list] The round plan's file list for this pass (`web/tests/`, `web/systemd/`,
+  `web/scripts/`, the README) leaves out the app files the walk, the scan, and the words test
+  need.
+- [estimate] The round plan gave this pass 60 minutes; the plan's path is 105, under the
+  120-minute park line.
