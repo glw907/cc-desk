@@ -20,10 +20,11 @@
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
 <!-- round-report state-rules -->
-**The State and rules round is starting its first pass.** A planner session is writing the plan
-for the first of four passes, which builds the state files and the snapshot. The other three wait
-on it in order. Weekly usage read 88 percent before the launch, under the 100 percent stop.
-Nothing waits for Geoff.
+**The cc-desk command now keeps the state files, and the second pass is starting.** The first of
+the round's four passes has landed as pull request 3. The command reads, checks, and writes every
+state file, records pass events, and prints a snapshot, and the gate fails on a skipped test. A
+planner session is writing the plan for the second pass, which adds the time forecast. Weekly
+usage read 89 percent, under the 100 percent stop. Nothing waits for Geoff.
 
 Open documents: none.
 Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
