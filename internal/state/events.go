@@ -195,14 +195,18 @@ func start(project, pass, guess string) Event {
 				return fmt.Errorf("the clock %s is before pass %q stopped at %s", t.Format(time.RFC3339), pass, last.Start.Format(time.RFC3339))
 			}
 			last.End = &t
-			p.StopReason = ""
+			p.StopReason, p.StopDetail = "", ""
 			p.State = Building
 			rf.Dirty = true
 			s.passEvent = true
 			return nil
 		case NotStarted:
 		default:
-			return Refuse(fmt.Sprintf("pass %q is %s and cannot start", pass, p.State))
+			text := fmt.Sprintf("pass %q is %s and cannot start", pass, p.State)
+			if p.Session != nil && p.Session.Ended == nil {
+				text += ": session " + p.Session.Name + " is live"
+			}
+			return Refuse(text)
 		}
 
 		if broken := s.Breaks(rf, p, guess); len(broken) > 0 {

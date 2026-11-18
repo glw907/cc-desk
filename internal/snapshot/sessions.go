@@ -117,7 +117,7 @@ func fillSessions(snap *Snapshot, s *state.State) {
 				round := p.Round
 				snap.NeedsYouNow = append(snap.NeedsYouNow, NeedEntry{
 					Project: rf.Project, Round: strp(round),
-					Reason: string(p.StopReason), Cause: causeOf("", p.StopReason), Todo: todoFor(p.StopReason),
+					Reason: string(p.StopReason), Cause: causeOf(p.StopDetail, p.StopReason), Todo: todoFor(p.StopReason),
 				})
 			}
 		}

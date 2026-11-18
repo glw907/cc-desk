@@ -176,6 +176,11 @@ func WithReading(u Usage, forced bool, ev Event) Event {
 	}
 }
 
+// Settle starts the waiting passes that now fit, as WithReading does before
+// its event. The session check calls it between its resumes and its launch
+// decisions.
+func (s *State) Settle(now time.Time) { settle(s, now) }
+
 // FoldUsage keeps one reading as WithReading describes, without settling.
 // The session check uses it to learn the usage hold before it locks.
 func (s *State) FoldUsage(u Usage, forced bool, now time.Time) {

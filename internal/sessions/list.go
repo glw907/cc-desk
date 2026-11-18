@@ -22,6 +22,7 @@ type Row struct {
 	Status     string `json:"status"`
 	State      string `json:"state"`
 	WaitingFor string `json:"waitingFor"`
+	Needs      string `json:"needs"`
 }
 
 // Class is the one class the check sorts a row into.

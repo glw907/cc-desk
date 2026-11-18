@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+// Efforts are the effort levels a session can launch at.
+var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
+
+// ValidModel reports whether m is a model a launch accepts: an alias or a
+// full claude-* id.
+func ValidModel(m string) bool {
+	return slices.Contains([]string{"opus", "sonnet", "fable", "haiku"}, m) || strings.HasPrefix(m, "claude-")
+}
+
 func validPassState(s PassState) bool {
 	switch s {
 	case NotStarted, Waiting, Building, Stopped, Done:
@@ -185,6 +194,15 @@ func validatePass(p *Pass, rounds map[string]*Round, passes map[string]*Pass, qu
 	}
 	if err := validatePassSession(p); err != nil {
 		return err
+	}
+	if p.Model != "" && !ValidModel(p.Model) {
+		return fmt.Errorf("pass %q: model %q is not opus, sonnet, fable, haiku, or a claude-* id", p.Name, p.Model)
+	}
+	if p.Effort != "" && !slices.Contains(Efforts, p.Effort) {
+		return fmt.Errorf("pass %q: effort %q is not one of %v", p.Name, p.Effort, Efforts)
+	}
+	if p.StopDetail != "" && p.State != Stopped {
+		return fmt.Errorf("pass %q is %s but carries a stop_detail", p.Name, p.State)
 	}
 	if p.State == Stopped && !ValidStopReason(p.StopReason) {
 		return fmt.Errorf("pass %q is stopped with reason %q, which is not a stop reason", p.Name, p.StopReason)

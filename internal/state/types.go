@@ -145,12 +145,15 @@ type Release struct {
 	Repo    string `json:"repo"`
 	// Checkout is the absolute path of the repo's main checkout, and
 	// DefaultBranch its default branch. They are set together.
-	Checkout      string     `json:"checkout,omitempty"`
-	DefaultBranch string     `json:"default_branch,omitempty"`
-	Conductor     *Session   `json:"conductor,omitempty"`
-	Rounds        []Round    `json:"rounds,omitempty"`
-	Passes        []Pass     `json:"passes,omitempty"`
-	Questions     []Question `json:"questions,omitempty"`
+	Checkout      string `json:"checkout,omitempty"`
+	DefaultBranch string `json:"default_branch,omitempty"`
+	// AllowRules are exact Claude Code permission rules the launch writes
+	// into each session's settings file, beside the report verbs.
+	AllowRules []string   `json:"allow_rules,omitempty"`
+	Conductor  *Session   `json:"conductor,omitempty"`
+	Rounds     []Round    `json:"rounds,omitempty"`
+	Passes     []Pass     `json:"passes,omitempty"`
+	Questions  []Question `json:"questions,omitempty"`
 }
 
 // Round is a group of passes that share a design.
@@ -171,18 +174,24 @@ type Round struct {
 
 // Pass is one unit of work in a round.
 type Pass struct {
-	Name           string         `json:"name"`
-	Summary        string         `json:"summary"`
-	Round          string         `json:"round"`
-	PlannedMinutes int            `json:"planned_minutes"`
-	After          []string       `json:"after,omitempty"`
-	Questions      []string       `json:"questions,omitempty"`
-	State          PassState      `json:"state"`
-	Started        *time.Time     `json:"started,omitempty"`
-	Finished       *time.Time     `json:"finished,omitempty"`
-	Stops          []StopInterval `json:"stops,omitempty"`
-	StopReason     StopReason     `json:"stop_reason,omitempty"`
-	ActualMinutes  *int           `json:"actual_minutes,omitempty"`
+	Name           string   `json:"name"`
+	Summary        string   `json:"summary"`
+	Round          string   `json:"round"`
+	PlannedMinutes int      `json:"planned_minutes"`
+	After          []string `json:"after,omitempty"`
+	Questions      []string `json:"questions,omitempty"`
+	// Model and Effort override the launch's default of opus at high.
+	Model      string         `json:"model,omitempty"`
+	Effort     string         `json:"effort,omitempty"`
+	State      PassState      `json:"state"`
+	Started    *time.Time     `json:"started,omitempty"`
+	Finished   *time.Time     `json:"finished,omitempty"`
+	Stops      []StopInterval `json:"stops,omitempty"`
+	StopReason StopReason     `json:"stop_reason,omitempty"`
+	// StopDetail is the cause of a stop that has no session record to hold
+	// it, such as a failed first launch. It is set only while stopped.
+	StopDetail    string `json:"stop_detail,omitempty"`
+	ActualMinutes *int   `json:"actual_minutes,omitempty"`
 	// Wait is set while the pass is waiting, and only then.
 	Wait *Wait `json:"wait,omitempty"`
 	// Guess records a pass started on an unanswered question. A guess
@@ -279,7 +288,8 @@ type CheckFile struct {
 
 // Decision is what the check decided for one session record. Record names
 // the record as pass:<name>, round:<name>, or conductor. Counted is set
-// only on a relaunch.
+// only on a relaunch. Outcome is empty until the check carries the decision
+// out and writes what happened.
 type Decision struct {
 	Project  string `json:"project"`
 	Record   string `json:"record"`
@@ -288,6 +298,7 @@ type Decision struct {
 	Reason   string `json:"reason,omitempty"`
 	Detail   string `json:"detail,omitempty"`
 	Counted  *bool  `json:"counted,omitempty"`
+	Outcome  string `json:"outcome,omitempty"`
 }
 
 // Desks is desks.json: the desk sessions that may record a ruling.
