@@ -654,3 +654,7 @@ Carried from pass 2: Geoff, 2026-11-18, terminal session, via conductor-cc-desk,
 that needs Geoff with no design and no item left (`ready_now` with a null time, or
 `nothing_waiting`): "Those both work." The built `ready_now` stands, and this pass's new
 `needs_you_now` reason sits ahead of it.
+
+Geoff, 2026-11-18, terminal session, via conductor-cc-desk, on this pass's one call (a resumed
+stopped pass skips both limits, so a resume can leave three passes building): "Yes as built." The
+built rule stands.
