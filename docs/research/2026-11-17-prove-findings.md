@@ -38,11 +38,25 @@ empty owned list, and the audit printed `strangers: 0`, `foreign kills: 0`, `for
 
 ## Proof 5
 
-A session launched in a new worktree of the trusted repo wasn't tried. The plan's mechanism table
-shows no entry for a path under `.claude/worktrees/`, though 14 earlier jobs launched from inside
-one, so the question stays open.
+Usage before the launch, read with `claude -p "/usage" --model haiku < /dev/null`: 87 percent
+for the week (all models), resetting Nov 20 at 11pm Alaska time.
 
-Fallback applies: worktrees go in one folder Geoff trusts once, at setup.
+`spikes/5-trust/run` adds a worktree `.claude/worktrees/ccd-spike-5` from `origin/main` and launches
+`ccd-spike-5-trust` there through `own.sh`, told to reply "ready" and change nothing. The
+launch printed no "Workspace not trusted" error, and the row was `done` 25 seconds later, having
+never shown `blocked`:
+
+```text
+backgrounded · 7f267061 · ccd-spike-5-trust
+{"pid": 2922984, "id": "7f267061", "cwd": ".../.claude/worktrees/ccd-spike-5", "kind": "background", "name": "ccd-spike-5-trust", "status": "idle", "state": "done"}
+```
+
+The session's screen ended on "Worked for 3s · done". The worktree and branch were removed
+afterwards with `git worktree remove` and `git branch -d`, neither forced. The session finished
+before `own.sh daemonpid` could find a live owned process, so proof 1 finds the supervisor from its
+own live session.
+
+Held.
 
 ## Proof 1
 

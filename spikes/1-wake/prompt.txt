@@ -1,0 +1,1 @@
+Do six steps in order. Each step is its own Bash call. Before each step, run `cat progress.txt` and skip any step whose line is already there, so no step is ever written twice. Step N runs exactly `sleep 90 && echo stepN >> progress.txt`, with N from 1 to 6. After step 6, reply with the single word finished and stop. Run nothing else.

@@ -1,0 +1,16 @@
+{
+  "env": {
+    "HTTPS_PROXY": "http://127.0.0.1:18907"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(cat progress.txt)",
+      "Bash(sleep 90 && echo step1 >> progress.txt)",
+      "Bash(sleep 90 && echo step2 >> progress.txt)",
+      "Bash(sleep 90 && echo step3 >> progress.txt)",
+      "Bash(sleep 90 && echo step4 >> progress.txt)",
+      "Bash(sleep 90 && echo step5 >> progress.txt)",
+      "Bash(sleep 90 && echo step6 >> progress.txt)"
+    ]
+  }
+}
