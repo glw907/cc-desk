@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Proof 5: a session launched in a new worktree of the trusted repo raises no
+# trust prompt. Run from a worktree of the repo, after own.sh start.
+set -euo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+ROOT=$(cd "$HERE/../.." && pwd)
+WT=$(dirname "$ROOT")/ccd-spike-5
+OUT=$HERE/out
+mkdir -p "$OUT"
+git worktree add -q -b ccd-spike-5 "$WT" origin/main
+bash "$OWN" launch ccd-spike-5-trust "$WT" --model sonnet --effort low \
+  "Reply with the single word ready and change nothing." 2>&1 | tee "$OUT/launch.txt"
+sleep 25
+claude agents --json --all >"$OUT/rows.json"
+python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("name") == "ccd-spike-5-trust":
+        print(json.dumps(r))
+' "$OUT/rows.json" | tee "$OUT/row.txt"
+bash "$OWN" daemonpid | tee "$HERE/../daemon.pid"
+echo "cleanup: own.sh stop/rm the session, then git worktree remove $WT and git branch -d ccd-spike-5"
