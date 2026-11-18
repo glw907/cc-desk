@@ -4,11 +4,10 @@
 
 - The design (`docs/specs/2026-11-17-cc-desk-design.md`) and the route
   (`docs/plans/2026-11-17-route.md`, seven rounds) are approved.
-- The Prove pass's first run landed as pull request 1 on 2026-11-17. It built the Go scaffold,
-  `scripts/gate.sh`, the CI workflow, and `spikes/own.sh`, the helper that launches and controls
-  proof sessions. A second review found three blocking bugs in `own.sh`, fixed before the merge.
+- The Prove pass's first run is merged as pull request 1. It holds the Go scaffold, `scripts/gate.sh`,
+  the CI workflow, and `spikes/own.sh`, the helper that launches and controls proof sessions.
 - The first run stopped on the plan's old 85 percent usage limit and launched no proof session.
-  Geoff raised the ceiling to 100 percent on 2026-11-17, and the second run ran all six proofs.
+  The ceiling is 100 percent since 2026-11-17, and the second run ran all six proofs.
 - The report is `docs/research/2026-11-17-prove-findings.md`. Proofs 5, 4, 2, 3, and 7 held. Proofs 1
   and 6 fall back: the check restarts a blocked or killed session from the files, and a fresh
   session starts from the plan and branch. A pass runs with zero prompts under five allow rules.

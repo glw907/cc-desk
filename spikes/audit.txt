@@ -1,6 +1,9 @@
-== strangers (control.log targets not in owned.tsv)
-== refused calls (not counted)
-== foreign settled-killed lines after the first launch (all listed)
+strangers: 0
+foreign kills: 0
+foreign restarts: 0
+bypass: 0
+allow hooks: spikes/4-permissions/decide-hook.py
+lines after the first launch (all listed)
 == foreign restarts (startedAt changed)
 == state changes in other sessions (not counted)
 == bypass matches

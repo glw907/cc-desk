@@ -86,13 +86,14 @@ as `blocked`.
 | Wake | Command | Three minutes later |
 | --- | --- | --- |
 | Nothing | none | Row `blocked idle`, 3 steps |
-| Restart | `claude respawn <id>` | Row `blocked idle`, 3 steps. It printed "restarted 5305f47d" and a note that the session was already running, so it started a copy, `b2ddeeb4`. |
-| Resume | `claude --resume <sid> --bg` | Row `blocked idle`, 4 steps |
+| Restart | `claude respawn <id>` | Row `blocked idle`, 3 steps. It printed "restarted 5305f47d". |
+| Resume | `claude --resume <sid> --bg` | Original row `blocked idle`, 4 steps. It printed a note that the session was already running, so it started a copy, `b2ddeeb4`. |
 
 No wake brought the row back to `working`. `progress.txt` still reached step 5 by 03:27, so
 something kept running the Bash calls after `respawn` and `resume`. I did not read a job file
-or transcript to say which process wrote steps 4 and 5, and `claude agents` never listed the copy
-as a separate row. The one result is that the row, the only signal the later rounds can read,
+or transcript to say which process wrote steps 4 and 5. The copy `b2ddeeb4` ran as a second row,
+`working busy`, named `step-3-sequential-run`, with its folder at the worktree root, and most
+likely wrote them, the same pattern as proof 6. The one result is that the row, the only signal the later rounds can read,
 stayed `blocked idle` for 614 seconds after the link returned, whatever ran underneath.
 
 A real drop on the laptop (WiFi lost, lid shut) was not tested. The tunnel models a refused
@@ -108,14 +109,18 @@ zero prompts and zero denials. Usage read 87 percent before each launch.
 
 | Run | Launch line | Prompts | Denials | Result |
 | --- | --- | --- | --- | --- |
-| 1 | `claude --bg --name ccd-spike-4-main-1 --worktree ccd-spike-4-1 --permission-mode auto --settings spikes/4-permissions/settings.json --model sonnet --effort low` | 0 | 0 | Scratch PR 1 merged at 03:28:32 UTC, 32 seconds after the launch |
+| 1 | `claude --bg --name ccd-spike-4-main-1 --worktree ccd-spike-4-1 --permission-mode auto --settings spikes/4-permissions/settings.json --model sonnet --effort low` | 0 | 0 | Scratch PR 1 merged at 03:28:32 UTC, 25 seconds after the 03:28:07 launch |
 | 2 | The same with `-2` in both names | 0 | 0 | Scratch PR 2 merged; the row read `working` at six polls 10 seconds apart, then `done` |
 
-The settings file holds five exact allow rules: `git clone` of the scratch repo, `git -C scratch *`,
+The settings file holds five allow rules, two exact and three with a wildcard: `git clone` of the scratch repo, `git -C scratch *`,
 `bash scratch/scripts/gate.sh`, `gh pr create -R glw907/cc-desk-scratch *`, and
 `gh pr ready * -R glw907/cc-desk-scratch`. It has no rule for `approval-queue land`, and step 7
-ran anyway: the session reported "returned with no output and no error", and PR 1 and PR 2 show
-`MERGED` with a green check. Auto mode allowed the landing command without a rule, and every
+ran anyway: the session reported "returned with no output and no error", and both PRs show
+`MERGED`. PR 2 merged at 03:30:25, after its `gate` check passed at 03:30:19. PR 1 merged at
+03:28:32, three seconds before its `gate` check started at 03:28:35, so `approval-queue land` merged
+it before any check existed. The wildcard rules (`git -C scratch *`, `gh pr create -R ... *`, and
+`gh pr ready * -R ...`) go beyond the auto-mode entry's "exact rules, each naming one command", so the
+zero-prompt result was measured under wider rules than the entry allows. Auto mode allowed the landing command without a rule, and every
 screen line for an edit or a write reads "Allowed by auto mode". Run 1 polled every 60 seconds and
 the session finished inside one poll, so run 1 alone would miss a short block. Run 2 polled every
 10 seconds and saw none. The tally also reads the denials log by session id, and it found none for
@@ -134,7 +139,8 @@ a worktree of that repo, the case proof 5 held.
 `PermissionRequest` hook in the launch settings.
 
 - `claude --help` names no command that answers a prompt. `--permission-prompts none` is tied to
-  `--print`: a `--bg` session launched with it in `default` mode still blocked on the prompt.
+  `--print`: a `--bg` session launched with it in `default` mode still blocked on the prompt (the
+  run's output was not saved, so this is recorded from the session, not from a file).
 - `ccd-spike-4-prompt` ran `date -u +%s > probe.txt` in `default` mode with no hook. Its row read
   `state: blocked`, `status: waiting`, `waitingFor: "permission prompt"` 11 seconds after launch,
   and `claude logs` showed the command and "Do you want to proceed?". That is the sample proof 2
@@ -151,7 +157,7 @@ attaching. The hook waits up to 120 seconds, then denies, so the desk has two mi
 file. I did not drive `claude attach`, the control socket, or anything under `~/.claude/daemon/`.
 
 **Denials by class.** The log held 129 rows on 2026-11-18, 2 more than the plan read. The two are
-this pass's: proof 1's first session had `sleep 90 && echo step1 >> progress.txt` refused as
+this pass's: proof 1's second session had `sleep 90 && echo step1 >> progress.txt` refused as
 Destructive or Unwanted Actions (the later runs use a `step.sh` script instead), and my write of
 proof 4's settings file with an `approval-queue land` allow rule was refused as Self-Modification.
 `denials.py` gives the same classes as the plan's table, and the lines below confirm or correct each.
@@ -167,7 +173,7 @@ proof 4's settings file with an `approval-queue land` allow rule was refused as 
 | Unauthorized Access | 4 | Desk session, executor | Each session gets the paths it needs and reads no other session's files |
 | Merge Without Review | 3 | Pass executor at a merge | `approval-queue land`. Step 7 ran it with no rule and the PRs merged |
 | Auto-Mode Bypass | 3 | Pass executor | CI runs on push and PR, so no pass dispatches a workflow |
-| 16 classes of one or two rows | 26 | Mostly the Retire round | Listed in `denials.py`'s output, each with its session kind |
+| 16 classes of one or two rows | 22 | Mostly the Retire round | Listed in `denials.py`'s output, each with its session kind |
 
 A `cc-desk check` could not wake or relaunch a `Classifier unavailable` session without Geoff by
 proof 1's method: the wakes there did not bring a blocked row back. Relaunching from the files is
@@ -244,14 +250,15 @@ Four things this showed:
 
 - Ending the process did not leave the session dead. Within 20 seconds the row had a new PID and read
   `working busy`. Whether the supervisor relaunched it or the step in flight kept the row busy, the
-  saved rows can't say. Step 3 did commit about 74 seconds later, and nothing came after it.
+  saved rows can't say. Step 3 did commit about 74 seconds later, 49 seconds before `respawn`, which is less than one
+  step, so the saves can't show a stall after it.
 - `respawn` printed success and left the session `blocked idle` with an empty prompt. It did not
   carry on, and nothing in the row says why.
 - `resume` with a prompt did the work. The copy ran steps 4 and 5 and read the log first, so it
   skipped steps 1 to 3.
-- The copy sat in a different folder (the worktree root) and carried the resume prompt as its name.
-  The run's saves list rows by folder, so they show one row throughout. A full list at 03:47:52
-  showed two: the original, idle, and the copy, working. The condition "no save shows two live
+- The copy sat in a different folder (the worktree root) and was named `missing-step-one-resume`.
+  The run's saves list rows by folder, so they show one row throughout. The full list saved at the
+  end of the run (`out/list.json`) shows two: the original, idle, and the copy, working. The condition "no save shows two live
   rows for the work" is therefore not met, though only one row was ever working. The third
   attempt, a fresh launch, was not needed and was not tried.
 
