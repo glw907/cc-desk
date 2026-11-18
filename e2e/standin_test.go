@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -30,7 +31,7 @@ func newStandIn(t *testing.T, delaySeconds int, result string) *standIn {
 		resultFile: filepath.Join(dir, "result.json"),
 		logFile:    filepath.Join(dir, "calls.log"),
 	}
-	script := fmt.Sprintf("#!/bin/sh\necho call >> %q\nsleep %d\ncat %q\n", s.logFile, delaySeconds, s.resultFile)
+	script := fmt.Sprintf("#!/bin/sh\necho \"$(date +%%s.%%N) call\" >> %q\nsleep %d\ncat %q\n", s.logFile, delaySeconds, s.resultFile)
 	if err := os.WriteFile(s.path, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -44,6 +45,28 @@ func (s *standIn) set(t *testing.T, result string) {
 	if err := os.WriteFile(s.resultFile, []byte(result), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// callTimes returns the time of each call, in seconds since the epoch.
+func (s *standIn) callTimes(t *testing.T) []float64 {
+	t.Helper()
+	b, err := os.ReadFile(s.logFile)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	var times []float64
+	for line := range strings.SplitSeq(strings.TrimSpace(string(b)), "\n") {
+		sec, _, _ := strings.Cut(line, " ")
+		v, err := strconv.ParseFloat(sec, 64)
+		if err != nil {
+			t.Fatalf("stand-in log line %q: %v", line, err)
+		}
+		times = append(times, v)
+	}
+	return times
 }
 
 // calls returns how many times the stand-in has run.

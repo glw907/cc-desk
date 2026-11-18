@@ -6,4 +6,6 @@ Its `beta` release has two finished passes (planned 40 and 50, taking 45 and 55)
 
 `order/` is a second state folder for the start rules and the waiting order. It has two releases, `north` and `south`, each with one designed round that needs Geoff, and no `usage.json` or `settings.json`, so the usage stop is 100 and the first verb takes a reading. Every question is unanswered, with the options `yes` and `no` and `yes` recommended. `north` has `n-free` (60 minutes), `n-two` (30), `n-big` (400, rests on `north-q1`), `n-guess` (200, rests on `north-q2`), and `n-after` (50, after `n-guess`). `south` has `s-free` (45), `s-two` (30), and `s-guess` (150, rests on `south-q1`).
 
+`writers/` is a third state folder, for twenty verbs at once. Its releases `east` and `west` each have one designed round that needs nothing from Geoff, seven building passes (`e-1` to `e-7`, `w-1` to `w-7`), and three unanswered questions that no pass rests on (`east-q1` to `east-q3`, `west-q1` to `west-q3`). It has no `usage.json`, so every verb takes a reading.
+
 `usage40.sh` stands in for `claude -p "/usage"` and prints a 40 percent result. Every e2e run passes it as `--usage-command` and runs the binary with a `PATH` of `/usr/bin:/bin`, so no test reaches the real `claude`.
