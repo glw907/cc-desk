@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Proof 2 live samples: an idle session (finished) and a permission prompt (blocked).
+# Two owned sessions. Each is saved twice, 60 seconds apart: its row from
+# claude agents --json --all, and its claude logs screen. Then both are stopped.
+# The working and lost-connection samples come from proof 1's saved files.
+set -uo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)
+OWN=$HERE/../own.sh
+OUT=$HERE/out
+rm -rf "$OUT" "$HERE"/sandbox-*
+mkdir -p "$OUT" "$HERE/sandbox-idle" "$HERE/sandbox-prompt"
+ev() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/events.log"; }
+
+launch() { # launch <kind> <prompt>
+  bash "$OWN" launch "ccd-spike-2-$1" "$HERE/sandbox-$1" --model sonnet --effort low \
+    --permission-mode default "$2" >"$OUT/launch-$1.txt" 2>&1 || { ev "launch $1 failed"; cat "$OUT/launch-$1.txt"; exit 1; }
+  tail -1 "$OUT/launch-$1.txt" | sed -E 's/.*owned ([0-9a-f]+) .*/\1/'
+}
+save() { # save <kind> <id> <n>
+  claude agents --json --all >"$OUT/list.json"
+  python3 -I -c '
+import json, sys
+for r in json.load(open(sys.argv[1])):
+    if r.get("id") == sys.argv[2]:
+        print(json.dumps(r))
+' "$OUT/list.json" "$2" >"$OUT/row-$1-$3.json"
+  bash "$OWN" logs "$2" 2>&1 | python3 -I -c '
+import re, sys
+t = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", " ", sys.stdin.read())
+print(re.sub(r"\s+", " ", t)[-1500:])
+' >"$OUT/logs-$1-$3.txt"
+  ev "saved $1 $3: $(cut -c1-220 "$OUT/row-$1-$3.json" | python3 -I -c 'import json,sys; r=json.loads(sys.stdin.read() or "{}"); print(r.get("state"), r.get("status"), r.get("waitingFor"))' 2>/dev/null)"
+}
+
+IDLE=$(launch idle 'Reply with the single word done and run nothing.')
+PROMPT=$(launch prompt 'Run exactly this one Bash command and nothing else: `date -u +%s > probe.txt`. Then reply with the word done.')
+ev "launched idle=$IDLE prompt=$PROMPT"
+sleep 20
+save idle "$IDLE" 1
+save prompt "$PROMPT" 1
+sleep 60
+save idle "$IDLE" 2
+save prompt "$PROMPT" 2
+bash "$OWN" stop "$PROMPT"
+bash "$OWN" stop "$IDLE"
+bash "$OWN" rm "$PROMPT"
+bash "$OWN" rm "$IDLE"
+ev "stopped and removed"

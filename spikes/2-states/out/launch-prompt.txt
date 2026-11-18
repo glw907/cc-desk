@@ -1,0 +1,6 @@
+backgrounded · 85b9dc54 · ccd-spike-2-prompt
+  claude agents             list sessions
+  claude attach 85b9dc54    open in this terminal
+  claude logs 85b9dc54      show recent output
+  claude stop 85b9dc54      stop this session
+own.sh: owned 85b9dc54 (ccd-spike-2-prompt)

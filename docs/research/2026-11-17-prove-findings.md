@@ -173,12 +173,39 @@ Held.
 
 ## Proof 2
 
-Not attempted. Its live samples come from proofs 1 and 4, and the plan's source of the six states is
-`claude agents --json --all`, whose `status` field held only `busy`, `idle`, or nothing. That field
-alone may not separate a lost connection from a permission prompt. The rerun tests whether
-`claude logs` does, before it falls back on the job files the docs tell scripts not to read.
+`spikes/2-states/classify.py` (stdlib, `python3 -I`) labels a case from its list row, the
+`claude logs` screen, and `state.json`, and `spikes/2-states/run` made the live samples. Usage read
+87 percent before the run. All 16 cases in `fixtures.json` get the expected label.
 
-Fallback applies: a state it can't tell shows as Needs you now with the session's last line.
+| Sample | Source of the label | Label | Saves |
+| --- | --- | --- | --- |
+| Working (proof 1, during a sleep step) | `row.state` is `working` | working | 2, 60 seconds apart |
+| Finished session (this proof) | `row.state` `done` with `row.status` `idle` | idle | 2, 60 seconds apart |
+| Permission prompt (this proof) | `row.waitingFor` is `permission prompt`, with `state` `blocked` and `status` `waiting` | permission prompt | 2, 60 seconds apart |
+| Lost connection (proof 1) | The row reads `blocked idle` and carries no reason. The `claude logs` screen holds "API Error: Couldn't connect through your proxy (ERR_PROXY_TUNNEL)" | lost connection | 2, 10 minutes apart |
+| EAI_AGAIN, 2026-11-14 (recorded text) | `state.json` `detail`: "API Error: Can't reach the API server — check your internet or DNS (EAI_AGAIN)" | lost connection | fixture |
+| Expired sign-in (recorded text) | `state.json` `detail`: "Login expired" | expired sign-in | fixture |
+| Weekly limit and Fable limit (recorded texts) | `state.json` `detail`: "You've hit your ... limit · resets ..." | usage limit | 2 fixtures |
+
+Four things this showed:
+
+- The list row alone separates three states. A working session reads `working`, a finished one
+  `done idle`, and a permission prompt carries `waitingFor: "permission prompt"`. The prompt row
+  also reads `blocked waiting`, where the lost connection reads `blocked idle`.
+- A lost connection, an expired sign-in, and a usage limit are all `blocked` rows with no reason in
+  the row. The lost connection's reason is on the `claude logs` screen, a documented command. The
+  screen held the error line ten minutes after the link came back, but a 700-character tail of it
+  did not, so the check must search the whole screen it saves, not a cut of it. The `—` in the EAI_AGAIN text
+  and the `·` in the limit texts are in `fixtures.json` as recorded.
+- The expired sign-in and the two usage limits come only from recorded `state.json` text. No live
+  sample of either was made (no sign-in was expired and no limit was hit), so whether
+  `claude logs` shows them is untested. Until it is, those two labels rest on a file the docs tell
+  scripts not to read. If the check can't read it, they show as Needs you now with the session's
+  last line, the design's fallback for a state it can't tell.
+- `loginExpiresAt` from `claude auth status --json` was not read in this proof, so the sign-in
+  expiry warning is open.
+
+Held.
 
 ## Proof 6
 
