@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "timer-live",
+  "repo": "glw907/cc-desk-scratch",
+  "rounds": [
+    {"name": "live", "summary": "Two fixture passes for the timer's live run.", "needs_geoff": false, "no_need_reason": "A fixture run in the scratch repo, with nothing to decide.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "timer-live-a", "summary": "Write one notes file, run the gate, and open a pull request.", "round": "live", "planned_minutes": 10, "model": "sonnet", "effort": "medium", "state": "not_started"},
+    {"name": "timer-live-b", "summary": "Commit twice with two sleeps between, file a follow-up, and open a pull request.", "round": "live", "planned_minutes": 20, "model": "sonnet", "effort": "medium", "state": "not_started"}
+  ],
+  "allow_rules": [
+    "Bash(bash scripts/gate.sh)",
+    "Bash(git add notes-timer-live-a.md)",
+    "Bash(git add notes-timer-live-b.md)",
+    "Bash(git add docs/follow-ups/*)",
+    "Bash(git commit -m *)",
+    "Bash(git push origin timer-live-a)",
+    "Bash(git push origin timer-live-b)",
+    "Bash(gh pr create --repo glw907/cc-desk-scratch *)",
+    "Bash(git rev-parse HEAD)",
+    "Bash(git log --oneline *)"
+  ]
+}

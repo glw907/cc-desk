@@ -1,0 +1,26 @@
+{
+    "session_id": "6f7ef48d-7f68-41a0-a8d7-ca8e9f8258a6",
+    "transcript_path": "/tmp/cc-desk-fixture/.claude/projects/-tmp-cc-desk-fixture-Projects-cc-desk--claude-worktrees-sessions-timer/6f7ef48d-7f68-41a0-a8d7-ca8e9f8258a6.jsonl",
+    "cwd": "/tmp/cc-desk-fixture/Projects/cc-desk/.claude/worktrees/sessions-timer",
+    "scratchpad_dir": "/tmp/claude-1000/-tmp-cc-desk-fixture-Projects-cc-desk--claude-worktrees-sessions-timer/6f7ef48d-7f68-41a0-a8d7-ca8e9f8258a6/scratchpad",
+    "prompt_id": "20d60c14-0bf0-48ef-b2f4-0753e29f102c",
+    "permission_mode": "default",
+    "effort": {
+        "level": "low"
+    },
+    "hook_event_name": "PermissionRequest",
+    "tool_name": "Bash",
+    "tool_input": {
+        "command": "date -u +%s > /tmp/cc-desk-fixture/.claude/jobs/b606693e/tmp/hookprobe/probe3.txt",
+        "description": "Write current epoch time to probe file"
+    },
+    "permission_suggestions": [
+        {
+            "type": "addDirectories",
+            "directories": [
+                "/tmp/cc-desk-fixture/.claude/jobs/b606693e/tmp/hookprobe"
+            ],
+            "destination": "session"
+        }
+    ]
+}

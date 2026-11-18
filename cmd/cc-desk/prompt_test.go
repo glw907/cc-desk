@@ -10,6 +10,10 @@ func TestParseHookPrompt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	real, err := os.ReadFile("../../e2e/testdata/prompts/hook-add-directories.json")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []struct {
 		name    string
 		in      string
@@ -17,6 +21,7 @@ func TestParseHookPrompt(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "documented bash example", in: string(sample), want: hookPrompt{SessionID: "abc123", Tool: "Bash", Command: "rm -rf node_modules", Rule: "Bash(rm -rf node_modules)"}},
+		{name: "real input with an addDirectories suggestion", in: string(real), want: hookPrompt{SessionID: "6f7ef48d-7f68-41a0-a8d7-ca8e9f8258a6", Tool: "Bash", Command: "date -u +%s > /tmp/cc-desk-fixture/.claude/jobs/b606693e/tmp/hookprobe/probe3.txt"}},
 		{name: "file path", in: `{"session_id":"s","tool_name":"Edit","tool_input":{"file_path":"/a/b"}}`, want: hookPrompt{SessionID: "s", Tool: "Edit", Command: "/a/b"}},
 		{name: "url", in: `{"session_id":"s","tool_name":"WebFetch","tool_input":{"url":"https://x.test"}}`, want: hookPrompt{SessionID: "s", Tool: "WebFetch", Command: "https://x.test"}},
 		{name: "command wins over file path", in: `{"session_id":"s","tool_name":"T","tool_input":{"file_path":"f","command":"c"}}`, want: hookPrompt{SessionID: "s", Tool: "T", Command: "c"}},
