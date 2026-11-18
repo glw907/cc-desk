@@ -19,6 +19,9 @@
   which is in the settings. The round is six passes under the id `desk`, run by the background
   session `conductor-cc-desk`. It ends with one real run that waits for Geoff at the desk, from
   `docs/specs/2026-11-18-stuck-sessions-design.md`.
+- Pass 1 of that round (`desk-records`, pull request 17) gives questions, rulings, reports, rounds,
+  and stops their new records, a check log, and the `brief` verb. It waits for the conductor to
+  merge it; passes 2 to 4 read its names from main.
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,

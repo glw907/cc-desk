@@ -24,4 +24,6 @@ The `desk/` fixture also holds the brief's cases. `desks.json` records one desk 
 
 The same fixture holds `reports.json` with one unread report, `rep-0001`, for round `b2` of `beta`. The report tests read it and break its file. The report inputs are in `inputs/`: `report.json` has all four keys, and `report-empty.json` has empty `calls` and `misses`. The tests build the missing-key and null cases from a copy of `report.json`.
 
+The `desk/` fixture also holds the closed-pass and ask-rule cases. Round `r2` of `alpha` has a done pass `a-closed`, closed by ruling `r-0001` in `rulings.jsonl`, and the pass `a-held`, which waits after it and so holds. The release carries `ask_rules` of `Bash(date *)`.
+
 The `desk/` fixture also holds the design records. Round `r1` of `alpha` carries a `design` path, one `context` paragraph, and one call. `desks.json` holds one conversation, for `beta` round `b3`, which that fixture does not define as a round: nothing checks a conversation against the rounds. `inputs/design-b3-context.json` is `design-b3.json` plus the three round fields, for `round design beta b3` on the `state` fixture.
