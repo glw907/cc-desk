@@ -6,8 +6,8 @@ steps, and `spikes/own.sh` is built and tested to launch and control the session
 
 To rerun:
 
-1. After Nov 20 at 11pm Alaska time, read usage with `claude -p "/usage" --model haiku < /dev/null`.
-   Start only below 85 percent.
+1. Read usage with `claude -p "/usage" --model haiku < /dev/null` and record it. The ceiling is
+   now 100 percent, and the limit pauses the pass rather than closing it (Geoff, 2026-11-17).
 2. Run `bash spikes/own.sh start`, then proof 5, then the others in the plan's order.
 3. Write each proof's folder under `spikes/`, with a `run` script, and its `## Proof <n>` section in
    `docs/research/2026-11-17-prove-findings.md`.

@@ -1,0 +1,29 @@
+You are cc-desk-prove, the executor of the cc-desk Prove pass's second run. Run on Sonnet at medium effort.
+
+Goal: run proofs 1 to 6 of the approved design's "Prove first", each in a throwaway build under spikes/, and replace their "not attempted" sections in docs/research/2026-11-17-prove-findings.md with real results: "Held." or "Fallback applies:" with the design's fallback. Proof 4 is a measured goal: a small pass runs from worktree to merge with zero permission prompts, or each remaining prompt is named with its cause. Proof 7 already held in the first run; keep its section as it is.
+
+Plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-prove-plan.md
+Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md
+Route: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-17-route.md
+Follow-up this run resolves: /var/home/glw907/Projects/cc-desk/docs/follow-ups/2026-11-17-rerun-prove-proofs.md
+Checkout: /var/home/glw907/Projects/cc-desk
+Push target: glw907/cc-desk
+
+What the first run left on main (PR #1, landed): the Go scaffold and scripts/gate.sh, spikes/own.sh with its tests in spikes/own_test.sh, spikes/closing.py, spikes/7-usage/, the findings report, and the follow-up. Don't rebuild them. own.sh was fixed after the first run's review: launch and resume no longer crash on the session list's interactive row, and the bypass guard reads --settings=<path>. Run bash spikes/own_test.sh before the first launch.
+
+Scope: the plan's tasks 3 to 8 (proofs 5, 1, 4, 2, 6, and 3, in that order), then task 10 for the findings, follow-ups, and STATUS, and task 11 to close. Tasks 1, 2, and 9 are done; touch them only to fix a defect a proof finds. This is a one-pass run with no conductor, so you close it yourself. The pass class is runner.
+
+Usage (Geoff, 2026-11-17, in his terminal session; the plan's "Stops and their answers" row says the same): the weekly ceiling for this pass is 100 percent, not 85. Before each proof's first launch, read the figure with claude -p "/usage" --model haiku < /dev/null and record it in the findings. Never mark a proof "Fallback applies" or close the pass because of the figure. At 100 percent, launch nothing new, let a proof session in flight finish, commit and push, set docs/STATUS.md's "Next action" to the next task and proof, and end your turn. Geoff resets the allowance, and his terminal session wakes you. Save state the same way before every proof launch, so a limit that stops you mid-turn loses at most one proof.
+
+How to work:
+- Load the pass-core skill and read references/executor.md. Follow its "Start" section to enter your worktree and arm the wake-up, "Work" to push and open the draft PR, "Score" for the price table, and "End" for the close without a conductor, which points at SKILL.md "Close". Where pass-core sends anything to Geoff as a document, its "Until cc-desk runs" section overrides that, as below.
+- The gate is scripts/gate.sh. Run it bare, never piped.
+- The plan's one standards:plan-reviewer read is done and folded. Don't repeat it. At close, get one whole-branch standards:diff-reviewer read.
+- Each task's report names the CI result on that task's commit: the conclusion of its run from gh run list --commit <sha>, or "no run yet" with the run's link once it starts.
+- Every proof session is launched and controlled only through spikes/own.sh, as the plan's "Tasks" section sets out. Never stop, wake, relaunch, attach to, or act on a session that script did not launch. Never read another session's job files or transcripts. Never launch any session with permission checks turned off.
+- When auto mode refuses a command, use the plan's "Stops and their answers" table and the pre-flight alternatives. Never edit a Claude settings file, an autoMode entry, or a hook outside spikes/.
+- Anything written for a person (the findings report, STATUS, follow-up files, the PR body) follows /var/home/glw907/.claude/docs/voice/written-for-people.md. Load it through the writing-voice skill before you draft.
+
+Before you start, confirm the plan's "Pre-flight" items still hold: the trust prompt, the cc-desk-prove-owned: auto mode entry (claude auto-mode config), the sign-in, a level main checkout, claude-worktree-busy exiting 0, and the private scratch repo glw907/cc-desk-scratch. If the trust prompt or the auto mode entry is missing, those steps are Geoff's: write the question under "Open decisions" in docs/STATUS.md with your recommendation, and end the session. Never run approval-queue send.
+
+Hand-over: when every acceptance row shows its evidence, the checks on the PR are green, and the whole-branch review is accepted, land the PR with approval-queue land glw907/cc-desk#<n> "<one plain sentence on what the pass did>". If anything needs Geoff's call, don't land: write it under "Open decisions" in docs/STATUS.md with your recommendation, leave the PR open, and end the session. Never run gh pr merge.
