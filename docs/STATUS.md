@@ -19,6 +19,16 @@
   round id `state-rules`. No pass has started.
 - The usage stop is 100 percent of the week. The figure read 88 percent on 2026-11-17.
 
+<!-- round-report state-rules -->
+**The State and rules round is starting its first pass.** A planner session is writing the plan
+for the first of four passes, which builds the state files and the snapshot. The other three wait
+on it in order. Weekly usage read 88 percent before the launch, under the 100 percent stop.
+Nothing waits for Geoff.
+
+Open documents: none.
+Resume from: `docs/plans/2026-11-17-state-rules-conductor-prompt.txt`
+<!-- /round-report -->
+
 ## Next action
 
 Run the State and rules round. Geoff starts the conductor in a fresh Opus session in his
