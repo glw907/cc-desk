@@ -67,7 +67,7 @@ and the tests run a `gh` stand-in. Every write is inside the worktree or a test'
 | Mechanism | Probe or source |
 | --- | --- |
 | The verbs today | `go run ./cmd/cc-desk pass ready --help` on `73da88e` prints the `pass` group's help, listing `finish`, `start`, and `stop`, exit 0. No ready verb exists |
-| What a pull request holds today | `internal/state/types.go:129-137`: `PullRequest{Number, Commit, Verdict, FixAttempts, Ready, Merged}`, each optional but `number`. `internal/state/check.go:228-229` refuses a number of 0 or less. Nothing writes the record yet: `PullRequest` has 7 hits outside tests, none an event |
+| What a pull request holds today | `internal/state/types.go:129-137`: `PullRequest{Number, Commit, Verdict, FixAttempts, Ready, Merged}`, each optional but `number`. `internal/state/check.go:228-229` refuses a number of 0 or less. Nothing writes the record yet: no event in `internal/state/events.go` sets it |
 | Ready holds the idle rule off | `internal/sessions/decide.go:360-364` `readyStands`: a pass whose `PullRequest.Ready` is set. `doneRow` at `decide.go:286` returns `none` while it stands |
 | One read for a pass's pull request | `gh pr list -R glw907/cc-desk --head state-rules-order --state all --json number,state,headRefOid,mergedAt,mergeCommit,statusCheckRollup` printed `[{"headRefOid":"1c128e6f...","mergeCommit":{"oid":"3b65cda9..."},"mergedAt":"2026-11-18T07:40:07Z","number":5,"state":"MERGED","statusCheckRollup":[{"__typename":"CheckRun","completedAt":"2026-11-18T07:39:42Z","conclusion":"SUCCESS",...,"name":"gate","startedAt":"2026-11-18T07:39:06Z","status":"COMPLETED","workflowName":"gate"}]}]`, exit 0 (`gh` 2.105.0). An open one: `gh pr view 12 -R glw907/cc-desk --json number,headRefOid,state,mergedAt,mergeCommit` gave `"number":12,"state":"OPEN"`, and `gh pr checks 12 --json name,state,bucket` gave one `gate` entry, bucket `pass`, state `SUCCESS`, both exit 0 |
 | No pull request for a branch | `gh pr list -R glw907/cc-desk --head no-such-branch-xyz --state all --json number` printed `[]`, exit 0. `gh pr view no-such-branch-xyz -R glw907/cc-desk` printed `no pull requests found for branch "no-such-branch-xyz"`, exit 1. So the check uses `pr list`, where exit 0 always means GitHub answered |
@@ -103,15 +103,17 @@ Hit counts are from `grep -rn` over `cmd` and `internal`, tests left out, on `73
 | `internal/state/merge.go` (new), `merge_test.go` (new) | The ready, wait, fix, ask, merge, and cleanup events | 0 |
 | `internal/state/checkrun.go` | `RecordCheck` writes a pull request's wait | the record step |
 | `cmd/cc-desk/pass.go` | The `pass ready` verb | `passCmd` 1 |
-| `internal/launch/settings.go`, `launch_test.go` | The ready verb's allow rule | `FollowUpCommand` 2, `Deny = ` 1 |
+| `internal/launch/settings.go`, `launch_test.go` | The ready verb's allow rule: `WriteSettings` (`:67`) takes a list of prefix rules in place of one `followUp` string | `func WriteSettings` 1, `Deny = ` 1 |
+| `cmd/cc-desk/launcher.go` | Pass launches pass the ready rule and fill `Prompt.Ready` | `FollowUpCommand` 1 (`:225`) |
+| `internal/launch/prompt.go` | A `Ready` field beside `FollowUp` (`:25-27`), and the fix note | `FollowUp string` 1, `RelaunchNote` 3 |
 | `internal/launch/templates/pass.txt` | The ready line | `Do not merge it` 1 |
-| `internal/launch/prompt.go`, `templates/fix.txt` (new) | The fix note | `RelaunchNote` 3 |
+| `internal/launch/templates/fix.txt` (new) | The fix note's text | 0 |
 | `internal/launch/worktree.go` | `Remove`, with no force | `dropBranch` 4, `branch", "-D` 1 |
 | `internal/sessions/github.go` (new), `github_test.go` (new) | Parse the read and bucket the checks | 0 |
 | `internal/sessions/decide.go`, `merge.go` (new), `merge_test.go` (new) | The merge decisions | `readyStands` 3, `func early` 1 |
 | `cmd/cc-desk/check.go` | `--gh-command`, the read in `gatherEvidence` | `probeURL` 3, `func gatherEvidence` 1 |
 | `cmd/cc-desk/carryout.go`, `launcher.go` | The merge, the fix relaunch, the question, the cleanup | `func (l *launcher) carry` 2, `RelaunchNote` 1 |
-| `internal/snapshot/sessions.go` | The no-check entry and the cleanup note | `func todoFor` 1 |
+| `internal/snapshot/sessions.go`, `snapshot.go` | The no-check entry and the cleanup note; `fillSessions` gains `now` | `func todoFor` 1, `fillSessions(` 2 |
 | `e2e/merge_test.go` (new), `e2e/merge_rig_test.go` (new), `e2e/testdata/check-merge/` (new), `e2e/testdata/README.md` | The `gh` stand-in and done item 5 | 0 |
 
 ## What the pass builds
@@ -120,12 +122,15 @@ Hit counts are from `grep -rn` over `cmd` and `internal`, tests left out, on `73
 
 `cc-desk pass ready <project> <pass> --pr <n> --commit <sha> --verdict accept|fix --design
 inside|outside`. All four flags are required. It commits one event, `ReportReady`, which
-refuses unless the pass is building and has a session record. The event sets the pull
-request's number, commit, verdict, inside-design flag, and `Ready` to the clock, and clears its
-wait and failures. `FixAttempts` carries over. A second report replaces the first.
+refuses unless the pass is building and has a session record, so a stopped pass can't report.
+The event sets the pull request's number, commit, verdict, inside-design flag, and `Ready` to
+the clock, and clears its wait, failures, question, and merge marker. `FixAttempts` carries over. A second report replaces the first.
 
-The launch adds one prefix allow rule beside the follow-up rule:
-`Bash(<binary> --state-dir <dir> pass ready <project> <pass> *)`. `pass.txt` gains one line:
+A pass launch adds one prefix allow rule beside the follow-up rule:
+`Bash(<binary> --state-dir <dir> pass ready <project> <pass> *)`. Design and conductor launches
+don't get it. `WriteSettings` takes its prefix rules as a list, and the launcher passes the
+follow-up rule alone for design and conductor launches. `Prompt` gains a `Ready` field, the
+command prefix, and `pass.txt` gains one line that uses it:
 once the pull request is ready and reviewed, report it with that command, naming the PR, its
 last commit, the review's verdict, and whether the change stays inside the approved design.
 The line keeps "Do not merge it". The service start the design gives this verb is pass 5's
@@ -137,7 +142,7 @@ The line keeps "Do not merge it". The service start the design gives this verb i
 building or stopped, has a session record with a branch, and has no recorded merge, it runs one
 call through a hidden `--gh-command` flag (default `gh`):
 
-`gh pr list -R <repo> --head <branch> --state all --json number,state,headRefOid,mergedAt,statusCheckRollup`
+`gh pr list -R <repo> --head <branch> --state all --json number,state,headRefOid,mergedAt,mergeCommit,statusCheckRollup`
 
 A non-zero exit is "GitHub can't be reached" for that pass. Exit 0 with `[]` is "no pull
 request". With more than one, the one whose number the ready report names wins, else the first.
@@ -152,7 +157,7 @@ in this order. The first row that matches wins.
 | --- | --- | --- | --- |
 | 1 | State `MERGED` | `merged`: recorded at `mergedAt`, outside cc-desk unless the merge marker is set (below) | Don't run |
 | 2 | No ready report stands, or the state is `CLOSED` | none | Run as today |
-| 3 | A merge question on the pass is unanswered | none, detail "question <id> open" | Run, idle held off |
+| 3 | A merge question was asked under the current report (the pull request's `question` is set), answered or not | none, detail "question <id> asked" | Run, idle held off |
 | 4 | The report says outside the design | `ask`, reason `outside_design` | Don't run |
 | 5 | The head isn't the reported commit | wait `commit_moved` | Run, idle held off |
 | 6 | The rollup is empty | wait `no_check` | Run, idle held off |
@@ -166,9 +171,12 @@ A pass that is stopped gets row 1 only. Every other stopped pass stays with pass
 the row rules run. Each wait is written to the pull request's `wait` field in the check's
 record step, so the snapshot can show it.
 
-`early()` gains one row: a done pass whose pull request is merged and not yet cleaned up
-decides `cleanup`, so a cleanup that failed part way runs again on the next check. Every other
-done pass keeps `none`.
+`early()` gains one row, placed first, before the `sess.Ended` test at `decide.go:186`: a
+done pass whose pull request is merged and not yet cleaned up decides `cleanup`. Cleanup step 1
+ends the session, so the row must come before that test for a cleanup that failed part way to
+run again on the next check. Every other done pass keeps `none`. A release marked done drops
+out of `LiveSessions` (`internal/state/check.go:418`), but no code sets a release done yet,
+so that case is a follow-up.
 
 ### Carrying out
 
@@ -187,16 +195,17 @@ done pass keeps `none`.
   the fix: `FixAttempts` up by one, `Ready` cleared, and the failures saved. A failed stop or
   launch spends no attempt.
 - **ask.** One commit adds a question with the id `merge-<pass>-<k>`, where `k` is one more
-  than the pass's merge questions so far, and adds the id to the pass's `questions`. Its text
+  than the pass's merge questions so far, and adds the id to the pass's `questions` and to the pull request's `question`. Its text
   names the pull request and the failures or "outside the approved design". Its options are
   `merge`, `fix again`, and `close`, with `close` recommended after the third failure and `fix
   again` for a change outside the design. The ready report stays, so the idle rule stays off and
-  row 3 holds every later decision. What an answer does is a follow-up (Decisions).
+  row 3 holds every later decision, after an answer too, until a new report clears `question`. What an answer does is a follow-up (Decisions).
 - **cleanup**, after `MergePass`, in this order:
   1. Stop the session when its row is live, and commit `EndSession`.
   2. Pull the checkout with `git -C <checkout> pull --ff-only` when all three hold: it is on the
-     release's default branch; no file the merge touched (`git diff --name-only` across the
-     merge) has an uncommitted change; and no live row's `cwd` is the checkout or a folder
+     release's default branch; no file the merge touched has an uncommitted change, found by
+     `git -C <checkout> fetch origin <default>`, then `git diff --name-only
+     HEAD...origin/<default>`, then `git status --porcelain -- <those files>`; and no live row's `cwd` is the checkout or a folder
      under it outside `.claude/worktrees/`. Otherwise note "checkout not pulled: <reason>".
   3. `git worktree remove <worktree>`, with no force flag. A refusal notes "worktree left:
      <the last line git printed>".
@@ -209,10 +218,13 @@ done pass keeps `none`.
 
 ### What the snapshot shows
 
-A pull request whose wait is `no_check` with `Ready` 30 minutes or more before the clock gives
-one `needs_you_now` entry with reason `no_check_registered`. A merge question shows under
-`waits_for_geoff` through the existing estimate code. A cleanup note shows on the pass's entry
-in the snapshot. None of these change the bytes of any old fixture's snapshot.
+`fillSessions(snap, s)` becomes `fillSessions(snap, s, now)` (`snapshot.go:210`). A pull
+request whose wait is `no_check` with `Ready` 30 minutes or more before the clock gives one
+`needs_you_now` entry: reason `no_check_registered`, cause the PR number, todo "See why no
+check has started on pull request <n>". That entry also sets `next_session.state` to
+`needs_you_now` (`estimate.go:361`, `:432`), which is right: Geoff must act. A merge question
+shows under `waits_for_geoff` through the existing estimate code. A cleanup note shows as a new
+`cleanup` field, `omitempty`, on the pass session's `SessionEntry` (`sessions.go:20`). None of these change the bytes of any old fixture's snapshot.
 
 ## Acceptance
 
@@ -237,13 +249,18 @@ What each test asserts:
 - `TestMergeSix`: one release with six building passes, launched through the rig. For each,
   the test commits a file in the worktree and pushes the branch to the bare remote, as the
   session would. It writes one stand-in answer per branch, then reports ready through `pass
-  ready`. The check runs once with `GIT_TRACE` set to a file. Then:
+  ready`. It sets every session's stand-in row live and `done`, so the row rules leave the
+  waiting passes alone. The check runs once, through a new `runEnv` helper in
+  `merge_rig_test.go` that adds `GIT_TRACE=<file>` to the binary's environment only, and exits
+  0. Then:
   - The stand-in's log holds exactly one `pr merge` call, for the clean PR, with `--merge` and
-    `--match-head-commit <its head>`.
+    `--match-head-commit <its head>`, and none of `--admin`, `-d`, `--delete-branch`, or
+    `--auto`.
   - The clean pass reads `done`, its `finished` equal to the check's clock, its pull request
     merged at that time. Its worktree folder is gone, `git branch --list <branch>` in the
     checkout prints nothing, and the checkout's `main` holds the merge commit.
-  - No line of the trace file names `-D`, `--force`, or `-f` on a `git` command.
+  - On the trace's `trace: built-in:` and `run_command:` lines, split on spaces, no token is
+    `-D`, `-f`, or `--force`. A substring match would fail on `--ff-only`.
   - The failed one's session was relaunched once, uncounted, cause `fix`, and its prompt holds
     the fix note. The outside one has an open `merge-<pass>-1` question, and the snapshot
     counts it under `waits_for_geoff`. The other three have the waits `no_check`,
@@ -252,7 +269,8 @@ What each test asserts:
   launch and no merge call. A new report on a new failed commit relaunches again. A third
   report on a third failed commit adds the question, and the log holds no third relaunch.
 - `TestMergeNoCheck`: a PR with an empty rollup. At 29 minutes after its report the snapshot's
-  `needs_you_now` holds no `no_check_registered` entry; at 31 minutes it holds one.
+  `needs_you_now` holds no `no_check_registered` entry; at 31 minutes it holds one, and
+  `next_session.state` reads `needs_you_now`.
 - `TestMergeOutside` and `TestMergeDirty` cover a PR merged by another hand (recorded outside,
   finished at `mergedAt`, cleaned up) and a worktree with an uncommitted file (it stays, the
   branch stays, and the note shows in the snapshot). `TestMergeUnreachable` covers a stand-in
@@ -275,11 +293,11 @@ task holds code. Each test is table-driven where it has cases, and every Go file
   prints `--- PASS:` for each of the five names.
 - Test:
   - New `PullRequest` fields, each `omitempty`: `inside_design`, `wait`, `failures`,
-    `merge_called`, `merged_outside`, `cleaned`, and `cleanup_note`. Validation refuses a
+    `question`, `merge_called`, `merged_outside`, `cleaned`, and `cleanup_note`. Validation refuses a
     verdict other than `accept` or `fix`, a `Ready` with no commit or verdict, a wait outside
     the four, and a `merged` time on a pass that isn't done.
-  - `ReportReady` as "The ready verb" says, refusing a pass that isn't building or has no
-    session.
+  - `ReportReady` as "The ready verb" says, refusing a pass that isn't building (a stopped
+    pass among the cases) or has no session.
   - `MergePass(project, pass, at, outside)` closes an open stop at `at`, then finishes the pass
     at `at` with its actual minutes and sets `merged`. It refuses a pass not started or already
     done.
@@ -289,14 +307,14 @@ task holds code. Each test is table-driven where it has cases, and every Go file
 ### Task 2: the ready verb (10 minutes, a pair with task 3)
 
 - Outcome: a pass session can report its pull request ready, and only through its own verb.
-- Files: `cmd/cc-desk/pass.go`, `internal/launch/settings.go`, `launch_test.go`,
-  `templates/pass.txt`, `e2e/merge_test.go` (new, `TestPassReady` only).
+- Files: `cmd/cc-desk/pass.go`, `launcher.go`, `internal/launch/settings.go`, `prompt.go`,
+  `launch_test.go`, `templates/pass.txt`, `e2e/merge_test.go` (new, `TestPassReady` only).
 - Class: `runner`.
 - Check: `go test ./e2e/ -run TestPassReady -count=1 -v` prints `--- PASS: TestPassReady`, and
   `go test ./internal/launch/ -count=1` passes.
 - Test: the verb writes the four fields and `Ready`; each missing flag is refused by cobra; a
   pass that isn't building is refused with exit 1. The settings file holds the prefix rule, the
-  deny list is unchanged, and the first-launch prompt holds the ready line and still holds "Do
+  deny list is unchanged, a design launch's settings hold no ready rule, and the first-launch prompt holds the ready line and still holds "Do
   not merge it". `launch_test.go` gains the rule in its expected list; no other old test
   changes.
 
@@ -322,7 +340,8 @@ task holds code. Each test is table-driven where it has cases, and every Go file
   old test changed.
 - Test: one case per row of the merge table, row order included (an outside report with a
   failed check asks; a moved head with a failed check waits), the stopped pass that gets row 1
-  only, the unreachable read, and a done pass with and without a merged, uncleaned pull request.
+  only, the unreachable read, an answered merge question that still holds row 3, and a done
+  pass with and without a merged, uncleaned pull request, with its session ended and not.
 
 ### Task 5: carrying out (20 minutes)
 
@@ -339,11 +358,12 @@ task holds code. Each test is table-driven where it has cases, and every Go file
 ### Task 6: the snapshot (5 minutes)
 
 - Outcome: the 31-minute entry and the cleanup note show.
-- Files: `internal/snapshot/sessions.go`, its test.
+- Files: `internal/snapshot/sessions.go`, `snapshot.go`, their tests.
 - Class: `runner`.
 - Check: `go test ./internal/snapshot/ ./e2e/ -count=1` passes, and `git diff --stat
   73da88e -- e2e/testdata/state/snapshot.json` prints nothing.
-- Test: the entry at 29 and 31 minutes; the note on a cleaned pass.
+- Test: the entry at 29 and 31 minutes, and `next_session.state` at each; the note on a
+  cleaned pass.
 
 ### Task 7: done item 5 (25 minutes)
 
@@ -366,7 +386,7 @@ task holds code. Each test is table-driven where it has cases, and every Go file
 - Outcome: the PR is ready, with its review accepted and CI green.
 - Files: `docs/STATUS.md` (below the round-report block), and one file each under
   `docs/follow-ups/`: what an answer to a merge question does; the ready verb's service start,
-  for pass 5; and a pull request closed without a merge.
+  for pass 5; a pull request closed without a merge; and the cleanup of a release marked done.
 - Class: `ordinary`.
 - Check: the PR body's `## Acceptance` evidence; the `gate` check on the last commit.
 - Test: none of its own. One whole-branch `standards:diff-reviewer` read (class `runner`),
@@ -455,4 +475,27 @@ ceiling in answer 39. The last round's 19 to 22 hold too. This pass adds:
 
 ## Review findings and their folds
 
-To be filled from the `standards:plan-reviewer` read.
+One `standards:plan-reviewer` read (Opus, medium), 2026-11-18: 2 High, 6 Medium, 4 Low. I
+checked each against the code before folding. All twelve are folded.
+
+1. High. The cleanup row could never run again after step 1, since `early()` returns at
+   `sess.Ended` first. Folded: the row goes first in `early()`, with a test case for an ended
+   session. The done-release half is filed for task 8: no code sets a release done yet.
+2. High. The trace check matched `-f` inside `--ff-only`. Folded: tokens on `trace: built-in:`
+   and `run_command:` lines only.
+3. Medium. The touched-files diff had no commit to diff against. Folded: `mergeCommit` joins the
+   read, and step 2 names the fetch, diff, and status commands.
+4. Medium. An answered merge question let the next check ask again, without end. Folded: a
+   `question` field that only a new report clears, and row 3 matches it answered or not.
+5. Medium. Task 2's files left out `launcher.go` and `prompt.go`. Folded: both listed, with the
+   `WriteSettings` list change, `Prompt.Ready`, and pass launches only.
+6. Medium. `TestMergeSix` could relaunch a waiting pass with no stand-in row. Folded: every row
+   set live and `done`, and the exit code asserted.
+7. Medium. No helper set `GIT_TRACE` for the binary alone. Folded: `runEnv` in
+   `merge_rig_test.go`.
+8. Medium. The snapshot change named no signature, field, or todo. Folded: all three, and
+   `next_session.state` asserted.
+9. Low. The `gh pr merge` call wasn't checked for force flags. Folded.
+10. Low. The marker from a failed merge call survived a new report. Folded: `ReportReady` clears it.
+11. Low. A report on a stopped pass was unstated. Folded: refused, with a test case.
+12. Low. Two hit counts were off. Folded: recounted, with `WriteSettings` listed.
