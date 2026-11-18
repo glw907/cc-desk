@@ -17,7 +17,8 @@
 <!-- round-report sessions -->
 **The Sessions round's first pass waits for Geoff's approval, and two more are ready behind
 it.** Pull request 8 records sessions and asks one call; pull requests 10 and 12 start them and
-answer their prompts, ask nothing, and land in order after 8. The fourth pass has started.
+answer their prompts, ask nothing, and land in order after 8. The fourth pass, pull request 14,
+is ready for the conductor to land; its session is cc-desk-sessions-merge (job f73e67ad).
 
 Open documents: none. Pull request 8 waits under "Open decisions".
 Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
@@ -41,7 +42,10 @@ Resume from: `docs/plans/2026-11-17-sessions-page-conductor-prompt.txt`
 - Pass 3 (sessions-prompts), pull request 12, records a permission prompt from the hook, answers it
   with `prompt yes` or `prompt no` from a desk session, adds `rules add` and `rules remove`, and
   files each answered prompt and each session's follow-up (`followup`). No verb registers a desk
-  yet (`docs/follow-ups/desk-registration-gap.md`). Pass 4 merges.
+  yet (`docs/follow-ups/desk-registration-gap.md`). Pass 4 (sessions-merge), pull request 14, has
+  the check merge a clean pull request, send back or ask on any other, and clean up after a merge.
+  Its follow-ups: `merge-question-answer.md`, `ready-verb-service-start.md`,
+  `pull-request-closed-without-merge.md`, `cleanup-of-a-release-marked-done.md`.
 
 ## Next action
 
