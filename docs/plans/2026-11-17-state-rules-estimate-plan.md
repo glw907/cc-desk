@@ -451,6 +451,16 @@ This pass adds:
   tests; case 6 carries clocks; the close caps review rounds and reruns the gate after the last
   edit.
 
+## Executor decisions
+
+- A question no pass rests on is needed now with an empty round. It counts in `question_count` and
+  `projects`, and stays out of `rounds` and `waits_for_geoff`. Its forecast line carries a null
+  time, which differs from the snapshot in that edge case; the follow-up
+  `docs/follow-ups/orphan-question-forecast.md` holds the open fix.
+- `rounds` lists only question rounds, and `not_designed` lists only rounds whose start is ahead.
+- In `ready_now` the range keeps the setting pass's low and high ends, so `high` can be later than
+  now when a building predecessor has used its paced length at the middle pace but not the high one.
+
 ## Rulings
 
 - Geoff, 2026-11-18, terminal session, via conductor-cc-desk: on the round that needs Geoff with no design and no item left, `ready_now` with a null time or `nothing_waiting`, "Those both work." The built `ready_now` stands.
