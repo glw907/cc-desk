@@ -23,8 +23,13 @@ const (
 // change, and any other error for a bad request.
 type Event func(s *State, now time.Time) error
 
-// Render turns the state into the bytes of snapshot.json.
-type Render func(s *State, now time.Time) ([]byte, error)
+// ForecastFile is the append-only log of next-session forecasts.
+const ForecastFile = "forecasts.jsonl"
+
+// Render turns the state into the bytes of snapshot.json and the forecast
+// line the same build gives for the next session. Commit stamps the line's
+// format and time made.
+type Render func(s *State, now time.Time) ([]byte, Forecast, error)
 
 type snapshotError struct {
 	Format  int    `json:"format"`
@@ -36,8 +41,9 @@ type snapshotError struct {
 // waiting up to wait, then loads and checks every file. A load or check
 // failure writes snapshot-error.json and leaves every other file alone.
 // A clean load removes that file, so a refusal clears it too. Commit
-// then applies ev, settles, writes each changed release atomically, and
-// rewrites snapshot.json. It returns the snapshot's bytes. A nil ev
+// then applies ev, settles, writes each changed release atomically,
+// appends a forecast line when ev started, finished, or stopped a pass,
+// and rewrites snapshot.json. It returns the snapshot's bytes. A nil ev
 // changes nothing.
 func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Render) ([]byte, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -86,9 +92,15 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		}
 	}
 
-	snap, err := render(s, now)
+	snap, fc, err := render(s, now)
 	if err != nil {
 		return nil, fmt.Errorf("build snapshot: %w", err)
+	}
+	if s.passEvent {
+		fc.Format, fc.Made = Format, now.UTC()
+		if err := appendForecast(dir, fc); err != nil {
+			return nil, err
+		}
 	}
 	if err := atomicfile.WriteFile(filepath.Join(dir, SnapshotFile), snap, 0o644); err != nil {
 		return nil, fmt.Errorf("write %s: %w", SnapshotFile, err)
@@ -99,6 +111,29 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 // settle starts the passes that wait on a limit and now fit. Pass 3 fills
 // it in.
 func settle(s *State, now time.Time) {}
+
+// appendForecast adds one line to forecasts.jsonl by rewriting the whole
+// file atomically, so a crash never leaves half a line. A last line with no
+// newline gets one first.
+func appendForecast(dir string, f Forecast) error {
+	line, err := json.Marshal(f)
+	if err != nil {
+		return fmt.Errorf("encode forecast: %w", err)
+	}
+	path := filepath.Join(dir, ForecastFile)
+	data, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("read %s: %w", ForecastFile, err)
+	}
+	if n := len(data); n > 0 && data[n-1] != '\n' {
+		data = append(data, '\n')
+	}
+	data = append(append(data, line...), '\n')
+	if err := atomicfile.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", ForecastFile, err)
+	}
+	return nil
+}
 
 func writeSnapshotError(dir string, fe *FileError) error {
 	data, err := marshal(snapshotError{Format: Format, File: fe.File, Message: fe.Error()})

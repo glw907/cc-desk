@@ -143,18 +143,32 @@ type OpenGuess struct {
 	Minutes  int    `json:"minutes"`
 }
 
-// Render builds the state's snapshot and encodes it as indented JSON.
-func Render(s *state.State, now time.Time) ([]byte, error) {
-	data, err := json.MarshalIndent(Build(s, now), "", "  ")
+// Render builds the state's snapshot once and returns it as indented JSON
+// with the forecast line for the same next session. The line names the
+// round that sets the session's time. Without one, its time is null.
+func Render(s *state.State, now time.Time) ([]byte, state.Forecast, error) {
+	snap, setter := build(s, now)
+	data, err := json.MarshalIndent(snap, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, state.Forecast{}, err
 	}
-	return append(data, '\n'), nil
+	var fc state.Forecast
+	if setter != nil && setter.round != "" {
+		t := setter.time.UTC()
+		fc.Project, fc.Round, fc.Time = setter.project, setter.round, &t
+	}
+	return append(data, '\n'), fc, nil
 }
 
 // Build fills the fields passes 1 and 2 own and leaves the rest at their
 // empty forms. Only live releases appear; done ones feed the pace.
 func Build(s *state.State, now time.Time) *Snapshot {
+	snap, _ := build(s, now)
+	return snap
+}
+
+// build is Build plus the item that sets the next session's time.
+func build(s *state.State, now time.Time) (*Snapshot, *item) {
 	snap := &Snapshot{
 		Format:            state.Format,
 		GeneratedAt:       now.UTC(),
@@ -183,8 +197,7 @@ func Build(s *state.State, now time.Time) *Snapshot {
 		ctxs = append(ctxs, &relCtx{idx: len(snap.Releases), rf: rf, v: v, pc: pc, times: times})
 		snap.Releases = append(snap.Releases, out)
 	}
-	fillSession(snap, ctxs, now)
-	return snap
+	return snap, fillSession(snap, ctxs, now)
 }
 
 func buildRelease(r *state.Release) Release {

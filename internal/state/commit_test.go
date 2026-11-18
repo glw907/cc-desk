@@ -11,7 +11,9 @@ import (
 
 var testClock = time.Date(2026, 11, 20, 23, 0, 0, 0, time.UTC)
 
-func render(*State, time.Time) ([]byte, error) { return []byte("{\"fresh\":true}\n"), nil }
+func render(*State, time.Time) ([]byte, Forecast, error) {
+	return []byte("{\"fresh\":true}\n"), Forecast{}, nil
+}
 
 func readFile(t *testing.T, dir, rel string) string {
 	t.Helper()

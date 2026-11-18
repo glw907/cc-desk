@@ -124,6 +124,26 @@ func TestNextSessionStopped(t *testing.T) {
 	}
 }
 
+func TestRenderForecast(t *testing.T) {
+	now := utcTime(20, 23, 0)
+	_, fc, err := Render(&state.State{Releases: []*state.ReleaseFile{asking("a", 60, false)}}, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fc.Project != "a" || fc.Round != "r2" {
+		t.Errorf("forecast names %s/%s, want a/r2", fc.Project, fc.Round)
+	}
+	wantTime(t, "forecast time", fc.Time, now.Add(60*time.Minute))
+
+	_, fc, err = Render(&state.State{Releases: []*state.ReleaseFile{asking("a", 0, true)}}, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fc.Project != "" || fc.Round != "" || fc.Time != nil {
+		t.Errorf("forecast with nothing waiting = %+v, want no names and no time", fc)
+	}
+}
+
 // A question no pass rests on has no round and is needed now.
 func TestNextSessionQuestionWithoutPass(t *testing.T) {
 	now := utcTime(20, 23, 0)

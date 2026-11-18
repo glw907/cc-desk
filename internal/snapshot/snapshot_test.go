@@ -17,9 +17,12 @@ var update = flag.Bool("update", false, "rewrite the golden files")
 var clock = time.Date(2026, 11, 20, 23, 0, 0, 0, time.UTC)
 
 func TestSnapshotEmptyGolden(t *testing.T) {
-	got, err := Render(&state.State{}, clock)
+	got, fc, err := Render(&state.State{}, clock)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if fc != (state.Forecast{}) {
+		t.Errorf("forecast of an empty state = %+v, want the zero line", fc)
 	}
 	golden := filepath.Join("testdata", "empty.golden.json")
 	if *update {
@@ -43,7 +46,7 @@ func TestSnapshotEmptyGolden(t *testing.T) {
 // its bytes: no top-level field encodes as null where it should be a list
 // or object.
 func TestSnapshotEveryFieldPresent(t *testing.T) {
-	got, err := Render(&state.State{}, clock)
+	got, _, err := Render(&state.State{}, clock)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -453,4 +453,4 @@ This pass adds:
 
 ## Rulings
 
-- Geoff, 2026-11-18, terminal session, via conductor-cc-desk: on the round that needs Geoff with no design and no item left, ready_now with a null time or nothing_waiting, "Those both work." The built ready_now stands.
+- Geoff, 2026-11-18, terminal session, via conductor-cc-desk: on the round that needs Geoff with no design and no item left, `ready_now` with a null time or `nothing_waiting`, "Those both work." The built `ready_now` stands.
