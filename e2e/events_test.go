@@ -3,6 +3,7 @@ package e2e
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -223,6 +224,48 @@ func TestBadRequests(t *testing.T) {
 			}
 			if !strings.Contains(got.stderr, c.want) {
 				t.Errorf("stderr does not name %q: %s", c.want, got.stderr)
+			}
+			sameFolder(t, before, folder(t, dir))
+		})
+	}
+}
+
+func TestReleaseCheckout(t *testing.T) {
+	t.Run("records both fields", func(t *testing.T) {
+		dir := newState(t)
+		repo := t.TempDir()
+		apply(t, dir, workedClock, "release", "checkout", "alpha", repo, "--default-branch", "main")
+		data, err := os.ReadFile(filepath.Join(dir, "releases", "alpha.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var rel struct {
+			Checkout      string `json:"checkout"`
+			DefaultBranch string `json:"default_branch"`
+		}
+		if err := json.Unmarshal(data, &rel); err != nil {
+			t.Fatal(err)
+		}
+		if rel.Checkout != repo || rel.DefaultBranch != "main" {
+			t.Fatalf("release holds %q and %q, want %q and main", rel.Checkout, rel.DefaultBranch, repo)
+		}
+	})
+
+	refusals := []struct {
+		name string
+		path func(t *testing.T) string
+	}{
+		{"relative path", func(*testing.T) string { return "work/alpha" }},
+		{"missing folder", func(t *testing.T) string { return filepath.Join(t.TempDir(), "absent") }},
+	}
+	for _, c := range refusals {
+		t.Run(c.name, func(t *testing.T) {
+			dir := newState(t)
+			before := folder(t, dir)
+			requireSnapshot(t, before)
+			got := run(t, dir, workedClock, "release", "checkout", "alpha", c.path(t), "--default-branch", "main")
+			if got.code != 2 {
+				t.Fatalf("exit %d, want 2; stderr: %s", got.code, got.stderr)
 			}
 			sameFolder(t, before, folder(t, dir))
 		})

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -282,6 +284,28 @@ func StopPass(project, pass string, reason StopReason) Event {
 		p.State = Stopped
 		rf.Dirty = true
 		s.passEvent = true
+		return nil
+	}
+}
+
+// SetCheckout records the repo's main checkout and default branch on the
+// project's live release. The path must be absolute and an existing folder.
+func SetCheckout(project, path, branch string) Event {
+	return func(s *State, now time.Time) error {
+		rf, err := s.liveRelease(project)
+		if err != nil {
+			return err
+		}
+		if !filepath.IsAbs(path) {
+			return Refuse(fmt.Sprintf("checkout %q is not an absolute path", path))
+		}
+		if info, err := os.Stat(path); err != nil || !info.IsDir() {
+			return Refuse(fmt.Sprintf("checkout %q is not a folder that exists", path))
+		}
+		if branch == "" {
+			return errors.New("the default branch is empty")
+		}
+		rf.Checkout, rf.DefaultBranch, rf.Dirty = path, branch, true
 		return nil
 	}
 }

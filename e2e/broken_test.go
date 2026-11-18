@@ -23,6 +23,9 @@ var verbs = []verb{
 	{"free", func(*testing.T) []string { return []string{"free"} }},
 	{"ruling record", func(*testing.T) []string { return []string{"ruling", "record", "go"} }},
 	{"release add", func(t *testing.T) []string { return []string{"release", "add", input(t, "gamma.json")} }},
+	{"release checkout", func(t *testing.T) []string {
+		return []string{"release", "checkout", "alpha", t.TempDir(), "--default-branch", "main"}
+	}},
 	{"round design", func(t *testing.T) []string {
 		return []string{"round", "design", "beta", "b3", input(t, "design-b3.json")}
 	}},
