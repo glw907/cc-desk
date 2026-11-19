@@ -49,6 +49,19 @@ func TestWriteSettings(t *testing.T) {
 	}
 }
 
+func TestCheckCommandPath(t *testing.T) {
+	for _, ok := range []string{"/usr/bin/cc-desk", "/home/g/.local/bin/cc-desk", "/var/state-dir_1.2"} {
+		if err := CheckCommandPath(ok); err != nil {
+			t.Errorf("CheckCommandPath(%q) = %v, want nil", ok, err)
+		}
+	}
+	for _, bad := range []string{"/my bin/cc-desk", "/bin/cc*desk", "/bin/[a]/cc-desk", "/bin/it's/cc-desk", "/bin/a$b", "/bin/a\tb"} {
+		if err := CheckCommandPath(bad); err == nil {
+			t.Errorf("CheckCommandPath(%q) = nil, want an error", bad)
+		}
+	}
+}
+
 func TestRulesSkillFile(t *testing.T) {
 	rules := Rules("p", "/s", "/s/desk/words", "/r/SKILL.md")
 	if !slices.Contains(rules, "Read(//r/SKILL.md)") {

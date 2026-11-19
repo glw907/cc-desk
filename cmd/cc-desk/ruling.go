@@ -28,7 +28,9 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 			"whole of the file --words-file names, less its trailing newlines. With --project,\n" +
 			"--round, --question, and --option together, the ruling answers that question, closes\n" +
 			"any guess on it, and frees what waited. With --replaces as well, it replaces the\n" +
-			"question's current answer while no pass resting on the question has started. A session that is not a registered desk, a\n" +
+			"question's current answer until a pass resting on it has finished, or, for a merge\n" +
+			"question, until its merge is called or its answer is carried out. A session that is\n" +
+			"not a registered desk, a\n" +
 			"command that does not run under the desk's process, and a desk process with no\n" +
 			"terminal are each refused, with the failing test named.",
 		Args: cobra.MaximumNArgs(1),

@@ -146,8 +146,9 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 // this order: the ruling doesn't exist, another already replaced it, it
 // answered a different question, it isn't the question's current answer, a
 // pass resting on the question has finished, or a merge question's merge was
-// called. A pass that has not started, is waiting, is stopped, or is building
-// takes the replacement.
+// called or its answer was carried out (the pass's pull request no longer
+// holds the question). A pass that has not started, is waiting, is stopped,
+// or is building takes the replacement.
 func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) error {
 	i := slices.IndexFunc(s.Rulings, func(g Ruling) bool { return g.ID == r.Replaces })
 	if i < 0 {
@@ -172,7 +173,9 @@ func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) erro
 		switch {
 		case p.State == Done:
 			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has finished; a new change is needed", rulingPrefix, p.Name, q.ID))
-		case merge && p.PullRequest != nil && p.PullRequest.MergeCalled != nil:
+		case merge && (p.PullRequest == nil || p.PullRequest.Question != q.ID):
+			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has been carried out; a new change is needed", rulingPrefix, p.Name, q.ID))
+		case merge && p.PullRequest.MergeCalled != nil:
 			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has had its merge called; a new change is needed", rulingPrefix, p.Name, q.ID))
 		}
 	}
