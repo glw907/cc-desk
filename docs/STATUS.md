@@ -40,6 +40,20 @@ its service, its terminal link, and its polish. Geoff approved every call as rec
 Open documents: none.
 <!-- /round-report -->
 
+## Stop
+
+Pass 5 (desk-check, pull request 21) stops before its live evidence. The relaunch ran
+`bash scripts/live-repairs.sh` on `e5017f2`. Two checks failed, and the run left two scratch
+sessions live that block the next `prep`: `757f73c4` (`cc-desk-scratch-refuse-20261119t221850z`,
+blocked) and `cedbf0db` (`cc-desk-scratch-hold-20261119t221850z`, working). Stop both, then
+relaunch `cc-desk-desk-check`; it runs the script again on the last commit and marks the pull
+request ready.
+
+The first failure was the script's own: it looked for the hook's input only under
+`hook-unmatched/`, and matched input lands on the session record. The second was real: a
+finished conductor's session reads `done`, which `claude stop` refuses, so the end failed on
+every check and its worktree stayed. Commit `70e3b15` fixes both.
+
 ## Next action
 
 The conductor runs the Desk and skills round from its prompt,
