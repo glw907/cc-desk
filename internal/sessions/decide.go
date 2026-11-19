@@ -30,6 +30,7 @@ const (
 	ReasonIdle           = "idle"
 	ReasonMissing        = "missing"
 	ReasonReplaced       = "replaced"
+	ReasonReportDue      = "report_due"
 )
 
 // IdleLimit is how long a done session may sit before the check ends it.
@@ -201,7 +202,113 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 			results = append(results, Result{Decision: d})
 		}
 	}
+	for _, rf := range s.Releases {
+		if r, ok := reportLaunch(s, rf, hold); ok {
+			results = append(results, r)
+		}
+	}
 	return results, nil
+}
+
+// ReleaseReport is the ForReport of a conductor started for the release's
+// report. A round's report names the round.
+const ReleaseReport = "release"
+
+// hasReport reports whether a report is recorded for the project and round,
+// the release's own when round is empty.
+func hasReport(s *state.State, project, round string) bool {
+	return slices.ContainsFunc(s.Reports.Reports, func(r state.Report) bool { return r.Project == project && r.Round == round })
+}
+
+// ReportRecorded reports whether the report a conductor was started for is
+// recorded. A conductor with no ForReport has none.
+func ReportRecorded(s *state.State, project, forReport string) bool {
+	switch forReport {
+	case "":
+		return false
+	case ReleaseReport:
+		return hasReport(s, project, "")
+	}
+	return hasReport(s, project, forReport)
+}
+
+// ReportDue names the report a live release is waiting on: the first round,
+// in file order, that has a pass, every pass done, and no report, or
+// ReleaseReport once every round has a pass, every pass in the release is
+// done, and no release report exists. It reports false when nothing is due.
+func ReportDue(s *state.State, rf *state.ReleaseFile) (string, bool) {
+	if rf.Done || len(rf.Passes) == 0 {
+		return "", false
+	}
+	allDone := true
+	for _, p := range rf.Passes {
+		allDone = allDone && p.State == state.Done
+	}
+	empty := false
+	for _, round := range rf.Rounds {
+		has, done := false, true
+		for _, p := range rf.Passes {
+			if p.Round == round.Name {
+				has = true
+				done = done && p.State == state.Done
+			}
+		}
+		switch {
+		case !has:
+			empty = true
+		case done && !hasReport(s, rf.Project, round.Name):
+			return round.Name, true
+		}
+	}
+	if allDone && !empty && !hasReport(s, rf.Project, "") {
+		return ReleaseReport, true
+	}
+	return "", false
+}
+
+// reportLaunch decides the conductor's start for a live release with a
+// checkout whose report is due and whose conductor record is not live. A
+// record that ended without that report is continued as a counted relaunch,
+// and the third try reads relaunch_limit. A record for another report, or none,
+// starts fresh. The usage hold waits a start but not the stop.
+func reportLaunch(s *state.State, rf *state.ReleaseFile, hold bool) (Result, bool) {
+	if rf.Checkout == "" {
+		return Result{}, false
+	}
+	due, ok := ReportDue(s, rf)
+	if !ok {
+		return Result{}, false
+	}
+	d := state.Decision{
+		Project: rf.Project, Record: "conductor", Session: rf.Project + "-conductor",
+		Decision: Launch, Reason: ReasonReportDue,
+	}
+	what := "the release report"
+	if due != ReleaseReport {
+		what = "the report for round " + due
+	}
+	d.Detail = what + " is due"
+	if c := rf.Conductor; c != nil {
+		if c.Ended == nil {
+			return Result{}, false
+		}
+		if c.ForReport == due {
+			if c.StopReason == state.StopRelaunchLimit {
+				return Result{}, false
+			}
+			if c.Counted() >= RelaunchLimit {
+				d.Decision, d.Reason = Stop, string(state.StopRelaunchLimit)
+				d.Detail = "the conductor ended three times without " + what
+				return Result{Decision: d}, true
+			}
+			counted := true
+			d.Counted = &counted
+		}
+	}
+	if hold {
+		d.Decision, d.Reason = WaitUsage, ""
+	}
+	return Result{Decision: d}, true
 }
 
 // startFree starts each not-started pass that breaks no start rule, in

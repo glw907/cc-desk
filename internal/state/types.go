@@ -91,6 +91,10 @@ type Session struct {
 	// pass fills it; a file without it reads as none.
 	Refusals []Refusal  `json:"refusals,omitempty"`
 	Finished *time.Time `json:"finished,omitempty"`
+	// ForReport is the report a conductor was started for: a round's name, or
+	// "release". Both relaunch paths carry it, and the limit of two relaunches
+	// counts per report.
+	ForReport string `json:"for_report,omitempty"`
 	// StopReason and Stopped are set on a conductor's or design writer's
 	// record only. A pass's stop stays on the pass.
 	StopReason StopReason `json:"stop_reason,omitempty"`

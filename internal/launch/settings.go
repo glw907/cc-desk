@@ -83,6 +83,12 @@ func ReportCommand(binary, stateDir, project string) string {
 	return binary + " --state-dir " + stateDir + " report add " + project
 }
 
+// BriefCommand gives the command that prints the brief, which a relaunched
+// conductor runs first. binary and stateDir must be absolute.
+func BriefCommand(binary, stateDir string) string {
+	return binary + " --state-dir " + stateDir + " brief"
+}
+
 // WriteSettings writes <stateDir>/launch/<name>.json fresh and gives its
 // path. The allow list is the release's rules, one exact rule per report
 // verb, and prefixRules, whole rules that end in a wildcard. binary is

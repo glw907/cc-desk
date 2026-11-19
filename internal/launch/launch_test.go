@@ -659,3 +659,46 @@ func TestRunIds(t *testing.T) {
 		}
 	})
 }
+
+func TestConductorReportPrompt(t *testing.T) {
+	base := Prompt{Kind: "conductor", Name: "proj-conductor", Project: "proj", Branch: "conductor", Report: "/b/cc-desk report add proj"}
+	fill := func(p Prompt) string {
+		t.Helper()
+		got, err := Fill(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+	if got := fill(base); !strings.Contains(got, "Conduct the rounds of the project.") || strings.Contains(got, "Write the report for") {
+		t.Errorf("a conductor with no report reads:\n%s", got)
+	}
+
+	round := base
+	round.ForReport, round.ReportRound = "r1", "r1"
+	got := fill(round)
+	if !strings.Contains(got, "Write the report for round r1") || !strings.Contains(got, "--round r1") || strings.Contains(got, "Conduct the rounds") {
+		t.Errorf("a round's report prompt reads:\n%s", got)
+	}
+
+	release := base
+	release.ForReport = "release"
+	got = fill(release)
+	if !strings.Contains(got, "Write the report for the release") || !strings.Contains(got, "no `--round`") {
+		t.Errorf("the release report prompt reads:\n%s", got)
+	}
+
+	relaunch := round
+	relaunch.Brief = "/b/cc-desk brief"
+	relaunch.Relaunch = &RelaunchNote{Count: 1, Cause: "a missing session"}
+	got = fill(relaunch)
+	for _, want := range []string{"Run `/b/cc-desk brief` first", "write no second one"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("a relaunched report conductor lacks %q:\n%s", want, got)
+		}
+	}
+	relaunch.ForReport, relaunch.ReportRound = "", ""
+	if got = fill(relaunch); strings.Contains(got, "write no second one") {
+		t.Errorf("a relaunched conductor with no report names the report rule:\n%s", got)
+	}
+}

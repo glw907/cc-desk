@@ -95,3 +95,116 @@ func TestPlanLaunchesABuildingPassWithNoSession(t *testing.T) {
 		}
 	}
 }
+
+// reportWorld is a release of rounds r1 and r2 with a checkout, each round's
+// passes in the given state, and the reports recorded.
+func reportWorld(r1, r2 []state.PassState, reports ...state.Report) *state.State {
+	rf := &state.ReleaseFile{Release: state.Release{
+		Project: "p", Checkout: "/c", Rounds: []state.Round{{Name: "r1"}, {Name: "r2"}},
+	}}
+	add := func(round string, states []state.PassState) {
+		for i, st := range states {
+			rf.Passes = append(rf.Passes, state.Pass{Name: round + string(rune('a'+i)), Round: round, State: st})
+		}
+	}
+	add("r1", r1)
+	add("r2", r2)
+	return &state.State{Releases: []*state.ReleaseFile{rf}, Reports: state.Reports{Reports: reports}, Usage: &state.Usage{Format: 1, Percent: 10, ReadAt: t0}}
+}
+
+func TestPlanLaunchesTheConductorForAReport(t *testing.T) {
+	done, building := state.Done, state.Building
+	round := func(r string) state.Report { return state.Report{Project: "p", Round: r} }
+	tests := []struct {
+		name     string
+		r1, r2   []state.PassState
+		reports  []state.Report
+		conduct  *state.Session
+		want     string
+		wantDue  string
+		wantStop string
+	}{
+		{name: "a round with a pass not done", r1: []state.PassState{done, building}},
+		{name: "every pass done and no report", r1: []state.PassState{done, done}, r2: []state.PassState{building},
+			want: Launch, wantDue: "r1"},
+		{name: "every pass done and a report", r1: []state.PassState{done, done}, r2: []state.PassState{building},
+			reports: []state.Report{round("r1")}},
+		{name: "a round with no pass holds the release report back", r1: []state.PassState{done}, reports: []state.Report{round("r1")}},
+		{name: "the release report follows every round's", r1: []state.PassState{done}, r2: []state.PassState{done},
+			reports: []state.Report{round("r1"), round("r2")}, want: Launch, wantDue: ReleaseReport},
+		{name: "a release holding a pass not done", r1: []state.PassState{done}, r2: []state.PassState{building},
+			reports: []state.Report{round("r1")}},
+		{name: "the release report recorded", r1: []state.PassState{done}, r2: []state.PassState{done},
+			reports: []state.Report{round("r1"), round("r2"), round("")}},
+		{name: "a live conductor", r1: []state.PassState{done}, r2: []state.PassState{building},
+			conduct: &state.Session{Name: "p-conductor", Kind: state.KindConductor, ForReport: "r1"}},
+		{name: "an ended conductor for another report", r1: []state.PassState{done}, r2: []state.PassState{building},
+			conduct: &state.Session{Name: "p-conductor", Kind: state.KindConductor, ForReport: "r0", Ended: ago(0)},
+			want:    Launch, wantDue: "r1"},
+		{name: "an ended conductor with two counted relaunches", r1: []state.PassState{done}, r2: []state.PassState{building},
+			conduct: &state.Session{Name: "p-conductor", Kind: state.KindConductor, ForReport: "r1", Ended: ago(0),
+				Relaunches: []state.Relaunch{{Cause: "no_report", Counted: true}, {Cause: "no_report", Counted: true}}},
+			want: Stop, wantDue: "r1", wantStop: string(state.StopRelaunchLimit)},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			s := reportWorld(tc.r1, tc.r2, tc.reports...)
+			s.Releases[0].Conductor = tc.conduct
+			if tc.name == "a live conductor" {
+				tc.conduct.Launched = t0
+			}
+			results, err := Plan(s, Evidence{}, t0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []Result
+			for _, r := range results {
+				if r.Record == "conductor" && (r.Decision.Decision == Launch || r.Decision.Decision == WaitUsage || r.Reason == string(state.StopRelaunchLimit)) {
+					got = append(got, r)
+				}
+			}
+			if tc.want == "" {
+				if len(got) != 0 {
+					t.Fatalf("conductor decisions %+v, want none", got)
+				}
+				return
+			}
+			if len(got) != 1 || got[0].Decision.Decision != tc.want {
+				t.Fatalf("conductor decisions %+v, want one %q", got, tc.want)
+			}
+			if tc.want == Launch && got[0].Reason != ReasonReportDue {
+				t.Errorf("reason %q, want %q", got[0].Reason, ReasonReportDue)
+			}
+			if tc.wantStop != "" && got[0].Reason != tc.wantStop {
+				t.Errorf("reason %q, want %q", got[0].Reason, tc.wantStop)
+			}
+			if due, _ := ReportDue(s, s.Releases[0]); due != tc.wantDue {
+				t.Errorf("report due %q, want %q", due, tc.wantDue)
+			}
+		})
+	}
+}
+
+func TestPlanHoldsTheConductorStartUnderTheUsageHold(t *testing.T) {
+	s := reportWorld([]state.PassState{state.Done}, nil)
+	s.Usage = &state.Usage{Format: 1, Percent: 100, ReadAt: t0}
+	results, err := Plan(s, Evidence{}, t0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(results) != 1 || results[0].Record != "conductor" || results[0].Decision.Decision != WaitUsage {
+		t.Errorf("results %+v, want one wait_usage for the conductor", results)
+	}
+}
+
+func TestPlanLeavesAReleaseWithNoCheckoutAlone(t *testing.T) {
+	s := reportWorld([]state.PassState{state.Done}, nil)
+	s.Releases[0].Checkout = ""
+	results, err := Plan(s, Evidence{}, t0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(results) != 0 {
+		t.Errorf("results %+v, want none", results)
+	}
+}

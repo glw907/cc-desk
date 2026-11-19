@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/glw907/cc-desk/internal/launch"
 	"github.com/glw907/cc-desk/internal/sessions"
 	"github.com/glw907/cc-desk/internal/snapshot"
 	"github.com/glw907/cc-desk/internal/state"
@@ -82,8 +83,28 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		if !e.gone {
 			return "", fmt.Errorf("session %s is still live after claude stop", sess.ShortID)
 		}
-		return "ended " + sess.ShortID, l.commit(state.EndSession(r.Project, r.Record))
+		out := "ended " + sess.ShortID
+		if err := l.commit(state.EndSession(r.Project, r.Record)); err != nil {
+			return out, err
+		}
+		if r.Record == "conductor" {
+			note, err := l.removeConductorWorktree(ctx, r.Project, sess)
+			if err != nil {
+				return out, err
+			}
+			if note != "" {
+				out += "; " + note
+			}
+		}
+		return out, nil
 	case sessions.Launch:
+		if r.Record == "conductor" {
+			req, ok := conductorRequest(s, rf, sess)
+			if !ok {
+				return "not carried out: no report is due for " + r.Project, nil
+			}
+			return l.launchOrStop(ctx, r, req)
+		}
 		return l.launchOrStop(ctx, r, launchRequest{Kind: state.LaunchFirst})
 	case sessions.LaunchAgain:
 		if sess == nil {
@@ -157,9 +178,90 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 func (l *launcher) launchOrStop(ctx context.Context, r sessions.Result, req launchRequest) (string, error) {
 	id, err := l.Launch(ctx, r.Project, r.Record, req)
 	if err != nil {
+		if r.Record == "conductor" && (req.Kind == state.LaunchFirst || req.Kind == state.LaunchContinue) {
+			return "", l.failedConductorStart(r, req, err)
+		}
 		return "", l.failedRelaunch(r, err)
 	}
 	return "launched " + id, nil
+}
+
+// conductorRequest gives the launch for a due report. An ended record for the
+// same report is continued, as a counted relaunch; any other record, or none,
+// starts a new one. It reports false when no report is due now, as when one
+// was recorded between the check's record step and this one.
+func conductorRequest(s *state.State, rf *state.ReleaseFile, sess *state.Session) (launchRequest, bool) {
+	due, ok := sessions.ReportDue(s, rf)
+	if !ok {
+		return launchRequest{}, false
+	}
+	req := launchRequest{Kind: state.LaunchFirst, ForReport: due}
+	if sess != nil && sess.Ended != nil && sess.ForReport == due {
+		req.Kind, req.Replaces, req.Counted, req.Cause = state.LaunchContinue, sess.ShortID, true, "no_report"
+		if sess.StopReason == state.StopLaunchFailed {
+			req.Cause = "launch_failed"
+		}
+	}
+	return req, true
+}
+
+// failedConductorStart writes the ended conductor record a failed start for a
+// report leaves, so the next check counts it, and gives back the error or the
+// commit's error when that fails too.
+func (l *launcher) failedConductorStart(r sessions.Result, req launchRequest, cause error) error {
+	_, rf, err := l.liveRelease(r.Project)
+	if err != nil {
+		return err
+	}
+	pl, err := place(rf, "conductor")
+	if err != nil {
+		return err
+	}
+	ev := state.RecordConductorLaunchFailure(r.Project, state.Launch{
+		Kind: req.Kind, Cause: req.Cause, Counted: req.Counted,
+		Session: state.Session{Name: pl.name, Kind: pl.sessionKind, Worktree: pl.worktree, Branch: pl.branch, ForReport: req.ForReport},
+	}, cause.Error())
+	if err := l.commit(ev); err != nil {
+		return err
+	}
+	return cause
+}
+
+// removeConductorWorktree takes the conductor's worktree and branch away with
+// the helper a pass's cleanup uses, once the report the conductor was started
+// for is recorded. It gives the note of what it left, or "removed the
+// conductor worktree and branch" when nothing stayed.
+func (l *launcher) removeConductorWorktree(ctx context.Context, project string, sess *state.Session) (string, error) {
+	s, rf, err := l.liveRelease(project)
+	if err != nil {
+		return "", err
+	}
+	if sess.Worktree == "" || !sessions.ReportRecorded(s, project, sess.ForReport) {
+		return "", nil
+	}
+	rows, err := sessions.List(ctx, l.runner.Claude)
+	if err != nil {
+		return "", err
+	}
+	var cwds []string
+	for _, row := range rows {
+		if row.Live() && row.ID != sess.ShortID {
+			cwds = append(cwds, row.Cwd)
+		}
+	}
+	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: sess.Worktree, Branch: sess.Branch}
+	pulled, note, err := wt.Pull(ctx, cwds)
+	if err != nil {
+		return "", err
+	}
+	notes := wt.Remove(pulled)
+	if note != "" {
+		notes = append([]string{note}, notes...)
+	}
+	if len(notes) == 0 {
+		return "removed the conductor worktree and branch", nil
+	}
+	return "removed the conductor worktree; " + strings.Join(notes, "; "), nil
 }
 
 // failedRelaunch records a failed launch on the record and gives back the

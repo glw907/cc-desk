@@ -7,13 +7,18 @@ import (
 )
 
 // LaunchKind says which launch a record is: the first of a session, the
-// second try of a first that never showed a row, or a relaunch.
+// second try of a first that never showed a row, a relaunch, or a conductor's
+// continuation of its own ended record.
 type LaunchKind int
 
 const (
 	LaunchFirst LaunchKind = iota
 	LaunchAgain
 	LaunchRelaunch
+	// LaunchContinue starts a conductor for a report whose last conductor
+	// record ended without it. It replaces that ended record and counts as a
+	// relaunch of it.
+	LaunchContinue
 )
 
 // Launch is what a launch learned: the identity of the new session, and for
@@ -95,11 +100,20 @@ func RecordLaunch(project, record string, l Launch) Event {
 				return Refuse(fmt.Sprintf("%s/%s already has a live session record, %s", project, record, old.Name))
 			}
 			next.LaunchTries = 1
+		case LaunchContinue:
+			if old == nil || old.Ended == nil || old.ShortID != l.Replaces {
+				return Refuse(fmt.Sprintf("%s/%s is no longer the ended record %q this launch continues", project, record, l.Replaces))
+			}
+			next.Prompts, next.Refusals = old.Prompts, old.Refusals
+			next.Relaunches = append(append([]Relaunch(nil), old.Relaunches...), Relaunch{Time: t, Cause: l.Cause, Counted: l.Counted})
+			next.ForReport = old.ForReport
+			next.LaunchTries = 1
 		default:
 			if old == nil || old.Ended != nil || old.ShortID != l.Replaces {
 				return Refuse(fmt.Sprintf("%s/%s is no longer the live record %q this launch replaces", project, record, l.Replaces))
 			}
 			next.Prompts, next.Refusals, next.Finished = old.Prompts, old.Refusals, old.Finished
+			next.ForReport = old.ForReport
 			next.Relaunches = append([]Relaunch(nil), old.Relaunches...)
 			next.LaunchTries = 2
 			if l.Kind == LaunchRelaunch {
@@ -216,6 +230,39 @@ func RecordOutcomes(outcomes []string) Event {
 			}
 		}
 		s.checkDirty = true
+		return nil
+	}
+}
+
+// RecordConductorLaunchFailure writes the ended conductor record that a failed
+// launch for a report leaves: the failure is its stop, and no session stands
+// behind it, so its ids read "none". A continuation keeps the ended record's
+// relaunches and adds this one, so a failed try counts toward the limit of two.
+// The event refuses when a live record holds the place.
+func RecordConductorLaunchFailure(project string, l Launch, detail string) Event {
+	return func(s *State, now time.Time) error {
+		rf, slot, _, err := sessionAt(s, project, "conductor")
+		if err != nil {
+			return err
+		}
+		old := *slot
+		if old != nil && old.Ended == nil {
+			return Refuse(fmt.Sprintf("%s/conductor already has a live session record, %s", project, old.Name))
+		}
+		t := now.UTC()
+		next := l.Session
+		next.ShortID, next.SessionID = "none", "none"
+		next.Launched, next.LaunchTries = t, 1
+		if l.Kind == LaunchContinue && old != nil {
+			next.Prompts, next.Refusals = old.Prompts, old.Refusals
+			next.Relaunches = append(append([]Relaunch(nil), old.Relaunches...), Relaunch{Time: t, Cause: l.Cause, Counted: l.Counted})
+		}
+		next.StopReason, next.Stopped, next.StopDetail, next.Ended = StopLaunchFailed, &t, detail, &t
+		if err := validateSession(&next, KindConductor, project+"/conductor"); err != nil {
+			return err
+		}
+		*slot = &next
+		rf.Dirty = true
 		return nil
 	}
 }

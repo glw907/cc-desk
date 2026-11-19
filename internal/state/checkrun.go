@@ -70,6 +70,11 @@ func applyRecorded(s *State, r Recorded, now time.Time) error {
 		if d := r.Decision.Decision; (d == "launch" || d == "wait_usage" || d == "start") && strings.HasPrefix(r.Decision.Record, "pass:") {
 			return nil
 		}
+		// A conductor with no record has only the decision to write too: the
+		// launch for a due report makes the record.
+		if d := r.Decision.Decision; (d == "launch" || d == "wait_usage") && r.Decision.Record == "conductor" {
+			return nil
+		}
 		return fmt.Errorf("no session record %s in project %q", r.Decision.Record, r.Decision.Project)
 	}
 	if r.LastState != "" && sess.LastState != r.LastState {

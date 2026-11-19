@@ -37,6 +37,16 @@ type Prompt struct {
 	// file and an optional --round follow it. It is empty for a pass or
 	// design.
 	Report string
+	// ForReport is the report a conductor was started for: a round's name, or
+	// "release". It is empty for a conductor started by hand, which gets the
+	// general prompt.
+	ForReport string
+	// ReportRound is ForReport when it names a round, and empty for the
+	// release's report.
+	ReportRound string
+	// Brief is the command that prints the brief. It is empty unless the
+	// conductor was started for a report.
+	Brief string
 	// Relaunch is set on a relaunch. Count is the number of the relaunch.
 	Relaunch *RelaunchNote
 	// Answer is set on the relaunch that follows an answered permission

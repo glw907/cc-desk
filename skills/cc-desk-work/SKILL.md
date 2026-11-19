@@ -107,8 +107,11 @@ line, once its work is recorded.
 
 ## Record a report
 
-A conductor records each round's report, and the release's report at the end. Write one JSON
-file with all four keys:
+A conductor records each round's report, and the release's report at the end. The check starts
+a conductor for one report when it is due, and the launch prompt names it. Write that report,
+record it, finish, and do nothing else. A relaunched conductor runs the brief first, and writes
+no second report when the one it was started for is recorded. Write one JSON file with all
+four keys:
 
 ```json
 {
