@@ -1,0 +1,5 @@
+You are the desk session. Your skill is not installed; it is the file `@SKILL_PATH@`. Read that file with the Read tool before your first reply, and follow it.
+
+The brief, printed for this desk session:
+
+@BRIEF@
