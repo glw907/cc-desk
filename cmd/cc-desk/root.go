@@ -25,6 +25,7 @@ type rootFlags struct {
 	systemctlCommand string
 	claudeCommand    string
 	listWait         time.Duration
+	skillFile        string
 }
 
 // dir returns the state folder: the flag, else $XDG_STATE_HOME/cc-desk,
@@ -108,12 +109,19 @@ func group(cmd *cobra.Command) *cobra.Command {
 func newRootCmd() *cobra.Command {
 	var f rootFlags
 	cmd := &cobra.Command{
-		Use:           "cc-desk",
-		Short:         "Keep the state of Claude Code's work and print its snapshot",
+		Use:   "cc-desk",
+		Short: "Keep the state of Claude Code's work and print its snapshot",
+		Long: "With no arguments on a terminal, open the desk: a session that opens with what\n" +
+			"waits for Geoff. With a project and a round, open it on that round's questions\n" +
+			"only. Anywhere else, print this help.",
 		Version:       version,
+		Args:          openArgs,
+		RunE:          func(cmd *cobra.Command, args []string) error { return runOpen(cmd, &f, args) },
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
+	cmd.Flags().StringVar(&f.skillFile, "skill-file", "", "a file the desk reads in place of loading the cc-desk skill")
+	_ = cmd.Flags().MarkHidden("skill-file")
 	cmd.PersistentFlags().StringVar(&f.stateDir, "state-dir", "",
 		"state folder (default $XDG_STATE_HOME/cc-desk, else ~/.local/state/cc-desk)")
 	cmd.PersistentFlags().StringVar(&f.now, "now", "", "the time to use, in RFC 3339")

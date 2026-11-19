@@ -91,6 +91,15 @@ func BuildRound(s *state.State, now time.Time, project, round string) (string, e
 	return b.String(), nil
 }
 
+// First returns the live release whose question comes first in the bare
+// brief, or nil when none waits.
+func First(s *state.State) *state.ReleaseFile {
+	if es := waiting(s, ""); len(es) > 0 {
+		return es[0].rf
+	}
+	return nil
+}
+
 // writeDesign prints a round's design path, context, and calls, or says
 // none is recorded.
 func writeDesign(b *strings.Builder, rd *state.Round) {

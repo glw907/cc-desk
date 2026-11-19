@@ -12,9 +12,11 @@ them.
 ## The brief
 
 The brief is in your system prompt or in a file the prompt names. Use it as given, and run
-`cc-desk brief` only when you were given none. Take "now" from its first line, `Brief at
+`<command> brief` only when you were given none. Take "now" from its first line, `Brief at
 <time>`, never from the system clock: the brief may have been printed for another day.
 
+Your system prompt gives `<command>`: the exact text to type before each cc-desk verb. Type
+it as given, never a bare `cc-desk`. Only that text runs without asking Geoff to approve it.
 The brief lists the waiting questions in order, most planned minutes held up first, each with
 its parts in the order the opening gives them.
 
@@ -92,7 +94,7 @@ Give its three answers with what the check does for each:
 - Fix again: the pass goes back with his words for one more attempt. If it comes back the same
   way, he is asked again.
 - Close: the pull request is closed, the session ends, and the pass is recorded as closed by
-  his ruling. Work that comes after it doesn't start.
+  his ruling. The pass leaves "Needs you now", and work that comes after it doesn't start.
 
 ## Record or ask
 
@@ -101,16 +103,17 @@ they leave the answers open, and then record nothing until he chooses. He may ar
 answer him, and record when he settles it.
 
 His words reach the record unchanged, whatever they hold. Write them with the Write tool to a
-file in the job's `tmp` folder, then run:
+new file in the words folder your system prompt names, `<state folder>/desk/words/`, such as
+`3.txt`. Then run:
 
 ```text
-cc-desk ruling record --project <p> --round <r> --question <q> --option "<o>" -- "$(cat <file>)"
+<command> ruling record --project <p> --round <r> --question <q> --option "<o>" --words-file <that file>
 ```
 
 Take the project, round, and question id from the brief's line for that question, and the
 option as the brief prints it (`merge`, `fix again`, and `close` for a merge question). The
-file keeps any quote or dollar sign out of the shell, and `--` keeps words that start with `-`
-from reading as a flag. The command prints `recorded ruling <id>` on stderr; keep that id in
+file keeps any quote or dollar sign out of the shell, and the command strips the newlines at
+the end of the file and no others. It prints `recorded ruling <id>` on stderr; keep that id in
 case he changes his mind.
 
 Then tell him what you recorded, with the time in Alaska time and his words quoted:
@@ -119,7 +122,7 @@ Then tell him what you recorded, with the time in Alaska time and his words quot
 Recorded at 2:43 pm as your ruling, in your words:
   "yes, but only after two clean looks in a row. one could be luck"
 It answers "Should cc-desk notice by itself that you fixed the problem?"
-The build starts within a minute. The second question is about cairn.
+The check starts the build within five minutes. The second question is about cairn.
 ```
 
 If the command refuses, tell him its reason in plain words and record nothing else.
@@ -127,26 +130,27 @@ If the command refuses, tell him its reason in plain words and record nothing el
 ## A wrong record
 
 When he says you recorded the wrong thing, record his new words with the same flags plus
-`--replaces <id>`, the id of the ruling it replaces. For a ruling recorded before this
-session, read its id from `rulings.jsonl` in the state folder (`$XDG_STATE_HOME/cc-desk`, or
-`~/.local/state/cc-desk` when that variable is unset). Both
-rulings stay in the log. What happens then depends on how far the pass that waited got:
+`--replaces <id>`, the id of the ruling it replaces, and the words in a new file as before.
+For a ruling recorded before this session, read its id from `rulings.jsonl` in the state
+folder (`$XDG_STATE_HOME/cc-desk`, or `~/.local/state/cc-desk` when that variable is unset).
+Both rulings stay in the log. What happens then depends on how far the pass that waited got:
 
 | The pass that waited | What the replacement does |
 | --- | --- |
 | Hasn't started | It starts on the new ruling |
-| Is building | Its session ends, and a new one starts from its branch with the new ruling |
+| Is building | Its session is ended, and a new one starts from the pass's branch with the new ruling in its prompt. The relaunch doesn't count toward the pass's limit of two |
 | Has merged | The command refuses; tell him a new change is needed |
 
 ## Prompts and stopped passes
 
 The page sends Geoff to the desk for two more things. Act on each only when he says so.
 
-- A session's permission prompt: `cc-desk prompt yes <project> <record> --follow-ups <dir>`
-  allows the blocked command, and `cc-desk prompt no <project> <record> --follow-ups <dir>`
+- A session's permission prompt: `<command> prompt yes <project> <record> --follow-ups <dir>`
+  allows the blocked command, and `<command> prompt no <project> <record> --follow-ups <dir>`
   refuses it. The record is `conductor`, `round:<name>`, or `pass:<name>`, and `--follow-ups`
-  is the folder the prompt's follow-up file is written to. Both relaunch the session.
-- A stopped pass, once he says the cause is fixed: `cc-desk pass start <project> <pass>`.
+  is the folder the prompt's follow-up file is written to. A command that isn't one simple
+  Bash command takes `--rule <rule>` on `yes`. Both relaunch the session.
+- A stopped pass, once he says the cause is fixed: `<command> pass start <project> <pass>`.
 
 ## Outside the desk
 
