@@ -5,6 +5,9 @@ status page to see how the work is going, and you answer its questions at the de
 session in your terminal. This guide covers what you type, what the page shows, and what to do
 when something is wrong.
 
+The guide describes cc-desk once its desk session lands. Until then, typing `cc-desk` prints
+its help, and the page is the only part you can use.
+
 ## Open the desk
 
 Type `cc-desk` in a terminal. A Claude session opens and tells you what is waiting:
@@ -19,7 +22,8 @@ recorded them. When your words don't settle the choice, it asks you to pick one 
 
 A question about a pull request has three answers:
 
-- Merge: it merges it on the next check, if every check still passes.
+- Merge: it merges it on the next check, if every check still passes and nothing was pushed since you
+  were asked.
 - Fix again: it sends it back with your words for one more try.
 - Close: it closes it, and the work that comes after it doesn't start.
 
@@ -58,7 +62,7 @@ reason with the one thing to do. The common ones:
 | The sign-in ran out | Sign in to Claude Code again, then tell the desk to start the pass again. |
 | Usage limit reached | Wait for the reset, or reset your usage early. The work starts again after the reset. |
 | The session would not start, or Restarted twice already | Read the error or the session's log, then tell the desk to start the pass again. |
-| An irreversible step, a secret, a sign-in or data change, or a change of scope | Read the stop in the repo's STATUS, deal with it, then tell the desk to start the pass again. |
+| An irreversible step, a secret, a sign-in or data change, or a change of scope | Read the session's log, deal with it, then tell the desk to start the pass again. |
 
 ## Fix a wrong ruling
 
@@ -66,6 +70,6 @@ If the desk recorded the wrong answer, tell it at the desk, in your words. It re
 ruling in place of the old one, and both stay in the log. You can see every ruling under
 "Rulings" in the page's sidebar.
 
-A replacement works only while the work that waits on the ruling hasn't started. Once that work
-starts, the desk says it can't replace the ruling yet. Once that work has merged, a new change is
+If the work that waits on the ruling hasn't started, it starts on the new ruling. If it is being
+built, its session restarts with the new ruling. Once that work has merged, a new change is
 needed instead.

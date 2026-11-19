@@ -20,7 +20,7 @@ shortened `cc-desk ...` line runs against the wrong state, or stops on a permiss
 
 | `pass-core` says | Do this instead |
 | --- | --- |
-| Write a question for Geoff under "Open decisions" in STATUS | Write it with `question add`, if it is about a pass that hasn't started. Otherwise stop |
+| Write a question for Geoff under "Open decisions" in STATUS | Write it with `question add`, if it is about a pass that hasn't started. Otherwise a pass session stops |
 | Write a stop to STATUS and end | Run your stop or finish line, then end |
 | A pull request waits for Geoff's approve | Report it with `pass ready`. The check merges it, or asks Geoff a merge question |
 | Send a report or a packet | A conductor records the round's report with `report add` |
@@ -30,8 +30,8 @@ No session runs `approval-queue send` or `notify-send`.
 
 ## Report a pull request ready
 
-Once the pull request is pushed and its whole-branch review has a verdict, run the prompt's
-ready line:
+A pass session reports its pull request once it is pushed and its whole-branch review has a
+verdict. Run the prompt's ready line:
 
 ```text
 <ready line> --pr <number> --commit <sha> --verdict <accept|fix> --design <inside|outside>

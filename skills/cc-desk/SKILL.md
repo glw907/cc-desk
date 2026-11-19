@@ -104,7 +104,7 @@ His words reach the record unchanged, whatever they hold. Write them with the Wr
 file in the job's `tmp` folder, then run:
 
 ```text
-cc-desk ruling record --project <p> --round <r> --question <q> --option <o> -- "$(cat <file>)"
+cc-desk ruling record --project <p> --round <r> --question <q> --option "<o>" -- "$(cat <file>)"
 ```
 
 Take the project, round, and question id from the brief's line for that question, and the
@@ -128,13 +128,14 @@ If the command refuses, tell him its reason in plain words and record nothing el
 
 When he says you recorded the wrong thing, record his new words with the same flags plus
 `--replaces <id>`, the id of the ruling it replaces. For a ruling recorded before this
-session, read its id from `rulings.jsonl` in the state folder (`~/.local/state/cc-desk`). Both
+session, read its id from `rulings.jsonl` in the state folder (`$XDG_STATE_HOME/cc-desk`, or
+`~/.local/state/cc-desk` when that variable is unset). Both
 rulings stay in the log. What happens then depends on how far the pass that waited got:
 
 | The pass that waited | What the replacement does |
 | --- | --- |
 | Hasn't started | It starts on the new ruling |
-| Is building | The command refuses for now; tell him the fix comes in a later change |
+| Is building | Its session ends, and a new one starts from its branch with the new ruling |
 | Has merged | The command refuses; tell him a new change is needed |
 
 ## Prompts and stopped passes
