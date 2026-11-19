@@ -523,3 +523,8 @@ clear of the numbers the round's other plans use.
   the per-tool target keys and the deny-list read, answer 51's end state, the outcome kept as a
   plain line, the `relaunch_limit` assertion and `time/tzdata`, the replaced template line, the
   listing beside the conductor phase, and the pre-code controls.
+
+## Rulings
+
+- **The estimate (Geoff, 2026-11-19).** The plan parked with a 315-minute path against 100, and answer 28's proviso failed on the round's clock. Geoff chose "Raise to 175, go (Recommended)": the estimate is 175 minutes and the stop is 350, and pass 5 may start and run past the conductor's 03:55 cutoff, as answer 31 lets pass 6.
+- **The orphaned scratch sessions (Geoff, 2026-11-19).** Geoff chose "Stop both (Recommended)". The conductor stopped `f0402e97` and `781526f0` before the executor launched, so the live steps don't wait on them.
