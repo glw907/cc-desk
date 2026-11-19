@@ -260,6 +260,19 @@ The twelve in `round-run.md` hold, with these changes and additions.
   and the planner trimmed nothing. A plan whose scope grew, or one whose path runs past the
   round's clock, still waits for Geoff. The conductor records each raise under `## Rulings` in
   the pass's plan and in the report.
+- **29. Pass 5 takes the third verdict (Geoff, 2026-11-18).** A failure review found that
+  `pass ready` refuses any verdict but `accept` or `fix`, so a session holding an `escalate`
+  has no honest line to run, and pass 6's real run goes through that verb. Geoff chose "Fold
+  into pass 5". Pass 5 adds it: `pass ready` takes `escalate` and a count of calls for Geoff,
+  and the check merges a pass whose change is inside the design, whose checks passed, and
+  that has no open finding and no call for Geoff. That is answer 26, built into cc-desk. The
+  working skill's ready line names the third verdict. This widens pass 5's scope by Geoff's
+  word, so answer 28 still applies to its estimate.
+- **30. The pass-core edits ride the dotfiles PR (Geoff, 2026-11-18).** Geoff chose "With the
+  dotfiles PR". The dotfiles PR of answer 22 also carries the `pass-core` edits the failure
+  review proposes, landed through `claude-infra` and reviewed with the rest. The review is
+  `~/Projects/initiatives/cc-desk/reports/desk-failure-review.md`, section 3. Answer 27 covers
+  landing it.
 
 ## Start line
 
