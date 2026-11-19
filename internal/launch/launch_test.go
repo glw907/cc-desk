@@ -81,6 +81,11 @@ func TestWriteSettings(t *testing.T) {
 		h[0].Hooks[0].Type != "command" || h[0].Hooks[0].Timeout != 30 {
 		t.Errorf("hook = %+v", h)
 	}
+	d := s.Hooks.PermissionDenied
+	if len(d) != 1 || len(d[0].Hooks) != 1 || d[0].Hooks[0].Command != "/bin/cc-desk --state-dir "+state+" refusal hook" ||
+		d[0].Hooks[0].Type != "command" || d[0].Hooks[0].Timeout != 30 {
+		t.Errorf("denied hook = %+v", d)
+	}
 	if strings.Contains(string(data), "matcher") {
 		t.Error("the hook has no matcher")
 	}

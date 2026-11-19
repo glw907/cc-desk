@@ -99,7 +99,7 @@ func RecordLaunch(project, record string, l Launch) Event {
 			if old == nil || old.Ended != nil || old.ShortID != l.Replaces {
 				return Refuse(fmt.Sprintf("%s/%s is no longer the live record %q this launch replaces", project, record, l.Replaces))
 			}
-			next.Prompts, next.Finished = old.Prompts, old.Finished
+			next.Prompts, next.Refusals, next.Finished = old.Prompts, old.Refusals, old.Finished
 			next.Relaunches = append([]Relaunch(nil), old.Relaunches...)
 			next.LaunchTries = 2
 			if l.Kind == LaunchRelaunch {

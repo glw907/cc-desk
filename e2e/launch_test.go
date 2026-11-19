@@ -132,10 +132,15 @@ func TestLaunchFreePass(t *testing.T) {
 		Permissions struct{ Allow, Deny []string }
 		Hooks       struct {
 			PermissionRequest []struct{ Hooks []struct{ Command string } }
+			PermissionDenied  []struct{ Hooks []struct{ Command string } }
 		}
 	}
 	if err := json.Unmarshal([]byte(readFileIn(t, r.state, "launch/proj-a.json")), &s); err != nil {
 		t.Fatal(err)
+	}
+	if len(s.Hooks.PermissionDenied) != 1 || !strings.HasPrefix(s.Hooks.PermissionDenied[0].Hooks[0].Command, "/") ||
+		!strings.HasSuffix(s.Hooks.PermissionDenied[0].Hooks[0].Command, " --state-dir "+r.state+" refusal hook") {
+		t.Errorf("settings hooks = %+v, want one PermissionDenied entry with the absolute binary", s.Hooks)
 	}
 	if !slices.Contains(s.Permissions.Allow, launchAllow) {
 		t.Errorf("settings allow %v lack the release's rule", s.Permissions.Allow)

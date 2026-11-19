@@ -35,6 +35,7 @@ type settings struct {
 	} `json:"permissions"`
 	Hooks struct {
 		PermissionRequest []hookGroup `json:"PermissionRequest"`
+		PermissionDenied  []hookGroup `json:"PermissionDenied"`
 	} `json:"hooks"`
 }
 
@@ -101,6 +102,9 @@ func WriteSettings(stateDir, binary, name string, allow, ask, verbs, prefixRules
 	s.Permissions.Deny = Deny
 	s.Hooks.PermissionRequest = []hookGroup{{Hooks: []hookCommand{{
 		Type: "command", Command: binary + " --state-dir " + stateDir + " prompt hook", Timeout: 30,
+	}}}}
+	s.Hooks.PermissionDenied = []hookGroup{{Hooks: []hookCommand{{
+		Type: "command", Command: binary + " --state-dir " + stateDir + " refusal hook", Timeout: 30,
 	}}}}
 	data, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
