@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	// The reset parser loads a zone by name, with no system database.
+	_ "time/tzdata"
 
 	"github.com/glw907/cc-desk/internal/state"
 )

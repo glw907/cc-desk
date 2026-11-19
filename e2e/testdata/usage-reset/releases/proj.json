@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "project": "proj",
+  "name": "v1",
+  "repo": "glw907/proj",
+  "checkout": "@CLONE@",
+  "default_branch": "main",
+  "allow_rules": ["Bash(go test ./...)"],
+  "rounds": [
+    {"name": "r1", "summary": "A round with one pass stopped on a weekly limit.", "needs_geoff": false, "no_need_reason": "A fixture.", "design_written": true}
+  ],
+  "passes": [
+    {
+      "name": "a", "summary": "Stopped on a weekly limit that names its reset.", "round": "r1", "planned_minutes": 30, "state": "stopped",
+      "started": "2026-11-20T19:00:00Z", "stop_reason": "usage", "stops": [{"start": "2026-11-20T20:00:00Z"}],
+      "session": {
+        "name": "proj-a", "kind": "pass", "short_id": "c0000001", "session_id": "c0000001-0000",
+        "worktree": "@CLONE@/.claude/worktrees/a", "branch": "a", "launched": "2026-11-20T19:00:00Z", "launch_tries": 1,
+        "stop_detail": "You've hit your weekly limit · resets Nov 20, 10:59pm (America/Anchorage)"
+      }
+    }
+  ]
+}

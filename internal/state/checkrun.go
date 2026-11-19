@@ -96,9 +96,17 @@ func applyRecorded(s *State, r Recorded, now time.Time) error {
 		return nil
 	}
 	if name, ok := strings.CutPrefix(r.Decision.Record, "pass:"); ok {
-		if err := StopPass(r.Decision.Project, name, r.Stop)(s, now); err != nil {
+		ev := StopPass(r.Decision.Project, name, r.Stop)
+		if _, p, err := findPass(s, r.Decision.Project, name); err == nil && p.State == Stopped {
+			// A pass already stopped on usage that reaches relaunch_limit
+			// changes its stop's reason and opens no second interval.
+			ev = RestopPass(r.Decision.Project, name, r.Stop, r.Decision.Detail)
+		}
+		if err := ev(s, now); err != nil {
 			return err
 		}
+	} else if sess.StopReason != "" {
+		sess.StopReason = r.Stop
 	} else {
 		sess.StopReason, sess.Stopped = r.Stop, &now
 	}

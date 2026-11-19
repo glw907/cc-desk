@@ -87,6 +87,18 @@ func TestDecide(t *testing.T) {
 			s.StopReason, s.Stopped = reason, ago(time.Minute)
 		}
 	}
+	// usageStopped is a pass stopped on usage an hour before t0 whose stop read
+	// detail, holding the given relaunch causes (all counted).
+	usageStopped := func(detail string, causes ...string) func(*state.ReleaseFile, *state.Session, *state.Pass) {
+		return func(_ *state.ReleaseFile, s *state.Session, p *state.Pass) {
+			p.State, p.StopReason = state.Stopped, state.StopUsage
+			p.Stops = []state.StopInterval{{Start: t0.Add(-time.Hour)}}
+			s.StopDetail = detail
+			for _, c := range causes {
+				s.Relaunches = append(s.Relaunches, state.Relaunch{Time: t0, Cause: c, Counted: true})
+			}
+		}
+	}
 	chain := func(fs ...func(*state.ReleaseFile, *state.Session, *state.Pass)) func(*state.ReleaseFile, *state.Session, *state.Pass) {
 		return func(rf *state.ReleaseFile, s *state.Session, p *state.Pass) {
 			for _, f := range fs {
@@ -116,6 +128,23 @@ func TestDecide(t *testing.T) {
 		{name: "row 4 conductor stopped on usage", kind: "conductor", usage: 40, mod: stoppedRecord(state.StopUsage), want: Relaunch, reason: "usage", counted: "false"},
 		{name: "row 4 at the stop line", kind: "pass", usage: 100, mod: stoppedWith(state.StopUsage), want: WaitUsage, reason: "usage"},
 		{name: "row 4 unreadable reading", kind: "pass", usage: -1, mod: stoppedWith(state.StopUsage), want: WaitUsage, reason: "usage"},
+		// The stop began 11:00Z on Nov 20; 10:59pm Alaska is 07:59Z on the 21st.
+		{name: "a named reset still ahead waits", kind: "pass", usage: 40, mod: usageStopped("resets Nov 20, 10:59pm (America/Anchorage)"), want: WaitUsage, reason: "usage", detail: "waits for the reset at 2026-11-21T07:59:00Z"},
+		{name: "a conductor's named reset ahead waits", kind: "conductor", usage: 40, mod: func(_ *state.ReleaseFile, s *state.Session, _ *state.Pass) {
+			s.StopReason, s.Stopped, s.StopDetail = state.StopUsage, ago(time.Minute), "resets Nov 20, 10:59pm (America/Anchorage)"
+		}, want: WaitUsage, reason: "usage", detail: "waits for the reset at 2026-11-21T07:59:00Z"},
+		{name: "a named reset behind relaunches uncounted", kind: "pass", usage: 40, mod: usageStopped("resets Nov 19, 10am (America/Anchorage)", "usage", "usage"), want: Relaunch, reason: "usage", counted: "false"},
+		{name: "a readable time after a no-time relaunch waits", kind: "pass", usage: 40, mod: usageStopped("resets Nov 20, 10:59pm (America/Anchorage)", "usage"), want: WaitUsage, reason: "usage", detail: "waits for the reset at 2026-11-21T07:59:00Z"},
+		{name: "no time, first stop relaunches uncounted", kind: "pass", usage: 40, mod: usageStopped("You've hit your Fable limit"), want: Relaunch, reason: "usage", counted: "false"},
+		{name: "no time, after a usage relaunch counts", kind: "pass", usage: 40, mod: usageStopped("You've hit your Fable limit", "usage"), want: Relaunch, reason: "usage", counted: "true"},
+		{name: "no time, a missing relaunch is not a usage one", kind: "pass", usage: 40, mod: usageStopped("You've hit your Fable limit", "missing"), want: Relaunch, reason: "usage", counted: "false"},
+		{name: "no time, the relaunches spent stops", kind: "pass", usage: 40, mod: usageStopped("You've hit your Fable limit", "usage", "usage"), want: Stop, reason: "relaunch_limit", detail: "the limit named no reset time and the relaunches are spent"},
+		{name: "an unknown zone counts as no time", kind: "pass", usage: 40, mod: usageStopped("resets Nov 20, 10:59pm (Mars/Olympus)", "usage"), want: Relaunch, reason: "usage", counted: "true"},
+		{name: "a conductor, no time, the relaunches spent stops", kind: "conductor", usage: 40, mod: func(_ *state.ReleaseFile, s *state.Session, _ *state.Pass) {
+			s.StopReason, s.Stopped, s.StopDetail = state.StopUsage, ago(time.Minute), "limit"
+			s.Relaunches = []state.Relaunch{{Cause: "usage", Counted: true}, {Cause: "usage", Counted: true}}
+		}, want: Stop, reason: "relaunch_limit", detail: "the limit named no reset time and the relaunches are spent"},
+		{name: "the hold still waits first", kind: "pass", usage: 100, mod: usageStopped("resets Nov 19, 10am (America/Anchorage)"), want: WaitUsage, reason: "usage"},
 		{name: "row 5 pass stopped for another reason", kind: "pass", usage: 40, mod: stoppedWith(state.StopScope), want: None, reason: "scope"},
 		{name: "row 5 design writer stopped", kind: "design", usage: 40, mod: stoppedRecord(state.StopPermissionPrompt), want: None, reason: "permission_prompt"},
 		{name: "row 6 working", kind: "pass", usage: 40, ev: found(rowWorking), want: None, seen: Observed{State: "working", Seen: true, Working: true}},
@@ -249,7 +278,7 @@ func TestWatched(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s, _ := world(tt.kind, 40, tt.mod)
-			if got := Watched(s); len(got) != tt.want {
+			if got := Watched(s, t0); len(got) != tt.want {
 				t.Fatalf("Watched = %d records, want %d", len(got), tt.want)
 			}
 		})

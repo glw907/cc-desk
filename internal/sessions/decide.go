@@ -98,11 +98,11 @@ type Target struct {
 }
 
 // Watched lists the records that need a row: those the first five rows of
-// the decision table leave undecided.
-func Watched(s *state.State) []Target {
+// the decision table leave undecided at now.
+func Watched(s *state.State, now time.Time) []Target {
 	var out []Target
 	s.LiveSessions(func(rf *state.ReleaseFile, record string, sess *state.Session) {
-		if _, decided := early(rf, record, sess, false); !decided {
+		if _, decided := early(rf, record, sess, false, now); !decided {
 			out = append(out, Target{Key{rf.Project, record}, sess})
 		}
 	})
@@ -139,7 +139,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			out = append(out, mr)
 			return
 		}
-		if r, decided := early(rf, record, sess, hold); decided {
+		if r, decided := early(rf, record, sess, hold, now); decided {
 			r.Merge = info
 			out = append(out, r)
 			return
@@ -289,9 +289,13 @@ func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e Reco
 	return Result{Decision: base}, true
 }
 
+// ResetWaitPrefix opens the detail of a wait_usage decision that waits for a
+// reset time the stop named.
+const ResetWaitPrefix = "waits for the reset at "
+
 // early applies rows 1 to 5, which need no row from the list and write
 // nothing to the record. It reports whether one of them decided.
-func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool) (Result, bool) {
+func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool, now time.Time) (Result, bool) {
 	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name}
 	done := func(decision, reason string) (Result, bool) {
 		d.Decision, d.Reason = decision, reason
@@ -319,13 +323,45 @@ func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool)
 	case stopped == state.StopUsage && hold:
 		return done(WaitUsage, string(state.StopUsage))
 	case stopped == state.StopUsage:
-		f := false
-		d.Counted = &f
-		return done(Relaunch, string(state.StopUsage))
+		return usageStop(d, pass, sess, now)
 	case stopped != "":
 		return done(None, string(stopped))
 	}
 	return Result{}, false
+}
+
+// usageStop decides for a record stopped on usage while no hold is on. A stop
+// that named its reset time waits for it, then relaunches uncounted. One that
+// gave no readable time relaunches uncounted the first time and counted after
+// a usage relaunch, so a limit that never lifts reaches relaunch_limit.
+func usageStop(d state.Decision, pass *state.Pass, sess *state.Session, now time.Time) (Result, bool) {
+	reason := string(state.StopUsage)
+	finish := func(decision string, counted *bool) (Result, bool) {
+		d.Decision, d.Reason, d.Counted = decision, reason, counted
+		return Result{Decision: d}, true
+	}
+	began := time.Time{}
+	switch {
+	case pass != nil && len(pass.Stops) > 0:
+		began = pass.Stops[len(pass.Stops)-1].Start
+	case sess.Stopped != nil:
+		began = *sess.Stopped
+	}
+	if at, ok := ParseReset(sess.StopDetail, began); ok {
+		if now.Before(at) {
+			d.Detail = ResetWaitPrefix + at.UTC().Format(time.RFC3339)
+			return finish(WaitUsage, nil)
+		}
+		uncounted := false
+		return finish(Relaunch, &uncounted)
+	}
+	counted := slices.ContainsFunc(sess.Relaunches, func(r state.Relaunch) bool { return r.Cause == reason })
+	if counted && sess.Counted() >= RelaunchLimit {
+		d.Detail = "the limit named no reset time and the relaunches are spent"
+		d.Decision, d.Reason = Stop, string(state.StopRelaunchLimit)
+		return Result{Decision: d}, true
+	}
+	return finish(Relaunch, &counted)
 }
 
 var limitText = regexp.MustCompile(`You've hit your .{0,30}limit(?:\s*·\s*resets [^(\n]*(?:\([^)]*\))?)?`)

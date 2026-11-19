@@ -51,6 +51,11 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 	switch r.Decision.Decision {
 	case sessions.Start:
 		return "started", nil
+	case sessions.WaitUsage:
+		if strings.HasPrefix(r.Detail, sessions.ResetWaitPrefix) {
+			return "usage limit holds the relaunch; " + r.Detail, nil
+		}
+		return "", nil
 	case sessions.Launch, sessions.LaunchAgain, sessions.Relaunch, sessions.EndAndRelaunch, sessions.End:
 	default:
 		return "", nil
@@ -92,6 +97,13 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 	req := launchRequest{Kind: state.LaunchRelaunch, Cause: d.Reason, Counted: counted, Replaces: sess.ShortID}
 	usage := d.Decision == sessions.Relaunch && d.Reason == string(state.StopUsage)
 	missing := d.Decision == sessions.Relaunch && !usage
+	relaunch := func() (string, error) {
+		out, err := l.launchOrStop(ctx, r, req)
+		if err == nil && usage && counted {
+			out += "; counted relaunch for usage, the stop named no reset time"
+		}
+		return out, err
+	}
 
 	if usage {
 		// The pass was resumed in the record commit; a live row for the old
@@ -102,7 +114,7 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 			return "", err
 		}
 		if row, found := sessions.Find(rows, sess.ShortID); !found || !row.Live() {
-			return l.launchOrStop(ctx, r, req)
+			return relaunch()
 		}
 	}
 	if !missing {
@@ -123,7 +135,7 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 			return "not relaunched: session " + sess.ShortID + " is still live after claude stop", nil
 		}
 	}
-	return l.launchOrStop(ctx, r, req)
+	return relaunch()
 }
 
 // launchOrStop runs the launch and, when it fails, stops the pass as

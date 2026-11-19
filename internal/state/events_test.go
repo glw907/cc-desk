@@ -147,6 +147,29 @@ func TestPassTimes(t *testing.T) {
 	}
 }
 
+func TestRestopPass(t *testing.T) {
+	s := loaded(t)
+	p := &s.Releases[0].Passes[0]
+	if err := RestopPass("alpha", "p1", StopRelaunchLimit, "spent")(s, at(9, 50)); err == nil {
+		t.Fatal("restop of a pass that is not stopped succeeded")
+	}
+	if err := StartPass("alpha", "p1")(s, at(9, 0)); err != nil {
+		t.Fatal(err)
+	}
+	if err := StopPass("alpha", "p1", StopUsage)(s, at(9, 40)); err != nil {
+		t.Fatal(err)
+	}
+	if err := RestopPass("alpha", "p1", StopRelaunchLimit, "spent")(s, at(9, 50)); err != nil {
+		t.Fatal(err)
+	}
+	if p.StopReason != StopRelaunchLimit || len(p.Stops) != 1 || !p.Stops[0].Start.Equal(at(9, 40)) || p.Stops[0].End != nil {
+		t.Errorf("restop left %+v reason %s, want one interval from 9:40 still open", p.Stops, p.StopReason)
+	}
+	if err := RestopPass("alpha", "p1", "tired", "")(s, at(9, 55)); err == nil {
+		t.Error("restop with an unknown reason succeeded")
+	}
+}
+
 func TestActualMinutesRound(t *testing.T) {
 	s := loaded(t)
 	start := time.Date(2026, 11, 20, 9, 0, 0, 0, time.UTC)

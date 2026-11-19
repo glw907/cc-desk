@@ -95,7 +95,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 	s.FoldUsage(u, false, now)
 
 	// Steps 4 to 8: gather the evidence.
-	ev, err := gatherEvidence(ctx, s, cf)
+	ev, err := gatherEvidence(ctx, s, cf, now)
 	if err != nil {
 		if !cf.dryRun {
 			if _, cerr := state.Commit(dir, now, state.LockWait, state.RecordListFailure(), snapshot.Render); cerr != nil {
@@ -166,7 +166,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 // has no row, then the job file and screen of each blocked row that names no
 // reason, then sends the network probe once when a lost connection could be
 // relaunched. A failed list read is the only error.
-func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessions.Evidence, error) {
+func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags, now time.Time) (sessions.Evidence, error) {
 	list := func() ([]sessions.Row, error) {
 		rows, err := sessions.List(ctx, cf.claude)
 		if err != nil {
@@ -178,7 +178,7 @@ func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessio
 	if err != nil {
 		return sessions.Evidence{}, err
 	}
-	targets := sessions.Watched(s)
+	targets := sessions.Watched(s, now)
 	if anyMissing(targets, rows) {
 		time.Sleep(cf.secondWait)
 		if rows, err = list(); err != nil {
