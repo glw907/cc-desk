@@ -344,7 +344,7 @@ func TestMergeUnreachable(t *testing.T) {
 
 func TestPassReady(t *testing.T) {
 	r := newLaunchRig(t)
-	r.addRelease(t, true, "a", "b")
+	r.addRelease(t, true, "a", "b", "c")
 	requireRun(t, r.do(t, workedClock, "pass", "start", "proj", "a"))
 	requireRun(t, r.run(t, workedClock, "check"))
 
@@ -373,12 +373,14 @@ func TestPassReady(t *testing.T) {
 		t.Errorf("pull request = %v, want number 7, commit abc123, verdict accept, inside_design, and ready", pr)
 	}
 
-	// A pass that is not building is refused, and nothing is written.
-	got := ready("b", flags)
+	// The check starts b beside a, which fills both slots, so c is the pass
+	// that has not started. A pass that is not building is refused, and nothing
+	// is written.
+	got := ready("c", flags)
 	if got.code != 2 || !strings.Contains(got.stderr, "not_started") {
 		t.Errorf("a pass not building: exit %d, stderr %q, want a refusal", got.code, got.stderr)
 	}
-	if pr := r.passRecord(t, "b")["pull_request"]; pr != nil {
+	if pr := r.passRecord(t, "c")["pull_request"]; pr != nil {
 		t.Errorf("the refused report left a pull request: %v", pr)
 	}
 }

@@ -1,7 +1,7 @@
 # Close the cleanup gaps in the live-check script
 
 The whole-branch review of pass 5 (sessions-timer) accepted the branch and left these gaps in
-`scripts/live-check.sh` and `cmd/cc-desk/desk.go`. None changed the live run's result.
+`scripts/live-check.sh`. None changed the live run's result.
 
 1. `session_ids` reads the id that `watch` saved and the record's current id. The first run's two
    blocked sessions, and any session a hand resume replaced, are never read, so the count of
@@ -16,9 +16,7 @@ The whole-branch review of pass 5 (sessions-timer) accepted the branch and left 
    with the timer enabled and a half-cut base branch.
 5. If the outer `systemd-run` of the `scope` phase fails, the `systemctl --user stop` of the
    probe's scope never runs, and the `sleep` stays alive until it ends.
-6. `desk register` runs `claude agents --json` with no timeout, where `internal/sessions/read.go`
-   uses a context. A hung `claude` hangs the verb.
-7. The hidden `--claude-command` flag lets a caller supply a row list. The ancestor-terminal
+6. The hidden `--claude-command` flag lets a caller supply a row list. The ancestor-terminal
    check is the real barrier. Weigh it again if `desk register` is ever classed as `auth-data`.
 
 Pass 5's live evidence reads three transcripts, and the first run's two blocked sessions are not

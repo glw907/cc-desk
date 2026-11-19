@@ -32,6 +32,7 @@ func TestReplaceRuling(t *testing.T) {
 		setup   func(s *State, rf *ReleaseFile)
 		refused string // a substring of the refusal
 		bad     bool   // a bad request, exit 1
+		marked  bool   // the pass p1 carries the replaced mark afterwards
 	}{
 		{name: "a good replacement"},
 		{name: "no ruling by that id", refused: `ruling "r-0009" does not exist`, req: func(r RulingRequest) RulingRequest { r.Replaces = "r-0009"; return r }},
@@ -54,12 +55,24 @@ func TestReplaceRuling(t *testing.T) {
 			name: "not the current answer", refused: `is not question "q1"'s current answer`,
 			setup: func(s *State, rf *ReleaseFile) { rf.Questions[0].Answer = &Answer{Ruling: "r-0002"} },
 		},
-		{name: "a merged pass", refused: "has merged; a new change is needed", setup: setState(Done)},
-		{name: "a building pass", refused: "has started; replacing it while it builds comes in pass 3", setup: setState(Building)},
-		{name: "a stopped pass", refused: "has started; replacing it while it builds comes in pass 3", setup: setState(Stopped)},
-		{name: "a waiting pass", refused: "has started; replacing it while it builds comes in pass 3", setup: setState(Waiting)},
+		{name: "a merged pass", refused: "has finished; a new change is needed", setup: setState(Done)},
 		{
-			name: "merged wins over started", refused: "has merged",
+			name: "a closed pass", refused: "has finished; a new change is needed",
+			setup: func(s *State, rf *ReleaseFile) {
+				rf.Passes[0].State, rf.Passes[0].Closed = Done, &Closed{Ruling: "r-0001"}
+			},
+		},
+		{name: "a building pass with a session", marked: true, setup: func(s *State, rf *ReleaseFile) {
+			rf.Passes[0].State, rf.Passes[0].Session = Building, &Session{}
+		}},
+		{name: "a building pass with no session", setup: setState(Building)},
+		{name: "a stopped pass with a session", marked: true, setup: func(s *State, rf *ReleaseFile) {
+			rf.Passes[0].State, rf.Passes[0].Session = Stopped, &Session{}
+		}},
+		{name: "a stopped pass with no session", setup: setState(Stopped)},
+		{name: "a waiting pass", setup: setState(Waiting)},
+		{
+			name: "finished wins over started", refused: "has finished",
 			setup: func(s *State, rf *ReleaseFile) {
 				addPass(rf, "p0", "r1", 30, Building).Questions = []string{"q1"}
 				rf.Passes[0].State = Done
@@ -108,6 +121,10 @@ func TestReplaceRuling(t *testing.T) {
 			if a := rf.Questions[0].Answer; a == nil || a.Ruling != "r-0003" || !rf.Dirty {
 				t.Errorf("answer = %+v, dirty %v", a, rf.Dirty)
 			}
+			m := rf.Passes[0].Replaced
+			if tt.marked != (m != nil) || (m != nil && m.Ruling != "r-0003") {
+				t.Errorf("mark = %+v, want marked %v with r-0003", m, tt.marked)
+			}
 		})
 	}
 
@@ -117,6 +134,57 @@ func TestReplaceRuling(t *testing.T) {
 		req.Replaces = ""
 		if err := RecordRuling(deskCaller(), req)(s, at(9, 0)); !isRefusal(err) || !strings.Contains(err.Error(), "already answered") {
 			t.Errorf("error = %v", err)
+		}
+	})
+
+	t.Run("a merge answer takes no mark and is refused once the merge is called", func(t *testing.T) {
+		s, rf := replaceState()
+		pass := &rf.Passes[0]
+		pass.State, pass.Session = Building, &Session{}
+		pass.PullRequest = &PullRequest{Number: 3, Question: "merge-p1-1"}
+		pass.Questions = []string{"merge-p1-1"}
+		rf.Questions = append(rf.Questions, Question{ID: "merge-p1-1", Options: []string{"merge", "close"}, Answer: &Answer{Ruling: "r-0003"}})
+		s.Rulings = append(s.Rulings, Ruling{Format: Format, ID: "r-0003", Time: at(8, 40), Desk: "d", Words: "Merge.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "merge"})
+		req := RulingRequest{Words: "Close it.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "close", Replaces: "r-0003"}
+
+		called := at(8, 50)
+		pass.PullRequest.MergeCalled = &called
+		err := RecordRuling(deskCaller(), req)(s, at(9, 0))
+		if !isRefusal(err) || !strings.Contains(err.Error(), "merge called") {
+			t.Fatalf("after the merge call: error = %v, want a refusal", err)
+		}
+		pass.PullRequest.MergeCalled = nil
+		if err := RecordRuling(deskCaller(), req)(s, at(9, 0)); err != nil {
+			t.Fatal(err)
+		}
+		if pass.Replaced != nil {
+			t.Errorf("mark = %+v, want none on a merge answer", pass.Replaced)
+		}
+		if a := rf.Questions[len(rf.Questions)-1].Answer; a == nil || a.Ruling != "r-0004" {
+			t.Errorf("answer = %+v, want r-0004", a)
+		}
+	})
+
+	t.Run("a merge answer is refused once the fix was sent back", func(t *testing.T) {
+		for name, pr := range map[string]*PullRequest{
+			"the question cleared": {Number: 3},
+			"a later question":     {Number: 3, Question: "merge-p1-2"},
+			"no pull request":      nil,
+		} {
+			s, rf := replaceState()
+			pass := &rf.Passes[0]
+			pass.State, pass.Session, pass.PullRequest = Building, &Session{}, pr
+			pass.Questions = []string{"merge-p1-1"}
+			rf.Questions = append(rf.Questions, Question{ID: "merge-p1-1", Options: []string{"merge", "fix again", "close"}, Answer: &Answer{Ruling: "r-0003"}})
+			s.Rulings = append(s.Rulings, Ruling{Format: Format, ID: "r-0003", Time: at(8, 40), Desk: "d", Words: "Again.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "fix again"})
+			req := RulingRequest{Words: "Merge it.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "merge", Replaces: "r-0003"}
+			err := RecordRuling(deskCaller(), req)(s, at(9, 0))
+			if !isRefusal(err) || !strings.Contains(err.Error(), "has been carried out; a new change is needed") {
+				t.Errorf("%s: error = %v, want a refusal", name, err)
+			}
+			if len(s.Rulings) != 3 || s.newRuling != nil || rf.Dirty {
+				t.Errorf("%s: a refused replacement changed the state", name)
+			}
 		}
 	})
 

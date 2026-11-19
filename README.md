@@ -3,13 +3,24 @@
 cc-desk shows what Claude Code is building, forecasts when the work will next need a decision,
 and takes each decision as a conversation in a terminal.
 
-The `cc-desk` command so far keeps the state files. It reads and strictly checks every one under one
+The `cc-desk` command keeps the state files. It reads and strictly checks every one under one
 lock, records a pass's start, finish, and stop, adds a release or a round's design, and prints a
 snapshot of it all as JSON. It also records Geoff's rulings, one line each, and only from a desk
-session. `cc-desk check` reads the sessions, launches or relaunches work, and merges ready pull
+session. Typed alone on a terminal, `cc-desk` opens that desk session, and `cc-desk <project>
+<round>` opens it on one round. `cc-desk check` reads the sessions, launches or relaunches work, and merges ready pull
 requests. `cc-desk timer install` puts the binary and a systemd user timer in place to run the
 check every five minutes, and `cc-desk timer status` says when it last ran. `bash scripts/gate.sh`
 runs the checks, and fails on any skipped test.
+
+## Install
+
+`cc-desk timer install` copies the binary to `~/.local/share/cc-desk/bin/cc-desk`. To run it by
+name from a shell, link it onto your `PATH`:
+
+```bash
+cc-desk timer install
+ln -sf ~/.local/share/cc-desk/bin/cc-desk ~/.local/bin/cc-desk
+```
 
 The approved design is
 [`docs/specs/2026-11-17-cc-desk-design.md`](docs/specs/2026-11-17-cc-desk-design.md), with a
@@ -44,6 +55,6 @@ letter or a digit and hold only those, `.`, `_`, and `-`, which is the rule for 
 state. It refuses every other address and runs nothing. A name that breaks the rule shows the
 command and the button, and no link.
 
-The handler looks for `cc-desk` on the `PATH` it starts with. It runs nothing until `cc-desk` is on a `PATH`
-that Chromium's session sees. The Desk and skills round puts it there. Chromium asks before it
-opens the link.
+The handler looks for `cc-desk` on the `PATH` it starts with and refuses when it finds none. The
+link from the install lines above puts it there, in a session that started after the install.
+Chromium asks before it opens the link.

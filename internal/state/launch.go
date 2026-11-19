@@ -120,6 +120,24 @@ func RecordLaunch(project, record string, l Launch) Event {
 	}
 }
 
+// ClearReplaced clears a pass's replaced mark and the ready report of its
+// pull request, which describes the work before the replacement. It composes
+// with RecordLaunch in one commit.
+func ClearReplaced(project, pass string) Event {
+	return func(s *State, now time.Time) error {
+		rf, p, err := findPass(s, project, pass)
+		if err != nil {
+			return err
+		}
+		p.Replaced = nil
+		if p.PullRequest != nil {
+			p.PullRequest.Ready = nil
+		}
+		rf.Dirty = true
+		return nil
+	}
+}
+
 // EndSession records that the check ended the record's session.
 func EndSession(project, record string) Event {
 	return func(s *State, now time.Time) error {

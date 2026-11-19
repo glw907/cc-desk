@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/glw907/cc-desk/internal/desk"
@@ -16,19 +19,34 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 	})
 
 	var req state.RulingRequest
+	var wordsFile string
 	record := &cobra.Command{
-		Use:   "record <words> [--project P --round R --question Q --option O] [--replaces <id>]",
+		Use:   "record (<words> | --words-file <path>) [--project P --round R --question Q --option O] [--replaces <id>]",
 		Short: "Record a ruling in Geoff's exact words",
 		Long: "Append one ruling to rulings.jsonl, from a desk session only. The words are one\n" +
-			"argument, taken byte for byte; words that start with - go after --. With --project,\n" +
+			"argument, taken byte for byte; words that start with - go after --. Or they are the\n" +
+			"whole of the file --words-file names, less its trailing newlines. With --project,\n" +
 			"--round, --question, and --option together, the ruling answers that question, closes\n" +
 			"any guess on it, and frees what waited. With --replaces as well, it replaces the\n" +
-			"question's current answer while no pass resting on the question has started. A session that is not a registered desk, a\n" +
+			"question's current answer until a pass resting on it has finished, or, for a merge\n" +
+			"question, until its merge is called or its answer is carried out. A session that is\n" +
+			"not a registered desk, a\n" +
 			"command that does not run under the desk's process, and a desk process with no\n" +
 			"terminal are each refused, with the failing test named.",
-		Args: cobra.ExactArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req.Words = args[0]
+			if (len(args) == 1) == (wordsFile != "") {
+				return errors.New("give the words as one argument or with --words-file, not both or neither")
+			}
+			if wordsFile != "" {
+				data, err := os.ReadFile(wordsFile)
+				if err != nil {
+					return fmt.Errorf("read the words file: %w", err)
+				}
+				req.Words = strings.TrimRight(string(data), "\n")
+			} else {
+				req.Words = args[0]
+			}
 			// The caller is read before the lock, so the lock wait never
 			// shifts what the chain shows.
 			ev := state.RecordRuling(desk.Caller(), req)
@@ -51,6 +69,7 @@ func newRulingCmd(f *rootFlags) *cobra.Command {
 		},
 	}
 	fl := record.Flags()
+	fl.StringVar(&wordsFile, "words-file", "", "a file that holds the words, in place of the argument")
 	fl.StringVar(&req.Project, "project", "", "the project of the question this ruling answers")
 	fl.StringVar(&req.Round, "round", "", "the round of the question")
 	fl.StringVar(&req.Question, "question", "", "the question's id")

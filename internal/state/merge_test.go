@@ -133,7 +133,8 @@ func TestAskMerge(t *testing.T) {
 	s := mergeState(t, "building", `"pull_request":{"number":7,"commit":"abc","verdict":"accept","ready":"2026-11-20T10:30:00Z"}`)
 	opts := []string{"merge", "fix again", "close"}
 	for want := 1; want <= 2; want++ {
-		if err := AskMerge("p", "x", "Pull request 7 failed.", opts, "close")(s, at(11, 0)); err != nil {
+		head := "head" + string(rune('0'+want))
+		if err := AskMerge("p", "x", "Pull request 7 failed.", head, opts, "close")(s, at(11, 0)); err != nil {
 			t.Fatal(err)
 		}
 		id := "merge-x-" + string(rune('0'+want))
@@ -142,13 +143,27 @@ func TestAskMerge(t *testing.T) {
 			t.Fatalf("question %s = %+v", id, q)
 		}
 		p := pass(t, s)
-		if p.PullRequest.Question != id || p.Questions[len(p.Questions)-1] != id || p.PullRequest.Ready == nil {
+		if p.PullRequest.Question != id || p.PullRequest.AskedCommit != head || p.Questions[len(p.Questions)-1] != id || p.PullRequest.Ready == nil {
 			t.Errorf("pass after ask %d = %+v", want, p)
 		}
 	}
 	empty := mergeState(t, "building", "")
-	if err := AskMerge("p", "x", "t", opts, "close")(empty, at(11, 0)); !isRefusal(err) {
+	if err := AskMerge("p", "x", "t", "abc", opts, "close")(empty, at(11, 0)); !isRefusal(err) {
 		t.Errorf("ask with no report: %v, want a refusal", err)
+	}
+}
+
+func TestRecordFixClearsTheQuestion(t *testing.T) {
+	s := mergeState(t, "building", `"pull_request":{"number":7,"commit":"abc","verdict":"accept","fix_attempts":2,"ready":"2026-11-20T10:30:00Z"}`)
+	if err := AskMerge("p", "x", "t", "abc", []string{"merge", "fix again", "close"}, "close")(s, at(10, 45)); err != nil {
+		t.Fatal(err)
+	}
+	if err := RecordFix("p", "x", nil)(s, at(11, 0)); err != nil {
+		t.Fatal(err)
+	}
+	pr := pass(t, s).PullRequest
+	if pr.Question != "" || pr.AskedCommit != "" || pr.FixAttempts != 3 || pr.Ready != nil {
+		t.Errorf("pull request after the fix = %+v", pr)
 	}
 }
 

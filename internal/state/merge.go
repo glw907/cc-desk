@@ -130,7 +130,8 @@ func MarkMerge(project, pass string) Event {
 // RecordFix records that a failed or unfit pull request is sent back to its
 // pass session: one more attempt, the failures saved, and the report
 // cleared, so the check decides nothing more for the pull request until a
-// new report arrives. It composes with RecordLaunch in one commit.
+// new report arrives. It clears an answered merge question, so the answer is
+// carried out once. It composes with RecordLaunch in one commit.
 func RecordFix(project, pass string, failures []string) Event {
 	return func(s *State, now time.Time) error {
 		rf, p, err := findPass(s, project, pass)
@@ -143,6 +144,7 @@ func RecordFix(project, pass string, failures []string) Event {
 		pr := p.PullRequest
 		pr.FixAttempts++
 		pr.Ready, pr.Wait = nil, ""
+		pr.Question, pr.AskedCommit = "", ""
 		pr.Failures = slices.Clone(failures)
 		rf.Dirty = true
 		return nil
@@ -150,10 +152,11 @@ func RecordFix(project, pass string, failures []string) Event {
 }
 
 // AskMerge adds a merge question for the pass and records it on the pull
-// request, whose report stays. The id is merge-<pass>-<k>, with k one more
-// than the pass's merge questions so far. Every later merge decision for the
-// pull request holds until a new report clears the question.
-func AskMerge(project, pass, text string, options []string, recommended string) Event {
+// request, whose report stays, along with the commit it asks about. The id is
+// merge-<pass>-<k>, with k one more than the pass's merge questions so far.
+// Every later merge decision for the pull request holds until the question is
+// answered or a new report clears it.
+func AskMerge(project, pass, text, commit string, options []string, recommended string) Event {
 	return func(s *State, now time.Time) error {
 		rf, p, err := findPass(s, project, pass)
 		if err != nil {
@@ -183,7 +186,7 @@ func AskMerge(project, pass, text string, options []string, recommended string) 
 		}
 		rf.Release = next
 		p, _ = rf.pass(pass)
-		p.PullRequest.Question = id
+		p.PullRequest.Question, p.PullRequest.AskedCommit = id, commit
 		rf.Dirty = true
 		return nil
 	}

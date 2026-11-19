@@ -88,8 +88,8 @@ func TestRecoveryConductorRowVanishes(t *testing.T) {
 	r.vanish(t, first)
 
 	got := r.check(t, minutes(t, 1))
-	if n := len(r.launches(t)); n != 2 {
-		t.Fatalf("%d launches, want 2 (the start and the check's launch again)", n)
+	if n := len(r.launches(t)); n != 3 {
+		t.Fatalf("%d launches, want 3 (the start, the free pass's launch, and the check's launch again)", n)
 	}
 	if slices.Contains(r.kinds(t), "stop") {
 		t.Errorf("claude stop ran for a row that was never there: %v", r.kinds(t))
@@ -114,8 +114,8 @@ func TestRecoveryFinishedConductorStays(t *testing.T) {
 
 	for i, m := range []int{1, 2} {
 		got := r.check(t, minutes(t, m))
-		if n := len(r.launches(t)); n != 1 {
-			t.Fatalf("check %d: %d launches, want only the first", i+1, n)
+		if n := len(r.launches(t)); n != 2 {
+			t.Fatalf("check %d: %d launches, want only the first and the free pass's", i+1, n)
 		}
 		if i == 0 && !strings.Contains(got.stdout, `"decision":"end"`) {
 			t.Errorf("first check output %q lacks end", got.stdout)
@@ -127,8 +127,8 @@ func TestRecoveryFinishedConductorStays(t *testing.T) {
 
 	// An ended record is replaced by a fresh start in its own worktree.
 	requireRun(t, r.run(t, minutes(t, 3), "session", "start", "conductor", "proj"))
-	if n := len(r.launches(t)); n != 2 {
-		t.Errorf("%d launches after restarting the ended conductor, want 2", n)
+	if n := len(r.launches(t)); n != 3 {
+		t.Errorf("%d launches after restarting the ended conductor, want 3", n)
 	}
 }
 

@@ -49,6 +49,8 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		return l.carryMerge(ctx, r)
 	}
 	switch r.Decision.Decision {
+	case sessions.Start:
+		return "started", nil
 	case sessions.Launch, sessions.LaunchAgain, sessions.Relaunch, sessions.EndAndRelaunch, sessions.End:
 	default:
 		return "", nil

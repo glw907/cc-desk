@@ -45,6 +45,16 @@ type Prompt struct {
 	// Fix is set on the relaunch that sends a pull request back to its
 	// session. It takes the place of Relaunch and Answer.
 	Fix *FixNote
+	// Replace is set when the pass's answer was replaced. It follows whichever
+	// of the notes above is set, or none.
+	Replace *ReplaceNote
+}
+
+// ReplaceNote fills the replace paragraph: the question and the words that now
+// answer it, as Geoff gave them.
+type ReplaceNote struct {
+	Question string
+	Words    string
 }
 
 // FixNote fills the fix paragraph: the pull request, the commit the check
@@ -53,6 +63,9 @@ type FixNote struct {
 	Number   int
 	Commit   string
 	Failures []string
+	// Words is what Geoff said when he sent the pull request back, as he gave
+	// it. Empty when the check sent it back on its own.
+	Words string
 }
 
 // List gives the failures as one phrase.
@@ -80,7 +93,7 @@ func (p Prompt) PushCommand() string { return "git push origin " + p.Branch }
 // Fill renders the prompt for the kind, with the relaunch paragraph on a
 // relaunch, the answer paragraph after an answered prompt, or the fix
 // paragraph on a pull request sent back. It refuses a prompt that sets more
-// than one.
+// than one of those. The replace paragraph composes with any of them.
 func Fill(p Prompt) (string, error) {
 	files := []string{p.Kind + ".txt"}
 	notes := 0
@@ -95,6 +108,9 @@ func Fill(p Prompt) (string, error) {
 	}
 	if notes > 1 {
 		return "", fmt.Errorf("prompt for %s sets more than one of a relaunch, an answer, and a fix", p.Name)
+	}
+	if p.Replace != nil {
+		files = append(files, "replace.txt")
 	}
 	var out bytes.Buffer
 	for i, f := range files {

@@ -67,7 +67,7 @@ func applyRecorded(s *State, r Recorded, now time.Time) error {
 	if sess == nil {
 		// A building pass with no session record has only the decision to
 		// write: the launch makes the record.
-		if d := r.Decision.Decision; (d == "launch" || d == "wait_usage") && strings.HasPrefix(r.Decision.Record, "pass:") {
+		if d := r.Decision.Decision; (d == "launch" || d == "wait_usage" || d == "start") && strings.HasPrefix(r.Decision.Record, "pass:") {
 			return nil
 		}
 		return fmt.Errorf("no session record %s in project %q", r.Decision.Record, r.Decision.Project)

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/glw907/cc-desk/internal/state"
 )
@@ -132,4 +133,23 @@ func TestDeskRegister(t *testing.T) {
 		r := registerUnderDesk(t, true, registerSession, func(pid int) string { return agentRow("another-session", "interactive", pid) })
 		refused(t, r, "lists no row for this session")
 	})
+}
+
+func TestDeskRegisterListWait(t *testing.T) {
+	t.Setenv("CLAUDE_CODE_SESSION_ID", registerSession)
+	dir := newStateFrom(t, "order")
+	before := folder(t, dir)
+	stand := filepath.Join(t.TempDir(), "claude")
+	if err := os.WriteFile(stand, []byte("#!/bin/sh\nsleep 5\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	r := run(t, dir, at(t, 20), "--claude-command", stand, "desk", "register", "--list-wait", "1s")
+	if took := time.Since(start); took > 3*time.Second {
+		t.Errorf("register took %s, want it to give up within 3s", took)
+	}
+	if r.code == 0 || !strings.Contains(r.stderr, "no list within 1s") {
+		t.Errorf("register exit %d, stderr %q; want a failure naming the wait", r.code, r.stderr)
+	}
+	sameFolder(t, before, folder(t, dir))
 }

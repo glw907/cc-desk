@@ -18,6 +18,7 @@ const (
 	EndAndRelaunch = "end_and_relaunch"
 	LaunchAgain    = "launch_again"
 	Launch         = "launch"
+	Start          = "start"
 	Stop           = "stop"
 	WaitUsage      = "wait_usage"
 	WaitLink       = "wait_link"
@@ -28,6 +29,7 @@ const (
 	ReasonLostConnection = "lost_connection"
 	ReasonIdle           = "idle"
 	ReasonMissing        = "missing"
+	ReasonReplaced       = "replaced"
 )
 
 // IdleLimit is how long a done session may sit before the check ends it.
@@ -121,7 +123,11 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			out = append(out, r)
 			return
 		}
-		mr, decided, info, held := decideMerge(base, sess, pass, ev, key)
+		if r, decided := replacedRow(base, sess, pass, ev.Records[key], hold); decided {
+			out = append(out, r)
+			return
+		}
+		mr, decided, info, held := decideMerge(base, sess, pass, ev, key, answerOf(s, rf, pass))
 		if decided && hold && mr.Decision.Decision == Fix {
 			// A fix relaunches the session, so the usage hold waits it out
 			// with no attempt spent.
@@ -157,8 +163,8 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 
 // Plan runs the record steps of a check on s, in this order: Decide on the
 // folded state before any settle, a resume through StartPass for each
-// uncounted usage relaunch on a release with a checkout, settle, then one
-// launch decision for each building pass with no session record (wait_usage
+// uncounted usage relaunch on a release with a checkout, settle, a start for
+// each free pass the limits allow, then one launch decision for each building pass with no session record (wait_usage
 // under the usage hold). The caller folds the usage reading into s first and
 // records the results. The dry run calls Plan on its in-memory copy.
 func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
@@ -173,6 +179,11 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 		}
 	}
 	s.Settle(now)
+	starts, err := startFree(s, now)
+	if err != nil {
+		return nil, err
+	}
+	results = append(results, starts...)
 	hold := s.UsageStop()
 	for _, rf := range s.Releases {
 		if rf.Done {
@@ -191,6 +202,31 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 		}
 	}
 	return results, nil
+}
+
+// startFree starts each not-started pass that breaks no start rule, in
+// release and file order, while no limit holds. A release with no checkout
+// starts nothing. Settle has run first, so a waiting pass takes a free slot
+// before a free one does.
+func startFree(s *state.State, now time.Time) ([]Result, error) {
+	var out []Result
+	for _, rf := range s.Releases {
+		if rf.Done || rf.Checkout == "" {
+			continue
+		}
+		for i := range rf.Passes {
+			p := &rf.Passes[i]
+			if p.State != state.NotStarted || len(s.Limits()) > 0 || !s.Free(rf, p) {
+				continue
+			}
+			if err := state.StartPass(rf.Project, p.Name)(s, now); err != nil {
+				return nil, err
+			}
+			d := state.Decision{Project: rf.Project, Record: "pass:" + p.Name, Session: rf.Project + "-" + p.Name, Decision: Start, Reason: "free"}
+			out = append(out, Result{Decision: d})
+		}
+	}
+	return out, nil
 }
 
 // hasCheckout reports whether the project's live release records a checkout.
@@ -213,6 +249,44 @@ func cleanupRow(rf *state.ReleaseFile, record string, sess *state.Session) (Resu
 	}
 	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name, Decision: Cleanup}
 	return Result{Decision: d}, true
+}
+
+// answerOf gives the ruling that answered the pass's merge question, or nil
+// while the question is open or none is asked.
+func answerOf(s *state.State, rf *state.ReleaseFile, p *state.Pass) *Answered {
+	if p == nil || p.PullRequest == nil || p.PullRequest.Question == "" {
+		return nil
+	}
+	for _, q := range rf.Questions {
+		if q.ID != p.PullRequest.Question || q.Answer == nil {
+			continue
+		}
+		for _, g := range s.Rulings {
+			if g.ID == q.Answer.Ruling {
+				return &Answered{Ruling: g.ID, Option: g.Option, Words: g.Words}
+			}
+		}
+	}
+	return nil
+}
+
+// replacedRow decides for a building pass whose answer was replaced and whose
+// session still has a row, working, blocked, or done: end it and relaunch it
+// with the new words, uncounted. A session that finished without a report
+// holds the old answer as much as a working one does. It runs before the
+// merge rows, so a report made under the old answer merges nothing. Under the
+// usage hold the relaunch waits.
+func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e RecordEvidence, hold bool) (Result, bool) {
+	if p == nil || p.State != state.Building || p.Replaced == nil || sess.Ended != nil || !e.HasRow {
+		return Result{}, false
+	}
+	if hold {
+		base.Decision, base.Reason = WaitUsage, ReasonReplaced
+		return Result{Decision: base}, true
+	}
+	no := false
+	base.Decision, base.Reason, base.Counted = EndAndRelaunch, ReasonReplaced, &no
+	return Result{Decision: base}, true
 }
 
 // early applies rows 1 to 5, which need no row from the list and write

@@ -1,0 +1,7 @@
+Geoff replaced his answer to this question: {{.Replace.Question}}
+
+His new words, exactly as he gave them:
+
+{{.Replace.Words}}
+
+Follow the new words over the answer you started on. Change the work on the branch to match, and report the pull request ready again once it does.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -132,6 +133,9 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 		s.newRuling = &ruling
 		if q != nil {
 			q.Answer = &Answer{Ruling: ruling.ID}
+			if r.Replaces != "" {
+				markReplaced(rf, q, ruling)
+			}
 			rf.Dirty = true
 		}
 		return nil
@@ -141,9 +145,10 @@ func RecordRuling(c Caller, r RulingRequest) Event {
 // checkReplace refuses a replacement the log or the passes don't allow, in
 // this order: the ruling doesn't exist, another already replaced it, it
 // answered a different question, it isn't the question's current answer, a
-// pass resting on the question has merged, a pass resting on it has started.
-// Starting the pass again belongs to the check, so a started pass is refused
-// here until that lands.
+// pass resting on the question has finished, or a merge question's merge was
+// called or its answer was carried out (the pass's pull request no longer
+// holds the question). A pass that has not started, is waiting, is stopped,
+// or is building takes the replacement.
 func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) error {
 	i := slices.IndexFunc(s.Rulings, func(g Ruling) bool { return g.ID == r.Replaces })
 	if i < 0 {
@@ -159,26 +164,38 @@ func (s *State) checkReplace(rf *ReleaseFile, q *Question, r RulingRequest) erro
 	if q.Answer == nil || q.Answer.Ruling != r.Replaces {
 		return Refuse(fmt.Sprintf("%sruling %q is not question %q's current answer", rulingPrefix, r.Replaces, r.Question))
 	}
-	var started *Pass
+	merge := strings.HasPrefix(q.ID, "merge-")
 	for k := range rf.Passes {
 		p := &rf.Passes[k]
 		if !slices.Contains(p.Questions, q.ID) {
 			continue
 		}
-		switch p.State {
-		case Done:
-			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has merged; a new change is needed", rulingPrefix, p.Name, q.ID))
-		case NotStarted:
-		default:
-			if started == nil {
-				started = p
-			}
+		switch {
+		case p.State == Done:
+			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has finished; a new change is needed", rulingPrefix, p.Name, q.ID))
+		case merge && (p.PullRequest == nil || p.PullRequest.Question != q.ID):
+			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has been carried out; a new change is needed", rulingPrefix, p.Name, q.ID))
+		case merge && p.PullRequest.MergeCalled != nil:
+			return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has had its merge called; a new change is needed", rulingPrefix, p.Name, q.ID))
 		}
 	}
-	if started != nil {
-		return Refuse(fmt.Sprintf("%spass %q, which rests on question %q, has started; replacing it while it builds comes in pass 3", rulingPrefix, started.Name, q.ID))
-	}
 	return nil
+}
+
+// markReplaced marks each building pass, or stopped pass with a session
+// record, that rests on the question whose answer a ruling replaced. The
+// check reads the mark and relaunches the session with the new words. A merge
+// question takes no mark: the merge rows read its latest answer.
+func markReplaced(rf *ReleaseFile, q *Question, ruling Ruling) {
+	if strings.HasPrefix(q.ID, "merge-") {
+		return
+	}
+	for k := range rf.Passes {
+		p := &rf.Passes[k]
+		if slices.Contains(p.Questions, q.ID) && (p.State == Building || p.State == Stopped) && p.Session != nil {
+			p.Replaced = &Replaced{Ruling: ruling.ID, Time: ruling.Time}
+		}
+	}
 }
 
 // StartConversation records a design conversation for a round of the live
