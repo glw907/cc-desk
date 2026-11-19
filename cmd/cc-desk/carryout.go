@@ -249,7 +249,7 @@ func (l *launcher) removeConductorWorktree(ctx context.Context, project string, 
 			cwds = append(cwds, row.Cwd)
 		}
 	}
-	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: sess.Worktree, Branch: sess.Branch}
+	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: sess.Worktree, Branch: sess.Branch, Limit: l.limit()}
 	pulled, note, err := wt.Pull(ctx, cwds)
 	if err != nil {
 		return "", err

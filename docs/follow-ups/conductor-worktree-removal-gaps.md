@@ -14,3 +14,7 @@ default branch and removes the conductor's worktree and branch. Three cases fall
 3. **The failed-launch record carries a placeholder id.** A conductor launch that fails records its
    session with the short id `none`, which stands for no session. Any reader of short ids must know
    that `none` is not one. Store an empty id instead.
+
+A related older gap sits in `cmd/cc-desk/merge.go`. `MarkMerge` sets `MergeCalled` before the merge
+call, and nothing clears it when the call fails. If Geoff later merges that pull request by hand,
+the check reads the merge as cc-desk's own. Clear the mark when the call fails.

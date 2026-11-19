@@ -164,7 +164,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 
 // Plan runs the record steps of a check on s, in this order: Decide on the
 // folded state before any settle, a resume through StartPass for each
-// uncounted usage relaunch on a release with a checkout, settle, a start for
+// usage relaunch on a release with a checkout, settle, a start for
 // each free pass the limits allow, then one launch decision for each building pass with no session record (wait_usage
 // under the usage hold). The caller folds the usage reading into s first and
 // records the results. The dry run calls Plan on its in-memory copy.
