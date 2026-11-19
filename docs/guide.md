@@ -5,9 +5,6 @@ status page to see how the work is going, and you answer its questions at the de
 session in your terminal. This guide covers what you type, what the page shows, and what to do
 when something is wrong.
 
-The guide describes cc-desk once its desk session lands. Until then, typing `cc-desk` prints
-its help, and the page is the only part you can use.
-
 ## Open the desk
 
 Type `cc-desk` in a terminal. A Claude session opens and tells you what is waiting:
