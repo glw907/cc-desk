@@ -18,6 +18,7 @@ const (
 	EndAndRelaunch = "end_and_relaunch"
 	LaunchAgain    = "launch_again"
 	Launch         = "launch"
+	Start          = "start"
 	Stop           = "stop"
 	WaitUsage      = "wait_usage"
 	WaitLink       = "wait_link"
@@ -157,8 +158,8 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 
 // Plan runs the record steps of a check on s, in this order: Decide on the
 // folded state before any settle, a resume through StartPass for each
-// uncounted usage relaunch on a release with a checkout, settle, then one
-// launch decision for each building pass with no session record (wait_usage
+// uncounted usage relaunch on a release with a checkout, settle, a start for
+// each free pass the limits allow, then one launch decision for each building pass with no session record (wait_usage
 // under the usage hold). The caller folds the usage reading into s first and
 // records the results. The dry run calls Plan on its in-memory copy.
 func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
@@ -173,6 +174,11 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 		}
 	}
 	s.Settle(now)
+	starts, err := startFree(s, now)
+	if err != nil {
+		return nil, err
+	}
+	results = append(results, starts...)
 	hold := s.UsageStop()
 	for _, rf := range s.Releases {
 		if rf.Done {
@@ -191,6 +197,31 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 		}
 	}
 	return results, nil
+}
+
+// startFree starts each not-started pass that breaks no start rule, in
+// release and file order, while no limit holds. A release with no checkout
+// starts nothing. Settle has run first, so a waiting pass takes a free slot
+// before a free one does.
+func startFree(s *state.State, now time.Time) ([]Result, error) {
+	var out []Result
+	for _, rf := range s.Releases {
+		if rf.Done || rf.Checkout == "" {
+			continue
+		}
+		for i := range rf.Passes {
+			p := &rf.Passes[i]
+			if p.State != state.NotStarted || len(s.Limits()) > 0 || !s.Free(rf, p) {
+				continue
+			}
+			if err := state.StartPass(rf.Project, p.Name)(s, now); err != nil {
+				return nil, err
+			}
+			d := state.Decision{Project: rf.Project, Record: "pass:" + p.Name, Session: rf.Project + "-" + p.Name, Decision: Start, Reason: "free"}
+			out = append(out, Result{Decision: d})
+		}
+	}
+	return out, nil
 }
 
 // hasCheckout reports whether the project's live release records a checkout.
