@@ -8,7 +8,18 @@ lock, records a pass's start, finish, and stop, adds a release or a round's desi
 snapshot of it all as JSON. It also records Geoff's rulings, one line each, and only from a desk
 session. Typed alone on a terminal, `cc-desk` opens that desk session, and `cc-desk <project>
 <round>` opens it on one round. `cc-desk check` reads the sessions, launches or relaunches work, and merges ready pull
-requests. `cc-desk timer install` puts the binary and a systemd user timer in place to run the
+requests. A pass reports itself ready with `cc-desk pass ready --verdict accept|fix|escalate
+--calls <n>`. The review gives the verdict, and `--calls` is the number of points the pull request
+leaves for Geoff to decide. The check merges a pull request only when that number is 0, and
+otherwise asks Geoff. The `--call-limit` flag on `cc-desk check` sets how long the merge call, the
+fetch, and the pull each may run. The default is 60 seconds.
+
+Every session the check launches carries a `PermissionDenied` hook that runs `cc-desk refusal
+hook`. The hook records each command that auto mode refuses on the session's record. It prints
+nothing and exits 0, so the session carries on. A failure is one line in `refusal-hook.log` under
+the state folder.
+
+`cc-desk timer install` puts the binary and a systemd user timer in place to run the
 check every five minutes, and `cc-desk timer status` says when it last ran. `bash scripts/gate.sh`
 runs the checks, and fails on any skipped test.
 
