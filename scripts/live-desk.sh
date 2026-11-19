@@ -192,6 +192,15 @@ phase_prep() {
     fi
   done
 
+  # A rerun starts clean: an earlier run's pass worktrees and branches would
+  # make a launch refuse, as it refuses a worktree no record names.
+  local leftover
+  for leftover in desk-live-a desk-merge desk-close; do
+    if [ -d "$SCRATCH/.claude/worktrees/$leftover" ]; then
+      show git -C "$SCRATCH" worktree remove --force ".claude/worktrees/$leftover"
+    fi
+    git -C "$SCRATCH" branch -D "$leftover" >/dev/null 2>&1 || true
+  done
   show git -C "$SCRATCH" fetch origin
   show git -C "$SCRATCH" switch -c "$BASE" origin/main
   mkdir -p "$SCRATCH/docs/plans"
