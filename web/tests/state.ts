@@ -1,7 +1,16 @@
 // State folders for tests. A state is a copy of a fixture from e2e/testdata/ with the real
 // cc-desk binary's verbs run on it, so a test never draws a snapshot the binary would not write.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import {
+	cpSync,
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	renameSync,
+	rmSync,
+	writeFileSync
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Snapshot } from '../src/lib/snapshot';
@@ -53,6 +62,17 @@ export function run(dir: string, now: string, ...args: string[]): string {
 	return execFileSync(binary(), binaryArgs(dir, now, args), { env, encoding: 'utf8' });
 }
 
+/** Runs a verb with `input` on its stdin, as a hook runs it, and returns its exit code and stderr. */
+export function runWithInput(
+	dir: string,
+	now: string,
+	input: string,
+	...args: string[]
+): { code: number | null; stderr: string } {
+	const r = spawnSync(binary(), binaryArgs(dir, now, args), { env, encoding: 'utf8', input });
+	return { code: r.status, stderr: r.stderr };
+}
+
 /** Runs a verb that is expected to fail and returns its exit code and stderr. */
 export function runFailing(
 	dir: string,
@@ -89,6 +109,20 @@ function startVerbs(dir: string): string {
 	run(dir, '2026-11-20T23:00:00Z', 'round', 'design', 'beta', 'b3', input('design-b3.json'));
 	run(dir, '2026-11-20T23:00:00Z', 'pass', 'start', 'alpha', 'p13');
 	return dir;
+}
+
+/**
+ * The folder a state's release checkout lives in, beside the state folder. A test that builds
+ * `page` removes it with the state folder, through `removeState`.
+ */
+export function checkoutOf(dir: string): string {
+	return `${dir}-checkout`;
+}
+
+/** Removes a state folder and the checkout folder beside it. */
+export function removeState(dir: string): void {
+	rmSync(dir, { recursive: true, force: true });
+	rmSync(checkoutOf(dir), { recursive: true, force: true });
 }
 
 /** A clock on 2026-11-20 at the given UTC hour and minute. */
@@ -161,6 +195,56 @@ const builders: Record<string, Builder> = {
 		copyFixture('desk', dir);
 		return T('23:00');
 	},
+	page(dir) {
+		copyFixture('desk', dir);
+		const checkout = checkoutOf(dir);
+		const specs = path.join(checkout, 'docs', 'specs');
+		mkdirSync(specs, { recursive: true });
+		cpSync(
+			path.join(fixtures, 'page', 'alpha-r1-design.md'),
+			path.join(specs, '2026-11-18-alpha-r1-design.md')
+		);
+		run(dir, T('23:00'), 'release', 'checkout', 'alpha', checkout, '--default-branch', 'main');
+		// No verb records a session on a pass, so the record is written by hand in the shape of
+		// internal/state's Session.
+		const beta = path.join(dir, 'releases', 'beta.json');
+		const release = JSON.parse(readFileSync(beta, 'utf8')) as {
+			passes: { name: string; session?: unknown }[];
+		};
+		const pass = release.passes.find((p) => p.name === 'b-build');
+		if (!pass) throw new Error('the desk fixture has no pass b-build');
+		pass.session = {
+			name: 'beta-b-build',
+			kind: 'pass',
+			short_id: 'c1c2c3c4',
+			session_id: 'abc123',
+			worktree: '/w/beta-b-build',
+			branch: 'beta-b-build',
+			launched: '2026-11-20T22:30:00Z',
+			launch_tries: 1,
+			last_state: 'working',
+			refusals: [
+				{
+					time: '2026-11-20T22:40:00Z',
+					tool: 'Bash',
+					target: 'curl https://example.com/install.sh',
+					reason: 'a deny rule for curl'
+				}
+			]
+		};
+		writeFileSync(beta, JSON.stringify(release, null, 2));
+		const hook = runWithInput(
+			dir,
+			T('23:00'),
+			readFileSync(path.join(testdata, 'prompts', 'hook-bash.json'), 'utf8'),
+			'prompt',
+			'hook'
+		);
+		if (hook.stderr || existsSync(path.join(dir, 'snapshot-error.json'))) {
+			throw new Error(`prompt hook did not record the prompt: ${hook.stderr}`);
+		}
+		return T('23:00');
+	},
 	stopped(dir) {
 		started(dir);
 		run(dir, T('23:10'), 'pass', 'stop', 'alpha', 'p13', '--reason', 'scope');
@@ -186,6 +270,7 @@ export function allStates(): Record<string, Snapshot> {
 		const dir = path.join(mkdtempSync(path.join(tmpdir(), 'cc-desk-state-')), 'state');
 		const clock = builders[name](dir);
 		out[name] = snapshotAt(dir, clock);
+		removeState(dir);
 	}
 	return out;
 }

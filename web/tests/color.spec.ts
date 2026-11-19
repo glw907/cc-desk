@@ -44,6 +44,7 @@ const SHOWN_BY: Record<string, { pass: string[]; round: string[]; widget: string
 	},
 	two: { pass: ['waiting'], round: [], widget: ['ready_now'], asks: false },
 	stopped: { pass: ['stopped'], round: [], widget: ['needs_you_now'], asks: false },
+	page: { pass: [], round: [], widget: [], asks: false },
 	redraw: { pass: [], round: ['not_designed'], widget: [], asks: false },
 	big: { pass: [], round: [], widget: ['ready_now'], asks: false },
 	quiet: { pass: [], round: [], widget: ['nothing_waiting'], asks: false }
@@ -109,7 +110,7 @@ test.describe('words with color', () => {
 				}
 			};
 			// The states that live on item pages are read there, so these builders walk every page.
-			if (name === 'started' || name === 'stopped' || name === 'two') {
+			if (name === 'started' || name === 'stopped' || name === 'two' || name === 'page') {
 				await crawl(page, app.url, visit);
 			} else {
 				await openDrawn(page, app.url, '/');

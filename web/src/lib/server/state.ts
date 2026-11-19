@@ -1,5 +1,6 @@
-// Reads the state folder. The server never opens a file for writing and runs no command:
-// the cc-desk binary is the only writer, and this page only reads what it leaves.
+// Reads the state folder. The server never opens a file for writing: the cc-desk binary is the
+// only writer, and this module only reads what it leaves. The one command the server runs,
+// "Mark as read", lives in command.ts.
 import { readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';

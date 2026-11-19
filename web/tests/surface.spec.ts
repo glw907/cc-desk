@@ -1,26 +1,12 @@
 // The page is a reading surface: it holds no control, refuses every write, writes no file.
-import { createHash } from 'node:crypto';
 import { chmodSync, cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, test } from './app';
 import { crawl, openDrawn } from './crawl';
-import { buildState } from './state';
+import { hashTree } from './hash';
+import { buildState, checkoutOf } from './state';
 import type { Snapshot } from '../src/lib/snapshot';
-
-/** SHA-256 of every file under `root`, by path relative to `root`. */
-function hashTree(root: string): Record<string, string> {
-	const out: Record<string, string> = {};
-	const walk = (dir: string) => {
-		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			const full = path.join(dir, entry.name);
-			if (entry.isDirectory()) walk(full);
-			else out[path.relative(root, full)] = createHash('sha256').update(readFileSync(full)).digest('hex');
-		}
-	};
-	walk(root);
-	return out;
-}
 
 /** Sets the mode of `root`, every folder under it, and every file under it. */
 function chmodTree(root: string, fileMode: number, dirMode: number): void {
@@ -88,7 +74,8 @@ test.describe('a reading surface', () => {
 			const addresses = [...visited, '/api/state', '/nothing/names/this', asset];
 			for (const address of addresses) {
 				for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
-					const res = await page.request.fetch(app.url + address, { method });
+					// The page's own origin, so Kit's origin check passes and the hook answers.
+					const res = await page.request.fetch(app.url + address, { method, headers: { origin: app.url } });
 					expect(res.status(), `${method} ${address}`).toBe(405);
 					expect(res.headers()['allow'], `${method} ${address} allow`).toBe('GET, HEAD');
 				}
@@ -116,6 +103,55 @@ test.describe('a reading surface', () => {
 		}
 	});
 
+	test('on the page state the one form is Mark as read, on a report page, and the walk writes nothing', async ({
+		app,
+		page
+	}) => {
+		const appCopy = mkdtempSync(path.join(tmpdir(), 'cc-desk-app-'));
+		cpSync(path.resolve(import.meta.dirname, '..', 'build'), appCopy, { recursive: true });
+		const clock = buildState('page', app.stateDir);
+		const checkout = checkoutOf(app.stateDir);
+		const snapshot = JSON.parse(readFileSync(path.join(app.stateDir, 'snapshot.json'), 'utf8')) as Snapshot;
+		const roots = [app.stateDir, appCopy, checkout];
+		const before = roots.map((root) => hashTree(root));
+		try {
+			for (const root of roots) readOnly(root);
+			await page.clock.setFixedTime(new Date(clock));
+			await app.start(appCopy);
+
+			// The walk never clicks. A report page holds the one form; no other page holds any.
+			const visited = await crawl(page, app.url, async (address) => {
+				const onReport = /^\/reports\/rep-\d+$/.test(address);
+				expect(await page.locator('form').count(), `${address} forms`).toBe(onReport ? 1 : 0);
+				for (const selector of ['input', 'select', 'textarea', '[contenteditable]']) {
+					expect(await page.locator(selector).count(), `${address} holds ${selector}`).toBe(0);
+				}
+				for (const button of await page.getByRole('button').all()) {
+					const name = await button.evaluate((el) => el.getAttribute('aria-label') ?? el.textContent?.trim() ?? '');
+					const allowed = onReport && name === 'Mark as read' ? name : 'Copy command';
+					expect(name, `${address} holds a button named "${name}"`).toBe(allowed);
+				}
+			});
+
+			const named = ['/', '/rulings', '/reports/rep-0001'];
+			for (const release of snapshot.releases) {
+				for (const round of release.rounds) {
+					named.push(`/${release.project}/${round.name}`);
+					for (const pass of round.passes) named.push(`/${release.project}/${round.name}/${pass.name}`);
+				}
+			}
+			expect(named.length).toBeGreaterThan(10);
+			for (const address of named) expect(visited, `the walk missed ${address}`).toContain(address);
+
+			await app.stop();
+			expect(app.stderr).toBe('');
+			roots.forEach((root, i) => expect(hashTree(root), root).toEqual(before[i]));
+		} finally {
+			for (const root of roots) writable(root);
+			rmSync(appCopy, { recursive: true, force: true });
+		}
+	});
+
 	test('the server source holds no call that writes a file', () => {
 		const src = path.resolve(import.meta.dirname, '..', 'src');
 		const files: string[] = [];
@@ -129,7 +165,10 @@ test.describe('a reading surface', () => {
 		walk(src);
 		expect(files.length).toBeGreaterThan(10);
 
-		const allowedNames = new Set(['readFile', 'stat', 'access']);
+		const allowedNames = new Set(['readFile', 'stat', 'access', 'realpath']);
+		// The one file that runs a command, for "Mark as read". It may import child_process and
+		// call execFile; every other name below stays banned there as everywhere.
+		const runsCommand = path.join('lib', 'server', 'command.ts');
 		const importFrom = /(?:import|export)\s+([^;]*?)\s+from\s+['"](?:node:)?(fs|fs\/promises|child_process)['"]/g;
 		const requireOf = /require\(\s*['"](?:node:)?(fs|fs\/promises|child_process)['"]\s*\)/;
 		const wholeModule = /^(\*\s+as\s+\w+|\w+)$/;
@@ -152,6 +191,7 @@ test.describe('a reading surface', () => {
 				}
 				for (const raw of clause.replace(/[{}]/g, '').split(',')) {
 					const name = raw.trim().split(/\s+as\s+/)[0];
+					if (rel === runsCommand && m[2] === 'child_process' && name === 'execFile') continue;
 					if (name && !allowedNames.has(name)) found.push(`${rel}: imports ${name} from ${m[2]}`);
 				}
 			}
@@ -159,6 +199,7 @@ test.describe('a reading surface', () => {
 			if (required) found.push(`${rel}: requires ${required[1]}`);
 			text.split('\n').forEach((line, i) => {
 				const hit = call.exec(line);
+				if (hit && hit[1] === 'execFile' && rel === runsCommand) return;
 				// open( is a file call only where the file imports node:fs; window.open is not.
 				if (hit && (hit[1] !== 'open' || importsFs)) found.push(`${rel}:${i + 1}: calls ${hit[1]}(`);
 			});

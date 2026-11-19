@@ -435,6 +435,54 @@ a.rail-row:hover {
 .calls li {
 	padding-inline-start: var(--spacing-4px);
 }
+.option-cards {
+	display: grid;
+	gap: var(--spacing-8px);
+	margin-block: var(--spacing-8px);
+}
+.option-card {
+	padding: var(--spacing-8px) var(--spacing-12px);
+	border: var(--spacing-1px) solid var(--color-base-300);
+	border-radius: var(--radius-box);
+}
+.option-name {
+	font-weight: var(--font-weight-heading);
+}
+.recommended {
+	margin-inline-start: var(--spacing-8px);
+	font-size: var(--text-step-9);
+	font-weight: normal;
+	color: var(--color-muted);
+}
+.design-body {
+	margin-block-start: var(--spacing-12px);
+	overflow-wrap: anywhere;
+}
+.design-body :is(h1, h2, h3, h4) {
+	font-family: var(--font-display);
+	font-weight: var(--font-weight-heading);
+	margin-block: var(--spacing-12px) var(--spacing-4px);
+}
+.design-body :is(ul, ol) {
+	padding-inline-start: var(--spacing-24px, 1.5rem);
+}
+.design-body ul {
+	list-style: disc;
+}
+.design-body ol {
+	list-style: decimal;
+}
+.design-body pre {
+	overflow-x: auto;
+}
+.design-body a {
+	color: var(--color-primary);
+	text-decoration: underline;
+}
+.form-error {
+	color: var(--cairn-error-ink);
+	font-size: var(--text-step-9);
+}
 .state-line {
 	display: flex;
 	flex-wrap: wrap;

@@ -2,9 +2,9 @@
 # Opens one cc-desk://<project>/<round> address in a terminal.
 #
 # The desktop hands this script the address unchanged, as its one argument. It runs
-# `ptyxis -x "<cc-desk> <project> <round>"` only when both names match [a-z0-9][a-z0-9-]*, and
-# refuses every other address with exit 2. A name can't start with "-", so it can't reach cc-desk
-# as a flag.
+# `ptyxis -x "<cc-desk> <project> <round>"` only when both names match [a-z0-9][a-z0-9._-]*, and
+# refuses every other address with exit 2. A name can't start with "-" or ".", so it can't reach
+# cc-desk as a flag.
 set -euo pipefail
 # Under a UTF-8 locale [a-z] can match accented letters. The variable is not exported, so ptyxis
 # and cc-desk keep the session's locale.
@@ -17,7 +17,7 @@ refuse() {
 
 (( $# == 1 )) || refuse "takes one address"
 
-re='^cc-desk://([a-z0-9][a-z0-9-]*)/([a-z0-9][a-z0-9-]*)$'
+re='^cc-desk://([a-z0-9][a-z0-9._-]*)/([a-z0-9][a-z0-9._-]*)$'
 [[ $1 =~ $re ]] || refuse "not a cc-desk://<project>/<round> address"
 # The path check below runs a second match, which overwrites BASH_REMATCH.
 project=${BASH_REMATCH[1]}

@@ -7,7 +7,10 @@ listed them as `idle` with `state` `blocked`. At 14:56:32Z the check recorded bo
 stopped with the reason `unreadable_stop`, and from then on it decided nothing for them. Nothing
 told Geoff, and no later check would have resumed them.
 
-Pass 5 fixed the `PATH` (commit `ba50c71`) and resumed the passes by hand with `pass start`. The
-open question is what the check should do with a session that is idle and blocked for a cause it
-can't read. Two choices: leave it stopped and put it in "Needs you now" with the transcript's last
-message as the cause, or relaunch it once and stop only if it blocks again.
+Pass 5 fixed the `PATH` (commit `ba50c71`) and resumed the passes by hand with `pass start`.
+
+The desk-page pass settled part of this. The stop stays, and the page now says it in words: a
+pass's page gives the stop's time and a sentence for its reason, and "Needs you now" lists it. What
+stays open is the cause. The page can't say why the session blocked, because the check doesn't read
+the transcript. Show the transcript's last message as the cause, so a failing hook reads as a
+failing hook and not as an unreadable stop.

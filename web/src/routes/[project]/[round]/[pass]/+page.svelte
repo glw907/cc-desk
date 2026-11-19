@@ -1,9 +1,9 @@
 <!--
 @component
 A pass's page at `/<project>/<round>/<pass>`: its name, summary, state, figures, what it needs,
-and the command of its round. A stopped pass shows its reason and no time, because the snapshot
-holds no stop time. The pass's own needs are its questions: the snapshot gives a pass no needs
-kind or reason, so a pass with none borrows its round's reason when the round needs nothing.
+and the command of its round. A stopped pass shows its reason and when the stop began. A pass
+with no questions says "Nothing." with its own reason (the snapshot's `needs_reason`). The
+permission prompts and refused commands of the sessions on the pass are listed with their times.
 -->
 <script lang="ts">
 	import { page } from '$app/state';
@@ -27,6 +27,16 @@ kind or reason, so a pass with none borrows its round's reason when the round ne
 				)
 			: undefined
 	);
+	const sessions = $derived(
+		(snapshot?.sessions ?? []).filter(
+			(s) =>
+				s.project === page.params.project &&
+				s.round === page.params.round &&
+				s.pass === page.params.pass
+		)
+	);
+	const prompts = $derived(sessions.flatMap((s) => s.prompts));
+	const refusals = $derived(sessions.flatMap((s) => s.refusals));
 	const minutes = (n: number | null) => (n === null ? null : formatMinutes(n));
 </script>
 
@@ -46,7 +56,9 @@ kind or reason, so a pass with none borrows its round's reason when the round ne
 				<p class="state-line">
 					<span class="state {pass.state}">{word('passState', pass.state)}</span>
 					{#if pass.state === 'stopped' && pass.stop_reason}
-						<span class="why">{word('stopReason', pass.stop_reason)}</span>
+						<span class="why">
+							{word('stopReason', pass.stop_reason)}{#if pass.stopped_at}, {formatWhen(pass.stopped_at, poll.now)}{/if}
+						</span>
 					{/if}
 				</p>
 
@@ -67,11 +79,35 @@ kind or reason, so a pass with none borrows its round's reason when the round ne
 				{#if pass.questions.length > 0}
 					<Questions questions={pass.questions} />
 				{:else}
-					<p>
-						Nothing. {round.needs.kind === 'nothing' && round.needs.reason
-							? round.needs.reason
-							: 'No reason recorded.'}
-					</p>
+					<p>Nothing. {pass.needs_reason ?? 'No reason recorded.'}</p>
+				{/if}
+
+				<h2>Permission prompts</h2>
+				{#if prompts.length > 0}
+					<ul>
+						{#each prompts as prompt (prompt.time + (prompt.command ?? ''))}
+							<li>
+								{formatWhen(prompt.time, poll.now)}: {prompt.tool}{#if prompt.command}, <code>{prompt.command}</code>{/if}.
+								{#if prompt.suggested_rule}Rule it would add: <code>{prompt.suggested_rule}</code>.{/if}
+								{prompt.answer ? `Answered: ${prompt.answer}.` : 'Not answered yet.'}
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="muted">No session on this pass has stopped on a permission prompt.</p>
+				{/if}
+
+				<h2>Refused commands</h2>
+				{#if refusals.length > 0}
+					<ul>
+						{#each refusals as refusal (refusal.time + refusal.target)}
+							<li>
+								{formatWhen(refusal.time, poll.now)}: {refusal.tool}, <code>{refusal.target}</code>. {refusal.reason}.
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="muted">No command on this pass was refused.</p>
 				{/if}
 
 				<Command project={release.project} round={round.name} />

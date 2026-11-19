@@ -118,6 +118,11 @@ export function count(n: number, one: string, many = `${one}s`): string {
 	return `${n} ${n === 1 ? one : many}`;
 }
 
+/** `count`, except that zero reads "no question" and not "0 questions". */
+export function countOrNo(n: number, one: string, many = `${one}s`): string {
+	return n === 0 ? `no ${one}` : count(n, one, many);
+}
+
 /** "alpha", "alpha and beta", "alpha, beta, and gamma". */
 export function list(items: string[]): string {
 	if (items.length < 3) return items.join(' and ');

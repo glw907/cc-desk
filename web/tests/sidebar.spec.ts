@@ -51,3 +51,22 @@ test('on big, Waiting for you lists the two rounds and links to each', async ({ 
 	const south = page.getByRole('link', { name: 'south/s1 1 question' });
 	await expect(south).toHaveAttribute('href', '/south/s1');
 });
+
+test.describe('Reports to read', () => {
+	test('lists the unread report with its counts', async ({ app, page }) => {
+		await show(app, page, 'page');
+		const reports = page.getByRole('region', { name: 'Reports to read' });
+		const link = reports.getByRole('link');
+		await expect(link).toHaveCount(1);
+		await expect(link).toHaveAttribute('href', '/reports/rep-0001');
+		await expect(link).toContainText('beta: Round b2: the report verbs');
+		await expect(link).toContainText('1 judgment call, 1 planning miss.');
+	});
+
+	test('reads Nothing when no report waits', async ({ app, page }) => {
+		await show(app, page, 'started');
+		const reports = page.getByRole('region', { name: 'Reports to read' });
+		await expect(reports).toContainText('Nothing');
+		await expect(reports.getByRole('link')).toHaveCount(0);
+	});
+});

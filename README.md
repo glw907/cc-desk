@@ -18,8 +18,9 @@ working mockup of the page beside it. [`docs/STATUS.md`](docs/STATUS.md) says wh
 ## The page
 
 The page in `web/` is a status page that only reads. It shows the releases, rounds, and passes in
-the state folder and the forecast of the next decision session. It holds no form and no button
-but "Copy command", and its server answers every request but GET and HEAD with 405.
+the state folder and the forecast of the next decision session. It holds one form, "Mark as read" on a
+report's page, and no button but "Copy command". Its server answers every other write with 405,
+or 403 from another origin.
 
 Run `bash web/scripts/install-page.sh` to install it, or to serve a newer build. The script builds
 the page, copies the build to `~/.local/share/cc-desk/page`, and installs and restarts the user
@@ -39,8 +40,9 @@ the desktop database. It leaves `~/.config/mimeapps.list` alone. Then run
 `bash web/scripts/check-link.sh` to confirm that `xdg-open` reaches the handler.
 
 The handler takes an address only when the project and the round each start with a lower-case
-letter or a digit and hold only those and `-`. It refuses every other address and runs nothing.
-A project whose name holds `.` or `_` shows the command and the button, and no link.
+letter or a digit and hold only those, `.`, `_`, and `-`, which is the rule for a project's name in the
+state. It refuses every other address and runs nothing. A name that breaks the rule shows the
+command and the button, and no link.
 
 The handler looks for `cc-desk` on the `PATH` it starts with. It runs nothing until `cc-desk` is on a `PATH`
 that Chromium's session sees. The Desk and skills round puts it there. Chromium asks before it

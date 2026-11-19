@@ -1,12 +1,13 @@
 <!--
 @component
 A round's page at `/<project>/<round>`: its name, summary, state, figures, what it needs from
-Geoff, its passes as links, and the command that opens it. It draws nothing until the first good
+Geoff, its passes as links, its reports read or not, and the command that opens it. It draws nothing until the first good
 snapshot arrives, then the not-found view when the address names no round.
 -->
 <script lang="ts">
 	import { page } from '$app/state';
 	import Command from '#lib/Command.svelte';
+	import Design from '#lib/Design.svelte';
 	import Figures from '#lib/Figures.svelte';
 	import NotFound from '#lib/NotFound.svelte';
 	import Questions from '#lib/Questions.svelte';
@@ -15,9 +16,18 @@ snapshot arrives, then the not-found view when the address names no round.
 	import { formatMinutes, formatWhen } from '#lib/time.ts';
 	import { word } from '#lib/words.ts';
 
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+
 	const snapshot = $derived(poll.answer?.snapshot ?? null);
 	const found = $derived(
 		snapshot ? findRoundAt(snapshot, page.params.project ?? '', page.params.round ?? '') : undefined
+	);
+	const reports = $derived(
+		(snapshot?.reports ?? [])
+			.filter((r) => r.project === page.params.project && r.round === page.params.round)
+			.toReversed()
 	);
 	const minutes = (n: number | null) => (n === null ? null : formatMinutes(n));
 	const when = (iso: string | null, about = false) =>
@@ -52,6 +62,10 @@ snapshot arrives, then the not-found view when the address names no round.
 					]}
 				/>
 
+				{#if round.context.length > 0}
+					{#each round.context as paragraph, i (i)}<p>{paragraph}</p>{/each}
+				{/if}
+
 				<h2>What it needs from you</h2>
 				{#if round.needs.kind === 'questions'}
 					<Questions questions={round.needs.questions} />
@@ -62,6 +76,22 @@ snapshot arrives, then the not-found view when the address names no round.
 					</p>
 				{:else}
 					<p>Nothing. {round.needs.reason ?? 'No reason recorded.'}</p>
+				{/if}
+
+				{#if round.calls.length > 0}
+					<h2>Already decided</h2>
+					<ul class="calls">
+						{#each round.calls as call (call.call)}
+							<li>
+								<strong>{call.call}.</strong> Chosen: {call.chosen}. Not chosen: {call.other}. {call.why}
+							</li>
+						{/each}
+					</ul>
+				{/if}
+
+				{#if data.design}
+					<h2>The design</h2>
+					<Design design={data.design} />
 				{/if}
 
 				<h2>Its passes</h2>
@@ -78,7 +108,21 @@ snapshot arrives, then the not-found view when the address names no round.
 					<p class="muted">No passes are written yet.</p>
 				{/if}
 
-				<Command project={release.project} round={round.name} />
+					{#if reports.length > 0}
+						<h2>Its reports</h2>
+						<ul>
+							{#each reports as report (report.id)}
+								<li>
+									<a href="/reports/{report.id}">{report.title}</a>
+									<span class="muted">
+										{report.read === null ? 'Not read yet' : `Read ${when(report.read)}`}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+
+					<Command project={release.project} round={round.name} />
 			</div>
 		</div>
 	</main>

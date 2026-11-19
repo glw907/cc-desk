@@ -1,9 +1,14 @@
 import type { Handle } from '@sveltejs/kit/hooks';
 
-// The page only reads: every method but GET and HEAD is refused before a route sees it.
+const READ = /^\/reports\/rep-\d{4,}$/;
+
+// The page only reads, with one exception: "Mark as read" on a report. Every other method but
+// GET and HEAD is refused before a route sees it. Kit's origin check runs first, so a write from
+// another origin gets its 403 before this hook runs.
 export const handle: Handle = async ({ event, resolve }) => {
-	if (event.request.method !== 'GET' && event.request.method !== 'HEAD') {
-		return new Response('Method Not Allowed', { status: 405, headers: { allow: 'GET, HEAD' } });
-	}
-	return resolve(event);
+	const { method } = event.request;
+	if (method === 'GET' || method === 'HEAD') return resolve(event);
+	const { pathname, search } = event.url;
+	if (method === 'POST' && READ.test(pathname) && search === '?/read') return resolve(event);
+	return new Response('Method Not Allowed', { status: 405, headers: { allow: 'GET, HEAD' } });
 };
