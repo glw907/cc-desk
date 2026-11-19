@@ -1,9 +1,10 @@
 # What the desk round's stops should change
 
 Geoff's rule for this round (2026-11-19): the system being built evolves from each mistake. Every
-stop in the desk round has a row here, with its cause and the change it calls for. The Move
-design answers each row with a design change, or with a reason to reject it. The `pass-core` half
-of a row rides the dotfiles PR of standing answer 30.
+stop in the desk round has a row here, with its cause and the change it calls for. A 1.1 round,
+after the first release and before Move, answers each row with a design change or a reason to
+reject it, for cc-desk and `pass-core` together (standing answer 34). Where a detail file says the
+Move design settles a point, the 1.1 design settles it.
 
 | Stop | Waited | Cause | cc-desk change | `pass-core` change | Detail |
 | --- | --- | --- | --- | --- | --- |

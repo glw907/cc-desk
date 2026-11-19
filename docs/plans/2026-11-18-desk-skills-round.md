@@ -291,6 +291,14 @@ The twelve in `round-run.md` hold, with these changes and additions.
   on". For the rest of the round, the conductor stops any `cc-desk-scratch` session that this
   round's own live runs left blocked or idle, notes it in the report, and relaunches the parked
   executor. A session the conductor can't trace to this round still waits for Geoff.
+- **34. A 1.1 round answers the lessons, before Move (Geoff, 2026-11-19).** Geoff asked whether
+  to collect the lessons and do an organized 1.1 after the first release, and chose "1.1 round
+  before Move". This replaces answer 30. The dotfiles PR of answer 22 carries only the two
+  skills' manifest entries, and no `pass-core` edit. Every lesson stays in
+  `docs/follow-ups/desk-round-lessons.md`, and a stop later in this round adds its row there. The
+  hand-over writes the design prompt for a 1.1 round that answers each row, for cc-desk and
+  `pass-core` together, and names it as the next round. The Move design prompt is still written,
+  and it runs after 1.1 lands. Pass 5's third verdict (answer 29) stays in this round.
 
 ## Start line
 
