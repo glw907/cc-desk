@@ -25,21 +25,27 @@ A question about a pull request has three answers:
 
 ## Read the status page
 
-The page has a sidebar and a main area. It changes nothing; it only shows the records.
+The page shows the records. The one thing you can change there is a report's "Mark as read"
+button, which takes the report off your list.
 
-The sidebar holds three parts:
+The sidebar holds four parts, with a "Rulings" link above them:
 
 - "Next decision session" says when you are next needed. It reads "Needs you now", "Ready
   now", a time, or "Nothing waiting". "Rough" beside the time means the estimate rests on little
   data.
 - "Waiting for you" lists each round with questions ready now. Each line links to the round
   and can open the desk for it in a terminal.
+- "Reports to read" lists the reports the sessions sent you. Each opens its report.
 - "Running" shows each release as a bar, one segment per round, with how much of the planned
   work is done.
 
-The main area repeats none of that. "Your next decision session" lists the rounds and
-questions the next session will cover. "Guesses waiting on an answer" lists work that started
-on a guess at your answer. Below them, one board per release shows each round and its passes.
+The main area repeats none of that:
+
+- "Your next decision session" lists the rounds and questions the next session will cover.
+- "Guesses waiting on an answer" lists work that started on a guess at your answer.
+- "Since the last check" says what the background check did on its last run.
+- "Sessions" lists each session that is running or stopped.
+- Below them, one board per release shows each round and its passes.
 
 ## When the page says "Needs you now"
 
@@ -49,9 +55,10 @@ reason with the one thing to do. The common ones:
 | The page says | What to do |
 | --- | --- |
 | A permission prompt | Open the desk and say yes or no. The desk passes on your answer and restarts the session. |
-| The sign-in expired | Sign in to Claude Code again, then tell the desk to start the pass again. |
-| A usage limit was reached | Wait for the reset, or reset your usage early. The work starts again after the reset. |
-| A launch failed, or a session kept failing | Read the error or the session's log, then tell the desk to start the pass again. |
+| The sign-in ran out | Sign in to Claude Code again, then tell the desk to start the pass again. |
+| Usage limit reached | Wait for the reset, or reset your usage early. The work starts again after the reset. |
+| The session would not start, or Restarted twice already | Read the error or the session's log, then tell the desk to start the pass again. |
+| An irreversible step, a secret, a sign-in or data change, or a change of scope | Read the stop in the repo's STATUS, deal with it, then tell the desk to start the pass again. |
 
 ## Fix a wrong ruling
 
