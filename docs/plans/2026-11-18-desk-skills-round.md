@@ -240,6 +240,19 @@ The twelve in `round-run.md` hold, with these changes and additions.
   `~/Projects/initiatives/cc-desk/reports/desk-report.md`, and puts its title and first
   paragraph under "Current state" in `docs/STATUS.md`. It counts the permission prompts and
   the refused commands of every live run.
+- **26. A review that escalates (Geoff, 2026-11-18).** Asked about PR 18, Geoff said "Let's
+  prep so that I stop doesn't happen." A PR whose closing review reads `escalate` or `fix`
+  lands like one that reads `accept` when every acceptance item carries its evidence, CI is
+  green, and the body says `Calls: none`. Each escalated point must also be settled by an
+  `[advisor]` line with a follow-up for a later pass. The conductor names each such landing in
+  the report. A point that changes what the design says still stops and waits for Geoff.
+- **27. The steps after passes 5 and 6 (Geoff, 2026-11-18).** In the same message Geoff
+  approved every step in answers 22 to 24 ahead of time. That covers pushing the `v0.1.0` and
+  `v0.1.1` tags and landing the dotfiles PR that pins both skills. It also covers installing
+  the binary, the timer, the page, and the link handler from `main`, and setting up the real
+  release in `~/.local/state/cc-desk`. When auto mode refuses one of these steps, the conductor
+  retries it once and cites this answer. It edits no setting, and a second refusal goes under
+  "Open decisions".
 
 ## Start line
 
