@@ -516,3 +516,10 @@ This pass adds:
   `## Decisions`.
 - The brief reaches the live sessions in the system prompt. Pass 3 may choose a file instead
   ("Left to the builder"), and `system.txt` is what it starts from.
+
+## Rulings
+
+- 2026-11-18, Geoff, answering the conductor in his session: "Raise to 105 (Recommended)". The
+  pass's estimate is 105 minutes and its stop is 210, so the plan launches as written. The PR
+  takes the parked question under `## Planning misses` as an `[estimate]` line and this ruling
+  under `## Decisions`.
