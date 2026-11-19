@@ -396,7 +396,7 @@ func TestPull(t *testing.T) {
 		checkout := repoWithRemote(t)
 		ahead(t, checkout)
 		w := Worktree{Checkout: checkout, Default: "main"}
-		pulled, note, err := w.Pull(nil)
+		pulled, note, err := w.Pull(context.Background(), nil)
 		if err != nil || !pulled || note != "" {
 			t.Fatalf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}
@@ -410,7 +410,7 @@ func TestPull(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(checkout, "f"), []byte("mine"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(context.Background(), nil)
 		if err != nil || pulled || !strings.HasPrefix(note, "checkout not pulled: ") {
 			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}
@@ -419,17 +419,17 @@ func TestPull(t *testing.T) {
 		checkout := repoWithRemote(t)
 		ahead(t, checkout)
 		w := Worktree{Checkout: checkout, Default: "main"}
-		if pulled, note, _ := w.Pull([]string{filepath.Join(checkout, "sub")}); pulled || note == "" {
+		if pulled, note, _ := w.Pull(context.Background(), []string{filepath.Join(checkout, "sub")}); pulled || note == "" {
 			t.Errorf("pulled = %v, note = %q, want it held", pulled, note)
 		}
-		if pulled, _, _ := w.Pull([]string{filepath.Join(checkout, ".claude", "worktrees", "x")}); !pulled {
+		if pulled, _, _ := w.Pull(context.Background(), []string{filepath.Join(checkout, ".claude", "worktrees", "x")}); !pulled {
 			t.Error("a session in a worktree must not hold the pull")
 		}
 	})
 	t.Run("a checkout off the default branch is left", func(t *testing.T) {
 		checkout := repoWithRemote(t)
 		runGit(t, checkout, "checkout", "-q", "-b", "other")
-		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(context.Background(), nil)
 		if err != nil || pulled || !strings.Contains(note, "other") {
 			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}

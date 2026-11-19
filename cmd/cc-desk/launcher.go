@@ -53,6 +53,9 @@ type launcher struct {
 	runner launch.Runner
 	// gh is the command that calls the pull request merge.
 	gh string
+	// callLimit is how long the merge call, the fetch, and the pull each may
+	// run; zero means launch.DefaultLimit.
+	callLimit time.Duration
 }
 
 // newLauncher resolves the absolute state folder, the running binary, and

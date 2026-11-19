@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/glw907/cc-desk/internal/launch"
 	"github.com/glw907/cc-desk/internal/sessions"
@@ -69,17 +70,26 @@ func (l *launcher) carryMerge(ctx context.Context, r sessions.Result) (string, e
 // callMerge runs the one merge call: pinned to the commit the check read, a
 // merge commit, with no delete, auto, or admin flag.
 func (l *launcher) callMerge(ctx context.Context, repo string, number int, commit string) error {
-	cmd := exec.CommandContext(ctx, l.gh, "pr", "merge", strconv.Itoa(number), "-R", repo, "--merge", "--match-head-commit", commit)
-	var errOut bytes.Buffer
-	cmd.Stderr = &errOut
-	if err := cmd.Run(); err != nil {
-		msg := lastLine(errOut.String())
+	_, errOut, err := launch.Run(ctx, l.limit(), l.gh, "pr", "merge", strconv.Itoa(number), "-R", repo, "--merge", "--match-head-commit", commit)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "stopped at") {
+			return err
+		}
+		msg := lastLine(errOut)
 		if msg == "" {
 			msg = err.Error()
 		}
 		return fmt.Errorf("%s", msg)
 	}
 	return nil
+}
+
+// limit is the limit of one merge call, fetch, or pull.
+func (l *launcher) limit() time.Duration {
+	if l.callLimit > 0 {
+		return l.callLimit
+	}
+	return launch.DefaultLimit
 }
 
 // lastLine is the last non-empty line of text.
@@ -305,8 +315,8 @@ func (l *launcher) cleanup(ctx context.Context, project, pass string) (string, e
 				cwds = append(cwds, row.Cwd)
 			}
 		}
-		wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: sess.Worktree, Branch: sess.Branch}
-		pulled, note, err := wt.Pull(cwds)
+		wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: sess.Worktree, Branch: sess.Branch, Limit: l.limit()}
+		pulled, note, err := wt.Pull(ctx, cwds)
 		if err != nil {
 			return "", err
 		}

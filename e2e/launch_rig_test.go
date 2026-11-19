@@ -374,6 +374,65 @@ func (r launchRig) run(t *testing.T, now string, verb ...string) result {
 	return run(t, r.state, now, r.args(t, verb...)...)
 }
 
+// sleepingGhStandIn wraps the gh stand-in. When the file gh-sleeps exists, a
+// `pr merge` call starts a child sleep that holds stdout, records its pid in
+// gh-child.pid, and waits. Every other call runs the real stand-in, with git
+// found on the plain system path so the sleeping git below does not see it.
+const sleepingGhStandIn = `#!/bin/sh
+d=%q
+if [ -e "$d/gh-sleeps" ] && [ "$1 $2" = "pr merge" ]; then
+  sleep 120 &
+  echo $! > "$d/gh-child.pid"
+  wait
+  exit 1
+fi
+PATH=/usr/bin:/bin exec %q "$@"
+`
+
+// sleepingGitStandIn is a git for the front of the binary's PATH. When the
+// file git-sleeps exists and its text is one of the call's arguments, the
+// call starts a child sleep holding stdout, records the pid in git-child.pid,
+// and waits. Every other call goes to the real git by absolute path.
+const sleepingGitStandIn = `#!/bin/sh
+d=%q
+if [ -e "$d/git-sleeps" ]; then
+  verb=$(cat "$d/git-sleeps")
+  for a in "$@"; do
+    if [ "$a" = "$verb" ]; then
+      sleep 120 &
+      echo $! > "$d/git-child.pid"
+      wait
+      exit 1
+    fi
+  done
+fi
+exec %q "$@"
+`
+
+// sleepers writes the sleeping gh wrapper around the gh stand-in at realGh,
+// and the sleeping git in a folder of its own. It returns the gh path and the
+// folder to put first on the binary's PATH. The controls are the files
+// gh-sleeps and git-sleeps, which a test creates with r.write.
+func (r launchRig) sleepers(t *testing.T, realGh string) (gh, pathDir string) {
+	t.Helper()
+	realGit, err := exec.LookPath("git")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gh = filepath.Join(r.dir, "gh-sleeper.sh")
+	if err := os.WriteFile(gh, fmt.Appendf(nil, sleepingGhStandIn, r.dir, realGh), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pathDir = filepath.Join(r.dir, "bin")
+	if err := os.MkdirAll(pathDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(pathDir, "git"), fmt.Appendf(nil, sleepingGitStandIn, r.dir, realGit), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	return gh, pathDir
+}
+
 // TestRigProbe is the round plan's check of its shared assumption: a launch
 // from a git-made worktree through systemd-run reaches the claude stand-in
 // with the worktree as its working folder.

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/glw907/cc-desk/internal/launch"
 	"github.com/glw907/cc-desk/internal/sessions"
 	"github.com/glw907/cc-desk/internal/snapshot"
 	"github.com/glw907/cc-desk/internal/state"
@@ -24,6 +25,9 @@ type checkFlags struct {
 	dryRun   bool
 	probeURL string
 	ghCmd    string
+	// callLimit is how long the merge call, the fetch, and the pull each may
+	// run.
+	callLimit time.Duration
 }
 
 func newCheckCmd(f *rootFlags) *cobra.Command {
@@ -44,6 +48,8 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 	_ = cmd.Flags().MarkHidden("probe-url")
 	cmd.Flags().StringVar(&cf.ghCmd, "gh-command", "gh", "the gh command the pull request read runs")
 	_ = cmd.Flags().MarkHidden("gh-command")
+	cmd.Flags().DurationVar(&cf.callLimit, "call-limit", launch.DefaultLimit, "how long the merge call, the fetch, and the pull each may run")
+	_ = cmd.Flags().MarkHidden("call-limit")
 	cf.register(cmd)
 	return cmd
 }
@@ -139,6 +145,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 			return err
 		}
 		l.gh = cf.ghCmd
+		l.callLimit = cf.callLimit
 		outcomes, err := l.carryOut(ctx, results)
 		if outcomes == nil {
 			return err
