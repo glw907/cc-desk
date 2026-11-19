@@ -476,8 +476,8 @@ clear of the numbers the round's other plans use.
   and standing answer 29, and nothing was trimmed. Answer 28's raise would be about 175, but
   the 315-minute path runs past the round's 12:55 UTC cutoff, so its proviso fails. The stop
   asks the conductor to put three choices to Geoff: allow the path past the cutoff, as answer 31
-  did for pass 6 (recommended); split the live script and Task 11 into a pass of their own; or
-  wait for the next round.
+  did for pass 6 (recommended); split the live script and Task 11 into a pass of their own,
+  which leaves a 255-minute path still past the cutoff; or wait for the next round.
 - [advisor] The stop step stops every row that is working, blocked, or done, and reads the list
   again. A failed stop on a row gone by the second read (no row, or stopped or failed) counts as
   ended.
