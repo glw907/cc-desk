@@ -68,6 +68,20 @@ func ReadyCommand(binary, stateDir, project, pass string) string {
 	return binary + " --state-dir " + stateDir + " pass ready " + project + " " + pass
 }
 
+// QuestionCommand gives the command prefix a pass or design session adds a
+// question to its own round with: the question file follows it. binary and
+// stateDir must be absolute.
+func QuestionCommand(binary, stateDir, project, round string) string {
+	return binary + " --state-dir " + stateDir + " question add " + project + " " + round
+}
+
+// ReportCommand gives the command prefix a conductor records a report with:
+// the report file and an optional --round follow it. binary and stateDir
+// must be absolute.
+func ReportCommand(binary, stateDir, project string) string {
+	return binary + " --state-dir " + stateDir + " report add " + project
+}
+
 // WriteSettings writes <stateDir>/launch/<name>.json fresh and gives its
 // path. The allow list is the release's rules, one exact rule per report
 // verb, and prefixRules, whole rules that end in a wildcard. binary is

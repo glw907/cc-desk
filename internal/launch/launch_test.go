@@ -42,7 +42,8 @@ func TestWriteSettings(t *testing.T) {
 	verbs := Verbs("/bin/cc-desk", state, "pass", "p", "w", "r")
 	followRule := "Bash(" + FollowUpCommand("/bin/cc-desk", state, "p", "pass:w") + " *)"
 	readyRule := "Bash(" + ReadyCommand("/bin/cc-desk", state, "p", "w") + " *)"
-	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, nil, verbs, []string{followRule, readyRule})
+	questionRule := "Bash(" + QuestionCommand("/bin/cc-desk", state, "p", "r") + " *)"
+	path, err := WriteSettings(state, "/bin/cc-desk", "p-w", []string{"Bash(go test *)"}, nil, verbs, []string{followRule, readyRule, questionRule})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +58,7 @@ func TestWriteSettings(t *testing.T) {
 	if err := json.Unmarshal(data, &s); err != nil {
 		t.Fatal(err)
 	}
-	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 3+len(SessionReasons) {
+	if s.Permissions.Allow[0] != "Bash(go test *)" || len(s.Permissions.Allow) != 4+len(SessionReasons) {
 		t.Errorf("allow = %v", s.Permissions.Allow)
 	}
 	if want := "Bash(/bin/cc-desk --state-dir " + state + " pass stop p w --reason usage)"; !slices.Contains(s.Permissions.Allow, want) {
@@ -68,6 +69,9 @@ func TestWriteSettings(t *testing.T) {
 	}
 	if !slices.Contains(s.Permissions.Allow, "Bash(/bin/cc-desk --state-dir "+state+" pass ready p w *)") {
 		t.Errorf("allow lacks the ready rule: %v", s.Permissions.Allow)
+	}
+	if !slices.Contains(s.Permissions.Allow, "Bash(/bin/cc-desk --state-dir "+state+" question add p r *)") {
+		t.Errorf("allow lacks the question rule: %v", s.Permissions.Allow)
 	}
 	if !slices.Equal(s.Permissions.Deny, []string{"Bash(gh pr merge *)", "Bash(approval-queue land *)"}) {
 		t.Errorf("deny = %v", s.Permissions.Deny)
@@ -86,6 +90,14 @@ func TestWriteSettings(t *testing.T) {
 	}
 	if b, err := os.ReadFile(design); err != nil || strings.Contains(string(b), "pass ready") {
 		t.Errorf("a design launch's settings hold a ready rule: %q, %v", b, err)
+	}
+	reportRule := "Bash(" + ReportCommand("/bin/cc-desk", state, "p") + " *)"
+	conductor, err := WriteSettings(state, "/bin/cc-desk", "p-conductor", nil, nil, nil, []string{followRule, reportRule})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b, err := os.ReadFile(conductor); err != nil || !strings.Contains(string(b), "report add p *") {
+		t.Errorf("a conductor's settings lack the report rule: %q, %v", b, err)
 	}
 	if _, err := WriteSettings("rel", "/bin/cc-desk", "x", nil, nil, nil, nil); err == nil {
 		t.Error("a relative state folder must be refused")
@@ -128,6 +140,13 @@ func TestTemplates(t *testing.T) {
 			FollowUp: FollowUpCommand("/b/cc-desk", "/st", "proj", "pass:x"),
 			Ready:    ReadyCommand("/b/cc-desk", "/st", "proj", "x"),
 		}
+		line := "/b/cc-desk --state-dir /st question add proj rnd <file>"
+		if kind == "conductor" {
+			p.Report = ReportCommand("/b/cc-desk", "/st", "proj")
+			line = "/b/cc-desk --state-dir /st report add proj <file> [--round <round>]"
+		} else {
+			p.Question = QuestionCommand("/b/cc-desk", "/st", "proj", "rnd")
+		}
 		got, err := Fill(p)
 		if err != nil {
 			t.Fatalf("%s: %v", kind, err)
@@ -135,7 +154,7 @@ func TestTemplates(t *testing.T) {
 		for _, want := range []string{
 			"proj-x", "/c/.claude/worktrees/x", "x-branch", "git push origin x-branch", "`pass-core`",
 			"/b/cc-desk --state-dir /st followup proj pass:x <title> --body-file <path>", "job `tmp` folder",
-			"references/round-run.md", "pass-core", "/b/cc-desk --state-dir /st", "## Stop", "approval-queue send",
+			"references/round-run.md", "pass-core", "/b/cc-desk --state-dir /st", "`cc-desk-work`", line,
 		} {
 			if !strings.Contains(got, want) {
 				t.Errorf("%s prompt lacks %q:\n%s", kind, want, got)
@@ -151,6 +170,11 @@ func TestTemplates(t *testing.T) {
 		if strings.Contains(got, "relaunch") {
 			t.Errorf("%s prompt names a relaunch on a first launch", kind)
 		}
+		for _, bad := range []string{"approval-queue", "Until cc-desk runs", "## Stop", "<no value>"} {
+			if strings.Contains(got, bad) {
+				t.Errorf("%s prompt holds %q:\n%s", kind, bad, got)
+			}
+		}
 	}
 	p := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b", Relaunch: &RelaunchNote{Count: 2, Cause: "a lost connection"}}
 	got, err := Fill(p)
@@ -160,6 +184,25 @@ func TestTemplates(t *testing.T) {
 	want := "This is relaunch 2 of 2, after a lost connection. Carry on from the branch as it stands; the commits on it are yours."
 	if !strings.Contains(got, want) {
 		t.Errorf("relaunch paragraph missing:\n%s", got)
+	}
+	p.Relaunch = &RelaunchNote{Count: 1, Cause: "a usage stop", Uncounted: true}
+	if got, err = Fill(p); err != nil {
+		t.Fatal(err)
+	}
+	want = "This relaunch, after a usage stop, doesn't count toward the two. Carry on from the branch as it stands"
+	if !strings.Contains(got, want) || strings.Contains(got, "of 2") {
+		t.Errorf("an uncounted relaunch reads:\n%s", got)
+	}
+}
+
+func TestCommandPrefixes(t *testing.T) {
+	for _, tc := range []struct{ name, got, want string }{
+		{"question", QuestionCommand("/b/cc-desk", "/st", "proj", "rnd"), "/b/cc-desk --state-dir /st question add proj rnd"},
+		{"report", ReportCommand("/b/cc-desk", "/st", "proj"), "/b/cc-desk --state-dir /st report add proj"},
+	} {
+		if tc.got != tc.want {
+			t.Errorf("%s = %q, want %q", tc.name, tc.got, tc.want)
+		}
 	}
 }
 
