@@ -1,0 +1,22 @@
+Brief at 2026-11-20T23:00:00Z
+Next question forecast: 2026-11-20T23:00:00Z
+
+Waiting: 1 question
+
+1. attic / a1, question q-juneau-7, holds up 85 planned minutes
+   Should the nightly backup also copy the Juneau archive to the second disk?
+   Background:
+     The family photo scans live on one disk today, and the second disk has 30 GB free.
+     A second copy was turned down in the spring, and a yes here replaces ruling r-0042.
+   Answers:
+     yes: Each night's backup runs 15 minutes longer, and the scans survive a failed disk.
+     no: The backup stays at 40 minutes a night, and one failed disk loses every scan.
+   Recommended: yes. The scans can't be made again, because the Sitka library returned the originals.
+   Never guessed.
+   Waits: a-copy (50 minutes), a-verify (35 minutes)
+
+Could come back in the next 6 hours:
+  The next decision session is forecast at 2026-11-20T23:00:00Z (attic / a1).
+
+Since the last desk session, 2026-11-20T18:00:00Z:
+  2026-11-20T21:00:00Z attic conductor relaunch: relaunched a7c2e9d1 (reason: connection_dropped)

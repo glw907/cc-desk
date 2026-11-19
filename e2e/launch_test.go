@@ -225,3 +225,81 @@ func TestLaunchNoCheckout(t *testing.T) {
 		t.Errorf("%d launches with no checkout", n)
 	}
 }
+
+// TestLaunchPrompts builds each kind's prompt the way a launch does and reads
+// the prompt argument the stand-in claude was given.
+func TestLaunchPrompts(t *testing.T) {
+	firstPrompt := func(t *testing.T, r launchRig) string {
+		t.Helper()
+		l := r.launches(t)
+		if len(l) != 1 {
+			t.Fatalf("%d launches, want 1", len(l))
+		}
+		return relaunchPrompt(l[0])
+	}
+	requireWorkPrompt := func(t *testing.T, p, line string) {
+		t.Helper()
+		for _, want := range []string{"`cc-desk-work`", line} {
+			if !strings.Contains(p, want) {
+				t.Errorf("prompt lacks %q:\n%s", want, p)
+			}
+		}
+		for _, bad := range []string{"approval-queue", "Until cc-desk runs"} {
+			if strings.Contains(p, bad) {
+				t.Errorf("prompt holds %q:\n%s", bad, p)
+			}
+		}
+	}
+	// launched starts pass a and lets the check launch it and see it work.
+	launched := func(t *testing.T) launchRig {
+		t.Helper()
+		r := newLaunchRig(t)
+		r.addRelease(t, true, "a")
+		requireRun(t, r.do(t, workedClock, "pass", "start", "proj", "a"))
+		r.check(t, minutes(t, 1))
+		r.check(t, minutes(t, 2))
+		return r
+	}
+
+	t.Run("pass", func(t *testing.T) {
+		r := launched(t)
+		requireWorkPrompt(t, firstPrompt(t, r), "--state-dir "+r.state+" question add proj r1 <file>")
+	})
+	t.Run("design", func(t *testing.T) {
+		r := newLaunchRig(t)
+		r.addRelease(t, true, "a")
+		requireRun(t, r.run(t, workedClock, "session", "start", "design", "proj", "r1"))
+		requireWorkPrompt(t, firstPrompt(t, r), "--state-dir "+r.state+" question add proj r1 <file>")
+	})
+	t.Run("conductor", func(t *testing.T) {
+		r := newLaunchRig(t)
+		r.addRelease(t, true, "a")
+		requireRun(t, r.run(t, workedClock, "session", "start", "conductor", "proj"))
+		requireWorkPrompt(t, firstPrompt(t, r), "--state-dir "+r.state+" report add proj <file> [--round <round>]")
+	})
+	t.Run("uncounted_relaunch", func(t *testing.T) {
+		r := launched(t)
+		requireRun(t, r.do(t, minutes(t, 3), "pass", "stop", "proj", "a", "--reason", "usage"))
+		r.check(t, minutes(t, 4))
+		l := r.launches(t)
+		if len(l) != 2 {
+			t.Fatalf("%d launches after the usage stop, want 2", len(l))
+		}
+		p := relaunchPrompt(l[1])
+		if strings.Contains(p, "relaunch 1 of 2") || !strings.Contains(p, "doesn't count toward the two") {
+			t.Errorf("an uncounted relaunch's prompt reads:\n%s", p)
+		}
+	})
+	t.Run("counted_relaunch", func(t *testing.T) {
+		r := launched(t)
+		r.vanish(t, r.sessionOf(t, "a")["short_id"].(string))
+		r.check(t, minutes(t, 3))
+		l := r.launches(t)
+		if len(l) != 2 {
+			t.Fatalf("%d launches after the row vanished, want 2", len(l))
+		}
+		if p := relaunchPrompt(l[1]); !strings.Contains(p, "This is relaunch 1 of 2") {
+			t.Errorf("a counted relaunch's prompt lacks its number:\n%s", p)
+		}
+	})
+}

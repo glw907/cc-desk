@@ -231,10 +231,17 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	verbs := launch.Verbs(l.binary, l.dir, pl.promptKind, project, pl.pass, pl.round)
 	followUp := launch.FollowUpCommand(l.binary, l.dir, project, record)
 	rules := []string{"Bash(" + followUp + " *)"}
-	var ready string
+	var ready, question, report string
 	if pl.promptKind == "pass" {
 		ready = launch.ReadyCommand(l.binary, l.dir, project, pl.pass)
 		rules = append(rules, "Bash("+ready+" *)")
+	}
+	if pl.promptKind == "conductor" {
+		report = launch.ReportCommand(l.binary, l.dir, project)
+		rules = append(rules, "Bash("+report+" *)")
+	} else {
+		question = launch.QuestionCommand(l.binary, l.dir, project, pl.round)
+		rules = append(rules, "Bash("+question+" *)")
 	}
 	settings, err := launch.WriteSettings(l.dir, l.binary, pl.name, rf.AllowRules, rf.AskRules, verbs, rules)
 	if err != nil {
@@ -243,6 +250,7 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	p := launch.Prompt{
 		Kind: pl.promptKind, Name: pl.name, Project: project, Round: pl.round, Pass: pl.pass,
 		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp, Ready: ready,
+		Question: question, Report: report,
 	}
 	var known []string
 	if old != nil {
@@ -262,7 +270,7 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 		case req.Fix != nil:
 			p.Fix = req.Fix
 		default:
-			p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause)}
+			p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause), Uncounted: !req.Counted}
 		}
 	}
 	text, err := launch.Fill(p)

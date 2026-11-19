@@ -29,6 +29,14 @@ type Prompt struct {
 	// Ready is the command prefix a pass session reports its pull request
 	// ready with. It is empty for a design or conductor.
 	Ready string
+	// Question is the command prefix a pass or design session adds a
+	// question to its round with: the file follows it. It is empty for a
+	// conductor.
+	Question string
+	// Report is the command prefix a conductor records a report with: the
+	// file and an optional --round follow it. It is empty for a pass or
+	// design.
+	Report string
 	// Relaunch is set on a relaunch. Count is the number of the relaunch.
 	Relaunch *RelaunchNote
 	// Answer is set on the relaunch that follows an answered permission
@@ -57,10 +65,13 @@ type AnswerNote struct {
 	Command, Rule string
 }
 
-// RelaunchNote fills the relaunch paragraph.
+// RelaunchNote fills the relaunch paragraph. An uncounted relaunch, such as
+// the one after a usage stop, gives no number, so Count is read only when
+// Uncounted is false.
 type RelaunchNote struct {
-	Count int
-	Cause string
+	Count     int
+	Cause     string
+	Uncounted bool
 }
 
 // PushCommand is the command a session pushes its branch with.

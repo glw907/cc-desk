@@ -1,0 +1,31 @@
+Brief at 2026-11-20T23:00:00Z
+Next question forecast: 2026-11-20T23:00:00Z
+
+Waiting: 2 questions
+
+1. dock / d1, merge question merge-dock-2 on pull request 4817, "Move the photo index into one searchable file", at commit 9e41b07, holds up 160 planned minutes
+   The pull request lies outside its design.
+   Background:
+     Beside the index, it adds a search box that the design didn't name.
+   Answers:
+     merge: Merges on the check's next run if every check has passed and the last commit is still 9e41b07. Otherwise it asks again.
+     fix again: Sends the pass back with your words for one more attempt. If it comes back the same way, this is asked again.
+     close: Closes the pull request, ends the session, and records the pass as closed by your ruling.
+   Recommended: merge. The extra code is 30 lines, and every check passed.
+   Waits: d-index (120 minutes), d-tags (40 minutes)
+
+2. dock / d2, question q-ferry-3, holds up 45 planned minutes
+   Should the weekly summary go to the family calendar?
+   Background:
+     The summary names each new album, about 60 photos on a busy week.
+   Answers:
+     yes: Everyone on the calendar sees it on Sunday morning.
+     no: It goes to your mail only.
+   Recommended: no. A weekly entry would crowd the shared view.
+   Waits: d-summary (25 minutes), d-send (20 minutes)
+
+Could come back in the next 6 hours:
+  The next decision session is forecast at 2026-11-20T23:00:00Z (dock / d1).
+
+Since the last desk session, 2026-11-20T18:00:00Z:
+  Nothing.

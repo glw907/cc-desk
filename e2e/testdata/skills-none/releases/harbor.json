@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "project": "harbor",
+  "name": "v1",
+  "repo": "glw907/harbor",
+  "rounds": [
+    {"name": "h1", "summary": "Two finished passes.", "needs_geoff": false, "no_need_reason": "Routine cleanup.", "design_written": true},
+    {"name": "h2", "summary": "One long pass.", "needs_geoff": true, "after": ["h1"], "design_written": true},
+    {"name": "h3", "summary": "A round with no design yet.", "needs_geoff": true, "after": ["h2"], "planned_minutes": 90}
+  ],
+  "passes": [
+    {"name": "h-one", "summary": "Cleanup one.", "round": "h1", "planned_minutes": 40, "state": "done", "started": "2026-11-16T18:00:00Z", "finished": "2026-11-16T18:45:00Z", "actual_minutes": 45},
+    {"name": "h-two", "summary": "Cleanup two.", "round": "h1", "planned_minutes": 50, "state": "done", "started": "2026-11-17T18:00:00Z", "finished": "2026-11-17T18:55:00Z", "actual_minutes": 55},
+    {"name": "h-three", "summary": "The long pass.", "round": "h2", "planned_minutes": 480, "state": "not_started", "after": ["h-two"], "questions": ["q-tide-1"]}
+  ],
+  "questions": [
+    {"id": "q-tide-1", "text": "Keep the old format?", "options": ["keep", "drop"], "recommended": "drop", "answer": {"carried": {"words": "Drop it.", "date": "2026-11-14", "source": "chat"}}}
+  ]
+}

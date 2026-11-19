@@ -9,8 +9,12 @@ import (
 	"testing"
 )
 
+const noteSkill = "---\nname: note\ndescription: A skill the gate test reads.\n---\n\n" +
+	"# Note\n\nThis skill holds a test.\n"
+
 // scratchRepo builds a one-package module in a temporary folder, with a copy
-// of this repo's gate, its vale config, and one doc. The scratch module holds
+// of this repo's gate, its vale config, one doc, and one skill. A files entry
+// with an empty value removes that file. The scratch module holds
 // no e2e package, so the gate can't recurse into this test.
 func scratchRepo(t *testing.T, files map[string]string) string {
 	t.Helper()
@@ -48,7 +52,14 @@ func scratchRepo(t *testing.T, files map[string]string) string {
 	}
 	put("go.mod", []byte("module scratch\n\ngo 1.27\n"))
 	put("docs/note.md", []byte("This folder holds a test.\n"))
+	put("skills/note/SKILL.md", []byte(noteSkill))
 	for rel, data := range files {
+		if data == "" {
+			if err := os.Remove(filepath.Join(dir, rel)); err != nil {
+				t.Fatal(err)
+			}
+			continue
+		}
 		put(rel, []byte(data))
 	}
 	for _, args := range [][]string{{"init", "-q"}, {"add", "."}} {
@@ -124,6 +135,41 @@ func TestGateFailsOnSkip(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dir := scratchRepo(t, tt.files)
+			out, code := runGate(t, dir)
+			if code != tt.wantCode {
+				t.Errorf("gate exit %d, want %d\n%s", code, tt.wantCode, out)
+			}
+			if !strings.Contains(out, tt.wantOut) {
+				t.Errorf("gate output lacks %q:\n%s", tt.wantOut, out)
+			}
+		})
+	}
+}
+
+func TestGateSkills(t *testing.T) {
+	const pkg = "package a\n\nimport \"testing\"\n\nfunc TestRuns(t *testing.T) {}\n"
+	hinge := noteSkill + "\nThe check reads the record first, since the prompt names it. " +
+		"The session stops on a refusal, which leaves the branch as it was. " +
+		"The reader gets the file next, so the question stays plain.\n"
+	tests := []struct {
+		name     string
+		skill    string
+		wantCode int
+		wantOut  string
+	}{
+		{name: "a clean skill", skill: noteSkill, wantCode: 0, wantOut: "gate: ok"},
+		{name: "no skill", skill: "", wantCode: 1, wantOut: "no skills/*/SKILL.md is tracked"},
+		{
+			name:     "160 lines",
+			skill:    noteSkill + strings.Repeat("\n", 160-strings.Count(noteSkill, "\n")),
+			wantCode: 1,
+			wantOut:  "has 160 lines",
+		},
+		{name: "a hinge run", skill: hinge, wantCode: 1, wantOut: "tellgrader failed on skills/note/SKILL.md (exit 2)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := scratchRepo(t, map[string]string{"a/a_test.go": pkg, "skills/note/SKILL.md": tt.skill})
 			out, code := runGate(t, dir)
 			if code != tt.wantCode {
 				t.Errorf("gate exit %d, want %d\n%s", code, tt.wantCode, out)

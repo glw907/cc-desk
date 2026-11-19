@@ -1,0 +1,42 @@
+{
+  "format": 1,
+  "project": "dock",
+  "name": "v1",
+  "repo": "glw907/dock",
+  "rounds": [
+    {"name": "d1", "summary": "The photo search.", "needs_geoff": true, "design_written": true},
+    {"name": "d2", "summary": "The weekly summary.", "needs_geoff": true, "design_written": true}
+  ],
+  "passes": [
+    {
+      "name": "d-index", "summary": "Move the photo index into one searchable file", "round": "d1", "planned_minutes": 120, "state": "building",
+      "started": "2026-11-20T19:00:00Z", "questions": ["merge-dock-2"],
+      "pull_request": {"number": 4817, "commit": "9e41b07", "verdict": "accept", "ready": "2026-11-20T22:15:00Z", "question": "merge-dock-2"}
+    },
+    {"name": "d-tags", "summary": "Tag the photos by place.", "round": "d1", "planned_minutes": 40, "state": "not_started", "after": ["d-index"]},
+    {"name": "d-summary", "summary": "Write the weekly summary.", "round": "d2", "planned_minutes": 25, "state": "not_started", "questions": ["q-ferry-3"]},
+    {"name": "d-send", "summary": "Send the weekly summary.", "round": "d2", "planned_minutes": 20, "state": "not_started", "after": ["d-summary"]}
+  ],
+  "questions": [
+    {
+      "id": "merge-dock-2",
+      "text": "The pull request lies outside its design.",
+      "options": ["merge", "fix again", "close"],
+      "recommended": "merge",
+      "background": ["Beside the index, it adds a search box that the design didn't name."],
+      "reason": "The extra code is 30 lines, and every check passed."
+    },
+    {
+      "id": "q-ferry-3",
+      "text": "Should the weekly summary go to the family calendar?",
+      "options": ["yes", "no"],
+      "recommended": "no",
+      "background": ["The summary names each new album, about 60 photos on a busy week."],
+      "causes": {
+        "yes": "Everyone on the calendar sees it on Sunday morning.",
+        "no": "It goes to your mail only."
+      },
+      "reason": "A weekly entry would crowd the shared view."
+    }
+  ]
+}
