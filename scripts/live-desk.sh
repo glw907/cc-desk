@@ -435,23 +435,21 @@ phase_replace() {
 
 # ---- merge and close -------------------------------------------------------
 
-# pr_branch names a pass's pull request branch. It differs from the pass's own
-# branch, which the pass's launch creates in its worktree and refuses to find.
-pr_branch() { echo "$BASE-$1-pr"; }
+# pr_worktree is where a pass's launch made its worktree. The check reads the
+# pull requests whose head is the pass's own branch, so the fixture pushes that
+# branch, as a pass's executor does.
+pr_worktree() { echo "$SCRATCH/.claude/worktrees/$1"; }
 
-# scratch_pr makes a branch off the base with one commit, pushes it, opens a
-# pull request, and prints its number.
+# scratch_pr commits one note on the pass's branch in its worktree, pushes the
+# branch, opens a pull request from it, and prints the number.
 scratch_pr() {
-  local pass=$1 br
-  br=$(pr_branch "$pass")
-  git -C "$SCRATCH" fetch --quiet origin
-  git -C "$SCRATCH" switch --quiet -c "$br" "origin/$BASE"
-  echo "$pass ran." >"$SCRATCH/notes-$pass.md"
-  git -C "$SCRATCH" add "notes-$pass.md"
-  git -C "$SCRATCH" commit --quiet -m "Add $pass notes"
-  git -C "$SCRATCH" push --quiet origin "$br"
-  git -C "$SCRATCH" switch --quiet "$BASE"
-  gh pr create --repo glw907/cc-desk-scratch --base "$BASE" --head "$br" --title "Add $pass notes" --body "Fixture pass $pass." |
+  local pass=$1 wt
+  wt=$(pr_worktree "$pass")
+  echo "$pass ran." >"$wt/notes-$pass.md"
+  git -C "$wt" add "notes-$pass.md"
+  git -C "$wt" commit --quiet -m "Add $pass notes"
+  git -C "$wt" push --quiet --force origin "$pass"
+  gh pr create --repo glw907/cc-desk-scratch --base "$BASE" --head "$pass" --title "Add $pass notes" --body "Fixture pass $pass." |
     sed -e 's|.*/pull/||'
 }
 
@@ -466,11 +464,12 @@ add_pass() {
 # the design, so the check asks a merge question.
 hold_pr() {
   local pass=$1 n sha
-  n=$(scratch_pr "$pass")
-  sha=$(git -C "$SCRATCH" rev-parse "origin/$(pr_branch "$pass")")
   add_pass "$pass"
   show "$BIN" --state-dir "$STATE" pass start "$PROJECT" "$pass"
   wait_for 300 bash -c "[ -n \"\$(jq -r --arg p '$pass' '.passes[] | select(.name == \$p) | .session.session_id // empty' '$RELEASE')\" ]" || true
+  wait_for 120 test -d "$(pr_worktree "$pass")" || true
+  n=$(scratch_pr "$pass")
+  sha=$(git -C "$(pr_worktree "$pass")" rev-parse HEAD)
   show "$BIN" --state-dir "$STATE" pass ready "$PROJECT" "$pass" --pr "$n" --commit "$sha" --verdict accept --design outside
   echo "$n" >"$RUN/$pass.pr"
   echo "$sha" >"$RUN/$pass.sha"
@@ -489,11 +488,9 @@ phase_merge() {
   q=$(question_of "$p")
   say "merge question: ${q:-none}"
   # Move the head before the answer, so the first answer asks again.
-  git -C "$SCRATCH" switch --quiet "$(pr_branch "$p")"
-  echo "second push" >>"$SCRATCH/notes-$p.md"
-  git -C "$SCRATCH" commit --quiet -am "Move the head"
-  git -C "$SCRATCH" push --quiet origin "$(pr_branch "$p")"
-  git -C "$SCRATCH" switch --quiet "$BASE"
+  echo "second push" >>"$(pr_worktree "$p")/notes-$p.md"
+  git -C "$(pr_worktree "$p")" commit --quiet -am "Move the head"
+  git -C "$(pr_worktree "$p")" push --quiet origin "$p"
   type_in "$s" "Run a fresh brief. For the merge question about the $p pull request, my answer is merge."
   wait_for 300 bash -c "[ \"\$(jq -r '.passes[] | select(.name == \"$p\") | .pull_request.question // empty' '$RELEASE')\" != '$q' ]" || true
   q2=$(question_of "$p")
