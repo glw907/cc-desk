@@ -25,7 +25,8 @@ func Sequence(evs ...Event) Event {
 // the number, the last commit, the reviewer's verdict, and whether the change
 // stays inside the approved design. It refuses a pass that is not building
 // or has no session record. The report clears the wait, failures, question,
-// and merge marker of any earlier one, and keeps the fix attempts. A second
+// and merge marker of any earlier one, and keeps the fix attempts, and the
+// merge failures when the pull request's number is unchanged. A second
 // report replaces the first.
 func ReportReady(project, pass string, number int, commit, verdict string, inside bool) Event {
 	return func(s *State, now time.Time) error {
@@ -46,13 +47,16 @@ func ReportReady(project, pass string, number int, commit, verdict string, insid
 			return Refuse(fmt.Sprintf("pass %q has no session record", pass))
 		}
 		t := now.UTC()
-		attempts := 0
+		attempts, failed := 0, 0
 		if p.PullRequest != nil {
 			attempts = p.PullRequest.FixAttempts
+			if p.PullRequest.Number == number {
+				failed = p.PullRequest.MergeFailures
+			}
 		}
 		p.PullRequest = &PullRequest{
 			Number: number, Commit: commit, Verdict: verdict, InsideDesign: inside,
-			FixAttempts: attempts, Ready: &t,
+			FixAttempts: attempts, MergeFailures: failed, Ready: &t,
 		}
 		rf.Dirty = true
 		return nil
@@ -101,7 +105,7 @@ func MergePass(project, pass string, number int, at time.Time, outside bool) Eve
 		}
 		pr := p.PullRequest
 		pr.Number, pr.Merged, pr.MergedOutside = number, &t, outside
-		pr.Wait, pr.Failures = "", nil
+		pr.Wait, pr.Failures, pr.MergeFailures = "", nil, 0
 		rf.Dirty = true
 		s.passEvent = true
 		return nil
@@ -122,6 +126,24 @@ func MarkMerge(project, pass string) Event {
 		}
 		t := now.UTC()
 		p.PullRequest.MergeCalled = &t
+		rf.Dirty = true
+		return nil
+	}
+}
+
+// RecordMergeFailure counts one failed or timed-out merge call on the pass's
+// pull request. It composes with AskMerge in one commit, which clears the
+// count again.
+func RecordMergeFailure(project, pass string) Event {
+	return func(s *State, now time.Time) error {
+		rf, p, err := findPass(s, project, pass)
+		if err != nil {
+			return err
+		}
+		if p.PullRequest == nil {
+			return Refuse(fmt.Sprintf("pass %q has no pull request record", pass))
+		}
+		p.PullRequest.MergeFailures++
 		rf.Dirty = true
 		return nil
 	}
@@ -155,7 +177,8 @@ func RecordFix(project, pass string, failures []string) Event {
 // request, whose report stays, along with the commit it asks about. The id is
 // merge-<pass>-<k>, with k one more than the pass's merge questions so far.
 // Every later merge decision for the pull request holds until the question is
-// answered or a new report clears it.
+// answered or a new report clears it. It clears the merge failures, so each
+// "merge" answer gets a full set of calls.
 func AskMerge(project, pass, text, commit string, options []string, recommended string) Event {
 	return func(s *State, now time.Time) error {
 		rf, p, err := findPass(s, project, pass)
@@ -187,6 +210,7 @@ func AskMerge(project, pass, text, commit string, options []string, recommended 
 		rf.Release = next
 		p, _ = rf.pass(pass)
 		p.PullRequest.Question, p.PullRequest.AskedCommit = id, commit
+		p.PullRequest.MergeFailures = 0
 		rf.Dirty = true
 		return nil
 	}

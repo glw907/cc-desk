@@ -26,6 +26,7 @@ const (
 	ReasonFix           = "fix"
 	ReasonHeadMoved     = "head_moved"
 	ReasonChecksFailed  = "checks_failed"
+	ReasonMergeFailed   = "merge_failed"
 )
 
 // The options a merge question offers, which its answer chooses between.

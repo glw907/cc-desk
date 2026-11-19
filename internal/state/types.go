@@ -179,7 +179,10 @@ type PullRequest struct {
 	AskedCommit string `json:"asked_commit,omitempty"`
 	// MergeCalled is when the check committed to calling the merge, before
 	// it ran. It tells the check's own merge from one by another hand.
-	MergeCalled   *time.Time `json:"merge_called,omitempty"`
+	MergeCalled *time.Time `json:"merge_called,omitempty"`
+	// MergeFailures counts the failed or timed-out merge calls in a row on
+	// this pull request. A merge question or the merge itself clears it.
+	MergeFailures int        `json:"merge_failures,omitempty"`
 	MergedOutside bool       `json:"merged_outside,omitempty"`
 	Cleaned       *time.Time `json:"cleaned,omitempty"`
 	CleanupNote   string     `json:"cleanup_note,omitempty"`

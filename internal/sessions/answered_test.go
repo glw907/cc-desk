@@ -23,6 +23,8 @@ func TestDecideAnsweredMerge(t *testing.T) {
 		{"merge at the asked head", OptionMerge, outside, PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Merge, "", "abc", false},
 		{"merge pins the asked commit, not the report", OptionMerge, func(p *state.PullRequest) { p.InsideDesign, p.AskedCommit = false, "def" },
 			PullRead{Pulls: []Pull{pull("def", ok("gate"))}}, Merge, "", "def", false},
+		{"merge after a merge_failed question merges at the asked head", OptionMerge, func(p *state.PullRequest) { p.InsideDesign, p.MergeFailures = true, 0 },
+			PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Merge, "", "abc", false},
 		{"merge with the head moved asks again", OptionMerge, outside, PullRead{Pulls: []Pull{pull("def", ok("gate"))}}, Ask, ReasonHeadMoved, "def", false},
 		{"merge with a failed check asks again", OptionMerge, outside, PullRead{Pulls: []Pull{pull("abc", failed("gate"))}}, Ask, ReasonChecksFailed, "abc", false},
 		{"merge with a check running holds", OptionMerge, outside, PullRead{Pulls: []Pull{pull("abc", Check{Name: "gate", Bucket: Pending})}}, None, "", "", false},

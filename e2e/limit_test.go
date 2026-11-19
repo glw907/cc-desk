@@ -55,7 +55,7 @@ func TestCallLimits(t *testing.T) {
 		if took > 6*time.Second {
 			t.Errorf("the run took %v, want under 6s", took)
 		}
-		if out := lastOutcome(t, m.state); !strings.Contains(out, "merge: stopped at the 2s limit") {
+		if out := lastOutcome(t, m.state); !strings.Contains(out, "merge call failed (1 of 3): stopped at the 2s limit") {
 			t.Errorf("outcome = %q, want it to name the limit\n%s%s", out, got.stdout, got.stderr)
 		}
 		childGone(t, m, "gh-child.pid")

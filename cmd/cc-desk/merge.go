@@ -44,7 +44,7 @@ func (l *launcher) carryMerge(ctx context.Context, r sessions.Result) (string, e
 			return "", err
 		}
 		if err := l.callMerge(ctx, rf.Repo, m.Number, m.Commit); err != nil {
-			return "", fmt.Errorf("merge: %w", err)
+			return l.mergeFailed(r, pass, err)
 		}
 		if err := l.commit(state.MergePass(r.Project, pass, m.Number, l.now, false)); err != nil {
 			return "", err
@@ -65,6 +65,36 @@ func (l *launcher) carryMerge(ctx context.Context, r sessions.Result) (string, e
 		return l.closePass(ctx, r, pass)
 	}
 	return l.ask(r, pass)
+}
+
+// mergeCalls is how many merge calls in a row may fail before the check asks.
+const mergeCalls = 3
+
+// mergeFailed counts a failed merge call. The outcome is plain, so the check
+// exits 0 and the log keeps the line; the third failure in a row asks in the
+// same commit, which clears the count.
+func (l *launcher) mergeFailed(r sessions.Result, pass string, callErr error) (string, error) {
+	_, rf, err := l.liveRelease(r.Project)
+	if err != nil {
+		return "", err
+	}
+	n := 1
+	for _, p := range rf.Passes {
+		if p.Name == pass && p.PullRequest != nil {
+			n = p.PullRequest.MergeFailures + 1
+		}
+	}
+	msg := lastLine(callErr.Error())
+	ev := state.RecordMergeFailure(r.Project, pass)
+	if n >= mergeCalls {
+		text, recommended := mergeQuestion(sessions.ReasonMergeFailed, r.Merge, msg)
+		options := []string{sessions.OptionMerge, sessions.OptionFixAgain, sessions.OptionClose}
+		ev = state.Sequence(ev, state.AskMerge(r.Project, pass, text, r.Merge.Commit, options, recommended))
+	}
+	if err := l.commit(ev); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("merge call failed (%d of %d): %s", n, mergeCalls, msg), nil
 }
 
 // callMerge runs the one merge call: pinned to the commit the check read, a
@@ -187,26 +217,28 @@ func (l *launcher) sendBack(ctx context.Context, r sessions.Result, pass string)
 // ask adds the merge question for an outside-design or fix-limit decision.
 func (l *launcher) ask(r sessions.Result, pass string) (string, error) {
 	m := r.Merge
-	var text, recommended string
-	switch r.Decision.Reason {
-	case sessions.ReasonOutsideDesign:
-		text = fmt.Sprintf("Pull request %d is outside the approved design. Merge it, send it back, or close it?", m.Number)
-		recommended = sessions.OptionFixAgain
-	case sessions.ReasonHeadMoved:
-		text = fmt.Sprintf("Pull request %d has a new head, %s, since you answered. Merge it, send it back, or close it?", m.Number, shortCommit(m.Commit))
-		recommended = sessions.OptionMerge
-	case sessions.ReasonChecksFailed:
-		text = fmt.Sprintf("Pull request %d now fails %s. Merge it anyway, send it back, or close it?", m.Number, strings.Join(m.Failures, ", "))
-		recommended = sessions.OptionFixAgain
-	default:
-		text = fmt.Sprintf("Pull request %d has failed %d times (%s). Merge it, send it back again, or close it?", m.Number, m.Attempts+1, strings.Join(m.Failures, ", "))
-		recommended = sessions.OptionClose
-	}
+	text, recommended := mergeQuestion(r.Decision.Reason, m, "")
 	options := []string{sessions.OptionMerge, sessions.OptionFixAgain, sessions.OptionClose}
 	if err := l.commit(state.AskMerge(r.Project, pass, text, m.Commit, options, recommended)); err != nil {
 		return "", err
 	}
 	return "asked about pull request " + strconv.Itoa(m.Number), nil
+}
+
+// mergeQuestion is the text of a merge question for the reason, and the
+// option it recommends. The detail is the last line of a failed merge call.
+func mergeQuestion(reason string, m sessions.MergeInfo, detail string) (text, recommended string) {
+	switch reason {
+	case sessions.ReasonOutsideDesign:
+		return fmt.Sprintf("Pull request %d is outside the approved design. Merge it, send it back, or close it?", m.Number), sessions.OptionFixAgain
+	case sessions.ReasonHeadMoved:
+		return fmt.Sprintf("Pull request %d has a new head, %s, since you answered. Merge it, send it back, or close it?", m.Number, shortCommit(m.Commit)), sessions.OptionMerge
+	case sessions.ReasonChecksFailed:
+		return fmt.Sprintf("Pull request %d now fails %s. Merge it anyway, send it back, or close it?", m.Number, strings.Join(m.Failures, ", ")), sessions.OptionFixAgain
+	case sessions.ReasonMergeFailed:
+		return fmt.Sprintf("The merge call for pull request %d has failed %d times (%s). Try the merge again, send it back, or close it?", m.Number, mergeCalls, detail), sessions.OptionFixAgain
+	}
+	return fmt.Sprintf("Pull request %d has failed %d times (%s). Merge it, send it back again, or close it?", m.Number, m.Attempts+1, strings.Join(m.Failures, ", ")), sessions.OptionClose
 }
 
 // shortCommit abbreviates a commit id for a question's text.

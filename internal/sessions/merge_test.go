@@ -55,6 +55,7 @@ func TestDecideMerge(t *testing.T) {
 		{"5 moved beats a failed check", pr(nil), PullRead{Pulls: []Pull{pull("def", failed("gate"))}}, None, "", waitPtr(state.WaitCommitMoved), false, 0},
 		{"6 no check", pr(nil), PullRead{Pulls: []Pull{pull("abc")}}, None, "", waitPtr(state.WaitNoCheck), false, 0},
 		{"7 check running", pr(nil), PullRead{Pulls: []Pull{pull("abc", ok("a"), Check{Name: "b", Bucket: Pending})}}, None, "", waitPtr(state.WaitCheckRunning), false, 0},
+		{"10 merge with failures on record still merges", pr(func(p *state.PullRequest) { p.MergeFailures = 2 }), PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Merge, "", nil, false, 0},
 		{"8 failed check", pr(nil), PullRead{Pulls: []Pull{pull("abc", ok("a"), failed("b"))}}, Fix, ReasonFix, nil, false, 1},
 		{"8 cancelled check", pr(nil), PullRead{Pulls: []Pull{pull("abc", Check{Name: "b", Bucket: Cancel})}}, Fix, ReasonFix, nil, false, 1},
 		{"8 verdict fix", pr(func(p *state.PullRequest) { p.Verdict = state.VerdictFix }), PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Fix, ReasonFix, nil, false, 1},
