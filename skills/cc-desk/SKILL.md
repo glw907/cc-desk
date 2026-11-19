@@ -134,7 +134,7 @@ rulings stay in the log. What happens then depends on how far the pass that wait
 | The pass that waited | What the replacement does |
 | --- | --- |
 | Hasn't started | It starts on the new ruling |
-| Is building | Its session ends, and a new one starts from its branch with the new ruling |
+| Is building | The command refuses for now; tell him the fix comes in a later change |
 | Has merged | The command refuses; tell him a new change is needed |
 
 ## Prompts and stopped passes
