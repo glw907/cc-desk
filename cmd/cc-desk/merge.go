@@ -231,6 +231,12 @@ func mergeQuestion(reason string, m sessions.MergeInfo, detail string) (text, re
 	switch reason {
 	case sessions.ReasonOutsideDesign:
 		return fmt.Sprintf("Pull request %d is outside the approved design. Merge it, send it back, or close it?", m.Number), sessions.OptionFixAgain
+	case sessions.ReasonCallsForGeoff:
+		what := "calls"
+		if m.Calls == 1 {
+			what = "call"
+		}
+		return fmt.Sprintf("Pull request %d leaves %d %s for you. Merge it, send it back, or close it?", m.Number, m.Calls, what), sessions.OptionMerge
 	case sessions.ReasonHeadMoved:
 		return fmt.Sprintf("Pull request %d has a new head, %s, since you answered. Merge it, send it back, or close it?", m.Number, shortCommit(m.Commit)), sessions.OptionMerge
 	case sessions.ReasonChecksFailed:

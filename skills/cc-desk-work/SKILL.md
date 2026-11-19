@@ -34,12 +34,12 @@ A pass session reports its pull request once it is pushed and its whole-branch r
 verdict. Run the prompt's ready line:
 
 ```text
-<ready line> --pr <number> --commit <sha> --verdict <accept|fix> --design <inside|outside>
+<ready line> --pr <number> --commit <sha> --verdict <accept|fix|escalate> --design <inside|outside> [--calls <n>]
 ```
 
 - `--pr` is the pull request's number.
 - `--commit` is its last commit. The check merges only that commit, so push before you report.
-- `--verdict` is the review's verdict, `accept` or `fix`.
+- `--verdict` is the review's verdict: `accept`, `fix`, or `escalate`. Report `escalate` when the review raised a point it left for Geoff's call, and say how many with `--calls <n>`. With one or more calls, the check asks Geoff before it merges. `--calls` defaults to 0.
 - `--design` is `inside` when the change stays within the approved design. Use `outside` when
   it adds something the design didn't name, drops something it named, or changes a ruling's
   outcome. The check then asks Geoff whether to merge, so an honest `outside` costs one

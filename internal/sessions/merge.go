@@ -27,6 +27,7 @@ const (
 	ReasonHeadMoved     = "head_moved"
 	ReasonChecksFailed  = "checks_failed"
 	ReasonMergeFailed   = "merge_failed"
+	ReasonCallsForGeoff = "calls_for_geoff"
 )
 
 // The options a merge question offers, which its answer chooses between.
@@ -66,6 +67,8 @@ type MergeInfo struct {
 	Words    string
 	Ruling   string
 	Attempts int
+	// Calls is the count of calls the report left for Geoff, set on a calls_for_geoff ask.
+	Calls int
 	// AlreadyClosed is set on a close decision when the pull request already
 	// reads CLOSED, so a close that failed halfway runs again without gh.
 	AlreadyClosed bool
@@ -174,6 +177,12 @@ func decideMerge(base state.Decision, sess *state.Session, p *state.Pass, ev Evi
 		}
 		no := false
 		base.Decision, base.Reason, base.Counted = Fix, ReasonFix, &no
+		return Result{Decision: base, Merge: info}, true, info, ""
+	}
+	if pr.Calls > 0 {
+		base.Decision, base.Reason = Ask, ReasonCallsForGeoff
+		base.Detail = fmt.Sprintf("pull request %d leaves %d for Geoff", pr.Number, pr.Calls)
+		info.Calls = pr.Calls
 		return Result{Decision: base, Merge: info}, true, info, ""
 	}
 	base.Decision = Merge

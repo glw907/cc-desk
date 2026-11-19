@@ -47,7 +47,7 @@ func TestMergeFailures(t *testing.T) {
 	t.Run("a report with the same number keeps it", func(t *testing.T) {
 		s := mergeState(t, "building", pr)
 		count(t, s, 2)
-		if err := ReportReady("p", "x", 7, "def", VerdictAccept, true)(s, at(11, 0)); err != nil {
+		if err := ReportReady("p", "x", 7, "def", VerdictAccept, true, 0)(s, at(11, 0)); err != nil {
 			t.Fatal(err)
 		}
 		if got := failures(s); got != 2 {
@@ -57,7 +57,7 @@ func TestMergeFailures(t *testing.T) {
 	t.Run("a new pull request starts at 0", func(t *testing.T) {
 		s := mergeState(t, "building", pr)
 		count(t, s, 2)
-		if err := ReportReady("p", "x", 8, "def", VerdictAccept, true)(s, at(11, 0)); err != nil {
+		if err := ReportReady("p", "x", 8, "def", VerdictAccept, true, 0)(s, at(11, 0)); err != nil {
 			t.Fatal(err)
 		}
 		if got := failures(s); got != 0 {

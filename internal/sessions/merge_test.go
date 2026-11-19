@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/glw907/cc-desk/internal/state"
@@ -190,5 +191,37 @@ func doneWith(ended, cleaned bool) func(rf *state.ReleaseFile, sess *state.Sessi
 		if cleaned {
 			p.PullRequest.Cleaned = ago(1)
 		}
+	}
+}
+
+func TestVerdicts(t *testing.T) {
+	tests := []struct {
+		verdict      string
+		calls        int
+		wantDecision string
+		wantReason   string
+	}{
+		{state.VerdictAccept, 0, Merge, ""},
+		{state.VerdictFix, 0, Fix, ReasonFix},
+		{state.VerdictEscalate, 0, Merge, ""},
+		{state.VerdictEscalate, 2, Ask, ReasonCallsForGeoff},
+		{state.VerdictAccept, 1, Ask, ReasonCallsForGeoff},
+		{state.VerdictFix, 1, Fix, ReasonFix},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s with %d calls", tt.verdict, tt.calls), func(t *testing.T) {
+			s, key := world("pass", 10, ready(func(p *state.PullRequest) { p.Verdict, p.Calls = tt.verdict, tt.calls }))
+			ev := Evidence{
+				Records: map[Key]RecordEvidence{key: {Row: rowWorking, HasRow: true}},
+				Pulls:   map[Key]PullRead{key: {Pulls: []Pull{pull("abc", ok("gate"))}}},
+			}
+			r := Decide(s, ev, t0)[0]
+			if r.Decision.Decision != tt.wantDecision || r.Reason != tt.wantReason {
+				t.Errorf("decision = %s/%s, want %s/%s", r.Decision.Decision, r.Reason, tt.wantDecision, tt.wantReason)
+			}
+			if tt.wantReason == ReasonCallsForGeoff && r.Merge.Calls != tt.calls {
+				t.Errorf("calls = %d, want %d", r.Merge.Calls, tt.calls)
+			}
+		})
 	}
 }

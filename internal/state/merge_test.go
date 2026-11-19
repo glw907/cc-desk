@@ -45,11 +45,12 @@ func TestReportReady(t *testing.T) {
 		{"stopped", "stopped", stoppedPass, "accept", true},
 		{"not started", "not_started", "", "accept", true},
 		{"bad verdict", "building", "", "ship", true},
+		{"escalate", "building", "", "escalate", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := mergeState(t, tt.state, tt.extra)
-			err := ReportReady("p", "x", 9, "def", tt.verdict, false)(s, at(11, 0))
+			err := ReportReady("p", "x", 9, "def", tt.verdict, false, 0)(s, at(11, 0))
 			if tt.refused != isRefusal(err) || (err != nil && !tt.refused) {
 				t.Fatalf("err = %v, refused want %v", err, tt.refused)
 			}
@@ -67,7 +68,7 @@ func TestReportReady(t *testing.T) {
 	}
 
 	s := mergeState(t, "building", `"pull_request":{"number":7,"fix_attempts":1}`)
-	if err := ReportReady("p", "x", 7, "def", "accept", true)(s, at(11, 0)); err != nil {
+	if err := ReportReady("p", "x", 7, "def", "accept", true, 0)(s, at(11, 0)); err != nil {
 		t.Fatal(err)
 	}
 	if got := pass(t, s).PullRequest.FixAttempts; got != 1 {
@@ -75,7 +76,7 @@ func TestReportReady(t *testing.T) {
 	}
 
 	noSession := loaded(t)
-	if err := ReportReady("alpha", "one", 1, "c", "accept", true)(noSession, at(11, 0)); err == nil {
+	if err := ReportReady("alpha", "one", 1, "c", "accept", true, 0)(noSession, at(11, 0)); err == nil {
 		t.Error("a report on a pass with no session passed")
 	}
 }

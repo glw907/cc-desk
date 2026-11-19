@@ -165,11 +165,20 @@ func (m mergeRig) setAnswer(t *testing.T, pass string, pull map[string]any) {
 	m.write(t, filepath.Join("answers", pass+".json"), string(b))
 }
 
-// report records the session's ready report for the pass.
+// report records the session's ready report for the pass, an accept with no
+// calls.
 func (m mergeRig) report(t *testing.T, pass string, number int, commit, design string) {
 	t.Helper()
-	requireRun(t, m.do(t, workedClock, "pass", "ready", "proj", pass,
-		"--pr", strconv.Itoa(number), "--commit", commit, "--verdict", "accept", "--design", design))
+	requireRun(t, m.reportAs(t, pass, number, commit, design, "accept", 0))
+}
+
+// reportAs runs `pass ready` with the verdict and the calls and returns the
+// result, so a test can read a refusal.
+func (m mergeRig) reportAs(t *testing.T, pass string, number int, commit, design, verdict string, calls int) result {
+	t.Helper()
+	return m.do(t, workedClock, "pass", "ready", "proj", pass,
+		"--pr", strconv.Itoa(number), "--commit", commit, "--verdict", verdict, "--design", design,
+		"--calls", strconv.Itoa(calls))
 }
 
 // rowsDone sets every row the stand-in holds to done and idle, so the row

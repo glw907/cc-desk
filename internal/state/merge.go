@@ -22,13 +22,14 @@ func Sequence(evs ...Event) Event {
 }
 
 // ReportReady records a pass session's report that its pull request is ready:
-// the number, the last commit, the reviewer's verdict, and whether the change
-// stays inside the approved design. It refuses a pass that is not building
+// the number, the last commit, the reviewer's verdict (accept, fix, or
+// escalate), whether the change stays inside the approved design, and the
+// count of calls it leaves for Geoff. It refuses a pass that is not building
 // or has no session record. The report clears the wait, failures, question,
 // and merge marker of any earlier one, and keeps the fix attempts, and the
 // merge failures when the pull request's number is unchanged. A second
 // report replaces the first.
-func ReportReady(project, pass string, number int, commit, verdict string, inside bool) Event {
+func ReportReady(project, pass string, number int, commit, verdict string, inside bool, calls int) Event {
 	return func(s *State, now time.Time) error {
 		rf, p, err := findPass(s, project, pass)
 		if err != nil {
@@ -39,8 +40,10 @@ func ReportReady(project, pass string, number int, commit, verdict string, insid
 			return Refuse("the pull request number must be above 0")
 		case commit == "":
 			return Refuse("the commit is empty")
-		case verdict != VerdictAccept && verdict != VerdictFix:
-			return Refuse(fmt.Sprintf("verdict %q is not accept or fix", verdict))
+		case !validVerdict(verdict):
+			return Refuse(fmt.Sprintf("verdict %q is not accept, fix, or escalate", verdict))
+		case calls < 0:
+			return Refuse("the calls for Geoff cannot be below 0")
 		case p.State != Building:
 			return Refuse(fmt.Sprintf("pass %q is %s, so it cannot report a pull request ready", pass, p.State))
 		case p.Session == nil:
@@ -55,7 +58,7 @@ func ReportReady(project, pass string, number int, commit, verdict string, insid
 			}
 		}
 		p.PullRequest = &PullRequest{
-			Number: number, Commit: commit, Verdict: verdict, InsideDesign: inside,
+			Number: number, Commit: commit, Verdict: verdict, InsideDesign: inside, Calls: calls,
 			FixAttempts: attempts, MergeFailures: failed, Ready: &t,
 		}
 		rf.Dirty = true
@@ -233,4 +236,9 @@ func RecordCleanup(project, pass string, notes []string) Event {
 		rf.Dirty = true
 		return nil
 	}
+}
+
+// validVerdict reports whether v is one of the three reviewer verdicts.
+func validVerdict(v string) bool {
+	return v == VerdictAccept || v == VerdictFix || v == VerdictEscalate
 }
