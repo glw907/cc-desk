@@ -24,6 +24,7 @@ type rootFlags struct {
 	usageCommand     string
 	systemctlCommand string
 	claudeCommand    string
+	listWait         time.Duration
 }
 
 // dir returns the state folder: the flag, else $XDG_STATE_HOME/cc-desk,

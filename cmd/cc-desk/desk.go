@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"slices"
+	"time"
 
 	"github.com/glw907/cc-desk/internal/desk"
 	"github.com/glw907/cc-desk/internal/sessions"
@@ -12,6 +15,13 @@ import (
 )
 
 const registerPrefix = "cannot register the desk: "
+
+// listWait is how long `desk register` waits for the session list.
+const listWait = 30 * time.Second
+
+// pipeWait bounds how long a grandchild holding the list's pipe can delay the
+// read after the command ends (golang/go#23019).
+const pipeWait = time.Second
 
 func newDeskCmd(f *rootFlags) *cobra.Command {
 	cmd := group(&cobra.Command{
@@ -61,14 +71,23 @@ func newDeskCmd(f *rootFlags) *cobra.Command {
 			return nil
 		},
 	}
+	register.Flags().DurationVar(&f.listWait, "list-wait", listWait, "how long to wait for the session list")
+	_ = register.Flags().MarkHidden("list-wait")
 	cmd.AddCommand(register)
 	return cmd
 }
 
 // agentRows runs the claude command the flags name and decodes its list.
 func (f *rootFlags) agentRows() ([]sessions.Row, error) {
-	out, err := exec.Command(f.claudeCommand, "agents", "--json").Output()
+	ctx, cancel := context.WithTimeout(context.Background(), f.listWait)
+	defer cancel()
+	c := exec.CommandContext(ctx, f.claudeCommand, "agents", "--json")
+	c.WaitDelay = pipeWait
+	out, err := c.Output()
 	if err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			return nil, fmt.Errorf("%s agents --json gave no list within %s", f.claudeCommand, f.listWait)
+		}
 		return nil, fmt.Errorf("run %s agents --json: %w", f.claudeCommand, err)
 	}
 	rows, err := sessions.ParseList(out)
