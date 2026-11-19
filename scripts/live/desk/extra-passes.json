@@ -1,0 +1,4 @@
+[
+  {"name": "desk-merge", "summary": "Holds a pull request the run opens, for the merge answer.", "round": "desk-live", "planned_minutes": 10, "model": "sonnet", "effort": "medium", "state": "not_started"},
+  {"name": "desk-close", "summary": "Holds a pull request the run opens, for the close answer.", "round": "desk-live", "planned_minutes": 10, "model": "sonnet", "effort": "medium", "state": "not_started"}
+]

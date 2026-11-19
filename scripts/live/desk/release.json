@@ -1,0 +1,26 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "cc-desk-scratch-desk",
+  "repo": "glw907/cc-desk-scratch",
+  "rounds": [
+    {"name": "desk-live", "summary": "Fixture passes for the desk's live run.", "needs_geoff": true, "design_written": true, "design": "docs/plans/desk-live-a-plan.md"}
+  ],
+  "passes": [
+    {"name": "desk-live-a", "summary": "Write one notes file, run the gate, and open a pull request.", "round": "desk-live", "planned_minutes": 10, "model": "sonnet", "effort": "medium", "state": "not_started", "questions": ["dq1"]}
+  ],
+  "questions": [
+    {"id": "dq1", "text": "Should the harbor chart keep its old scale?", "options": ["keep", "change"], "recommended": "keep",
+     "background": ["The chart has used one scale since the first release."],
+     "causes": {"keep": "Every printed copy still matches.", "change": "Every printed copy is reissued."},
+     "reason": "A reissue costs more than the scale is worth."}
+  ],
+  "allow_rules": [
+    "Bash(bash scripts/gate.sh)",
+    "Bash(git add notes-desk-live-a.md)",
+    "Bash(git commit -m *)",
+    "Bash(git push origin desk-live-a)",
+    "Bash(gh pr create --repo glw907/cc-desk-scratch *)",
+    "Bash(git rev-parse HEAD)"
+  ]
+}

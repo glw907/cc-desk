@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "project": "north",
+  "name": "v1",
+  "repo": "glw907/north",
+  "checkout": "/CHECKOUT",
+  "default_branch": "main",
+  "rounds": [
+    {"name": "n1", "summary": "A round with one waiting pass.", "needs_geoff": true, "design_written": true, "design": "docs/specs/n1-design.md"},
+    {"name": "n2", "summary": "A round with another.", "needs_geoff": true, "design_written": true, "design": "docs/specs/n2-design.md"},
+    {"name": "n3", "summary": "A round after a closed pass.", "needs_geoff": false, "no_need_reason": "Nothing to ask.", "design_written": true}
+  ],
+  "passes": [
+    {"name": "n-wait", "summary": "Waits on the first question.", "round": "n1", "planned_minutes": 60, "state": "not_started", "questions": ["nq1"]},
+    {"name": "n-other", "summary": "Waits on the second question.", "round": "n2", "planned_minutes": 30, "state": "not_started", "questions": ["nq2"]},
+    {
+      "name": "n-closed", "summary": "Closed without a merge.", "round": "n3", "planned_minutes": 30, "state": "done",
+      "started": "2026-11-20T20:00:00Z", "finished": "2026-11-20T20:40:00Z", "actual_minutes": 40,
+      "closed": {"ruling": "r-0001", "time": "2026-11-20T20:40:00Z"}
+    },
+    {"name": "n-after", "summary": "Comes after the closed pass.", "round": "n3", "planned_minutes": 20, "state": "not_started", "after": ["n-closed"]}
+  ],
+  "questions": [
+    {"id": "nq1", "text": "Should the harbor chart keep its old scale?", "options": ["keep", "change"], "recommended": "keep",
+     "background": ["The chart has used one scale since the first release."],
+     "causes": {"keep": "Every printed copy still matches.", "change": "Every printed copy is reissued."},
+     "reason": "A reissue costs more than the scale is worth."},
+    {"id": "nq2", "text": "Should the tide table list the Sitka station?", "options": ["yes", "no"], "recommended": "yes",
+     "background": ["Sitka is the nearest station with a long record."],
+     "causes": {"yes": "The table grows by one column.", "no": "The table stays as it is."},
+     "reason": "One column is cheap."}
+  ]
+}
