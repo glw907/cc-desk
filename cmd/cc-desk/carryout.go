@@ -75,8 +75,12 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		if sess == nil {
 			return "", fmt.Errorf("no session record to end")
 		}
-		if err := l.runner.Stop(ctx, sess.ShortID); err != nil {
+		e, err := l.stopSession(ctx, sess.ShortID)
+		if err != nil {
 			return "", err
+		}
+		if !e.gone {
+			return "", fmt.Errorf("session %s is still live after claude stop", sess.ShortID)
 		}
 		return "ended " + sess.ShortID, l.commit(state.EndSession(r.Project, r.Record))
 	case sessions.Launch:
@@ -117,7 +121,15 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 			return relaunch()
 		}
 	}
-	if !missing {
+	if d.Decision == sessions.EndAndRelaunch {
+		e, err := l.stopSession(ctx, sess.ShortID)
+		if err != nil {
+			return "", err
+		}
+		if !e.gone {
+			return "not relaunched: session " + sess.ShortID + " is still live after claude stop", nil
+		}
+	} else if !missing {
 		if err := l.runner.Stop(ctx, sess.ShortID); err != nil {
 			if usage {
 				return "", l.failedRelaunch(r, err)

@@ -98,6 +98,49 @@ func (l *launcher) sessionLive(ctx context.Context, shortID string) (bool, []ses
 	return found && row.Live(), rows, nil
 }
 
+// ended is what stopSession found: the list read after the stop, and whether
+// the stop ran.
+type ended struct {
+	rows    []sessions.Row
+	stopped bool
+	gone    bool
+}
+
+// step names the stop in a carry-out's outcome.
+func (e ended) step(id string) string {
+	if e.stopped {
+		return "stopped session " + id
+	}
+	return "session " + id + " already gone"
+}
+
+// stopSession reads the list, stops the session's row when it is working,
+// blocked, or done, and reads the list again. The session is gone when the
+// second read has no row for it or a stopped or failed one. A failed stop on
+// a session that is gone counts as ended; otherwise its error stands. A row
+// that is already stopped or failed takes no stop.
+func (l *launcher) stopSession(ctx context.Context, shortID string) (ended, error) {
+	rows, err := sessions.List(ctx, l.runner.Claude)
+	if err != nil {
+		return ended{}, err
+	}
+	row, found := sessions.Find(rows, shortID)
+	if !found || row.Class() == sessions.ClassNone {
+		return ended{rows: rows, gone: true}, nil
+	}
+	stopErr := l.runner.Stop(ctx, shortID)
+	rows, err = sessions.List(ctx, l.runner.Claude)
+	if err != nil {
+		return ended{}, err
+	}
+	row, found = sessions.Find(rows, shortID)
+	gone := !found || row.Class() == sessions.ClassNone
+	if stopErr != nil && !gone {
+		return ended{}, stopErr
+	}
+	return ended{rows: rows, stopped: stopErr == nil, gone: gone}, nil
+}
+
 // sendBack stops the pass's session when live and relaunches it, uncounted,
 // with the fix note. One commit holds the fix and the launch, so a failed
 // stop or launch spends no attempt.
@@ -234,17 +277,17 @@ func (l *launcher) cleanup(ctx context.Context, project, pass string) (string, e
 	sess := recordOf(s, project, "pass:"+pass)
 	var notes []string
 	var rows []sessions.Row
+	step := ""
 	if sess != nil {
-		live, got, err := l.sessionLive(ctx, sess.ShortID)
+		e, err := l.stopSession(ctx, sess.ShortID)
 		if err != nil {
 			return "", err
 		}
-		rows = got
-		if live {
-			if err := l.runner.Stop(ctx, sess.ShortID); err != nil {
-				return "", err
-			}
+		if !e.gone {
+			return "", fmt.Errorf("session %s is still live after claude stop", sess.ShortID)
 		}
+		rows = e.rows
+		step = e.step(sess.ShortID)
 		if sess.Ended == nil {
 			if err := l.commit(state.EndSession(project, "pass:"+pass)); err != nil {
 				return "", err
@@ -275,8 +318,12 @@ func (l *launcher) cleanup(ctx context.Context, project, pass string) (string, e
 	if err := l.commit(state.RecordCleanup(project, pass, notes)); err != nil {
 		return "", err
 	}
-	if len(notes) == 0 {
-		return "cleaned up", nil
+	out := "cleaned up"
+	if step != "" {
+		out = step + "; " + out
 	}
-	return "cleaned up; " + strings.Join(notes, "; "), nil
+	if len(notes) == 0 {
+		return out, nil
+	}
+	return out + "; " + strings.Join(notes, "; "), nil
 }

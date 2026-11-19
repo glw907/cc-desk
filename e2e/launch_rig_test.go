@@ -32,7 +32,9 @@ type launchRig struct {
 //	no-row        --bg adds no row, so the ids come from the job's state.json
 //	needs-prompt  the new row carries needs "send a prompt to start"
 //	fail-bg       --bg exits 1 after logging
-//	stop-fails    stop exits 1 and changes nothing
+//	stop-fails    stop exits 1 and changes nothing, unless stop-marks is set
+//	stop-marks    with stop-fails, stop first marks the row stopped, as a
+//	              stop that did its work and then failed to report it
 //	lists/<n>.json  the n-th list read prints this file, and a later read
 //	                with no file prints rows.json
 //
@@ -110,14 +112,18 @@ elif cmd == "--bg":
     if not has("no-id"):
         sys.stdout.write("backgrounded · %%s · %%s\n" %% (sid, name))
 elif cmd == "stop":
-    if has("stop-fails"):
+    rows = load()
+    if has("stop-fails") and not has("stop-marks"):
         sys.stderr.write("claude: could not stop the session\n")
         sys.exit(1)
-    rows = load()
     for r in rows:
         if r["id"] == a[1]:
             r["state"], r["status"] = "stopped", "stopped"
     save(rows)
+    if has("stop-fails"):
+        sys.stderr.write("claude: could not stop the session\n")
+        sys.exit(1)
+    sys.stdout.write("stopped %%s\n" %% a[1])
 elif cmd == "logs":
     pass
 `
