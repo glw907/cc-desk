@@ -3,14 +3,22 @@ Description=cc-desk page: the read-only status page on 127.0.0.1:7908
 
 [Service]
 Environment=HOST=127.0.0.1 PORT=7908
+# adapter-node needs the page's own origin to check a write's Origin header against.
+Environment=ORIGIN=http://127.0.0.1:7908
+# The one write the page makes goes through this binary, named by its full path.
+Environment=CC_DESK_BINARY=%h/.local/share/cc-desk/bin/cc-desk
 # A user unit's PATH has no mise shims, so Node is named by its full path. The lts symlink is
 # what `mise which node` prints. No state folder is set: the server reads the live one.
 ExecStart=%h/.local/share/mise/installs/node/lts/bin/node %h/.local/share/cc-desk/page
 Restart=on-failure
 NoNewPrivileges=yes
 PrivateTmp=yes
-# The page writes nothing, so the whole file system is read-only to it.
+# The page writes one thing, a report's read time, through the binary. Everything is read-only
+# except the state folder. ProtectHome=read-only is what makes the grant mean something: without
+# it the home mount stays writable. The leading dash lets the unit start before the folder exists.
 ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=-%h/.local/state/cc-desk
 
 [Install]
 WantedBy=default.target

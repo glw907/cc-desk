@@ -19,7 +19,7 @@ cp -r build "$share/page.new"
 mv "$share/page.new" "$share/page"
 rm -rf "$share/page.old"
 
-mkdir -p "$unit_dir"
+mkdir -p "$unit_dir" "${HOME}/.local/state/cc-desk"
 cp systemd/cc-desk-page.service "$unit_dir/cc-desk-page.service"
 systemd-analyze --user verify "$unit_dir/cc-desk-page.service"
 systemctl --user daemon-reload

@@ -54,6 +54,12 @@ function runHandler(
 }
 
 test.describe('the handler', () => {
+	test('cc-desk://a.b/r_1 runs the command in a terminal', () => {
+		const run = runHandler(['cc-desk://a.b/r_1']);
+		expect(run.status).toBe(0);
+		expect(run.record).toEqual(['-x', `${run.bin}/cc-desk a.b r_1`]);
+	});
+
 	test('cc-desk://alpha/r1 runs the command in a terminal', () => {
 		const run = runHandler(['cc-desk://alpha/r1']);
 		expect(run.status).toBe(0);
@@ -76,6 +82,8 @@ test.describe('the handler', () => {
 		'cc-desk://alph%C3%A4/r1',
 		'cc-desk://ALPHA/R1',
 		'cc-desk://-x/r1',
+		'cc-desk://.a/r1',
+		'cc-desk://alpha/_r1',
 		'cc-desk://alpha/--help'
 	];
 	for (const address of refused) {
@@ -114,7 +122,11 @@ test.describe('the handler', () => {
 });
 
 test.describe('the address', () => {
-	const good: [string, string, string][] = [['alpha', 'r1', 'cc-desk://alpha/r1']];
+	const good: [string, string, string][] = [
+		['alpha', 'r1', 'cc-desk://alpha/r1'],
+		['a.b', 'r1', 'cc-desk://a.b/r1'],
+		['a_b', 'r_1', 'cc-desk://a_b/r_1']
+	];
 	for (const [project, round, want] of good) {
 		test(`${project} and ${round} give ${want}`, () => {
 			expect(terminalLink(project, round)).toBe(want);
@@ -123,15 +135,14 @@ test.describe('the address', () => {
 
 	const bad: [string, string][] = [
 		['Alpha', 'r1'],
-		['a.b', 'r1'],
-		['a_b', 'r1'],
+		['.a', 'r1'],
+		['_a', 'r1'],
 		['a/b', 'r1'],
 		['-x', 'r1'],
 		['', 'r1'],
 		['alpha;x', 'r1'],
 		['alpha', 'R1'],
-		['alpha', 'r.1'],
-		['alpha', 'r_1'],
+		['alpha', '.1'],
 		['alpha', 'r/1'],
 		['alpha', '-x'],
 		['alpha', ''],

@@ -1,16 +1,20 @@
 // The test fixture: one built app per test, on a free port, reading a state folder of its own.
 import { test as base, expect, type Page } from '@playwright/test';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const buildDir = path.resolve(import.meta.dirname, '..', 'build');
+import { removeState } from './state';
+
+const buildDir =path.resolve(import.meta.dirname, '..', 'build');
 
 export interface App {
 	/** The state folder the server reads. The test fills it before `start()`. */
 	stateDir: string;
+	/** Environment the next `start()` adds to the server's, such as a stub `CC_DESK_BINARY`. */
+	env: Record<string, string>;
 	/** The address of the running server, set by `start()`. */
 	url: string;
 	/** What the server has written to stdout so far, since the last start. */
@@ -57,6 +61,7 @@ export const test = base.extend<{ app: App }>({
 		let port = 0;
 		const app: App = {
 			stateDir,
+			env: {},
 			url: '',
 			stdout: '',
 			stderr: '',
@@ -66,7 +71,17 @@ export const test = base.extend<{ app: App }>({
 					app.stdout = '';
 					app.stderr = '';
 					child = spawn('node', [appDir], {
-						env: { ...process.env, HOST: '127.0.0.1', PORT: String(wanted), CC_DESK_STATE_DIR: stateDir, SHUTDOWN_TIMEOUT: '1' },
+						// ORIGIN is the page's own address, which Kit's origin check compares a form
+						// post against. The port is only known here, so it is built from `wanted`.
+						env: {
+							...process.env,
+							HOST: '127.0.0.1',
+							PORT: String(wanted),
+							ORIGIN: `http://127.0.0.1:${wanted}`,
+							CC_DESK_STATE_DIR: stateDir,
+							SHUTDOWN_TIMEOUT: '1',
+							...app.env
+						},
 						stdio: ['ignore', 'pipe', 'pipe']
 					});
 					child.stdout?.on('data', (chunk: Buffer) => (app.stdout += chunk.toString()));
@@ -94,7 +109,7 @@ export const test = base.extend<{ app: App }>({
 		};
 		await use(app);
 		await app.stop();
-		rmSync(stateDir, { recursive: true, force: true });
+		removeState(stateDir);
 	}
 });
 

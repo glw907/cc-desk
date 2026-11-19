@@ -1,14 +1,15 @@
 <!--
 @component
-The sidebar: the next-session forecast, what waits for Geoff, and each release under way. It
-draws nothing under the forecast until the first good snapshot arrives.
+The sidebar: the next-session forecast, what waits for Geoff, the reports to read, and each
+release under way. It draws nothing under the forecast until the first good snapshot arrives.
 -->
 <script lang="ts">
 	import NextSession from './NextSession.svelte';
 	import ReleaseBlock from './ReleaseBlock.svelte';
 	import { terminalLink } from './link';
 	import type { Snapshot } from './snapshot';
-	import { count } from './sums';
+	import { count, countOrNo } from './sums';
+	import { formatWhen } from './time';
 
 	interface Props {
 		/** The whole snapshot, so each release's sums come from its own rounds. */
@@ -18,6 +19,9 @@ draws nothing under the forecast until the first good snapshot arrives.
 	}
 
 	let { snapshot, now }: Props = $props();
+
+	// The snapshot lists reports oldest first; the sidebar shows the newest on top.
+	const unread = $derived(snapshot.reports.filter((r) => r.read === null).toReversed());
 </script>
 
 <NextSession next={snapshot.next_session} {now} />
@@ -34,6 +38,25 @@ draws nothing under the forecast until the first good snapshot arrives.
 			{#if href}
 				<a class="term-link" {href}>Open {wait.project}/{wait.round} in a terminal</a>
 			{/if}
+		</div>
+	{:else}
+		<p class="rail-row muted">Nothing</p>
+	{/each}
+</section>
+
+<section class="rail-section" aria-labelledby="reports-heading">
+	<h2 class="rail-heading" id="reports-heading">Reports to read</h2>
+	{#each unread as report (report.id)}
+		<div class="rail-row">
+			<a href="/reports/{report.id}">
+				{report.project}: {report.title}
+				<span class="sub">
+					{countOrNo(report.calls.length, 'judgment call')}, {countOrNo(
+						report.misses.length,
+						'planning miss'
+					)}. {formatWhen(report.sent, now)}
+				</span>
+			</a>
 		</div>
 	{:else}
 		<p class="rail-row muted">Nothing</p>
