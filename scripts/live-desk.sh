@@ -18,7 +18,9 @@ RUN=${CLAUDE_JOB_DIR:-${TMPDIR:-/tmp}/cc-desk-live}/tmp/live-desk
 BIN=$RUN/cc-desk
 UNIT_DIR=$HOME/.config/systemd/user
 PROJECT=cc-desk-scratch
-BASE=live-desk-2026-11-18
+# BASE carries the prep time, so a second run gets its own branch; prep writes it
+# and every later phase reads it back.
+BASE=$(cat "$RUN/base" 2>/dev/null || true)
 RELEASE=$STATE/releases/$PROJECT.json
 RESULTS=$RUN/results.tsv
 SKILL=$REPO/skills/cc-desk/SKILL.md
@@ -26,6 +28,35 @@ SKILL=$REPO/skills/cc-desk/SKILL.md
 WORDS_1="keep the scale, it's \"fine\" at \$5"
 WORDS_2="second line"
 EXPECTED=$WORDS_1$'\n'$WORDS_2
+
+# Every clause a full run records; the result line fails when one is missing.
+EXPECTED_CLAUSES="prep: claude is on the unit's PATH
+prep: gh is on the unit's PATH
+prep: git is on the unit's PATH
+prep: systemd-run is on the unit's PATH
+3 desk registered
+3 listed interactive under the registered id
+3 arguments name Opus and high effort
+3 the screen holds the first line
+3 the screen holds no brief line and no instruction
+3 no permission prompt, no trust question
+3 the round form's screen holds that round's question
+4 the typed answer adds one line, byte for byte
+4 the snapshot drops the question within 5 seconds
+4 the pass starts within 5 minutes and the log holds the start
+4 the pass session has a row
+4 the desk ran no start command
+4 refused from a background session
+4 refused from a shell with no terminal, naming it
+5 the session was ended and a new one started
+5 the new session's first prompt holds the words
+5 the count is unchanged
+5 never two sessions at once
+5 merge asks again when the head moved
+5 merge merges at the commit asked about
+5 close closes the pull request
+5 close records the pass closed
+5 close empties Needs you now for it"
 
 say() { printf '%s\n' "$*"; }
 show() {
@@ -71,6 +102,18 @@ wait_for() {
   return 1
 }
 
+# wait_saving is wait_for that saves the session list before each try.
+wait_saving() {
+  local secs=$1 i
+  shift
+  for ((i = 0; i * 5 < secs; i++)); do
+    save_list
+    "$@" && return 0
+    sleep 5
+  done
+  return 1
+}
+
 desk_session() { cat "$RUN/desk-session" 2>/dev/null; }
 pane() { tmux capture-pane -p -t "$1" -S -200; }
 pane_has() { pane "$1" | grep -q -- "$2"; }
@@ -93,6 +136,7 @@ save_list() {
 }
 
 # desk_row prints the desk's registered session id when the saved list holds its row.
+desk_count() { jq -r '.desks | length' "$STATE/desks.json" 2>/dev/null || echo 0; }
 desk_id() { jq -r '.desks[-1].session_id // empty' "$STATE/desks.json" 2>/dev/null; }
 row_for() {
   claude agents --json --all 2>/dev/null |
@@ -130,7 +174,9 @@ phase_prep() {
   prep_refuse
   mkdir -p "$RUN"
   : >"$RESULTS"
-  say "prep: the scratch checkout is clean on main, and the state folder holds no other release"
+  BASE=live-desk-$(date -u +%Y%m%d-%H%M%S)
+  echo "$BASE" >"$RUN/base"
+  say "prep: the scratch checkout is clean on main, and the state folder holds no other release; base branch $BASE"
 
   show go build -o "$BIN" "$REPO/cmd/cc-desk"
   show "$BIN" timer install
@@ -149,7 +195,8 @@ phase_prep() {
   show git -C "$SCRATCH" fetch origin
   show git -C "$SCRATCH" switch -c "$BASE" origin/main
   mkdir -p "$SCRATCH/docs/plans"
-  show cp "$REPO/scripts/live/desk/desk-live-a-plan.md" "$SCRATCH/docs/plans/desk-live-a-plan.md"
+  # desk-live-a must still be building when replace runs, so its plan only waits.
+  show cp "$REPO/scripts/live/desk/hold-plan.md" "$SCRATCH/docs/plans/desk-live-a-plan.md"
   show cp "$REPO/scripts/live/desk/hold-plan.md" "$SCRATCH/docs/plans/desk-merge-plan.md"
   show cp "$REPO/scripts/live/desk/hold-plan.md" "$SCRATCH/docs/plans/desk-close-plan.md"
   show git -C "$SCRATCH" add docs/plans
@@ -176,11 +223,10 @@ phase_open() {
   local s
   s=$PROJECT-desk-$(date -u +%H%M%S)
   echo "$s" >"$RUN/desk-session"
+  DESKS_BEFORE=$(desk_count)
   show tmux new-session -d -s "$s" -x 200 -y 50 -c "$SCRATCH" "$BIN --state-dir $STATE --skill-file $SKILL"
   local id
-  if ! wait_for 60 desk_id_new; then
-    check fail "3 desk registered"
-  fi
+  if wait_for 60 desk_id_new; then check pass "3 desk registered"; else check fail "3 desk registered"; fi
   id=$(desk_id)
   echo "$id" >"$RUN/desk-id"
   say "desk session id: $id"
@@ -203,8 +249,8 @@ phase_open() {
     bash -c "! grep -qi 'do you want to\\|trust the files\\|trust this folder' '$RUN/open.pane'"
 }
 
-# desk_id_new is true once desks.json lists a desk this run did not start before.
-desk_id_new() { [ -n "$(desk_id)" ]; }
+# desk_id_new is true once desks.json holds more desks than before the open.
+desk_id_new() { [ "$(desk_count)" -gt "$DESKS_BEFORE" ]; }
 
 # ---- round -----------------------------------------------------------------
 
@@ -224,6 +270,7 @@ phase_rule() {
   local s lines before after t0
   s=$(desk_session)
   before=$(wc -l <"$STATE/rulings.jsonl" 2>/dev/null || echo 0)
+  date -u +%Y-%m-%dT%H:%M:%SZ >"$RUN/answer-time"
   tmux send-keys -t "$s" -l -- "$WORDS_1"
   # Alt+Enter is the newline key; the run records whether it worked.
   tmux send-keys -t "$s" M-Enter
@@ -241,102 +288,160 @@ phase_rule() {
     bash -c "for i in 1 2 3 4 5; do cc() { '$BIN' --state-dir '$STATE' \"\$@\"; }; if ! cc snapshot | jq -e '.waits_for_geoff | map(select(.project == \"$PROJECT\")) | length > 0' >/dev/null; then exit 0; fi; sleep 1; done; exit 1"
   say "rule: $(($(date +%s) - t0)) seconds from typing to the last check"
   pane "$s" | tee "$RUN/rule.pane" >/dev/null
-  jq -r '.. | objects | select(.type? == "tool_use" and .name? == "Bash") | .input.command // empty' \
-    "$HOME"/.claude/projects/*/"$(cat "$RUN/desk-id")".jsonl 2>/dev/null >"$RUN/desk-bash.txt" || true
-  say "desk Bash calls recorded in $RUN/desk-bash.txt"
 }
 
 # ---- start -----------------------------------------------------------------
 
+# started is true once the check logged a start of desk-live-a after the answer
+# and the pass has a session.
+started() {
+  local since
+  since=$(cat "$RUN/answer-time" 2>/dev/null || cat "$RUN/start-time")
+  jq -e -s --arg p "$PROJECT" --arg since "$since" '
+    def secs: sub("\\.[0-9]+"; "") | fromdateiso8601;
+    any(.[]; .project == $p and .record == "pass:desk-live-a" and .decision == "start" and (.time | secs) >= ($since | secs))' \
+    "$STATE/check-log.jsonl" >/dev/null 2>&1 &&
+    [ -n "$(pass_field desk-live-a '.session.session_id // empty')" ]
+}
+
 phase_start() {
-  local before_t
-  before_t=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  echo "$before_t" >"$RUN/start-time"
-  started() { grep -q '"decision":"start"' "$STATE/check-log.jsonl" 2>/dev/null && [ -n "$(pass_field desk-live-a '.session.session_id // empty')" ]; }
-  local i
-  for ((i = 0; i < 60; i++)); do
-    save_list
-    started && break
-    sleep 5
-  done
+  date -u +%Y-%m-%dT%H:%M:%SZ >"$RUN/start-time"
+  wait_saving 300 started || true
   if started; then check pass "4 the pass starts within 5 minutes and the log holds the start"; else check fail "4 the pass starts within 5 minutes and the log holds the start"; fi
-  expect "4 the desk ran no start command" bash -c "! grep -q 'pass start' '$RUN/desk-bash.txt'"
   local sid
   sid=$(pass_field desk-live-a '.session.session_id // empty')
   echo "$sid" >"$RUN/pass-session-1"
   expect "4 the pass session has a row" row_for "$sid"
   save_list
+  # The desk's transcript, read now that the start window has passed.
+  local t tr=""
+  for t in "$HOME"/.claude/projects/*/"$(cat "$RUN/desk-id")".jsonl; do
+    [ -f "$t" ] && tr=$t && break
+  done
+  if [ -n "$tr" ] && jq -r '.. | objects | select(.type? == "tool_use" and .name? == "Bash") | .input.command // empty' "$tr" >"$RUN/desk-bash.txt"; then
+    say "desk Bash calls recorded in $RUN/desk-bash.txt from $tr"
+    expect "4 the desk ran no start command" bash -c "! grep -q 'pass start' '$RUN/desk-bash.txt'"
+  else
+    say "no desk transcript found"
+    check fail "4 the desk ran no start command"
+  fi
 }
 
 # ---- refuse ----------------------------------------------------------------
+
+# proc_started prints a process's real start as a UTC timestamp, the way the
+# desk's guard reads it: field 22 of /proc/<pid>/stat over the clock tick, on
+# the boot time from /proc/stat.
+proc_started() {
+  local ticks btime hz
+  ticks=$(sed -e 's/^.*) //' "/proc/$1/stat" | cut -d' ' -f20)
+  btime=$(awk '$1 == "btime" {print $2}' /proc/stat)
+  hz=$(getconf CLK_TCK)
+  date -u -d "@$((btime + ticks / hz))" +%Y-%m-%dT%H:%M:%SZ
+}
+
+# claude_pid prints the pid of the process named claude whose command line
+# holds the session id, not the setsid or shell parent.
+claude_pid() {
+  local p
+  for p in $(pgrep -f -- "--session-id $1" || true); do
+    if [ "$(cat "/proc/$p/comm" 2>/dev/null)" = claude ]; then
+      echo "$p"
+      return 0
+    fi
+  done
+  return 1
+}
 
 phase_refuse() {
   local copy=$RUN/state-copy
   rm -rf "$copy"
   show cp -r "$STATE" "$copy"
-  # The executor's own session: a background session, so no terminal.
+  # The executor's own session: a background session, so no terminal and no desk.
   local own=${CLAUDE_SESSION_ID:-executor}
   local out
   out=$("$BIN" --state-dir "$copy" ruling record --project "$PROJECT" --round desk-live --question dq1 --option keep "from the executor" 2>&1) || true
   say "$out"
-  if printf '%s' "$out" | grep -qi 'desk'; then check pass "4 refused from a background session"; else check fail "4 refused from a background session"; fi
+  if printf '%s' "$out" | grep -q "isn.t a registered desk"; then check pass "4 refused from a background session"; else check fail "4 refused from a background session"; fi
   say "(executor session $own)"
+  save_list
 
-  # Real claude under setsid, registered in the copy, records against the copy.
-  local id s pid
+  # Real claude under setsid, registered in the copy before it can act, records against the copy.
+  local id s pid=""
   id=$(cat /proc/sys/kernel/random/uuid)
   s=$PROJECT-nosetty-$(date -u +%H%M%S)
+  local settings=$RUN/nodesk-settings.json
+  jq -n --arg r "Bash($BIN --state-dir $copy ruling record *)" '{permissions: {allow: [$r]}}' >"$settings"
   tmux new-session -d -s "$s" -x 200 -y 50 -c "$SCRATCH" \
-    "setsid -w claude --session-id $id --model sonnet --effort low --permission-mode default --name $PROJECT-nodesk 'Run this command and print what it says: $BIN --state-dir $copy ruling record --project $PROJECT --round desk-live --question dq1 --option keep words'"
-  wait_for 60 bash -c "pgrep -f -- '--session-id $id' >/dev/null" || true
-  pid=$(pgrep -f -- "--session-id $id" | head -n1 || true)
+    "setsid -w claude --session-id $id --model sonnet --effort low --permission-mode default --settings $settings --name $PROJECT-nodesk"
+  wait_saving 60 claude_pid "$id" || true
+  pid=$(claude_pid "$id" || true)
   say "setsid claude pid: ${pid:-none}"
   if [ -n "$pid" ]; then
-    jq --arg id "$id" --argjson pid "$pid" --arg t "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    jq --arg id "$id" --argjson pid "$pid" --arg t "$(proc_started "$pid")" \
       '.desks += [{session_id: $id, pid: $pid, started: $t}]' "$copy/desks.json" >"$copy/desks.json.new"
     mv "$copy/desks.json.new" "$copy/desks.json"
+    # Registered; now let the session act. Wait for its input box, then type the prompt.
+    wait_saving 60 pane_has "$s" 'for shortcuts' || true
+    sleep 3
+    type_in "$s" "Run this command and print what it says: $BIN --state-dir $copy ruling record --project $PROJECT --round desk-live --question dq1 --option keep words"
   fi
-  wait_for 120 bash -c "tmux capture-pane -p -t '$s' | grep -qi 'terminal'" || true
+  wait_saving 120 bash -c "tmux capture-pane -p -t '$s' -S -200 | tr -s '[:space:]' ' ' | grep -q \"desk.s process has no terminal\"" || true
   pane "$s" | tee "$RUN/refuse.pane"
-  expect "4 refused from a shell with no terminal, naming it" grep -qi 'terminal' "$RUN/refuse.pane"
+  expect "4 refused from a shell with no terminal, naming it" \
+    bash -c "tr -s '[:space:]' ' ' <'$RUN/refuse.pane' | grep -q \"desk.s process has no terminal\""
   try tmux kill-session -t "$s"
-  [ -n "$pid" ] && try kill "$pid"
+  if [ -n "$pid" ]; then try kill "$pid"; fi
+  save_list
 }
 
 # ---- replace ---------------------------------------------------------------
+
+# relaunch_counts prints the pass's relaunch entries as "counted uncounted".
+relaunch_counts() {
+  pass_field desk-live-a '[.session.relaunches // [] | .[] | .counted] | "\(map(select(. == true)) | length) \(map(select(. == false)) | length)"'
+}
 
 phase_replace() {
   local s old
   s=$(desk_session)
   old=$(cat "$RUN/pass-session-1" 2>/dev/null || true)
-  type_in "$s" "I recorded the wrong thing. Replace my last ruling: I want to change the scale. Record it as my ruling with the replaces flag."
-  wait_for 300 bash -c "[ \"\$(pass_field desk-live-a '.session.session_id')\" != '$old' ]" || true
+  local c0 u0
+  read -r c0 u0 <<<"$(relaunch_counts)"
   save_list
-  local new relaunch
+  type_in "$s" "I recorded the wrong thing. Replace my last ruling: I want to change the scale. Record it as my ruling with the replaces flag."
+  wait_saving 300 bash -c "[ \"\$(pass_field desk-live-a '.session.session_id')\" != '$old' ]" || true
+  save_list
+  local new c1 u1
   new=$(pass_field desk-live-a '.session.session_id // empty')
-  relaunch=$(pass_field desk-live-a '.session.relaunches // [] | length')
-  say "pass session was $old, is now $new; relaunches recorded: $relaunch"
+  read -r c1 u1 <<<"$(relaunch_counts)"
+  say "pass session was $old, is now $new; counted relaunches $c0 -> $c1, uncounted $u0 -> $u1"
   expect "5 the session was ended and a new one started" test -n "$new" -a "$new" != "$old"
   expect "5 the new session's first prompt holds the words" \
     bash -c "grep -l 'change the scale' \"\$HOME\"/.claude/projects/*/$new.jsonl >/dev/null 2>&1"
-  expect "5 the count is unchanged" test "$(pass_field desk-live-a '.session.launch_tries // 0')" -le 2
+  expect "5 the count is unchanged" test "$c1" = "$c0" -a "$((u1 - u0))" -eq 1
   expect "5 never two sessions at once" bash -c "[ \$(jq -s '[.[] | [.. | objects | select(.name? == \"$PROJECT-desk-live-a\")] | length] | max' '$RUN'/lists/*.json) -le 1 ]"
 }
 
 # ---- merge and close -------------------------------------------------------
 
+# pr_branch names a pass's pull request branch. It differs from the pass's own
+# branch, which the pass's launch creates in its worktree and refuses to find.
+pr_branch() { echo "$BASE-$1-pr"; }
+
 # scratch_pr makes a branch off the base with one commit, pushes it, opens a
 # pull request, and prints its number.
 scratch_pr() {
-  local pass=$1
+  local pass=$1 br
+  br=$(pr_branch "$pass")
   git -C "$SCRATCH" fetch --quiet origin
-  git -C "$SCRATCH" switch --quiet -c "$pass" "origin/$BASE"
+  git -C "$SCRATCH" switch --quiet -c "$br" "origin/$BASE"
   echo "$pass ran." >"$SCRATCH/notes-$pass.md"
   git -C "$SCRATCH" add "notes-$pass.md"
   git -C "$SCRATCH" commit --quiet -m "Add $pass notes"
-  git -C "$SCRATCH" push --quiet origin "$pass"
+  git -C "$SCRATCH" push --quiet origin "$br"
   git -C "$SCRATCH" switch --quiet "$BASE"
-  gh pr create --repo glw907/cc-desk-scratch --base "$BASE" --head "$pass" --title "Add $pass notes" --body "Fixture pass $pass." |
+  gh pr create --repo glw907/cc-desk-scratch --base "$BASE" --head "$br" --title "Add $pass notes" --body "Fixture pass $pass." |
     sed -e 's|.*/pull/||'
 }
 
@@ -352,7 +457,7 @@ add_pass() {
 hold_pr() {
   local pass=$1 n sha
   n=$(scratch_pr "$pass")
-  sha=$(git -C "$SCRATCH" rev-parse "origin/$pass")
+  sha=$(git -C "$SCRATCH" rev-parse "origin/$(pr_branch "$pass")")
   add_pass "$pass"
   show "$BIN" --state-dir "$STATE" pass start "$PROJECT" "$pass"
   wait_for 300 bash -c "[ -n \"\$(jq -r --arg p '$pass' '.passes[] | select(.name == \$p) | .session.session_id // empty' '$RELEASE')\" ]" || true
@@ -374,10 +479,10 @@ phase_merge() {
   q=$(question_of "$p")
   say "merge question: ${q:-none}"
   # Move the head before the answer, so the first answer asks again.
-  git -C "$SCRATCH" switch --quiet "$p"
+  git -C "$SCRATCH" switch --quiet "$(pr_branch "$p")"
   echo "second push" >>"$SCRATCH/notes-$p.md"
   git -C "$SCRATCH" commit --quiet -am "Move the head"
-  git -C "$SCRATCH" push --quiet origin "$p"
+  git -C "$SCRATCH" push --quiet origin "$(pr_branch "$p")"
   git -C "$SCRATCH" switch --quiet "$BASE"
   type_in "$s" "Run a fresh brief. For the merge question about the $p pull request, my answer is merge."
   wait_for 300 bash -c "[ \"\$(jq -r '.passes[] | select(.name == \"$p\") | .pull_request.question // empty' '$RELEASE')\" != '$q' ]" || true
@@ -431,10 +536,17 @@ phase_evidence() {
   evidence_readings || say "evidence: a reading failed; the rest ran"
   try git -C "$SCRATCH" switch main
   try systemctl --user disable --now cc-desk-check.timer
-  local fails
+  local fails missing="" c
   fails=$(grep -c '^fail' "$RESULTS" 2>/dev/null || true)
+  while IFS= read -r c; do
+    cut -f2 "$RESULTS" 2>/dev/null | grep -Fxq -- "$c" || missing+="$c"$'\n'
+  done <<<"$EXPECTED_CLAUSES"
   say
-  if [ "${fails:-0}" -eq 0 ] && [ -s "$RESULTS" ]; then say "result: pass"; else say "result: fail"; fi
+  if [ -n "$missing" ]; then
+    say "clauses never recorded:"
+    printf '%s' "$missing"
+  fi
+  if [ "${fails:-0}" -eq 0 ] && [ -z "$missing" ] && [ -s "$RESULTS" ]; then say "result: pass"; else say "result: fail"; fi
 }
 
 evidence_readings() {
