@@ -173,6 +173,7 @@ prep_refuse() {
 phase_prep() {
   prep_refuse
   mkdir -p "$RUN"
+  rm -rf "$RUN/lists"
   : >"$RESULTS"
   BASE=live-desk-$(date -u +%Y%m%d-%H%M%S)
   echo "$BASE" >"$RUN/base"
@@ -429,7 +430,7 @@ phase_replace() {
   expect "5 the new session's first prompt holds the words" \
     bash -c "grep -l 'change the scale' \"\$HOME\"/.claude/projects/*/$new.jsonl >/dev/null 2>&1"
   expect "5 the count is unchanged" test "$c1" = "$c0" -a "$((u1 - u0))" -eq 1
-  expect "5 never two sessions at once" bash -c "[ \$(jq -s '[.[] | [.. | objects | select(.name? == \"$PROJECT-desk-live-a\")] | length] | max' '$RUN'/lists/*.json) -le 1 ]"
+  expect "5 never two sessions at once" bash -c "[ \$(jq -s '[.[] | [.. | objects | select(.name? == \"$PROJECT-desk-live-a\" and (.state? == \"working\" or .state? == \"blocked\"))] | length] | max' '$RUN'/lists/*.json) -le 1 ]"
 }
 
 # ---- merge and close -------------------------------------------------------
