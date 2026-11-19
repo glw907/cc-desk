@@ -517,3 +517,10 @@ The round plan's answers 13 to 27 and the twelve in `round-run.md` hold. These a
 - [call] A pass held by the limit of two stays not started rather than becoming `Waiting`.
 - [call] Review note 5 stays as a follow-up. Notes 1 to 4 and 6 are folded by Tasks 5, 4, 2, 3,
   and 5.
+
+## Rulings
+
+- 2026-11-18, Geoff, answering the conductor in his session: "Raise to 140 (Recommended)". The
+  pass's estimate is 140 minutes and its stop is 280, so the plan launches as written. The PR
+  takes the parked question under `## Planning misses` as an `[estimate]` line and this ruling
+  under `## Decisions`.
