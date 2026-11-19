@@ -174,6 +174,9 @@ phase_prep() {
   prep_refuse
   mkdir -p "$RUN"
   rm -rf "$RUN/lists"
+  # Sessions from an earlier run keep their rows in the list, so the clauses
+  # that count sessions count only those started after this moment.
+  date +%s%3N >"$RUN/epoch"
   : >"$RESULTS"
   BASE=live-desk-$(date -u +%Y%m%d-%H%M%S)
   echo "$BASE" >"$RUN/base"
@@ -430,7 +433,7 @@ phase_replace() {
   expect "5 the new session's first prompt holds the words" \
     bash -c "grep -l 'change the scale' \"\$HOME\"/.claude/projects/*/$new.jsonl >/dev/null 2>&1"
   expect "5 the count is unchanged" test "$c1" = "$c0" -a "$((u1 - u0))" -eq 1
-  expect "5 never two sessions at once" bash -c "[ \$(jq -s '[.[] | [.. | objects | select(.name? == \"$PROJECT-desk-live-a\" and (.state? == \"working\" or .state? == \"blocked\"))] | length] | max' '$RUN'/lists/*.json) -le 1 ]"
+  expect "5 never two sessions at once" bash -c "[ \$(jq -s --argjson t \$(cat '$RUN/epoch') '[.[] | [.. | objects | select(.name? == \"$PROJECT-desk-live-a\" and .startedAt? >= \$t and (.state? == \"working\" or .state? == \"blocked\"))] | length] | max' '$RUN'/lists/*.json) -le 1 ]"
 }
 
 # ---- merge and close -------------------------------------------------------
@@ -515,7 +518,7 @@ phase_close() {
   expect "5 close closes the pull request" bash -c "[ \"\$(gh pr view $n --repo glw907/cc-desk-scratch --json state -q .state)\" = CLOSED ]"
   expect "5 close records the pass closed" bash -c "[ -n \"\$(jq -r '.passes[] | select(.name == \"$p\") | .closed // empty' '$RELEASE')\" ]"
   expect "5 close empties Needs you now for it" \
-    bash -c "! '$BIN' --state-dir '$STATE' snapshot | jq -e '.needs_you_now | map(select(.project == \"$PROJECT\")) | length > 0' >/dev/null"
+    bash -c "! '$BIN' --state-dir '$STATE' snapshot | jq -e '.needs_you_now | map(select(.session == \"$PROJECT-$p\")) | length > 0' >/dev/null"
 }
 
 # ---- abort -----------------------------------------------------------------
