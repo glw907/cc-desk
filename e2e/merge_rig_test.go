@@ -20,7 +20,8 @@ import (
 const mergeClock = "2026-11-21T00:00:00Z"
 
 // mergeRig is a launch rig with a gh stand-in beside the claude one. The
-// stand-in is testdata/check-merge/gh.py, copied into the rig folder.
+// stand-in is testdata/check-merge/gh.py, or the folder newMergeRigFrom names,
+// copied into the rig folder.
 type mergeRig struct {
 	launchRig
 	gh string
@@ -31,8 +32,15 @@ type mergeRig struct {
 // worktree and a branch of its own name.
 func newMergeRig(t *testing.T, passes ...string) mergeRig {
 	t.Helper()
+	return newMergeRigFrom(t, "check-merge", passes...)
+}
+
+// newMergeRigFrom is newMergeRig with the gh stand-in taken from the named
+// fixture folder.
+func newMergeRigFrom(t *testing.T, fixture string, passes ...string) mergeRig {
+	t.Helper()
 	m := mergeRig{launchRig: newLaunchRig(t)}
-	src, err := os.ReadFile(filepath.Join("testdata", "check-merge", "gh.py"))
+	src, err := os.ReadFile(filepath.Join("testdata", fixture, "gh.py"))
 	if err != nil {
 		t.Fatal(err)
 	}

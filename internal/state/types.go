@@ -174,6 +174,9 @@ type PullRequest struct {
 	// Question is the id of the merge question asked under the current
 	// report. It holds every later merge decision until a new report.
 	Question string `json:"question,omitempty"`
+	// AskedCommit is the head the question asks about. A merge answer merges
+	// only at this commit.
+	AskedCommit string `json:"asked_commit,omitempty"`
 	// MergeCalled is when the check committed to calling the merge, before
 	// it ran. It tells the check's own merge from one by another hand.
 	MergeCalled   *time.Time `json:"merge_called,omitempty"`

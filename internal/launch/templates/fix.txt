@@ -1,1 +1,5 @@
-Pull request {{.Fix.Number}} came back at commit {{.Fix.Commit}}: {{.Fix.List}}. Fix the branch, push it with `{{.PushCommand}}`, and report the pull request ready again with `{{.Ready}}`, naming its new last commit. Do not merge it. This doesn't count toward the two relaunches. Carry on from the branch as it stands; the commits on it are yours.
+Pull request {{.Fix.Number}} came back at commit {{.Fix.Commit}}{{if .Fix.Failures}}: {{.Fix.List}}{{end}}.{{if .Fix.Words}} Geoff sent it back and said, exactly as he gave it:
+
+{{.Fix.Words}}
+
+{{else}} {{end}}Fix the branch, push it with `{{.PushCommand}}`, and report the pull request ready again with `{{.Ready}}`, naming its new last commit. Do not merge it. This doesn't count toward the two relaunches. Carry on from the branch as it stands; the commits on it are yours.

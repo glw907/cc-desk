@@ -63,6 +63,9 @@ type FixNote struct {
 	Number   int
 	Commit   string
 	Failures []string
+	// Words is what Geoff said when he sent the pull request back, as he gave
+	// it. Empty when the check sent it back on its own.
+	Words string
 }
 
 // List gives the failures as one phrase.

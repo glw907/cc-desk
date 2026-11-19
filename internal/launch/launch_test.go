@@ -267,6 +267,21 @@ func TestFixNote(t *testing.T) {
 	}
 }
 
+func TestFixNoteWords(t *testing.T) {
+	p := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b", Ready: "cc-desk pass ready"}
+	words := "Rename it.\nKeep $HOME."
+	p.Fix = &FixNote{Number: 7, Commit: "abc123", Words: words}
+	got, err := Fill(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{"Pull request 7 came back at commit abc123.", words, "git push origin b"} {
+		if !strings.Contains(got, w) {
+			t.Errorf("prompt lacks %q:\n%s", w, got)
+		}
+	}
+}
+
 func TestReplaceNote(t *testing.T) {
 	base := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b", Ready: "cc-desk pass ready"}
 	words := "Use the 'short' form.\nSecond line with $HOME."

@@ -127,7 +127,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			out = append(out, r)
 			return
 		}
-		mr, decided, info, held := decideMerge(base, sess, pass, ev, key)
+		mr, decided, info, held := decideMerge(base, sess, pass, ev, key, answerOf(s, rf, pass))
 		if decided && hold && mr.Decision.Decision == Fix {
 			// A fix relaunches the session, so the usage hold waits it out
 			// with no attempt spent.
@@ -249,6 +249,25 @@ func cleanupRow(rf *state.ReleaseFile, record string, sess *state.Session) (Resu
 	}
 	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name, Decision: Cleanup}
 	return Result{Decision: d}, true
+}
+
+// answerOf gives the ruling that answered the pass's merge question, or nil
+// while the question is open or none is asked.
+func answerOf(s *state.State, rf *state.ReleaseFile, p *state.Pass) *Answered {
+	if p == nil || p.PullRequest == nil || p.PullRequest.Question == "" {
+		return nil
+	}
+	for _, q := range rf.Questions {
+		if q.ID != p.PullRequest.Question || q.Answer == nil {
+			continue
+		}
+		for _, g := range s.Rulings {
+			if g.ID == q.Answer.Ruling {
+				return &Answered{Ruling: g.ID, Option: g.Option, Words: g.Words}
+			}
+		}
+	}
+	return nil
 }
 
 // replacedRow decides for a building pass whose answer was replaced and whose
