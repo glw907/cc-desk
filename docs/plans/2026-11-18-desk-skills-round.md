@@ -253,6 +253,13 @@ The twelve in `round-run.md` hold, with these changes and additions.
   release in `~/.local/state/cc-desk`. When auto mode refuses one of these steps, the conductor
   retries it once and cites this answer. It edits no setting, and a second refusal goes under
   "Open decisions".
+- **28. A plan over its estimate (Geoff, 2026-11-18).** After passes 2 and 3 parked on their
+  estimates, Geoff chose "Yes, with limits". When a plan parks at planning only because its path
+  is over twice its estimate, the conductor raises the estimate to half the path plus about 15
+  minutes and launches the executor. That holds only when the plan's scope matches the design
+  and the planner trimmed nothing. A plan whose scope grew, or one whose path runs past the
+  round's clock, still waits for Geoff. The conductor records each raise under `## Rulings` in
+  the pass's plan and in the report.
 
 ## Start line
 
