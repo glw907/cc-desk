@@ -15,6 +15,7 @@ jobs:
     env:
       PIN_VALE_VERSION: 3.27.0
       PIN_VALE_SHA256: c80d62f6bce87b81843ac5b512a26e63213927b957adba0a64fc594570da2000
+      PIN_TELLGRADER_COMMIT: c60c2f5858c69a18deffecee9dd530bbfbc1dbee
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,6 +50,20 @@ jobs:
           echo "$PIN_VALE_SHA256  $RUNNER_TEMP/$a" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/bin"
           tar -xf "$RUNNER_TEMP/$a" -C "$RUNNER_TEMP/bin" vale
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      # tellgrader has no release; build it from the public workstation repo at
+      # the pinned commit. Its module path doesn't match its folder, so go
+      # install can't fetch it.
+      - name: Build tellgrader
+        run: |
+          set -euo pipefail
+          w="$RUNNER_TEMP/workstation"
+          git clone --filter=blob:none --no-checkout https://github.com/glw907/workstation.git "$w"
+          git -C "$w" sparse-checkout set --no-cone claude/.claude/skills/writing-voice/evals/tellgrader
+          git -C "$w" checkout "$PIN_TELLGRADER_COMMIT"
+          mkdir -p "$RUNNER_TEMP/bin"
+          (cd "$w/claude/.claude/skills/writing-voice/evals/tellgrader" && go build -o "$RUNNER_TEMP/bin/tellgrader" ./cmd/tellgrader)
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Gate

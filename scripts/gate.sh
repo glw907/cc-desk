@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # gate.sh: the cc-desk gate. Runs gofmt, go vet, go test, and vale over docs/,
-# then the page's steps when web/package.json is tracked: npm ci, type check,
+# then the skills step (each skills/*/SKILL.md under 160 lines, clean under vale
+# and under tellgrader's agent register), then the page's steps when web/package.json is tracked: npm ci, type check,
 # build, and the Playwright suite. It fails when any Go test reports a skip, and
 # when the Playwright run skips a test, finds no browser, or runs fewer tests than
 # the suite lists. The page mock-ups under docs/specs/2026-11-17-cc-desk-mockups/
@@ -56,6 +57,35 @@ if ! command -v vale >/dev/null 2>&1; then
 fi
 mapfile -t docs < <(git ls-files 'docs/*.md' | grep -v '^docs/specs/2026-11-17-cc-desk-mockups/')
 vale --minAlertLevel=error --output=line "${docs[@]}"
+
+echo "gate: skills"
+if ! command -v tellgrader >/dev/null 2>&1; then
+  echo "gate: tellgrader is not installed; install it, do not skip the gate" >&2
+  exit 1
+fi
+mapfile -t skills < <(git ls-files 'skills/*/SKILL.md')
+if [ "${#skills[@]}" -eq 0 ]; then
+  echo "gate: no skills/*/SKILL.md is tracked" >&2
+  exit 1
+fi
+for skill in "${skills[@]}"; do
+  lines=$(wc -l <"$skill")
+  if [ "$lines" -ge 160 ]; then
+    echo "gate: $skill has $lines lines; a skill stays under 160" >&2
+    exit 1
+  fi
+done
+vale --minAlertLevel=error --output=line "${skills[@]}"
+# tellgrader exits 2 when a finding gates, and gates only under this profile.
+for skill in "${skills[@]}"; do
+  tg=0
+  tellgrader --register agent --profile docs-register "$skill" >/dev/null || tg=$?
+  if [ "$tg" -ne 0 ]; then
+    tellgrader --register agent --profile docs-register "$skill" >&2 || true
+    echo "gate: tellgrader failed on $skill (exit $tg)" >&2
+    exit 1
+  fi
+done
 
 if git ls-files --error-unmatch web/package.json >/dev/null 2>&1; then
   echo "gate: web install"
