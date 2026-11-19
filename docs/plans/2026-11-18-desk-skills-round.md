@@ -279,6 +279,13 @@ The twelve in `round-run.md` hold, with these changes and additions.
   each start only when the one before has landed. Pass 6 launches whenever those steps finish,
   and the hand-over follows it as planned. A stop that waits for Geoff still goes under "Open
   decisions".
+- **32. A skill line the design doesn't back (Geoff, 2026-11-18).** Geoff chose "Fix it to
+  match". When the read of both skills after pass 5 finds a line that tells a session to do
+  something the design doesn't, and the design says plainly what the line should say, the
+  conductor fixes the skill to match in a small PR. One whole-branch `standards:diff-reviewer`
+  read reviews it, and it lands by the usual test before the `v0.1.0` tag. A fix that would
+  change what the design says still waits for Geoff under "Open decisions". The report names
+  each such fix.
 
 ## Start line
 
