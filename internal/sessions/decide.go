@@ -271,11 +271,13 @@ func answerOf(s *state.State, rf *state.ReleaseFile, p *state.Pass) *Answered {
 }
 
 // replacedRow decides for a building pass whose answer was replaced and whose
-// session is live: end it and relaunch it with the new words, uncounted. It
-// runs before the merge rows, so a report made under the old answer merges
-// nothing. Under the usage hold the relaunch waits.
+// session still has a row, working, blocked, or done: end it and relaunch it
+// with the new words, uncounted. A session that finished without a report
+// holds the old answer as much as a working one does. It runs before the
+// merge rows, so a report made under the old answer merges nothing. Under the
+// usage hold the relaunch waits.
 func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e RecordEvidence, hold bool) (Result, bool) {
-	if p == nil || p.State != state.Building || p.Replaced == nil || sess.Ended != nil || !e.HasRow || !e.Row.Live() {
+	if p == nil || p.State != state.Building || p.Replaced == nil || sess.Ended != nil || !e.HasRow {
 		return Result{}, false
 	}
 	if hold {

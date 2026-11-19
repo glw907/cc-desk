@@ -26,20 +26,25 @@ func TestPlanReplacedRow(t *testing.T) {
 	live := Evidence{Records: map[Key]RecordEvidence{
 		{"p", "pass:b"}: {Row: Row{ID: "bb22", State: "working", Status: "busy"}, HasRow: true},
 	}}
+	done := Evidence{Records: map[Key]RecordEvidence{
+		{"p", "pass:b"}: {Row: Row{ID: "bb22", State: "done", Status: "idle"}, HasRow: true},
+	}}
 	tests := []struct {
 		name    string
+		ev      Evidence
 		percent int
 		mark    bool
 		want    string
 		counted bool
 	}{
-		{"a marked live pass is ended and relaunched uncounted", 10, true, EndAndRelaunch, false},
-		{"under the usage hold the relaunch waits", 100, true, WaitUsage, false},
-		{"no mark leaves the pass alone", 10, false, "none", false},
+		{"a marked live pass is ended and relaunched uncounted", live, 10, true, EndAndRelaunch, false},
+		{"a marked pass whose session finished is relaunched uncounted", done, 10, true, EndAndRelaunch, false},
+		{"under the usage hold the relaunch waits", live, 100, true, WaitUsage, false},
+		{"no mark leaves the pass alone", live, 10, false, "none", false},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			results, err := Plan(world(tc.percent, tc.mark), live, t0)
+			results, err := Plan(world(tc.percent, tc.mark), tc.ev, t0)
 			if err != nil {
 				t.Fatal(err)
 			}
