@@ -141,7 +141,7 @@ func TestReplaceRuling(t *testing.T) {
 		s, rf := replaceState()
 		pass := &rf.Passes[0]
 		pass.State, pass.Session = Building, &Session{}
-		pass.PullRequest = &PullRequest{Number: 3}
+		pass.PullRequest = &PullRequest{Number: 3, Question: "merge-p1-1"}
 		pass.Questions = []string{"merge-p1-1"}
 		rf.Questions = append(rf.Questions, Question{ID: "merge-p1-1", Options: []string{"merge", "close"}, Answer: &Answer{Ruling: "r-0003"}})
 		s.Rulings = append(s.Rulings, Ruling{Format: Format, ID: "r-0003", Time: at(8, 40), Desk: "d", Words: "Merge.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "merge"})
@@ -162,6 +162,29 @@ func TestReplaceRuling(t *testing.T) {
 		}
 		if a := rf.Questions[len(rf.Questions)-1].Answer; a == nil || a.Ruling != "r-0004" {
 			t.Errorf("answer = %+v, want r-0004", a)
+		}
+	})
+
+	t.Run("a merge answer is refused once the fix was sent back", func(t *testing.T) {
+		for name, pr := range map[string]*PullRequest{
+			"the question cleared": {Number: 3},
+			"a later question":     {Number: 3, Question: "merge-p1-2"},
+			"no pull request":      nil,
+		} {
+			s, rf := replaceState()
+			pass := &rf.Passes[0]
+			pass.State, pass.Session, pass.PullRequest = Building, &Session{}, pr
+			pass.Questions = []string{"merge-p1-1"}
+			rf.Questions = append(rf.Questions, Question{ID: "merge-p1-1", Options: []string{"merge", "fix again", "close"}, Answer: &Answer{Ruling: "r-0003"}})
+			s.Rulings = append(s.Rulings, Ruling{Format: Format, ID: "r-0003", Time: at(8, 40), Desk: "d", Words: "Again.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "fix again"})
+			req := RulingRequest{Words: "Merge it.", Project: "alpha", Round: "r1", Question: "merge-p1-1", Option: "merge", Replaces: "r-0003"}
+			err := RecordRuling(deskCaller(), req)(s, at(9, 0))
+			if !isRefusal(err) || !strings.Contains(err.Error(), "has been carried out; a new change is needed") {
+				t.Errorf("%s: error = %v, want a refusal", name, err)
+			}
+			if len(s.Rulings) != 3 || s.newRuling != nil || rf.Dirty {
+				t.Errorf("%s: a refused replacement changed the state", name)
+			}
 		}
 	})
 

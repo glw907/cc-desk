@@ -143,7 +143,7 @@ func (l *launcher) ask(r sessions.Result, pass string) (string, error) {
 		text = fmt.Sprintf("Pull request %d has a new head, %s, since you answered. Merge it, send it back, or close it?", m.Number, shortCommit(m.Commit))
 		recommended = sessions.OptionMerge
 	case sessions.ReasonChecksFailed:
-		text = fmt.Sprintf("Pull request %d now fails %s. Send it back or close it?", m.Number, strings.Join(m.Failures, ", "))
+		text = fmt.Sprintf("Pull request %d now fails %s. Merge it anyway, send it back, or close it?", m.Number, strings.Join(m.Failures, ", "))
 		recommended = sessions.OptionFixAgain
 	default:
 		text = fmt.Sprintf("Pull request %d has failed %d times (%s). Merge it, send it back again, or close it?", m.Number, m.Attempts+1, strings.Join(m.Failures, ", "))

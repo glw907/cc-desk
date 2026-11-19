@@ -5,9 +5,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/glw907/cc-desk/internal/atomicfile"
 )
+
+// CheckCommandPath refuses a path that cannot sit in an allow rule or in the
+// command the session types: one with whitespace, a glob character, a quote,
+// or another character the shell or the rule matcher reads.
+func CheckCommandPath(path string) error {
+	if strings.ContainsAny(path, " \t\n*?[]{}()<>|&;$`'\"\\!#~") {
+		return fmt.Errorf("the path %q has a space or a character the desk's permission rules read; run cc-desk from a path without one", path)
+	}
+	return nil
+}
 
 // Rules gives the allow rules of a desk session. prefix is the command the
 // session types before each verb, so the rules match its text exactly. A

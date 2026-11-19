@@ -106,6 +106,11 @@ func runOpen(cmd *cobra.Command, f *rootFlags, args []string) error {
 		return err
 	}
 
+	for _, p := range []string{binary, dir} {
+		if err := desk.CheckCommandPath(p); err != nil {
+			return err
+		}
+	}
 	prefix := binary
 	if f.stateDir != "" {
 		prefix += " --state-dir " + dir
@@ -118,6 +123,17 @@ func runOpen(cmd *cobra.Command, f *rootFlags, args []string) error {
 	if f.skillFile != "" {
 		if skillFile, err = filepath.Abs(f.skillFile); err != nil {
 			return fmt.Errorf("find the skill file: %w", err)
+		}
+	}
+	name := "desk"
+	folder := ""
+	if rf != nil {
+		name = rf.Project + "-desk"
+		folder = rf.Checkout
+	}
+	if folder != "" {
+		if err := os.Chdir(folder); err != nil {
+			return fmt.Errorf("open the project's checkout: %w", err)
 		}
 	}
 	id, err := desk.NewID()
@@ -136,17 +152,6 @@ func runOpen(cmd *cobra.Command, f *rootFlags, args []string) error {
 		return err
 	}
 
-	name := "desk"
-	folder := ""
-	if rf != nil {
-		name = rf.Project + "-desk"
-		folder = rf.Checkout
-	}
-	if folder != "" {
-		if err := os.Chdir(folder); err != nil {
-			return fmt.Errorf("open the project's checkout: %w", err)
-		}
-	}
 	argv := []string{claude, "--session-id", id, "--model", openModel, "--effort", openEffort,
 		"--permission-mode", "default", "--settings", settings,
 		"--append-system-prompt", systemPrompt(prefix, wordsDir, skillFile, text),
