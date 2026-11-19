@@ -273,6 +273,12 @@ The twelve in `round-run.md` hold, with these changes and additions.
   review proposes, landed through `claude-infra` and reviewed with the rest. The review is
   `~/Projects/initiatives/cc-desk/reports/desk-failure-review.md`, section 3. Answer 27 covers
   landing it.
+- **31. Pass 6 may start past the clock (Geoff, 2026-11-18).** At 23:27 the forecast put pass
+  6's launch at about the conductor's 03:55 cutoff. Geoff said "Yes, let pass 6 start past the
+  cutoff." The cutoff still holds for everything else: pass 5, the steps after it, and pass 6
+  each start only when the one before has landed. Pass 6 launches whenever those steps finish,
+  and the hand-over follows it as planned. A stop that waits for Geoff still goes under "Open
+  decisions".
 
 ## Start line
 
