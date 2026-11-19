@@ -121,7 +121,8 @@ func TestEndStopsSession(t *testing.T) {
 		{"done row", "done", false, false, 1, true},
 		{"stopped row", "stopped", false, false, 0, true},
 		{"failed stop, session gone", "done", true, true, 1, true},
-		{"failed stop, session listed", "done", true, false, 1, false},
+		{"failed stop, done row stays listed", "done", true, false, 1, true},
+		{"failed stop, live row stays listed", "working", true, false, 1, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := newLaunchRig(t)

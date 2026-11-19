@@ -262,13 +262,21 @@ phase_refuse() {
   say "the session's deny list: $(jq -c '.permissions.deny' "$STATE/launch/$PROJECT-$pass.json")"
   say "the session's hooks: $(jq -c '.hooks' "$STATE/launch/$PROJECT-$pass.json")"
 
-  local i found=""
+  # Matched input lands on the session's record; only input that matched no record is kept
+  # under hook-unmatched, so the check reads the record first and the folder second.
+  local i found="" recorded=""
   for ((i = 0; i < 120; i++)); do
+    recorded=$(pass_field "$pass" '.session.refusals // [] | map(select((.reason // "") != "")) | length')
     found=$(hook_input_for "$sid")
-    [ -n "$found" ] && break
+    [ "${recorded:-0}" != 0 ] || [ -n "$found" ] && break
     sleep 5
   done
-  if [ -n "$found" ]; then
+  if [ "${recorded:-0}" != 0 ]; then
+    say "the session's record holds the refusal:"
+    pass_field "$pass" '.session.refusals'
+    check pass "7 the refusal hook fired with the session id"
+    check pass "7 the hook input holds a reason"
+  elif [ -n "$found" ]; then
     show cp "$(echo "$found" | head -n1)" "$FIXTURE"
     say "the hook input:"
     jq . "$FIXTURE"

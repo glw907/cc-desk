@@ -176,7 +176,7 @@ func (l *launcher) stopSession(ctx context.Context, shortID string) (ended, erro
 	row, found = sessions.Find(rows, shortID)
 	gone := !found || row.Class() == sessions.ClassNone
 	if stopErr != nil && !gone {
-		return ended{}, stopErr
+		return ended{rows: rows}, stopErr
 	}
 	return ended{rows: rows, stopped: stopErr == nil, gone: gone}, nil
 }
