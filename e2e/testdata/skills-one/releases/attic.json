@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "project": "attic",
+  "name": "v1",
+  "repo": "glw907/attic",
+  "rounds": [
+    {"name": "a1", "summary": "The second copy of the scans.", "needs_geoff": true, "design_written": true}
+  ],
+  "passes": [
+    {"name": "a-copy", "summary": "Copy the scans each night.", "round": "a1", "planned_minutes": 50, "state": "not_started", "questions": ["q-juneau-7"]},
+    {"name": "a-verify", "summary": "Check the copy each week.", "round": "a1", "planned_minutes": 35, "state": "not_started", "after": ["a-copy"]}
+  ],
+  "questions": [
+    {
+      "id": "q-juneau-7",
+      "text": "Should the nightly backup also copy the Juneau archive to the second disk?",
+      "options": ["yes", "no"],
+      "recommended": "yes",
+      "background": [
+        "The family photo scans live on one disk today, and the second disk has 30 GB free.",
+        "A second copy was turned down in the spring, and a yes here replaces ruling r-0042."
+      ],
+      "causes": {
+        "yes": "Each night's backup runs 15 minutes longer, and the scans survive a failed disk.",
+        "no": "The backup stays at 40 minutes a night, and one failed disk loses every scan."
+      },
+      "reason": "The scans can't be made again, because the Sitka library returned the originals.",
+      "never_guess": true
+    }
+  ]
+}
