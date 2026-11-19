@@ -286,6 +286,11 @@ The twelve in `round-run.md` hold, with these changes and additions.
   read reviews it, and it lands by the usual test before the `v0.1.0` tag. A fix that would
   change what the design says still waits for Geoff under "Open decisions". The report names
   each such fix.
+- **33. Leftover scratch sessions (Geoff, 2026-11-19).** Pass 5 parked because a blocked session
+  from its own earlier probe kept its live script from starting. Geoff chose "Yes, and from now
+  on". For the rest of the round, the conductor stops any `cc-desk-scratch` session that this
+  round's own live runs left blocked or idle, notes it in the report, and relaunches the parked
+  executor. A session the conductor can't trace to this round still waits for Geoff.
 
 ## Start line
 
