@@ -159,8 +159,33 @@ func causeText(cause string) string {
 		return "sitting idle with its work unfinished"
 	case "missing":
 		return "its session vanishing from the session list"
+	case "replaced":
+		return "your answer being replaced"
 	}
 	return cause
+}
+
+// replaceNote gives the paragraph for a pass whose answer was replaced: the
+// question and the new words. It is nil for a pass with no mark.
+func replaceNote(s *state.State, rf *state.ReleaseFile, pass string) *launch.ReplaceNote {
+	for _, p := range rf.Passes {
+		if p.Name != pass || p.Replaced == nil {
+			continue
+		}
+		for _, r := range s.Rulings {
+			if r.ID != p.Replaced.Ruling {
+				continue
+			}
+			note := &launch.ReplaceNote{Question: r.Question, Words: r.Words}
+			for _, q := range rf.Questions {
+				if q.ID == r.Question {
+					note.Question = q.Text
+				}
+			}
+			return note
+		}
+	}
+	return nil
 }
 
 // launchRequest says which launch of a record to make.
@@ -273,6 +298,15 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 			p.Relaunch = &launch.RelaunchNote{Count: count, Cause: causeText(req.Cause), Uncounted: !req.Counted}
 		}
 	}
+	also := req.Also
+	if note := replaceNote(s, rf, pl.pass); note != nil {
+		p.Replace = note
+		clear := state.ClearReplaced(project, pl.pass)
+		if also != nil {
+			clear = state.Sequence(also, clear)
+		}
+		also = clear
+	}
 	text, err := launch.Fill(p)
 	if err != nil {
 		return "", err
@@ -290,8 +324,8 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 			Worktree: pl.worktree, Branch: pl.branch,
 		},
 	})
-	if req.Also != nil {
-		recordLaunch = state.Sequence(req.Also, recordLaunch)
+	if also != nil {
+		recordLaunch = state.Sequence(also, recordLaunch)
 	}
 	_, err = state.Commit(l.dir, l.now, state.LockWait, recordLaunch, snapshot.Render)
 	if err != nil {

@@ -71,7 +71,7 @@ func TestReplace(t *testing.T) {
 		}
 	})
 
-	t.Run("refuses_a_started_pass", func(t *testing.T) {
+	t.Run("replaces_for_a_building_pass", func(t *testing.T) {
 		dir := newStateFrom(t, "order")
 		answer := answerQ1(t, dir)
 		r := recordRulingArgs(t, inTerminalDesk, deskSession, dir, at(t, 20), replaceArgs("r-0002"), func() {
@@ -80,7 +80,21 @@ func TestReplace(t *testing.T) {
 			body := strings.Replace(readFile(t, path), `"planned_minutes": 400, "state": "not_started"`, `"planned_minutes": 400, "state": "building", "started": "2026-11-20T21:00:00Z"`, 1)
 			writeIn(t, dir, "releases/north.json", body)
 		})
-		if r.code != 2 || !strings.Contains(r.stderr, "has started; replacing it while it builds comes in pass 3") {
+		if r.code != 0 || !strings.Contains(r.stderr, "recorded ruling r-0003") {
+			t.Fatalf("exit %d, stderr %q", r.code, r.stderr)
+		}
+	})
+
+	t.Run("refuses_a_finished_pass", func(t *testing.T) {
+		dir := newStateFrom(t, "order")
+		answer := answerQ1(t, dir)
+		r := recordRulingArgs(t, inTerminalDesk, deskSession, dir, at(t, 20), replaceArgs("r-0002"), func() {
+			answer()
+			path := filepath.Join(dir, "releases/north.json")
+			body := strings.Replace(readFile(t, path), `"planned_minutes": 400, "state": "not_started"`, `"planned_minutes": 400, "state": "done", "started": "2026-11-20T21:00:00Z", "finished": "2026-11-20T21:30:00Z", "actual_minutes": 30`, 1)
+			writeIn(t, dir, "releases/north.json", body)
+		})
+		if r.code != 2 || !strings.Contains(r.stderr, "has finished; a new change is needed") {
 			t.Fatalf("exit %d, stderr %q", r.code, r.stderr)
 		}
 	})

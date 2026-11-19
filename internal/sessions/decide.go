@@ -29,6 +29,7 @@ const (
 	ReasonLostConnection = "lost_connection"
 	ReasonIdle           = "idle"
 	ReasonMissing        = "missing"
+	ReasonReplaced       = "replaced"
 )
 
 // IdleLimit is how long a done session may sit before the check ends it.
@@ -119,6 +120,10 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 		base := state.Decision{Project: rf.Project, Record: record, Session: sess.Name}
 		pass := findPass(rf, record)
 		if r, decided := cleanupRow(rf, record, sess); decided {
+			out = append(out, r)
+			return
+		}
+		if r, decided := replacedRow(base, sess, pass, ev.Records[key], hold); decided {
 			out = append(out, r)
 			return
 		}
@@ -244,6 +249,23 @@ func cleanupRow(rf *state.ReleaseFile, record string, sess *state.Session) (Resu
 	}
 	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name, Decision: Cleanup}
 	return Result{Decision: d}, true
+}
+
+// replacedRow decides for a building pass whose answer was replaced and whose
+// session is live: end it and relaunch it with the new words, uncounted. It
+// runs before the merge rows, so a report made under the old answer merges
+// nothing. Under the usage hold the relaunch waits.
+func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e RecordEvidence, hold bool) (Result, bool) {
+	if p == nil || p.State != state.Building || p.Replaced == nil || sess.Ended != nil || !e.HasRow || !e.Row.Live() {
+		return Result{}, false
+	}
+	if hold {
+		base.Decision, base.Reason = WaitUsage, ReasonReplaced
+		return Result{Decision: base}, true
+	}
+	no := false
+	base.Decision, base.Reason, base.Counted = EndAndRelaunch, ReasonReplaced, &no
+	return Result{Decision: base}, true
 }
 
 // early applies rows 1 to 5, which need no row from the list and write

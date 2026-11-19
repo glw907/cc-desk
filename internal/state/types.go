@@ -261,6 +261,15 @@ type Pass struct {
 	// without a merge. It is a mark on a done pass, never a sixth state, so
 	// an older file reads as it did.
 	Closed *Closed `json:"closed,omitempty"`
+	// Replaced marks a building or stopped pass whose question's answer was
+	// replaced. The launch that carries the new words clears it.
+	Replaced *Replaced `json:"replaced,omitempty"`
+}
+
+// Replaced is the ruling that replaced an answer the pass rests on, and when.
+type Replaced struct {
+	Ruling string    `json:"ruling"`
+	Time   time.Time `json:"time"`
 }
 
 // Closed is the ruling that closed a pass and when.

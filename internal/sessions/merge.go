@@ -83,6 +83,10 @@ func decideMerge(base state.Decision, sess *state.Session, p *state.Pass, ev Evi
 	if p.State != state.Building {
 		return
 	}
+	if p.Replaced != nil {
+		detail = "answer replaced by " + p.Replaced.Ruling
+		return
+	}
 	clear := waitPtr("")
 	if !found || pull.State == "CLOSED" || pr == nil || pr.Ready == nil {
 		info.Wait = clear

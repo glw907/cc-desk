@@ -267,6 +267,36 @@ func TestFixNote(t *testing.T) {
 	}
 }
 
+func TestReplaceNote(t *testing.T) {
+	base := Prompt{Kind: "pass", Name: "a-b", Project: "a", Round: "r", Pass: "b", Branch: "b", Ready: "cc-desk pass ready"}
+	words := "Use the 'short' form.\nSecond line with $HOME."
+	p := base
+	p.Replace = &ReplaceNote{Question: "Split the big pass?", Words: words}
+	got, err := Fill(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{"Split the big pass?", words} {
+		if !strings.Contains(got, w) {
+			t.Errorf("replace prompt lacks %q:\n%s", w, got)
+		}
+	}
+	for name, other := range map[string]func(*Prompt){
+		"a relaunch": func(p *Prompt) { p.Relaunch = &RelaunchNote{Count: 1, Cause: "x", Uncounted: true} },
+		"an answer":  func(p *Prompt) { p.Answer = &AnswerNote{Yes: true} },
+		"a fix":      func(p *Prompt) { p.Fix = &FixNote{Number: 7, Commit: "abc123"} },
+	} {
+		q := p
+		other(&q)
+		got, err := Fill(q)
+		if err != nil {
+			t.Errorf("a replace with %s must compose: %v", name, err)
+		} else if !strings.Contains(got, words) {
+			t.Errorf("a replace with %s lost the words", name)
+		}
+	}
+}
+
 func TestRemove(t *testing.T) {
 	// worktree makes a branch with one commit in a worktree of its own.
 	worktree := func(t *testing.T) (Worktree, string) {
