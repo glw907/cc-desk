@@ -41,3 +41,21 @@ cc-desk should carry the fix, since it runs every round from Move on. Two parts 
 The Move round's design should settle both, and fold the evidence pricing into its own round
 plan. The process half belongs in `pass-core`'s `references/round.md` and
 `references/planner.md`, a workstation change through `claude-infra`.
+
+## The fourth stop: a standing answer whose condition was going to fail
+
+Pass 5 parked at about 00:00 on 2026-11-19, with a 315-minute path against 100. Standing answer
+28 covers an estimate park only when the path fits the round's clock, and this one didn't. The
+conductor had seen at 23:27 that pass 5 would end close to the 03:55 cutoff. It asked Geoff to let
+only pass 6 run past it (answer 31), and told him every foreseeable step was covered. The pass
+waited until his answer at 10:39, about ten and a half hours.
+
+The lesson: when a stop is foreseen, check that the conditions of the standing answer meant to
+cover it will hold, not only that an answer exists. A conductor that asks for a standing answer
+reads its provisos against the forecast it already has, and asks again for any that will fail.
+
+For cc-desk, the Move design should settle how the check or the brief tests a standing answer's
+conditions against the forecast and shows any that will fail, before the stop they cover arrives.
+A Fable review of the round
+(`~/Projects/initiatives/cc-desk/reports/desk-failure-review.md`) adds that the twice-the-estimate
+stop itself should go, since the round's plan paths ran about twice their measured minutes.
