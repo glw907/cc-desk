@@ -116,6 +116,29 @@ func (s *Session) Counted() int {
 	return n
 }
 
+// SignInResumeLimit is how many times the check resumes one pass's sign-in
+// stops by itself. Past it, the stop waits for a pass start.
+const SignInResumeLimit = 2
+
+// SignInResumes reports whether the check resumes the pass by itself once
+// the sign-in is new: the release has a checkout, the pass is stopped on the
+// sign-in, its session record is live, and its sign-in resumes are not spent.
+func SignInResumes(rf *ReleaseFile, p *Pass, sess *Session) bool {
+	return rf.Checkout != "" && p != nil && p.State == Stopped && p.StopReason == StopSignInExpired &&
+		sess != nil && sess.Ended == nil && sess.Resumes(string(StopSignInExpired)) < SignInResumeLimit
+}
+
+// Resumes reports how many of the session's relaunches had the cause.
+func (s *Session) Resumes(cause string) int {
+	n := 0
+	for _, r := range s.Relaunches {
+		if r.Cause == cause {
+			n++
+		}
+	}
+	return n
+}
+
 // Relaunch is one relaunch of a session. One after a prompt's answer or a
 // fix does not count.
 type Relaunch struct {

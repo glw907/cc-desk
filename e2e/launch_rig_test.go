@@ -36,8 +36,15 @@ type launchRig struct {
 //	stop-ignored  stop exits 0 and changes nothing
 //	stop-marks    with stop-fails, stop first marks the row stopped, as a
 //	              stop that did its work and then failed to report it
+//	auth-out      auth status reports no sign-in and exits 1
+//	auth-sleeps   auth status runs a sleep a minute long, a child holding
+//	              its output, before it answers
 //	lists/<n>.json  the n-th list read prints this file, and a later read
 //	                with no file prints rows.json
+//
+// With neither auth control, auth status reports a good sign-in and names
+// the rig folder as its configDirectory, so the time a test gives
+// .credentials.json there is when the sign-in was written.
 //
 // Every call appends one JSON line to calls.log: its arguments and working
 // folder. A list read also advances reads.log.
@@ -130,6 +137,14 @@ elif cmd == "stop":
     sys.stdout.write("stopped %%s\n" %% a[1])
 elif cmd == "logs":
     pass
+elif cmd == "auth":
+    if has("auth-sleeps"):
+        import subprocess
+        subprocess.run(["sleep", "60"])
+    if has("auth-out"):
+        sys.stdout.write('{"loggedIn": false}\n')
+        sys.exit(1)
+    sys.stdout.write(json.dumps({"loggedIn": True, "authMethod": "claude.ai", "configDirectory": d}) + "\n")
 `
 
 // launchSystemdStandIn logs the three flags and the working folder to

@@ -6,8 +6,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestProbe(t *testing.T) {
@@ -108,4 +110,72 @@ func TestListAndScreenWithAStandIn(t *testing.T) {
 	if _, err := List(context.Background(), ""); err == nil {
 		t.Error("no command should be an error")
 	}
+}
+
+func TestSignedIn(t *testing.T) {
+	if SignInLimit != 30*time.Second {
+		t.Errorf("SignInLimit = %s, want 30s", SignInLimit)
+	}
+	written := time.Date(2026, 11, 20, 18, 0, 0, 0, time.UTC)
+	// standIn writes a stand-in claude whose body may name @DIR@, a config
+	// folder holding a .credentials.json written at the written time.
+	standIn := func(t *testing.T, body string) string {
+		t.Helper()
+		dir := t.TempDir()
+		creds := filepath.Join(dir, ".credentials.json")
+		if err := os.WriteFile(creds, []byte("{}"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chtimes(creds, written, written); err != nil {
+			t.Fatal(err)
+		}
+		p := filepath.Join(t.TempDir(), "claude.sh")
+		body = strings.ReplaceAll(body, "@DIR@", dir)
+		if err := os.WriteFile(p, []byte("#!/bin/sh\n"+body+"\n"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		return p
+	}
+	tests := []struct {
+		name string
+		body string
+		want time.Time
+	}{
+		{"good", `[ "$*" = "auth status --json" ] || exit 9
+echo '{"loggedIn": true, "configDirectory": "@DIR@", "loginExpiresAt": "2099-01-01T00:00:00Z"}'`, written},
+		{"good with no expiry named", `echo '{"loggedIn": true, "configDirectory": "@DIR@"}'`, written},
+		{"signed out", `echo '{"loggedIn": false, "configDirectory": "@DIR@"}'; exit 1`, time.Time{}},
+		{"signed out with exit 0", `echo '{"loggedIn": false, "configDirectory": "@DIR@"}'`, time.Time{}},
+		{"the login expired", `echo '{"loggedIn": true, "configDirectory": "@DIR@", "loginExpiresAt": "2020-01-01T00:00:00Z"}'`, time.Time{}},
+		{"no config folder named", `echo '{"loggedIn": true}'`, time.Time{}},
+		{"no credentials file", `echo '{"loggedIn": true, "configDirectory": "@DIR@/none"}'`, time.Time{}},
+		{"good text but a failed exit", `echo '{"loggedIn": true, "configDirectory": "@DIR@"}'; exit 1`, time.Time{}},
+		{"not JSON", `echo 'Logged in'`, time.Time{}},
+		{"no output", `exit 0`, time.Time{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SignedIn(context.Background(), standIn(t, tt.body), time.Second); !got.Equal(tt.want) {
+				t.Errorf("SignedIn = %s, want %s", got, tt.want)
+			}
+		})
+	}
+	t.Run("no command", func(t *testing.T) {
+		if got := SignedIn(context.Background(), "", time.Second); !got.IsZero() {
+			t.Errorf("an empty command read as signed in at %s", got)
+		}
+	})
+	t.Run("a child holding the output past the limit", func(t *testing.T) {
+		// The sleep is a child of the shell and holds stdout, so only a
+		// kill of the process group ends the read at its limit.
+		claude := standIn(t, `sleep 20; echo '{"loggedIn": true, "configDirectory": "@DIR@"}'`)
+		start := time.Now()
+		got := SignedIn(context.Background(), claude, 200*time.Millisecond)
+		if took := time.Since(start); took > 3*time.Second {
+			t.Errorf("the read took %s, want it ended near the 200ms limit", took)
+		}
+		if !got.IsZero() {
+			t.Errorf("a read past the limit read as signed in at %s", got)
+		}
+	})
 }

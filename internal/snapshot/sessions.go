@@ -65,19 +65,33 @@ type LastCheck struct {
 	Decisions    []state.Decision `json:"decisions"`
 }
 
-// todoFor is the one thing to do for a stop reason.
-func todoFor(r state.StopReason) string {
+// todoFor is the one thing to do for a stop reason. For a pass, the line
+// names the command that starts it again, since the desk runs it when Geoff
+// says to. A conductor or design writer has no pass to start, so its line
+// keeps the plain words. resumes reports whether the check resumes the
+// pass's sign-in stop by itself, as state.SignInResumes says.
+func todoFor(r state.StopReason, project, pass string, resumes bool) string {
+	start := "start the pass again"
+	if pass != "" {
+		start = "run cc-desk pass start " + project + " " + pass
+	}
 	switch r {
 	case state.StopPermissionPrompt:
 		return "answer it at the desk"
 	case state.StopSignInExpired:
-		return "sign in to Claude Code"
+		if pass == "" {
+			return "sign in to Claude Code"
+		}
+		if resumes {
+			return "sign in to Claude Code, and the pass resumes by itself"
+		}
+		return "sign in to Claude Code, then " + start
 	case state.StopUsage:
 		return "wait for the reset, or reset early"
 	case state.StopUnreadable, state.StopRelaunchLimit:
-		return "read the session's log, then start the pass again"
+		return "read the session's log, then " + start
 	case state.StopLaunchFailed:
-		return "read the launch error, then start the pass again"
+		return "read the launch error, then " + start
 	}
 	return "read the stop in the repo's STATUS"
 }
@@ -102,7 +116,7 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 		// ended with a stop leaves needs_you_now, unless the stop is a launch
 		// that failed or the limit of relaunches. A pass's stop stays, ended
 		// session or not.
-		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string, stoppedAt *time.Time, mayEnd bool) {
+		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string, stoppedAt *time.Time, mayEnd, resumes bool) {
 			e := SessionEntry{
 				Project: rf.Project, Round: strp(round), Pass: strp(pass),
 				Kind: string(sess.Kind), Name: sess.Name, ShortID: sess.ShortID,
@@ -115,16 +129,17 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 			if stop != "" && !(mayEnd && sess.Ended != nil && stop != state.StopLaunchFailed && stop != state.StopRelaunchLimit) {
 				snap.NeedsYouNow = append(snap.NeedsYouNow, NeedEntry{
 					Project: rf.Project, Round: e.Round, Session: strp(sess.Name),
-					Reason: string(stop), Cause: causeOf(sess.StopDetail, stop), Todo: todoFor(stop),
+					Reason: string(stop), Cause: causeOf(sess.StopDetail, stop),
+					Todo: todoFor(stop, rf.Project, pass, resumes),
 				})
 			}
 		}
 		if c := rf.Conductor; c != nil {
-			add("", "", c, c.StopReason, "", utc(c.Stopped), true)
+			add("", "", c, c.StopReason, "", utc(c.Stopped), true, false)
 		}
 		for i := range rf.Rounds {
 			if sess := rf.Rounds[i].Session; sess != nil {
-				add(rf.Rounds[i].Name, "", sess, sess.StopReason, "", utc(sess.Stopped), true)
+				add(rf.Rounds[i].Name, "", sess, sess.StopReason, "", utc(sess.Stopped), true, false)
 			}
 		}
 		for i := range rf.Passes {
@@ -144,14 +159,14 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 				if p.PullRequest != nil {
 					cleanup = p.PullRequest.CleanupNote
 				}
-				add(p.Round, p.Name, p.Session, p.StopReason, cleanup, openStop(p), false)
+				add(p.Round, p.Name, p.Session, p.StopReason, cleanup, openStop(p), false, state.SignInResumes(rf, p, p.Session))
 				continue
 			}
 			if p.State == state.Stopped {
 				round := p.Round
 				snap.NeedsYouNow = append(snap.NeedsYouNow, NeedEntry{
 					Project: rf.Project, Round: strp(round),
-					Reason: string(p.StopReason), Cause: causeOf(p.StopDetail, p.StopReason), Todo: todoFor(p.StopReason),
+					Reason: string(p.StopReason), Cause: causeOf(p.StopDetail, p.StopReason), Todo: todoFor(p.StopReason, rf.Project, p.Name, false),
 				})
 			}
 		}

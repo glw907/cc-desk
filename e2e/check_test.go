@@ -223,7 +223,7 @@ func TestCheckStops(t *testing.T) {
 	})
 	t.Run("2 login expired", func(t *testing.T) {
 		stop(t, b["pass:s02"], "sign_in_expired")
-		stopped(t, dirB, "s02", "chk-s02", "sign_in_expired", "sign in to Claude Code")
+		stopped(t, dirB, "s02", "chk-s02", "sign_in_expired", "sign in to Claude Code, then run cc-desk pass start chk s02")
 	})
 	t.Run("3 a usage limit", func(t *testing.T) {
 		d := b["pass:s03"]
@@ -242,7 +242,7 @@ func TestCheckStops(t *testing.T) {
 		if d.Detail != unreadableCause {
 			t.Errorf("detail = %q, want the last 200 runes of the screen, %q", d.Detail, unreadableCause)
 		}
-		n := stopped(t, dirB, "s04", "chk-s04", "unreadable_stop", "read the session's log, then start the pass again")
+		n := stopped(t, dirB, "s04", "chk-s04", "unreadable_stop", "read the session's log, then run cc-desk pass start chk s04")
 		if n.Cause != unreadableCause {
 			t.Errorf("cause = %q", n.Cause)
 		}

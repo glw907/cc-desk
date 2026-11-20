@@ -121,7 +121,10 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 	counted := d.Counted != nil && *d.Counted
 	req := launchRequest{Kind: state.LaunchRelaunch, Cause: d.Reason, Counted: counted, Replaces: sess.ShortID}
 	usage := d.Decision == sessions.Relaunch && d.Reason == string(state.StopUsage)
-	missing := d.Decision == sessions.Relaunch && !usage
+	// A usage or sign-in relaunch resumes a stopped pass, which the record
+	// commit already made building again.
+	resume := usage || (d.Decision == sessions.Relaunch && d.Reason == string(state.StopSignInExpired))
+	missing := d.Decision == sessions.Relaunch && !resume
 	relaunch := func() (string, error) {
 		out, err := l.launchOrStop(ctx, r, req)
 		if err == nil && usage && counted {
@@ -130,10 +133,9 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		return out, err
 	}
 
-	if usage {
-		// The pass was resumed in the record commit; a live row for the old
-		// id is stopped first. A failed list read marks nothing: the next
-		// check reads again.
+	if resume {
+		// A live row for the old id is stopped first. A failed list read
+		// marks nothing: the next check reads again.
 		rows, err := sessions.List(ctx, l.runner.Claude)
 		if err != nil {
 			return "", err
@@ -152,7 +154,7 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		}
 	} else if !missing {
 		if err := l.runner.Stop(ctx, sess.ShortID); err != nil {
-			if usage {
+			if resume {
 				return "", l.failedRelaunch(r, err)
 			}
 			return "", err
@@ -162,7 +164,7 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 			return "", err
 		}
 		if row, found := sessions.Find(rows, sess.ShortID); found && row.Live() {
-			if usage {
+			if resume {
 				return "", l.failedRelaunch(r, fmt.Errorf("session %s is still live after claude stop", sess.ShortID))
 			}
 			return "not relaunched: session " + sess.ShortID + " is still live after claude stop", nil

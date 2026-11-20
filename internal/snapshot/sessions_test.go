@@ -62,7 +62,7 @@ func TestNeedsYouNowStoppedPassTakesItsCauseFromStopDetail(t *testing.T) {
 	}
 	e := snap.NeedsYouNow[0]
 	if e.Cause != "the last line of the screen" || e.Reason != "unreadable_stop" ||
-		e.Todo != "read the session's log, then start the pass again" || e.Round == nil || *e.Round != "r1" {
+		e.Todo != "read the session's log, then run cc-desk pass start a w" || e.Round == nil || *e.Round != "r1" {
 		t.Errorf("entry = %+v", e)
 	}
 	if s := snap.Sessions[len(snap.Sessions)-1]; s.StopReason == nil || *s.StopReason != "unreadable_stop" || s.Pass == nil || *s.Pass != "w" {
@@ -195,5 +195,78 @@ func TestLastCheck(t *testing.T) {
 	got := Build(st, clock).LastCheck
 	if got == nil || !got.Time.Equal(run) || got.ListFailures != 1 || len(got.Decisions) != 1 {
 		t.Errorf("last_check = %+v", got)
+	}
+}
+
+func TestTodoFor(t *testing.T) {
+	tests := []struct {
+		reason  state.StopReason
+		pass    string
+		resumes bool
+		want    string
+	}{
+		{state.StopUnreadable, "w", false, "read the session's log, then run cc-desk pass start a w"},
+		{state.StopRelaunchLimit, "w", false, "read the session's log, then run cc-desk pass start a w"},
+		{state.StopLaunchFailed, "w", false, "read the launch error, then run cc-desk pass start a w"},
+		{state.StopSignInExpired, "w", true, "sign in to Claude Code, and the pass resumes by itself"},
+		{state.StopSignInExpired, "w", false, "sign in to Claude Code, then run cc-desk pass start a w"},
+		{state.StopPermissionPrompt, "w", false, "answer it at the desk"},
+		{state.StopUsage, "w", false, "wait for the reset, or reset early"},
+		// A conductor or design writer has no pass to start.
+		{state.StopRelaunchLimit, "", false, "read the session's log, then start the pass again"},
+		{state.StopLaunchFailed, "", false, "read the launch error, then start the pass again"},
+		{state.StopSignInExpired, "", false, "sign in to Claude Code"},
+	}
+	for _, tc := range tests {
+		if got := todoFor(tc.reason, "a", tc.pass, tc.resumes); got != tc.want {
+			t.Errorf("todoFor(%s, a, %q, %v) = %q, want %q", tc.reason, tc.pass, tc.resumes, got, tc.want)
+		}
+	}
+}
+
+// TestNeedsYouNowSignInLine reads the sign-in line through Build: it says
+// the pass resumes by itself only while state.SignInResumes holds.
+func TestNeedsYouNowSignInLine(t *testing.T) {
+	const auto = "sign in to Claude Code, and the pass resumes by itself"
+	const manual = "sign in to Claude Code, then run cc-desk pass start a w"
+	tests := []struct {
+		name string
+		mod  func(rf *state.ReleaseFile, p *state.Pass)
+		want string
+	}{
+		{"a live record with resumes left", nil, auto},
+		{"one resume spent", func(_ *state.ReleaseFile, p *state.Pass) {
+			p.Session.Relaunches = []state.Relaunch{{Cause: string(state.StopSignInExpired)}}
+		}, auto},
+		{"two resumes spent", func(_ *state.ReleaseFile, p *state.Pass) {
+			p.Session.Relaunches = []state.Relaunch{{Cause: string(state.StopSignInExpired)}, {Cause: string(state.StopSignInExpired)}}
+		}, manual},
+		{"an ended record", func(_ *state.ReleaseFile, p *state.Pass) {
+			ended := clock.Add(-time.Minute)
+			p.Session.Ended = &ended
+		}, manual},
+		{"no record", func(_ *state.ReleaseFile, p *state.Pass) { p.Session = nil }, manual},
+		{"no checkout", func(rf *state.ReleaseFile, _ *state.Pass) { rf.Checkout = "" }, manual},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rf := asking("a", 0, true)
+			rf.Checkout = "/c"
+			b := building("w", "r1", 10, clock.Add(-20*time.Minute))
+			b.State, b.StopReason = state.Stopped, state.StopSignInExpired
+			b.Stops = []state.StopInterval{{Start: clock.Add(-10 * time.Minute)}}
+			b.Session = sessionOn(state.KindPass, "a-w")
+			if tc.mod != nil {
+				tc.mod(rf, &b)
+			}
+			rf.Passes = append(rf.Passes, b)
+			snap := Build(&state.State{Releases: []*state.ReleaseFile{rf}}, clock)
+			if len(snap.NeedsYouNow) != 1 {
+				t.Fatalf("needs_you_now = %+v, want one entry", snap.NeedsYouNow)
+			}
+			if got := snap.NeedsYouNow[0].Todo; got != tc.want {
+				t.Errorf("todo = %q, want %q", got, tc.want)
+			}
+		})
 	}
 }

@@ -28,6 +28,8 @@ type checkFlags struct {
 	// callLimit is how long the merge call, the fetch, and the pull each may
 	// run.
 	callLimit time.Duration
+	// signInLimit is how long the sign-in read may run.
+	signInLimit time.Duration
 }
 
 func newCheckCmd(f *rootFlags) *cobra.Command {
@@ -50,6 +52,8 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 	_ = cmd.Flags().MarkHidden("gh-command")
 	cmd.Flags().DurationVar(&cf.callLimit, "call-limit", launch.DefaultLimit, "how long the merge call, the fetch, and the pull each may run")
 	_ = cmd.Flags().MarkHidden("call-limit")
+	cmd.Flags().DurationVar(&cf.signInLimit, "sign-in-limit", sessions.SignInLimit, "how long the sign-in read may run")
+	_ = cmd.Flags().MarkHidden("sign-in-limit")
 	cf.register(cmd)
 	return cmd
 }
@@ -172,7 +176,8 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 // gatherEvidence reads the session list, and the second list when a record
 // has no row, then the job file and screen of each blocked row that names no
 // reason, then sends the network probe once when a lost connection could be
-// relaunched. A failed list read is the only error.
+// relaunched, and reads the sign-in once when a pass stopped on it could
+// resume. A failed list read is the only error.
 func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags, now time.Time) (sessions.Evidence, error) {
 	list := func() ([]sessions.Row, error) {
 		rows, err := sessions.List(ctx, cf.claude)
@@ -210,6 +215,9 @@ func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags, now tim
 		ev.Records[t.Key] = re
 	}
 	ev.Pulls = readPulls(ctx, s, cf.ghCmd)
+	if sessions.NeedsSignInRead(s) {
+		ev.SignedIn = sessions.SignedIn(ctx, cf.claude, cf.signInLimit)
+	}
 	if probe {
 		ev.Probe = sessions.ProbeDown
 		if sessions.Probe(ctx, cf.probeURL) {
