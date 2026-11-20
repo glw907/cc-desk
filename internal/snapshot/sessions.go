@@ -100,7 +100,8 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 		}
 		// add records a session. A conductor's or round's record that has
 		// ended with a stop leaves needs_you_now, unless the stop is a launch
-		// that failed. A pass's stop stays, ended session or not.
+		// that failed or the limit of relaunches. A pass's stop stays, ended
+		// session or not.
 		add := func(round, pass string, sess *state.Session, stop state.StopReason, cleanup string, stoppedAt *time.Time, mayEnd bool) {
 			e := SessionEntry{
 				Project: rf.Project, Round: strp(round), Pass: strp(pass),
@@ -111,7 +112,7 @@ func fillSessions(snap *Snapshot, s *state.State, now time.Time) {
 				StoppedAt: stoppedAt, Refusals: append([]state.Refusal{}, sess.Refusals...),
 			}
 			snap.Sessions = append(snap.Sessions, e)
-			if stop != "" && !(mayEnd && sess.Ended != nil && stop != state.StopLaunchFailed) {
+			if stop != "" && !(mayEnd && sess.Ended != nil && stop != state.StopLaunchFailed && stop != state.StopRelaunchLimit) {
 				snap.NeedsYouNow = append(snap.NeedsYouNow, NeedEntry{
 					Project: rf.Project, Round: e.Round, Session: strp(sess.Name),
 					Reason: string(stop), Cause: causeOf(sess.StopDetail, stop), Todo: todoFor(stop),

@@ -295,8 +295,8 @@ func validatePullRequest(p *Pass, questions map[string]bool) error {
 	switch {
 	case pr.Number <= 0:
 		return fmt.Errorf(`pass %q: pull_request needs a "number" above 0`, p.Name)
-	case pr.Verdict != "" && pr.Verdict != VerdictAccept && pr.Verdict != VerdictFix:
-		return fmt.Errorf("pass %q: pull_request verdict %q is not accept or fix", p.Name, pr.Verdict)
+	case pr.Verdict != "" && !validVerdict(pr.Verdict):
+		return fmt.Errorf("pass %q: pull_request verdict %q is not accept, fix, or escalate", p.Name, pr.Verdict)
 	case pr.Wait != "" && !slices.Contains(PRWaits, pr.Wait):
 		return fmt.Errorf("pass %q: pull_request wait %q is not one of %v", p.Name, pr.Wait, PRWaits)
 	case pr.Merged != nil && p.State != Done:

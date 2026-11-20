@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/glw907/cc-desk/internal/state"
@@ -55,6 +56,7 @@ func TestDecideMerge(t *testing.T) {
 		{"5 moved beats a failed check", pr(nil), PullRead{Pulls: []Pull{pull("def", failed("gate"))}}, None, "", waitPtr(state.WaitCommitMoved), false, 0},
 		{"6 no check", pr(nil), PullRead{Pulls: []Pull{pull("abc")}}, None, "", waitPtr(state.WaitNoCheck), false, 0},
 		{"7 check running", pr(nil), PullRead{Pulls: []Pull{pull("abc", ok("a"), Check{Name: "b", Bucket: Pending})}}, None, "", waitPtr(state.WaitCheckRunning), false, 0},
+		{"10 merge with failures on record still merges", pr(func(p *state.PullRequest) { p.MergeFailures = 2 }), PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Merge, "", nil, false, 0},
 		{"8 failed check", pr(nil), PullRead{Pulls: []Pull{pull("abc", ok("a"), failed("b"))}}, Fix, ReasonFix, nil, false, 1},
 		{"8 cancelled check", pr(nil), PullRead{Pulls: []Pull{pull("abc", Check{Name: "b", Bucket: Cancel})}}, Fix, ReasonFix, nil, false, 1},
 		{"8 verdict fix", pr(func(p *state.PullRequest) { p.Verdict = state.VerdictFix }), PullRead{Pulls: []Pull{pull("abc", ok("gate"))}}, Fix, ReasonFix, nil, false, 1},
@@ -189,5 +191,37 @@ func doneWith(ended, cleaned bool) func(rf *state.ReleaseFile, sess *state.Sessi
 		if cleaned {
 			p.PullRequest.Cleaned = ago(1)
 		}
+	}
+}
+
+func TestVerdicts(t *testing.T) {
+	tests := []struct {
+		verdict      string
+		calls        int
+		wantDecision string
+		wantReason   string
+	}{
+		{state.VerdictAccept, 0, Merge, ""},
+		{state.VerdictFix, 0, Fix, ReasonFix},
+		{state.VerdictEscalate, 0, Merge, ""},
+		{state.VerdictEscalate, 2, Ask, ReasonCallsForGeoff},
+		{state.VerdictAccept, 1, Ask, ReasonCallsForGeoff},
+		{state.VerdictFix, 1, Fix, ReasonFix},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s with %d calls", tt.verdict, tt.calls), func(t *testing.T) {
+			s, key := world("pass", 10, ready(func(p *state.PullRequest) { p.Verdict, p.Calls = tt.verdict, tt.calls }))
+			ev := Evidence{
+				Records: map[Key]RecordEvidence{key: {Row: rowWorking, HasRow: true}},
+				Pulls:   map[Key]PullRead{key: {Pulls: []Pull{pull("abc", ok("gate"))}}},
+			}
+			r := Decide(s, ev, t0)[0]
+			if r.Decision.Decision != tt.wantDecision || r.Reason != tt.wantReason {
+				t.Errorf("decision = %s/%s, want %s/%s", r.Decision.Decision, r.Reason, tt.wantDecision, tt.wantReason)
+			}
+			if tt.wantReason == ReasonCallsForGeoff && r.Merge.Calls != tt.calls {
+				t.Errorf("calls = %d, want %d", r.Merge.Calls, tt.calls)
+			}
+		})
 	}
 }

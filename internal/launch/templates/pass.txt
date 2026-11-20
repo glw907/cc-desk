@@ -12,7 +12,7 @@ Report a stop with one of these commands, and nothing else:
 {{range .Verbs}}- `{{.}}`
 {{end}}
 
-Once the pull request is ready and reviewed, report it with `{{.Ready}} --pr <number> --commit <sha> --verdict <accept|fix> --design <inside|outside>`, naming the pull request, its last commit, the review's verdict, and whether the change stays inside the approved design.
+Once the pull request is ready and reviewed, report it with `{{.Ready}} --pr <number> --commit <sha> --verdict <accept|fix|escalate> --design <inside|outside> [--calls <n>]`, naming the pull request, its last commit, the review's verdict, whether the change stays inside the approved design, and the number of calls it leaves for Geoff.
 
 To ask Geoff a question about a pass of your round that hasn't started, write the question to a file and run `{{.Question}} <file>`.
 

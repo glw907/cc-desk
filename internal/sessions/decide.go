@@ -30,6 +30,7 @@ const (
 	ReasonIdle           = "idle"
 	ReasonMissing        = "missing"
 	ReasonReplaced       = "replaced"
+	ReasonReportDue      = "report_due"
 )
 
 // IdleLimit is how long a done session may sit before the check ends it.
@@ -98,11 +99,11 @@ type Target struct {
 }
 
 // Watched lists the records that need a row: those the first five rows of
-// the decision table leave undecided.
-func Watched(s *state.State) []Target {
+// the decision table leave undecided at now.
+func Watched(s *state.State, now time.Time) []Target {
 	var out []Target
 	s.LiveSessions(func(rf *state.ReleaseFile, record string, sess *state.Session) {
-		if _, decided := early(rf, record, sess, false); !decided {
+		if _, decided := early(rf, record, sess, false, now); !decided {
 			out = append(out, Target{Key{rf.Project, record}, sess})
 		}
 	})
@@ -139,7 +140,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			out = append(out, mr)
 			return
 		}
-		if r, decided := early(rf, record, sess, hold); decided {
+		if r, decided := early(rf, record, sess, hold, now); decided {
 			r.Merge = info
 			out = append(out, r)
 			return
@@ -163,7 +164,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 
 // Plan runs the record steps of a check on s, in this order: Decide on the
 // folded state before any settle, a resume through StartPass for each
-// uncounted usage relaunch on a release with a checkout, settle, a start for
+// usage relaunch on a release with a checkout, settle, a start for
 // each free pass the limits allow, then one launch decision for each building pass with no session record (wait_usage
 // under the usage hold). The caller folds the usage reading into s first and
 // records the results. The dry run calls Plan on its in-memory copy.
@@ -201,7 +202,113 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 			results = append(results, Result{Decision: d})
 		}
 	}
+	for _, rf := range s.Releases {
+		if r, ok := reportLaunch(s, rf, hold); ok {
+			results = append(results, r)
+		}
+	}
 	return results, nil
+}
+
+// ReleaseReport is the ForReport of a conductor started for the release's
+// report. A round's report names the round.
+const ReleaseReport = "release"
+
+// hasReport reports whether a report is recorded for the project and round,
+// the release's own when round is empty.
+func hasReport(s *state.State, project, round string) bool {
+	return slices.ContainsFunc(s.Reports.Reports, func(r state.Report) bool { return r.Project == project && r.Round == round })
+}
+
+// ReportRecorded reports whether the report a conductor was started for is
+// recorded. A conductor with no ForReport has none.
+func ReportRecorded(s *state.State, project, forReport string) bool {
+	switch forReport {
+	case "":
+		return false
+	case ReleaseReport:
+		return hasReport(s, project, "")
+	}
+	return hasReport(s, project, forReport)
+}
+
+// ReportDue names the report a live release is waiting on: the first round,
+// in file order, that has a pass, every pass done, and no report, or
+// ReleaseReport once every round has a pass, every pass in the release is
+// done, and no release report exists. It reports false when nothing is due.
+func ReportDue(s *state.State, rf *state.ReleaseFile) (string, bool) {
+	if rf.Done || len(rf.Passes) == 0 {
+		return "", false
+	}
+	allDone := true
+	for _, p := range rf.Passes {
+		allDone = allDone && p.State == state.Done
+	}
+	empty := false
+	for _, round := range rf.Rounds {
+		has, done := false, true
+		for _, p := range rf.Passes {
+			if p.Round == round.Name {
+				has = true
+				done = done && p.State == state.Done
+			}
+		}
+		switch {
+		case !has:
+			empty = true
+		case done && !hasReport(s, rf.Project, round.Name):
+			return round.Name, true
+		}
+	}
+	if allDone && !empty && !hasReport(s, rf.Project, "") {
+		return ReleaseReport, true
+	}
+	return "", false
+}
+
+// reportLaunch decides the conductor's start for a live release with a
+// checkout whose report is due and whose conductor record is not live. A
+// record that ended without that report is continued as a counted relaunch,
+// and the third try reads relaunch_limit. A record for another report, or none,
+// starts fresh. The usage hold waits a start but not the stop.
+func reportLaunch(s *state.State, rf *state.ReleaseFile, hold bool) (Result, bool) {
+	if rf.Checkout == "" {
+		return Result{}, false
+	}
+	due, ok := ReportDue(s, rf)
+	if !ok {
+		return Result{}, false
+	}
+	d := state.Decision{
+		Project: rf.Project, Record: "conductor", Session: rf.Project + "-conductor",
+		Decision: Launch, Reason: ReasonReportDue,
+	}
+	what := "the release report"
+	if due != ReleaseReport {
+		what = "the report for round " + due
+	}
+	d.Detail = what + " is due"
+	if c := rf.Conductor; c != nil {
+		if c.Ended == nil {
+			return Result{}, false
+		}
+		if c.ForReport == due {
+			if c.StopReason == state.StopRelaunchLimit {
+				return Result{}, false
+			}
+			if c.Counted() >= RelaunchLimit {
+				d.Decision, d.Reason = Stop, string(state.StopRelaunchLimit)
+				d.Detail = "the conductor ended three times without " + what
+				return Result{Decision: d}, true
+			}
+			counted := true
+			d.Counted = &counted
+		}
+	}
+	if hold {
+		d.Decision, d.Reason = WaitUsage, ""
+	}
+	return Result{Decision: d}, true
 }
 
 // startFree starts each not-started pass that breaks no start rule, in
@@ -289,9 +396,13 @@ func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e Reco
 	return Result{Decision: base}, true
 }
 
+// ResetWaitPrefix opens the detail of a wait_usage decision that waits for a
+// reset time the stop named.
+const ResetWaitPrefix = "waits for the reset at "
+
 // early applies rows 1 to 5, which need no row from the list and write
 // nothing to the record. It reports whether one of them decided.
-func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool) (Result, bool) {
+func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool, now time.Time) (Result, bool) {
 	d := state.Decision{Project: rf.Project, Record: record, Session: sess.Name}
 	done := func(decision, reason string) (Result, bool) {
 		d.Decision, d.Reason = decision, reason
@@ -319,13 +430,45 @@ func early(rf *state.ReleaseFile, record string, sess *state.Session, hold bool)
 	case stopped == state.StopUsage && hold:
 		return done(WaitUsage, string(state.StopUsage))
 	case stopped == state.StopUsage:
-		f := false
-		d.Counted = &f
-		return done(Relaunch, string(state.StopUsage))
+		return usageStop(d, pass, sess, now)
 	case stopped != "":
 		return done(None, string(stopped))
 	}
 	return Result{}, false
+}
+
+// usageStop decides for a record stopped on usage while no hold is on. A stop
+// that named its reset time waits for it, then relaunches uncounted. One that
+// gave no readable time relaunches uncounted the first time and counted after
+// a usage relaunch, so a limit that never lifts reaches relaunch_limit.
+func usageStop(d state.Decision, pass *state.Pass, sess *state.Session, now time.Time) (Result, bool) {
+	reason := string(state.StopUsage)
+	finish := func(decision string, counted *bool) (Result, bool) {
+		d.Decision, d.Reason, d.Counted = decision, reason, counted
+		return Result{Decision: d}, true
+	}
+	began := time.Time{}
+	switch {
+	case pass != nil && len(pass.Stops) > 0:
+		began = pass.Stops[len(pass.Stops)-1].Start
+	case sess.Stopped != nil:
+		began = *sess.Stopped
+	}
+	if at, ok := ParseReset(sess.StopDetail, began); ok {
+		if now.Before(at) {
+			d.Detail = ResetWaitPrefix + at.UTC().Format(time.RFC3339)
+			return finish(WaitUsage, nil)
+		}
+		uncounted := false
+		return finish(Relaunch, &uncounted)
+	}
+	counted := slices.ContainsFunc(sess.Relaunches, func(r state.Relaunch) bool { return r.Cause == reason })
+	if counted && sess.Counted() >= RelaunchLimit {
+		d.Detail = "the limit named no reset time and the relaunches are spent"
+		d.Decision, d.Reason = Stop, string(state.StopRelaunchLimit)
+		return Result{Decision: d}, true
+	}
+	return finish(Relaunch, &counted)
 }
 
 var limitText = regexp.MustCompile(`You've hit your .{0,30}limit(?:\s*·\s*resets [^(\n]*(?:\([^)]*\))?)?`)

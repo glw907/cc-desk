@@ -91,6 +91,10 @@ type Session struct {
 	// pass fills it; a file without it reads as none.
 	Refusals []Refusal  `json:"refusals,omitempty"`
 	Finished *time.Time `json:"finished,omitempty"`
+	// ForReport is the report a conductor was started for: a round's name, or
+	// "release". Both relaunch paths carry it, and the limit of two relaunches
+	// counts per report.
+	ForReport string `json:"for_report,omitempty"`
 	// StopReason and Stopped are set on a conductor's or design writer's
 	// record only. A pass's stop stays on the pass.
 	StopReason StopReason `json:"stop_reason,omitempty"`
@@ -151,8 +155,9 @@ var PRWaits = []string{WaitCommitMoved, WaitNoCheck, WaitCheckRunning, WaitUnrea
 
 // The reviewer verdicts a ready report carries.
 const (
-	VerdictAccept = "accept"
-	VerdictFix    = "fix"
+	VerdictAccept   = "accept"
+	VerdictFix      = "fix"
+	VerdictEscalate = "escalate"
 )
 
 // PullRequest is the pull request a pass's session opened and reported
@@ -160,12 +165,15 @@ const (
 // check. Wait, Failures, and Question belong to the current report: a new
 // report clears them, and a fix relaunch clears Ready.
 type PullRequest struct {
-	Number      int        `json:"number"`
-	Commit      string     `json:"commit,omitempty"`
-	Verdict     string     `json:"verdict,omitempty"`
-	FixAttempts int        `json:"fix_attempts,omitempty"`
-	Ready       *time.Time `json:"ready,omitempty"`
-	Merged      *time.Time `json:"merged,omitempty"`
+	Number      int    `json:"number"`
+	Commit      string `json:"commit,omitempty"`
+	Verdict     string `json:"verdict,omitempty"`
+	FixAttempts int    `json:"fix_attempts,omitempty"`
+	// Calls is the count of points the pass left for Geoff to decide. Above
+	// zero, the check asks before it merges.
+	Calls  int        `json:"calls,omitempty"`
+	Ready  *time.Time `json:"ready,omitempty"`
+	Merged *time.Time `json:"merged,omitempty"`
 	// InsideDesign is what the report said of the change. Absent reads as
 	// outside the approved design.
 	InsideDesign bool     `json:"inside_design,omitempty"`
@@ -179,7 +187,10 @@ type PullRequest struct {
 	AskedCommit string `json:"asked_commit,omitempty"`
 	// MergeCalled is when the check committed to calling the merge, before
 	// it ran. It tells the check's own merge from one by another hand.
-	MergeCalled   *time.Time `json:"merge_called,omitempty"`
+	MergeCalled *time.Time `json:"merge_called,omitempty"`
+	// MergeFailures counts the failed or timed-out merge calls in a row on
+	// this pull request. A merge question or the merge itself clears it.
+	MergeFailures int        `json:"merge_failures,omitempty"`
 	MergedOutside bool       `json:"merged_outside,omitempty"`
 	Cleaned       *time.Time `json:"cleaned,omitempty"`
 	CleanupNote   string     `json:"cleanup_note,omitempty"`

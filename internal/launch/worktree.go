@@ -5,29 +5,32 @@
 package launch
 
 import (
-	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // git runs one git command in dir and gives its trimmed output. An error
 // carries the command's own text.
 func git(dir string, args ...string) (string, error) {
-	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
-	var out, errOut bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &out, &errOut
-	if err := cmd.Run(); err != nil {
-		msg := strings.TrimSpace(errOut.String())
-		if msg == "" {
+	return gitLimited(context.Background(), 0, dir, args...)
+}
+
+// gitLimited is git under a context and a limit, as Run reads them.
+func gitLimited(ctx context.Context, limit time.Duration, dir string, args ...string) (string, error) {
+	out, errOut, err := Run(ctx, limit, "git", append([]string{"-C", dir}, args...)...)
+	if err != nil {
+		msg := strings.TrimSpace(errOut)
+		if msg == "" || strings.HasPrefix(err.Error(), "stopped at") {
 			msg = err.Error()
 		}
 		return "", fmt.Errorf("git %s: %s", strings.Join(args, " "), msg)
 	}
-	return strings.TrimSpace(out.String()), nil
+	return strings.TrimSpace(out), nil
 }
 
 // Worktree is a worktree and branch a launch uses.
@@ -36,6 +39,9 @@ type Worktree struct {
 	Default  string
 	Path     string
 	Branch   string
+	// Limit is how long each git call in Pull may run; zero means
+	// DefaultLimit.
+	Limit time.Duration
 }
 
 // Make adds the worktree for a first launch. It refuses, before any git
@@ -87,8 +93,14 @@ func (w Worktree) dropBranch(tip string) error {
 // touched has an uncommitted change, and no live session's cwd is the
 // checkout or a folder under it outside .claude/worktrees/. Otherwise it
 // gives the reason, as the note "checkout not pulled: <reason>", and runs
-// nothing that changes the checkout.
-func (w Worktree) Pull(liveCwds []string) (pulled bool, note string, err error) {
+// nothing that changes the checkout. Each git call runs under its own limit,
+// so a fetch that stops is an error and a pull that stops is a note.
+func (w Worktree) Pull(ctx context.Context, liveCwds []string) (pulled bool, note string, err error) {
+	limit := w.Limit
+	if limit <= 0 {
+		limit = DefaultLimit
+	}
+	git := func(dir string, args ...string) (string, error) { return gitLimited(ctx, limit, dir, args...) }
 	skip := func(reason string) (bool, string, error) { return false, "checkout not pulled: " + reason, nil }
 	on, err := git(w.Checkout, "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {

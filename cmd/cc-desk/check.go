@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/glw907/cc-desk/internal/launch"
 	"github.com/glw907/cc-desk/internal/sessions"
 	"github.com/glw907/cc-desk/internal/snapshot"
 	"github.com/glw907/cc-desk/internal/state"
@@ -24,6 +25,9 @@ type checkFlags struct {
 	dryRun   bool
 	probeURL string
 	ghCmd    string
+	// callLimit is how long the merge call, the fetch, and the pull each may
+	// run.
+	callLimit time.Duration
 }
 
 func newCheckCmd(f *rootFlags) *cobra.Command {
@@ -44,6 +48,8 @@ func newCheckCmd(f *rootFlags) *cobra.Command {
 	_ = cmd.Flags().MarkHidden("probe-url")
 	cmd.Flags().StringVar(&cf.ghCmd, "gh-command", "gh", "the gh command the pull request read runs")
 	_ = cmd.Flags().MarkHidden("gh-command")
+	cmd.Flags().DurationVar(&cf.callLimit, "call-limit", launch.DefaultLimit, "how long the merge call, the fetch, and the pull each may run")
+	_ = cmd.Flags().MarkHidden("call-limit")
 	cf.register(cmd)
 	return cmd
 }
@@ -95,7 +101,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 	s.FoldUsage(u, false, now)
 
 	// Steps 4 to 8: gather the evidence.
-	ev, err := gatherEvidence(ctx, s, cf)
+	ev, err := gatherEvidence(ctx, s, cf, now)
 	if err != nil {
 		if !cf.dryRun {
 			if _, cerr := state.Commit(dir, now, state.LockWait, state.RecordListFailure(), snapshot.Render); cerr != nil {
@@ -139,6 +145,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 			return err
 		}
 		l.gh = cf.ghCmd
+		l.callLimit = cf.callLimit
 		outcomes, err := l.carryOut(ctx, results)
 		if outcomes == nil {
 			return err
@@ -166,7 +173,7 @@ func runCheck(cmd *cobra.Command, f *rootFlags, cf *checkFlags) error {
 // has no row, then the job file and screen of each blocked row that names no
 // reason, then sends the network probe once when a lost connection could be
 // relaunched. A failed list read is the only error.
-func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessions.Evidence, error) {
+func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags, now time.Time) (sessions.Evidence, error) {
 	list := func() ([]sessions.Row, error) {
 		rows, err := sessions.List(ctx, cf.claude)
 		if err != nil {
@@ -178,7 +185,7 @@ func gatherEvidence(ctx context.Context, s *state.State, cf *checkFlags) (sessio
 	if err != nil {
 		return sessions.Evidence{}, err
 	}
-	targets := sessions.Watched(s)
+	targets := sessions.Watched(s, now)
 	if anyMissing(targets, rows) {
 		time.Sleep(cf.secondWait)
 		if rows, err = list(); err != nil {

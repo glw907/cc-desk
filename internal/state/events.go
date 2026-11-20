@@ -358,6 +358,31 @@ func StopPass(project, pass string, reason StopReason) Event {
 	}
 }
 
+// RestopPass changes the reason and detail of a pass that is already stopped.
+// It opens no stop interval, so the stretch the pass has spent stopped keeps
+// running from the stop that began it.
+func RestopPass(project, pass string, reason StopReason, detail string) Event {
+	return func(s *State, now time.Time) error {
+		if !ValidStopReason(reason) {
+			return fmt.Errorf("stop reason %q is not one of %v", reason, StopReasons)
+		}
+		rf, p, err := findPass(s, project, pass)
+		if err != nil {
+			return err
+		}
+		if p.State != Stopped {
+			return Refuse(fmt.Sprintf("pass %q is %s, not stopped", pass, p.State))
+		}
+		p.StopReason = reason
+		if p.Session == nil {
+			p.StopDetail = detail
+		}
+		rf.Dirty = true
+		s.passEvent = true
+		return nil
+	}
+}
+
 // SetCheckout records the repo's main checkout and default branch on the
 // project's live release. The path must be absolute and an existing folder.
 func SetCheckout(project, path, branch string) Event {

@@ -23,8 +23,10 @@
   and stops their new records, a check log, and the `brief` verb. It waits for the conductor to
   merge it; passes 2 to 4 read its names from main.
 - Pass 3 of that round (`desk-open`, pull request 20) opens the desk from a bare `cc-desk`, starts
-  the pass a ruling frees, replaces a wrong record before the merge, and acts on a merge
   question's three answers. It waits for the conductor to merge it.
+- Pass 5 of that round (`desk-check`, pull request 21) makes the check's five repairs and adds
+  the third verdict. Its live rerun (run 5) on `e6b7641`, after the stop-rule fix, ended `result: pass`, and the
+  pull request is ready for the conductor to read.
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,

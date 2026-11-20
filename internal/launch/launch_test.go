@@ -81,6 +81,11 @@ func TestWriteSettings(t *testing.T) {
 		h[0].Hooks[0].Type != "command" || h[0].Hooks[0].Timeout != 30 {
 		t.Errorf("hook = %+v", h)
 	}
+	d := s.Hooks.PermissionDenied
+	if len(d) != 1 || len(d[0].Hooks) != 1 || d[0].Hooks[0].Command != "/bin/cc-desk --state-dir "+state+" refusal hook" ||
+		d[0].Hooks[0].Type != "command" || d[0].Hooks[0].Timeout != 30 {
+		t.Errorf("denied hook = %+v", d)
+	}
 	if strings.Contains(string(data), "matcher") {
 		t.Error("the hook has no matcher")
 	}
@@ -391,7 +396,7 @@ func TestPull(t *testing.T) {
 		checkout := repoWithRemote(t)
 		ahead(t, checkout)
 		w := Worktree{Checkout: checkout, Default: "main"}
-		pulled, note, err := w.Pull(nil)
+		pulled, note, err := w.Pull(context.Background(), nil)
 		if err != nil || !pulled || note != "" {
 			t.Fatalf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}
@@ -405,7 +410,7 @@ func TestPull(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(checkout, "f"), []byte("mine"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(context.Background(), nil)
 		if err != nil || pulled || !strings.HasPrefix(note, "checkout not pulled: ") {
 			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}
@@ -414,17 +419,17 @@ func TestPull(t *testing.T) {
 		checkout := repoWithRemote(t)
 		ahead(t, checkout)
 		w := Worktree{Checkout: checkout, Default: "main"}
-		if pulled, note, _ := w.Pull([]string{filepath.Join(checkout, "sub")}); pulled || note == "" {
+		if pulled, note, _ := w.Pull(context.Background(), []string{filepath.Join(checkout, "sub")}); pulled || note == "" {
 			t.Errorf("pulled = %v, note = %q, want it held", pulled, note)
 		}
-		if pulled, _, _ := w.Pull([]string{filepath.Join(checkout, ".claude", "worktrees", "x")}); !pulled {
+		if pulled, _, _ := w.Pull(context.Background(), []string{filepath.Join(checkout, ".claude", "worktrees", "x")}); !pulled {
 			t.Error("a session in a worktree must not hold the pull")
 		}
 	})
 	t.Run("a checkout off the default branch is left", func(t *testing.T) {
 		checkout := repoWithRemote(t)
 		runGit(t, checkout, "checkout", "-q", "-b", "other")
-		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(nil)
+		pulled, note, err := Worktree{Checkout: checkout, Default: "main"}.Pull(context.Background(), nil)
 		if err != nil || pulled || !strings.Contains(note, "other") {
 			t.Errorf("pulled = %v, note = %q, err = %v", pulled, note, err)
 		}
@@ -653,4 +658,47 @@ func TestRunIds(t *testing.T) {
 			t.Error("want an error")
 		}
 	})
+}
+
+func TestConductorReportPrompt(t *testing.T) {
+	base := Prompt{Kind: "conductor", Name: "proj-conductor", Project: "proj", Branch: "conductor", Report: "/b/cc-desk report add proj"}
+	fill := func(p Prompt) string {
+		t.Helper()
+		got, err := Fill(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+	if got := fill(base); !strings.Contains(got, "Conduct the rounds of the project.") || strings.Contains(got, "Write the report for") {
+		t.Errorf("a conductor with no report reads:\n%s", got)
+	}
+
+	round := base
+	round.ForReport, round.ReportRound = "r1", "r1"
+	got := fill(round)
+	if !strings.Contains(got, "Write the report for round r1") || !strings.Contains(got, "--round r1") || strings.Contains(got, "Conduct the rounds") {
+		t.Errorf("a round's report prompt reads:\n%s", got)
+	}
+
+	release := base
+	release.ForReport = "release"
+	got = fill(release)
+	if !strings.Contains(got, "Write the report for the release") || !strings.Contains(got, "no `--round`") {
+		t.Errorf("the release report prompt reads:\n%s", got)
+	}
+
+	relaunch := round
+	relaunch.Brief = "/b/cc-desk brief"
+	relaunch.Relaunch = &RelaunchNote{Count: 1, Cause: "a missing session"}
+	got = fill(relaunch)
+	for _, want := range []string{"Run `/b/cc-desk brief` first", "write no second one"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("a relaunched report conductor lacks %q:\n%s", want, got)
+		}
+	}
+	relaunch.ForReport, relaunch.ReportRound = "", ""
+	if got = fill(relaunch); strings.Contains(got, "write no second one") {
+		t.Errorf("a relaunched conductor with no report names the report rule:\n%s", got)
+	}
 }

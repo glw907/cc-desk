@@ -32,7 +32,10 @@ type launchRig struct {
 //	no-row        --bg adds no row, so the ids come from the job's state.json
 //	needs-prompt  the new row carries needs "send a prompt to start"
 //	fail-bg       --bg exits 1 after logging
-//	stop-fails    stop exits 1 and changes nothing
+//	stop-fails    stop exits 1 and changes nothing, unless stop-marks is set
+//	stop-ignored  stop exits 0 and changes nothing
+//	stop-marks    with stop-fails, stop first marks the row stopped, as a
+//	              stop that did its work and then failed to report it
 //	lists/<n>.json  the n-th list read prints this file, and a later read
 //	                with no file prints rows.json
 //
@@ -110,14 +113,21 @@ elif cmd == "--bg":
     if not has("no-id"):
         sys.stdout.write("backgrounded · %%s · %%s\n" %% (sid, name))
 elif cmd == "stop":
-    if has("stop-fails"):
+    rows = load()
+    if has("stop-ignored"):
+        sys.stdout.write("stopped %%s\n" %% a[1])
+        sys.exit(0)
+    if has("stop-fails") and not has("stop-marks"):
         sys.stderr.write("claude: could not stop the session\n")
         sys.exit(1)
-    rows = load()
     for r in rows:
         if r["id"] == a[1]:
             r["state"], r["status"] = "stopped", "stopped"
     save(rows)
+    if has("stop-fails"):
+        sys.stderr.write("claude: could not stop the session\n")
+        sys.exit(1)
+    sys.stdout.write("stopped %%s\n" %% a[1])
 elif cmd == "logs":
     pass
 `
@@ -366,6 +376,65 @@ func (r launchRig) args(t *testing.T, verb ...string) []string {
 func (r launchRig) run(t *testing.T, now string, verb ...string) result {
 	t.Helper()
 	return run(t, r.state, now, r.args(t, verb...)...)
+}
+
+// sleepingGhStandIn wraps the gh stand-in. When the file gh-sleeps exists, a
+// `pr merge` call starts a child sleep that holds stdout, records its pid in
+// gh-child.pid, and waits. Every other call runs the real stand-in, with git
+// found on the plain system path so the sleeping git below does not see it.
+const sleepingGhStandIn = `#!/bin/sh
+d=%q
+if [ -e "$d/gh-sleeps" ] && [ "$1 $2" = "pr merge" ]; then
+  sleep 120 &
+  echo $! > "$d/gh-child.pid"
+  wait
+  exit 1
+fi
+PATH=/usr/bin:/bin exec %q "$@"
+`
+
+// sleepingGitStandIn is a git for the front of the binary's PATH. When the
+// file git-sleeps exists and its text is one of the call's arguments, the
+// call starts a child sleep holding stdout, records the pid in git-child.pid,
+// and waits. Every other call goes to the real git by absolute path.
+const sleepingGitStandIn = `#!/bin/sh
+d=%q
+if [ -e "$d/git-sleeps" ]; then
+  verb=$(cat "$d/git-sleeps")
+  for a in "$@"; do
+    if [ "$a" = "$verb" ]; then
+      sleep 120 &
+      echo $! > "$d/git-child.pid"
+      wait
+      exit 1
+    fi
+  done
+fi
+exec %q "$@"
+`
+
+// sleepers writes the sleeping gh wrapper around the gh stand-in at realGh,
+// and the sleeping git in a folder of its own. It returns the gh path and the
+// folder to put first on the binary's PATH. The controls are the files
+// gh-sleeps and git-sleeps, which a test creates with r.write.
+func (r launchRig) sleepers(t *testing.T, realGh string) (gh, pathDir string) {
+	t.Helper()
+	realGit, err := exec.LookPath("git")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gh = filepath.Join(r.dir, "gh-sleeper.sh")
+	if err := os.WriteFile(gh, fmt.Appendf(nil, sleepingGhStandIn, r.dir, realGh), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pathDir = filepath.Join(r.dir, "bin")
+	if err := os.MkdirAll(pathDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(pathDir, "git"), fmt.Appendf(nil, sleepingGitStandIn, r.dir, realGit), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	return gh, pathDir
 }
 
 // TestRigProbe is the round plan's check of its shared assumption: a launch

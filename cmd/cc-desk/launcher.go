@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/glw907/cc-desk/internal/launch"
+	"github.com/glw907/cc-desk/internal/sessions"
 	"github.com/glw907/cc-desk/internal/snapshot"
 	"github.com/glw907/cc-desk/internal/state"
 	"github.com/spf13/cobra"
@@ -53,6 +54,9 @@ type launcher struct {
 	runner launch.Runner
 	// gh is the command that calls the pull request merge.
 	gh string
+	// callLimit is how long the merge call, the fetch, and the pull each may
+	// run; zero means launch.DefaultLimit.
+	callLimit time.Duration
 }
 
 // newLauncher resolves the absolute state folder, the running binary, and
@@ -161,6 +165,10 @@ func causeText(cause string) string {
 		return "its session vanishing from the session list"
 	case "replaced":
 		return "your answer being replaced"
+	case "no_report":
+		return "ending with no report recorded"
+	case "launch_failed":
+		return "a start that failed"
 	}
 	return cause
 }
@@ -194,6 +202,9 @@ type launchRequest struct {
 	Cause    string
 	Counted  bool
 	Replaces string
+	// ForReport is the report a conductor's first launch or continuation is
+	// for. A relaunch reads it from the record.
+	ForReport string
 	// Answer is set on the relaunch after an answered permission prompt, and
 	// replaces the relaunch note in the prompt.
 	Answer *launch.AnswerNote
@@ -239,13 +250,26 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	wt := launch.Worktree{Checkout: rf.Checkout, Default: rf.DefaultBranch, Path: pl.worktree, Branch: pl.branch}
 	var undo func() error
 	// A first launch takes over a folder only when this record's own ended
-	// session made it; any other existing folder or branch is refused.
-	if req.Kind == state.LaunchFirst && !(old != nil && old.Ended != nil && old.Worktree == pl.worktree) {
+	// session made it; any other existing folder or branch is refused. A
+	// conductor's folder goes with the report it wrote, so a record whose
+	// folder is gone starts a new one. A continuation reuses the folder its
+	// ended record left, and makes one when a failed launch took it away.
+	_, statErr := os.Stat(pl.worktree)
+	gone := record == "conductor" && statErr != nil
+	takeover := old != nil && old.Ended != nil && old.Worktree == pl.worktree && !gone
+	if (req.Kind == state.LaunchFirst && !takeover) || (req.Kind == state.LaunchContinue && gone) {
 		if undo, err = wt.Make(); err != nil {
 			return "", state.Refuse(err.Error())
 		}
 	} else if err = wt.Reuse(); err != nil {
 		return "", err
+	}
+	// A launch for a report names it; the launches that continue a record
+	// read it from the record. A hand start, a first launch with no report,
+	// never inherits the report an ended record held.
+	forReport := req.ForReport
+	if forReport == "" && old != nil && req.Kind != state.LaunchFirst {
+		forReport = old.ForReport
 	}
 	defer func() {
 		if err != nil && undo != nil {
@@ -264,6 +288,9 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 	if pl.promptKind == "conductor" {
 		report = launch.ReportCommand(l.binary, l.dir, project)
 		rules = append(rules, "Bash("+report+" *)")
+		if forReport != "" {
+			rules = append(rules, "Bash("+launch.BriefCommand(l.binary, l.dir)+")")
+		}
 	} else {
 		question = launch.QuestionCommand(l.binary, l.dir, project, pl.round)
 		rules = append(rules, "Bash("+question+" *)")
@@ -277,11 +304,18 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 		Checkout: rf.Checkout, Worktree: pl.worktree, Branch: pl.branch, Base: rf.DefaultBranch, Verbs: verbs, FollowUp: followUp, Ready: ready,
 		Question: question, Report: report,
 	}
+	if pl.promptKind == "conductor" && forReport != "" {
+		p.ForReport = forReport
+		if forReport != sessions.ReleaseReport {
+			p.ReportRound = forReport
+		}
+		p.Brief = launch.BriefCommand(l.binary, l.dir)
+	}
 	var known []string
 	if old != nil {
 		known = []string{old.ShortID}
 	}
-	if req.Kind == state.LaunchRelaunch {
+	if req.Kind == state.LaunchRelaunch || req.Kind == state.LaunchContinue {
 		count := 1
 		if old != nil {
 			count = max(old.Counted(), 1)
@@ -321,7 +355,7 @@ func (l *launcher) Launch(ctx context.Context, project, record string, req launc
 		Kind: req.Kind, Replaces: req.Replaces, Cause: req.Cause, Counted: req.Counted,
 		Session: state.Session{
 			Name: pl.name, Kind: pl.sessionKind, ShortID: got.ShortID, SessionID: got.SessionID,
-			Worktree: pl.worktree, Branch: pl.branch,
+			Worktree: pl.worktree, Branch: pl.branch, ForReport: forReport,
 		},
 	})
 	if also != nil {

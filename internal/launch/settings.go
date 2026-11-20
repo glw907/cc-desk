@@ -35,6 +35,7 @@ type settings struct {
 	} `json:"permissions"`
 	Hooks struct {
 		PermissionRequest []hookGroup `json:"PermissionRequest"`
+		PermissionDenied  []hookGroup `json:"PermissionDenied"`
 	} `json:"hooks"`
 }
 
@@ -82,6 +83,12 @@ func ReportCommand(binary, stateDir, project string) string {
 	return binary + " --state-dir " + stateDir + " report add " + project
 }
 
+// BriefCommand gives the command that prints the brief, which a relaunched
+// conductor runs first. binary and stateDir must be absolute.
+func BriefCommand(binary, stateDir string) string {
+	return binary + " --state-dir " + stateDir + " brief"
+}
+
 // WriteSettings writes <stateDir>/launch/<name>.json fresh and gives its
 // path. The allow list is the release's rules, one exact rule per report
 // verb, and prefixRules, whole rules that end in a wildcard. binary is
@@ -101,6 +108,9 @@ func WriteSettings(stateDir, binary, name string, allow, ask, verbs, prefixRules
 	s.Permissions.Deny = Deny
 	s.Hooks.PermissionRequest = []hookGroup{{Hooks: []hookCommand{{
 		Type: "command", Command: binary + " --state-dir " + stateDir + " prompt hook", Timeout: 30,
+	}}}}
+	s.Hooks.PermissionDenied = []hookGroup{{Hooks: []hookCommand{{
+		Type: "command", Command: binary + " --state-dir " + stateDir + " refusal hook", Timeout: 30,
 	}}}}
 	data, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
