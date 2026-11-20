@@ -411,10 +411,11 @@ phase_conductor_after() {
     local f=$RUN/conductor/min-$i.json src live row rsid rpid
     if save_agents "$f"; then
       row=$(jq -r --arg n "$CONDUCTOR" "[.[]? | select(.name == \$n and ($LIVE_JQ))][0] // empty
-        | \"\\(.sessionId // \"\") \\(.pid // \"\") \\(.state // \"\")\"" "$f")
+        | \"\\(.sessionId // \"none\") \\(.pid // \"none\") \\(.state // \"none\")\"" "$f")
       if [ -n "$row" ]; then
         read -r rsid rpid live <<<"$row"
-        if [ -z "$first" ] && { [ "$rsid" != "$sid" ] || { [ -n "$rpid" ] && [ "$rpid" != "$pid" ]; }; }; then
+        # A row the supervisor is still bringing back lists no pid yet; it counts once it has one.
+        if [ -z "$first" ] && { [ "$rsid" != "$sid" ] || { [ "$rpid" != none ] && [ "$rpid" != "$pid" ]; }; }; then
           if [ "$rsid" = "$sid" ]; then
             mech="the supervisor: the same session id under a new pid ($pid -> $rpid)"
           else
@@ -422,7 +423,7 @@ phase_conductor_after() {
           fi
           first="minute $i, $(( $(date +%s) - started )) s after the step began"
         fi
-        say "conductor read $i: live row $rsid pid ${rpid:-none} $live"
+        say "conductor read $i: live row $rsid pid $rpid $live"
       else
         say "conductor read $i: no live $CONDUCTOR row"
       fi
@@ -433,7 +434,7 @@ phase_conductor_after() {
 
     local src stopped
     src=$(page_json "$RUN/conductor/page-$i.json" || true)
-    stopped=$(jq -r --arg n "$CONDUCTOR" '[.snapshot.sessions[]? | select(.name == $n and .stop_reason != null)] | length
+    stopped=$(jq -r --arg n "$CONDUCTOR" '([.snapshot.sessions[]? | select(.name == $n and .stop_reason != null)] | length)
       + ([.snapshot.needs_you_now[]? | select(.session == $n)] | length)' "$RUN/conductor/page-$i.json" 2>/dev/null || echo "?")
     say "conductor read $i: the $src shows $stopped stop(s) for $CONDUCTOR"
     [ "$stopped" = 0 ] || stops=$((stops + 1))
