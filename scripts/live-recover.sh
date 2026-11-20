@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # live-recover.sh: the live run of the recovery checks (acceptance item 8), one phase per call.
 #
-#   bash scripts/live-recover.sh <prep|conductor|pass|ask|evidence|close|help>
+#   bash scripts/live-recover.sh <prep|conductor|ask|pass|evidence|close|help>
 #   bash scripts/live-recover.sh conductor --after
 #
-# The phases run in that order. Each prints the commands it ran with their output and appends
+# The phases run in that order. One release holds all three rounds from prep, and the two-pass
+# limit orders the passes: the merge and work passes start first together, and the ask pass
+# starts once the merge frees a slot, so the ask phase runs right after the conductor phase.
+# Each prints the commands it ran with their output and appends
 # all of it to $CLAUDE_JOB_DIR/tmp/live-recover/run.log. Each live check prints `pass <check>` or
 # `fail <check>`; close ends the run with `result: pass` or `result: fail`. A failed check never
 # stops the phases after it. It reads CC_DESK_STATE_DIR (default ~/.local/state/cc-desk) and
@@ -167,44 +170,30 @@ prep_refuse() {
   fi
 }
 
-# add_rounds appends the merge round and the work round to the release JSON on stdin. The work
-# round comes after the merge round, so the check starts it once the merge pass is done: its
-# 1100 steps are then spent on the deaths, not on the conductor's wait.
+# add_rounds appends the three rounds and their passes to the release JSON on stdin, so one
+# release holds all of them from the start. The two-pass limit orders them: the merge pass and
+# the work pass start first together, and the ask round waits on the merge round, so the ask
+# pass starts once the merge frees a slot.
 add_rounds() {
-  jq --arg m "merge-$STAMP" --arg w "work-$STAMP" '
+  jq --arg m "merge-$STAMP" --arg w "work-$STAMP" --arg a "ask-$STAMP" '
     .rounds += [
       {name: $m, summary: "One fixture pass the timed check merges.", needs_geoff: false,
         no_need_reason: "A fixture run in the scratch repo, with nothing to decide.",
         design_written: true, design: ("docs/plans/" + $m + "-plan.md")},
       {name: $w, summary: "One fixture pass that keeps working.", needs_geoff: false,
         no_need_reason: "A fixture run in the scratch repo, with nothing to decide.",
-        design_written: true, design: ("docs/plans/" + $w + "-plan.md"), after: [$m]}]
+        design_written: true, design: ("docs/plans/" + $w + "-plan.md")},
+      {name: $a, summary: "One fixture pass whose command always asks.", needs_geoff: false,
+        no_need_reason: "A fixture run in the scratch repo, with nothing to decide.",
+        design_written: true, design: ("docs/plans/" + $a + "-plan.md"), after: [$m]}]
     | .passes += [
       {name: $m, summary: "Waits while the script opens its pull request.", round: $m,
         planned_minutes: 10, model: "sonnet", effort: "medium", state: "not_started"},
       {name: $w, summary: "Runs the scratch gate, step after step.", round: $w,
-        planned_minutes: 60, model: "sonnet", effort: "medium", state: "not_started"}]'
+        planned_minutes: 60, model: "sonnet", effort: "medium", state: "not_started"},
+      {name: $a, summary: "Runs the one command the release says always asks.", round: $a,
+        planned_minutes: 10, model: "sonnet", effort: "medium", state: "not_started"}]'
 }
-
-# add_ask_round appends the ask round and its pass to the release JSON on stdin.
-add_ask_round() {
-  jq --arg a "ask-$STAMP" '
-    .rounds += [{name: $a, summary: "One fixture pass whose command always asks.", needs_geoff: false,
-      no_need_reason: "A fixture run in the scratch repo, with nothing to decide.",
-      design_written: true, design: ("docs/plans/" + $a + "-plan.md")}]
-    | .passes += [{name: $a, summary: "Runs the one command the release says always asks.", round: $a,
-      planned_minutes: 10, model: "sonnet", effort: "medium", state: "not_started"}]'
-}
-
-# add_ask_to_release edits the release file in place. It runs under flock, in a subshell, so the
-# helpers it needs are exported.
-add_ask_to_release() {
-  local file=$1
-  add_ask_round <"$file" >"$file.new"
-  mv "$file.new" "$file"
-}
-export -f add_ask_round add_ask_to_release
-export STAMP
 
 # saver_loop is the background reader: it saves the session list every 30 seconds until the
 # stop file appears. It ends itself, so nothing kills it.
@@ -236,8 +225,17 @@ start_saver() {
   say "saver: saving the session list every 30 seconds, pid $(cat "$RUN/saver.pid"); close ends it through $RUN/saver.stop"
 }
 
+PREP_DONE=0
+prep_exit() {
+  if [ "$PREP_DONE" != 1 ]; then
+    say "prep: stopped before its end. The scratch checkout is on '$(git -C "$SCRATCH" branch --show-current)'."
+    say "prep: bash scripts/live-recover.sh close puts it back on main"
+  fi
+}
+
 phase_prep() {
   prep_refuse
+  trap prep_exit EXIT
   : >"$RESULTS"
   STAMP=$(date -u +%Y%m%dt%H%M%Sz)
   echo "$STAMP" >"$RUN/stamp"
@@ -283,6 +281,7 @@ phase_prep() {
   show "$BIN" --state-dir "$STATE" release checkout "$PROJECT" "$SCRATCH" --default-branch "$base"
   start_saver
   say "prep: the timer now runs this branch's build; the conductor reinstalls from main once the pass lands"
+  PREP_DONE=1
 }
 
 # ---- conductor -------------------------------------------------------------
@@ -464,6 +463,73 @@ phase_conductor() {
   fi
 }
 
+# ---- ask -------------------------------------------------------------------
+
+# ask_line_ok succeeds when the page reads Needs you now and an entry for the ask round names
+# the command.
+ask_line_ok() {
+  page_json "$RUN/page-ask.json" >/dev/null || return 1
+  jq -e --arg r "$ASK" '.snapshot.next_session.state == "needs_you_now"
+    and ([.snapshot.needs_you_now[]? | select(.round == $r and (((.cause // "") + " " + (.todo // "")) | contains("cksum ask-probe.txt")))] | length > 0)' \
+    "$RUN/page-ask.json" >/dev/null 2>&1
+}
+
+# end_run_pass stops a pass still building or waiting, so the check does not relaunch it, and
+# ends its open session through the binary. Neither call is fatal.
+end_run_pass() {
+  local p=$1 state open
+  state=$(pass_field "$p" '.state')
+  case $state in
+    building | waiting) try cc pass stop "$PROJECT" "$p" --reason scope ;;
+    *) say "$p reads $state" ;;
+  esac
+  open=$(pass_field "$p" 'select(.session != null and .session.ended == null) | .session.session_id // empty')
+  if [ -n "$open" ]; then
+    teardown_end pass "$p"
+  fi
+}
+
+phase_ask() {
+  need_stamp ask
+  # The release already holds the ask round; the two-pass limit starts its pass after the merge.
+  if ! wait_for 2400 have_session "$ASK"; then
+    check fail "8 the check started the ask pass"
+    end_run_pass "$ASK"
+    return 0
+  fi
+  check pass "8 the check started the ask pass"
+  local launched deadline now
+  launched=$(pass_field "$ASK" '.session.launched')
+  deadline=$(($(epoch "$launched") + 600))
+  say "ask: session $(pass_field "$ASK" '.session.session_id') launched $launched; the page must name the command by $(date -u -d "@$deadline" +%H:%M:%SZ)"
+  while :; do
+    if ask_line_ok; then
+      # The page reads the state on each request, so it has read Needs you now since the check
+      # recorded the prompt. The prompt's time, not this read's, is the evidence.
+      local asked
+      asked=$(pass_field "$ASK" '[.session.prompts[]? | select((.command // "") | contains("cksum ask-probe.txt")) | .time][0] // empty')
+      if [ -n "$asked" ] && [ "$(epoch "$asked")" -le "$deadline" ]; then
+        check pass "8 the page reads Needs you now and names cksum ask-probe.txt; the check recorded the prompt at $asked, $(($(epoch "$asked") - $(epoch "$launched"))) s after the launch"
+      else
+        check fail "8 the page names cksum ask-probe.txt, but the prompt on the record (${asked:-none}) is not within 10 minutes of the launch"
+      fi
+      break
+    fi
+    now=$(date +%s)
+    if [ "$now" -gt "$deadline" ]; then
+      check fail "8 the page reads Needs you now and names cksum ask-probe.txt within 10 minutes of the launch"
+      break
+    fi
+    sleep 10
+  done
+  say "the ask pass's prompts on its record:"
+  pass_field "$ASK" '.session.prompts // []' || true
+  say "the needs entries on the page:"
+  jq -c '.snapshot.needs_you_now' "$RUN/page-ask.json" 2>/dev/null || true
+  # The stuck session ends through session end (standing answer 18).
+  end_run_pass "$ASK"
+}
+
 # ---- pass ------------------------------------------------------------------
 
 # track_ids adds the work pass's current session id and short id to the run's id file. A row
@@ -498,17 +564,24 @@ stopped_at_limit() {
   [ "$(pass_field "$WORK" '.state')" = stopped ] && [ "$(pass_field "$WORK" '.stop_reason // empty')" = relaunch_limit ]
 }
 
-# end_session ends a pass's open session through the binary. A refusal waits 60 seconds and
-# retries once (standing answer 72).
+# end_session ends an open session through the binary: `end_session pass <name>` or
+# `end_session conductor`. `session end` waits only 10 seconds for check.lock and a check run
+# holds it for about 40, so a refusal waits 60 seconds and retries once (standing answer 72).
 end_session() {
-  local pass=$1
-  printf '$ cc-desk session end pass %s %s\n' "$PROJECT" "$pass"
-  if cc session end pass "$PROJECT" "$pass"; then
+  printf '$ cc-desk session end %s %s\n' "$1" "$PROJECT${2:+ $2}"
+  if cc session end "$1" "$PROJECT" ${2:+"$2"}; then
     return 0
   fi
   say "session end was refused; waiting 60 seconds and trying once more"
   sleep 60
-  cc session end pass "$PROJECT" "$pass"
+  cc session end "$1" "$PROJECT" ${2:+"$2"}
+}
+
+# teardown_end is end_session for close: a second refusal is a fail line, not a stop of the phase.
+teardown_end() {
+  if ! end_session "$@"; then
+    check fail "close: session end $* was refused twice; this is a stop (standing answer 72): the conductor ends the session"
+  fi
 }
 
 # page_has_limit succeeds when the page reads Needs you now and holds an entry for the work
@@ -535,7 +608,7 @@ death() {
   check pass "8 death $n: a check saw session $sid ($(pass_field "$WORK" '.session.last_state // "?"')) at $seen, after its launch at $launched"
   dt=$(date +%s)
   printf '%s\t%s\t%s\n' "$n" "$sid" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$RUN/deaths.tsv"
-  if ! end_session "$WORK"; then
+  if ! end_session pass "$WORK"; then
     say "death $n: session end was refused twice. This is a stop (standing answer 72): the conductor ends the session."
     check fail "8 death $n: session end ran"
     return 1
@@ -592,67 +665,6 @@ phase_pass() {
   for n in 1 2 3; do
     death "$n" || return 0
   done
-}
-
-# ---- ask -------------------------------------------------------------------
-
-# ask_line_ok succeeds when the page reads Needs you now and an entry for the ask round names
-# the command.
-ask_line_ok() {
-  page_json "$RUN/page-ask.json" >/dev/null || return 1
-  jq -e --arg r "$ASK" '.snapshot.next_session.state == "needs_you_now"
-    and ([.snapshot.needs_you_now[]? | select(.round == $r and (((.cause // "") + " " + (.todo // "")) | contains("cksum ask-probe.txt")))] | length > 0)' \
-    "$RUN/page-ask.json" >/dev/null 2>&1
-}
-
-# end_run_pass stops a pass still building or waiting, so the check does not relaunch it, and
-# ends its open session through the binary. Neither call is fatal.
-end_run_pass() {
-  local p=$1 state open
-  state=$(pass_field "$p" '.state')
-  case $state in
-    building | waiting) try cc pass stop "$PROJECT" "$p" --reason scope ;;
-    *) say "$p reads $state" ;;
-  esac
-  open=$(pass_field "$p" 'select(.session != null and .session.ended == null) | .session.session_id // empty')
-  if [ -n "$open" ]; then
-    try cc session end pass "$PROJECT" "$p"
-  fi
-}
-
-phase_ask() {
-  need_stamp ask
-  # shellcheck disable=SC2016  # $1 expands in the inner shell
-  show flock "$STATE/lock" bash -c 'add_ask_to_release "$1"' _ "$RELEASE"
-  if ! wait_for 1500 have_session "$ASK"; then
-    check fail "8 the check started the ask pass"
-    end_run_pass "$ASK"
-    return 0
-  fi
-  check pass "8 the check started the ask pass"
-  local launched deadline now
-  launched=$(pass_field "$ASK" '.session.launched')
-  deadline=$(($(epoch "$launched") + 600))
-  say "ask: session $(pass_field "$ASK" '.session.session_id') launched $launched; the page must name the command by $(date -u -d "@$deadline" +%H:%M:%SZ)"
-  while :; do
-    if ask_line_ok; then
-      now=$(date +%s)
-      check pass "8 the page reads Needs you now and names cksum ask-probe.txt, $((now - $(epoch "$launched"))) s after the launch"
-      break
-    fi
-    now=$(date +%s)
-    if [ "$now" -gt "$deadline" ]; then
-      check fail "8 the page reads Needs you now and names cksum ask-probe.txt within 10 minutes of the launch"
-      break
-    fi
-    sleep 10
-  done
-  say "the ask pass's prompts on its record:"
-  pass_field "$ASK" '.session.prompts // []' || true
-  say "the needs entries on the page:"
-  jq -c '.snapshot.needs_you_now' "$RUN/page-ask.json" 2>/dev/null || true
-  # The stuck session ends through session end (standing answer 18).
-  end_run_pass "$ASK"
 }
 
 # ---- evidence --------------------------------------------------------------
@@ -758,14 +770,19 @@ result_line() {
 phase_close() {
   need_stamp close
   [ -x "$BIN" ] || show go build -o "$BIN" "$REPO/cmd/cc-desk"
-  local p
-  if [ -f "$RELEASE" ]; then
+  local p live_name="" mine=no
+  [ -f "$RELEASE" ] && live_name=$(jq -r '.name // ""' "$RELEASE" 2>/dev/null || true)
+  [ "$live_name" = "$PROJECT-recover-$STAMP" ] && mine=yes
+  if [ -f "$RELEASE" ] && [ "$mine" = no ]; then
+    say "close: the live release is $live_name, not this run's ($PROJECT-recover-$STAMP); it is left alone"
+    check fail "close: the live release is this run's"
+  elif [ -f "$RELEASE" ]; then
     for p in "$MERGE" "$WORK" "$ASK"; do
       pass_field "$p" '.name' | grep -q . && end_run_pass "$p"
     done
     if conductor_open; then
       try cc session finish conductor "$PROJECT"
-      try cc session end conductor "$PROJECT"
+      teardown_end conductor
     fi
   else
     say "close: no $PROJECT release in the state folder"
@@ -782,8 +799,10 @@ phase_close() {
     wait_for 60 bash -c "! kill -0 $(cat "$RUN/saver.pid") 2>/dev/null" || say "close: the saver is still running; it ends on its own at its next read"
   fi
 
-  mark_reports_read
-  if [ -f "$RELEASE" ]; then
+  if [ "$mine" = yes ] || [ ! -f "$RELEASE" ]; then
+    mark_reports_read
+  fi
+  if [ "$mine" = yes ]; then
     try cc release 'done' "$PROJECT"
     if [ -f "$RELEASE" ]; then
       say "release done was refused; waiting 60 seconds and trying once more"
@@ -791,7 +810,9 @@ phase_close() {
       try cc release 'done' "$PROJECT"
     fi
   fi
-  if [ -f "$RELEASE" ]; then
+  if [ "$mine" = no ] && [ -f "$RELEASE" ]; then
+    : # the fail line above names the release found
+  elif [ -f "$RELEASE" ]; then
     check fail "close: the release is ended"
   else
     check pass "close: the release is ended"
@@ -818,14 +839,15 @@ usage() {
   cat <<'EOF'
 usage: bash scripts/live-recover.sh <phase>
   prep            refuse on a dirty scratch, a live release, or a live scratch session; build and install the
-                  branch's binary; cut the base branch; add the merge and work rounds; start the 30-second saver
+                  branch's binary; cut the base branch; add the merge, work, and ask rounds; start the 30-second saver
   conductor       wait for the check to start the merge pass, report its pull request ready, wait for the merge
                   and the conductor's launch, print the conductor's pid, and stop (the executor runs the kill)
   conductor --after
                   read the list and the page each minute for 10 minutes after the kill; name which brought it back
+  ask             wait for the ask pass the check starts once the merge frees a slot, and check the page names
+                  cksum ask-probe.txt within 10 minutes of its launch; then stop the pass and end its session
   pass            three deaths of the work pass through session end; each waits for a check to see the session;
                   the third gives relaunch_limit and Needs you now with the round's name
-  ask             add the ask round, wait for its pass, and check the page names cksum ask-probe.txt within 10 minutes
   evidence        check the saved lists never show two live rows for the pass; print each death's evidence
   close           end every session the records hold, stop the saver, mark reports read, release done,
                   switch the scratch checkout to main, and print the snapshot line and the result
@@ -841,7 +863,7 @@ main() {
       usage
       return 0
       ;;
-    prep | conductor | pass | ask | evidence | close | saver-loop) ;;
+    prep | conductor | ask | pass | evidence | close | saver-loop) ;;
     *)
       usage >&2
       exit 2

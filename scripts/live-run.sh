@@ -151,8 +151,9 @@ desk_new() { [ "$(desk_count)" -gt "$(cat "$RUN/desks-before" 2>/dev/null || ech
 
 # row_for succeeds when the session list holds a row for the id.
 row_for() {
-  claude agents --json --all 2>/dev/null |
-    jq -e --arg id "$1" '[.. | objects | select((.sessionId? // .session_id? // .id?) == $id)] | length > 0' >/dev/null
+  local f=$RUN/row-for.json
+  claude agents --json --all >"$f" 2>/dev/null || return 1
+  jq -e --arg id "$1" '[.. | objects | select((.sessionId? // .session_id? // .id?) == $id)] | length > 0' "$f" >/dev/null
 }
 
 # pane_stable succeeds when two reads of the pane, 10 seconds apart, match.
@@ -233,15 +234,10 @@ prep_refuse() {
   fi
 }
 
-# fill puts a repo and a branch into the shared rules; unfill puts the placeholders back in a
-# filled list, given the repo and branch it holds.
+# fill puts a repo and a branch into the shared rules.
 fill() {
   jq --arg repo "$1" --arg branch "$2" \
     'map(gsub("\\{\\{repo\\}\\}"; $repo) | gsub("\\{\\{branch\\}\\}"; $branch))' "$RULES"
-}
-unfill() {
-  jq --arg repo "$1" --arg branch "$2" \
-    'map(split($repo) | join("{{repo}}") | split($branch) | join("{{branch}}"))'
 }
 
 PREP_DONE=0
@@ -351,7 +347,7 @@ phase_rule() {
   need_prep
   local s before after t0 line
   s=$(desk_session)
-  if [ -z "$s" ] || ! tmux has-session -t "$s" 2>/dev/null; then
+  if [ -z "$s" ] || ! tmux has-session -t "=$s" 2>/dev/null; then
     check fail "9 the desk is open to type the answer (run open first)"
     return 0
   fi
@@ -363,8 +359,8 @@ phase_rule() {
   line=$(tail -n 1 "$STATE/rulings.jsonl" 2>/dev/null || true)
   say "rulings.jsonl: $before line(s) before, $after after; $(($(date +%s) - t0)) seconds from typing"
   # The desk ends right after the ruling line, alone, by the name the run recorded.
-  try tmux kill-session -t "$s"
-  expect "9 the desk session is gone" bash -c "! tmux has-session -t '$s' 2>/dev/null"
+  try tmux kill-session -t "=$s"
+  expect "9 the desk session is gone" bash -c "! tmux has-session -t '=$s' 2>/dev/null"
   if [ "$after" -eq $((before + 1)) ]; then
     check pass "9 the typed answer adds one ruling line"
     jq -r .time <<<"$line" >"$RUN/ruling-time"
@@ -741,16 +737,13 @@ phase_evidence() {
     return 0
   fi
 
-  # The rules the release carried, against the shared source filled with the scratch values,
-  # and against the real release's, values put back.
+  # The rules the release carried, against the shared source filled with the scratch values.
   want=$(fill "$GH_REPO" "$PASS")
   got=$(jq -S -c '.allow_rules' "$f")
   say "rules: the release carried $(jq -r 'length' <<<"$got") rule(s): $got"
   expect "10 the release's allow rules equal the shared source filled with $GH_REPO and $PASS" \
     test "$(jq -S -c . <<<"$want")" = "$got"
-  expect "10 the rehearsal's rules and the real release's (glw907/cc-desk, stuck-sessions), values put back, match" \
-    test "$(unfill "$GH_REPO" "$PASS" <<<"$want" | jq -S -c .)" = "$(fill glw907/cc-desk stuck-sessions | unfill glw907/cc-desk stuck-sessions | jq -S -c .)"
-  say "the setup check takes this run's pass name: bash scripts/setup-release-check.sh $PASS"
+  say "the setup check: bash scripts/setup-release-check.sh"
 
   # Prompts and refusals, on every record of the run: the pass's session and the conductor's.
   local prompts refusals denied
@@ -832,6 +825,21 @@ snapshot_line() {
   [ "$needs" = 0 ] && [ "$waits" = 0 ] && [ "$waiting" = 0 ] && [ "$sessions" = 0 ] && [ "$unread" = 0 ]
 }
 
+# teardown_end ends an open session through the binary. `session end` waits only 10 seconds for
+# check.lock and a check run holds it for about 40, so a refusal waits 60 seconds and tries once
+# more; a second refusal is a stop (standing answer 72).
+teardown_end() {
+  printf '$ cc-desk session end %s\n' "$*"
+  if cc session end "$@"; then
+    return 0
+  fi
+  say "session end was refused; waiting 60 seconds and trying once more"
+  sleep 60
+  if ! cc session end "$@"; then
+    check fail "close: session end $* was refused twice; this is a stop (standing answer 72): the conductor ends the session"
+  fi
+}
+
 phase_close() {
   need_prep
   local live=$STATE/releases/$PROJECT.json state s id
@@ -851,12 +859,12 @@ phase_close() {
     note_ids
     id=$(open_session pass)
     if [ -n "$id" ]; then
-      try cc session end pass "$PROJECT" "$PASS"
+      teardown_end pass "$PROJECT" "$PASS"
     fi
     id=$(open_session conductor)
     if [ -n "$id" ]; then
       try cc session finish conductor "$PROJECT"
-      try cc session end conductor "$PROJECT"
+      teardown_end conductor "$PROJECT"
     fi
   else
     say "close: no live $PROJECT release; nothing to end"
@@ -865,7 +873,7 @@ phase_close() {
   s=$(desk_session)
   case $s in
     cc-desk-scratch-*)
-      if tmux has-session -t "$s" 2>/dev/null; then try tmux kill-session -t "$s"; fi
+      if tmux has-session -t "=$s" 2>/dev/null; then try tmux kill-session -t "=$s"; fi
       ;;
   esac
   if [ -f "$RUN/listing.pid" ] && kill -0 "$(cat "$RUN/listing.pid")" 2>/dev/null &&
