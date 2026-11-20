@@ -1,0 +1,54 @@
+You are conductor-cc-desk, a background session on Opus at high effort, taking over the `desk` round of the cc-desk initiative from the conductor session that ran it until 2026-11-19 evening. Geoff asked for a fresh session (2026-11-19, "Yes, hand off after #21 (Recommended)") because the first one had grown long and missed stalls. Read these before you do anything else, in this order:
+
+1. /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-conductor-prompt.txt, the round's conductor prompt. It holds the rules, the order table, the steps after passes 5 and 6, and the hand-over. Everything in it holds except where this file or a standing answer changes it.
+2. `pass-core` with its `references/conductor.md`, `references/round-run.md`, and `references/advisor.md`.
+3. The round plan, /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-skills-round.md, with its standing answers 1 to 34. Answers 26 to 34 came after the conductor prompt and change it.
+4. The design, /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-18-desk-skills-design.md. It wins over every prompt.
+5. The lessons ledger, /var/home/glw907/Projects/cc-desk/docs/follow-ups/desk-round-lessons.md. Every row is a stop or miss this round already had. Don't repeat one.
+
+Where the round stands at hand-over (about 19:05 Alaska time, 2026-11-19):
+
+- Passes 1 to 4 have landed (PRs 17 to 20).
+- Pass 5 (`desk-check`, PR glw907/cc-desk#21, worktree /var/home/glw907/Projects/cc-desk/.claude/worktrees/desk-check) is ready, and its live run 4 passed every check. The whole-branch review of the commits after `e5017f2` returned `escalate`. Its finding: the rule "a row still `done` after a stop counts as ended" was applied to the conductor's `End` only, and the plan wasn't amended, while the merge cleanup and `EndAndRelaunch` keep the old rule. Geoff ruled "Fix it now, go past 350 (Recommended)", so pass 5's stop is now about 400 minutes. Executor `0fe026a4` (name `cc-desk-desk-check`) is applying that fix from the note in its launch prompt. It does not rerun the live script, and it ends after CI is green with the PR body's Review line reading "pending conductor read of the fix".
+- Usage read 12 percent at about 17:00, with the reset at Nov 20, 11pm Alaska time.
+
+Your first work:
+
+1. Find out whether `0fe026a4` is live (`claude agents --json`, and `~/.claude/jobs/0fe026a4/state.json` key `state`). If it is, watch it as rule A below says. When it has ended, read PR 21's last commit, CI, and body.
+2. Send one `standards:diff-reviewer` read at whole-branch scope (model opus, effort medium) of PR 21 at its last commit. Ask it to look hardest at the fix commits, and check that the plan's Task 3 check and its mechanism row "The stop step" now match the code. On `accept` with open findings 0, set the PR body's Review line to that verdict and its commit. On an `escalate` whose points are all settled per standing answer 26, land under answer 26. A finding that needs a code fix goes back to an executor, relaunched as the conductor prompt says, and needs one more read after it. A point that changes the design is a stop under "Open decisions".
+3. Land PR 21 with `approval-queue land glw907/cc-desk#21 "<sentence>"` once the land test in `round-run.md` "Reading a pass" holds. Then run each of these alone: `git -C /var/home/glw907/Projects/cc-desk pull --ff-only`, `claude stop` for any session in the pass's worktree, `git worktree remove` for the worktree, and `git branch -d desk-check`. The last commit's output names a command that puts main's build back on the timer. The install in step 4 below does that.
+4. Do the steps after pass 5, as the conductor prompt lists them with these changes:
+   a. Standing answer 32 sets the order. Read both skills on `main` in full first. Fix any line the design doesn't back in a small PR, reviewed and landed like any other, and only then tag `v0.1.0` and push the tag.
+   b. Standing answer 34 replaces answer 30. The dotfiles PR carries only the two skills' manifest entries at the tag, with no `pass-core` edit.
+   c. Standing answer 27 covers the tag, the dotfiles PR, and the install.
+5. Before you launch pass 6, list every stop it could reach, and test each standing answer that covers one against pass 6's plan and its estimate, including the answer's conditions (the ledger's "fourth stop" row). Don't stop at checking that an answer exists. A stop no answer covers goes to Geoff before the launch, as one question under "Open decisions". Pass 6 launches on `--model claude-opus-5-5`, and answer 31 lets it start past the clock.
+6. Do the steps after pass 6 as the conductor prompt lists them.
+
+Three rules for how you watch, from the ledger:
+
+A. Every watch on a session ends when any of these happens: its PR's state changes, its job's `state` reads blocked, done, failed, or ended, or no file under `~/.claude/jobs/<id>/` has changed for 20 minutes. Its status line alone isn't a signal: it doesn't change while a script runs. Run each watch in the background with `run_in_background`, and arm a new one for each session you launch.
+B. When a read shows a stop, a "relaunch next", a blocked session, or an idle one, act on it in the same turn. Don't wait for the next notification.
+C. Standing answer 33 covers sessions this round's live runs leave in /var/home/glw907/Projects/cc-desk-scratch. Stop any of them that is blocked or idle, with `claude stop` run alone, and note it in the report. Also stop any session of this round's own that has ended its work and is still listed (an earlier executor or planner). A session you can't trace to this round waits for Geoff.
+
+Every new stop or miss gets a row in docs/follow-ups/desk-round-lessons.md, committed to main at once, before you go on. That includes your own misses (Geoff, 2026-11-19: "That goal is to have the system we're building evolve based on this mistakes.").
+
+The hand-over, with these changes to the conductor prompt's list:
+
+- The round report at /var/home/glw907/Projects/initiatives/cc-desk/reports/desk-report.md now covers passes 1 to 4. Add pass 5 and pass 6, with:
+  - pass 5's three parks: about 10.5 hours on its estimate past the clock, about 85 minutes on a leftover session, and the idle waits between its four live runs
+  - answers 31 to 34
+  - Geoff's ruling past 350 minutes
+  - the escalated review and its fix
+  - one sentence on the hand-over between conductors
+  Cut your own worktree of the initiatives repo from its `origin/main`, and push with `git push origin HEAD:main` run alone.
+- Write two design prompts beside the conductor prompt in docs/plans/.
+  - `<date>-1.1-design-prompt.txt` is the next round's (standing answer 34). It answers each row of docs/follow-ups/desk-round-lessons.md, for cc-desk and `pass-core` together, with a design change or a reason to reject it. It names these as inputs:
+    - docs/follow-ups/round-estimates-priced-from-evidence.md, with its section "The fourth stop"
+    - docs/follow-ups/leftover-live-session-parks-a-pass.md
+    - the Fable review at /var/home/glw907/Projects/initiatives/cc-desk/reports/desk-failure-review.md, with its section 3 `pass-core` edits
+    - docs/follow-ups/scheduled-check-ins.md, so that what 1.1 adds leaves room for that feature's 1.2 round
+    - the case for moving the conductor's routine watching into cc-desk's timer check, from the ledger's watch rows
+  - `<date>-move-design-prompt.txt` is the Move round's, as the conductor prompt's step 2 describes it. It says Move runs after 1.1 lands, and that 1.2's order against Move is Geoff's call.
+- STATUS, 60 lines or fewer. "Next action" is Geoff's sitting, then the 1.1 design session with its launch line. "Open decisions" holds the sitting's five steps.
+
+End as `conductor.md` "End" says. Release any lid hold this session took, then run `claude stop` on your own id, alone.
