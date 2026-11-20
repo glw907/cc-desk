@@ -21,9 +21,11 @@ const (
 	openEffort = "high"
 )
 
-// sessionEnv names the variables that make a new session count as a child of
-// the one that started it, so the session list leaves it out.
-var sessionEnv = []string{"CLAUDECODE", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_ENTRYPOINT"}
+// sessionEnv names the variables the desk session must not inherit. The first
+// four make a new session count as a child of the one that started it, so the
+// session list leaves it out. ANTHROPIC_API_KEY, which ~/.local/secrets exports
+// for scripts, would make Claude Code bill that key ahead of the claude.ai login.
+var sessionEnv = []string{"CLAUDECODE", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_ENTRYPOINT", "ANTHROPIC_API_KEY"}
 
 func openArgs(cmd *cobra.Command, args []string) error {
 	if len(args) != 0 && len(args) != 2 {
