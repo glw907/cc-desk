@@ -80,7 +80,7 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 		if err != nil && !finishedRow(e.rows, sess.ShortID) {
 			return "", err
 		}
-		if err == nil && !e.gone {
+		if err == nil && !e.gone && !finishedRow(e.rows, sess.ShortID) {
 			return "", fmt.Errorf("session %s is still live after claude stop", sess.ShortID)
 		}
 		out := "ended " + sess.ShortID
