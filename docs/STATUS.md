@@ -7,26 +7,19 @@
 - Prove landed as pull request 1, with open tests in `2026-11-17-rerun-prove-proofs.md`. State
   and rules landed as 3 to 6; two of its follow-ups need Geoff's choice when taken up:
   `orphan-question-forecast.md` and `reading-errors-and-guess-on-resume.md`.
-- The Sessions and Page rounds landed on 2026-11-18 as pull requests 7 to 16, from the designs
-  `docs/specs/2026-11-17-sessions-design.md` and `docs/specs/2026-11-17-page-design.md`. The
-  page serves main's build at http://127.0.0.1:7908/, and the check's timer runs main's binary,
+- The Sessions and Page rounds landed on 2026-11-18 as pull requests 7 to 16. The page serves
+  main's build at http://127.0.0.1:7908/, and the check's timer runs main's binary,
   `~/.local/share/cc-desk/bin/cc-desk`, every five minutes. Follow-ups are files in
-  `docs/follow-ups/`, with no `BACKLOG.md`; three carry Geoff's rulings of 2026-11-18.
+  `docs/follow-ups/`, with no `BACKLOG.md`.
 - The usage stop is 100 percent of the week; `cc-desk usage` prints the figure.
-- Geoff approved the Desk and skills round on 2026-11-18, in his terminal: the design
-  (`docs/specs/2026-11-18-desk-skills-design.md`), its round plan
-  (`docs/plans/2026-11-18-desk-skills-round.md`), and the auto mode entry `cc-desk-desk-round`,
-  which is in the settings. The round is six passes under the id `desk`, run by the background
-  session `conductor-cc-desk`. It ends with one real run that waits for Geoff at the desk, from
-  `docs/specs/2026-11-18-stuck-sessions-design.md`.
-- Pass 1 of that round (`desk-records`, pull request 17) gives questions, rulings, reports, rounds,
-  and stops their new records, a check log, and the `brief` verb. It waits for the conductor to
-  merge it; passes 2 to 4 read its names from main.
-- Pass 3 of that round (`desk-open`, pull request 20) opens the desk from a bare `cc-desk`, starts
-  question's three answers. It waits for the conductor to merge it.
-- Pass 5 of that round (`desk-check`, pull request 21) makes the check's five repairs and adds
-  the third verdict. Its live rerun (run 5) on `e6b7641`, after the stop-rule fix, ended `result: pass`, and the
-  pull request is ready for the conductor to read.
+- The Desk and skills round (`desk`; design `docs/specs/2026-11-18-desk-skills-design.md`, round
+  plan `docs/plans/2026-11-18-desk-skills-round.md`) has landed passes 1 to 5 as pull requests 17
+  to 21: the records, the skills, the page, the desk, and the check's repairs. Geoff stopped the
+  round after pass 5 and gave pass 6 to a fresh conductor (standing answer 36). Nothing after
+  pass 5 has run: no `v0.1.0` tag, no dotfiles PR, and the two skills aren't installed. The
+  round's report is `~/Projects/initiatives/cc-desk/reports/desk-report.md`.
+- Every stop in the round has a row in `docs/follow-ups/desk-round-lessons.md`. The 1.1 round
+  answers each row, for cc-desk and `pass-core` (standing answer 34).
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,
@@ -44,22 +37,22 @@ Open documents: none.
 
 ## Next action
 
-The conductor runs the Desk and skills round from its prompt,
-`docs/plans/2026-11-18-desk-conductor-prompt.txt`. If no session named `conductor-cc-desk` is
-running and the round isn't finished, launch it again from `~/Projects/cc-desk`, and it resumes
-from this file and the round's report:
+Geoff launches the fresh conductor. It reads the skills, tags `v0.1.0`, lands the dotfiles PR,
+installs the skills, then runs pass 6 and the steps after it. Launch it from `~/Projects/cc-desk`:
 
 ```text
-claude --bg --model claude-opus-5-5 --effort medium --name conductor-cc-desk "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-18-desk-conductor-prompt.txt)"
+claude --bg --model claude-opus-5-5 --effort high --name conductor-cc-desk "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-desk-pass-6-conductor-prompt.txt)"
 ```
 
-When the round reports, the Move round is designed next. It also reshapes the cairn and dubplate
-initiatives so that cc-desk can take them over (Geoff, 2026-11-18).
+After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
+(`docs/plans/2026-11-19-1.1-design-prompt.txt`). Move follows 1.1
+(`docs/plans/2026-11-19-move-design-prompt.txt`). Whether the 1.2 round comes before or after
+Move is Geoff's call, asked at the end of the 1.1 design.
 
 ## Open decisions
 
-- Geoff's click in Chromium on the page's terminal link is still owed:
-  `docs/follow-ups/page-link-chromium-click.md`.
+- When to launch the pass 6 conductor (above).
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
+- A blocked session, `cairn-cms-tool-delete`, belongs to no cc-desk round and waits for Geoff.
