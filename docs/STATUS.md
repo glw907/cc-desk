@@ -38,19 +38,22 @@ Open documents: none.
 
 ## Next action
 
-`conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
-Pass 6's executor is `cc-desk-desk-run`, background job `b8782b33`, started 2026-11-20 at 09:26 UTC.
-After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
-(`docs/plans/2026-11-19-1.1-design-prompt.txt`) and the Move design session
-(`docs/plans/2026-11-19-move-design-prompt.txt`). Move starts once cc-desk reaches 1.0, after
-the sitting, and 1.1 runs beside it (standing answer 37). Whether 1.2 comes before or after
-Move is Geoff's call, asked at the end of the 1.1 design.
+Pass 6 (`desk-run`, draft pull request 22) stopped at its rehearsal, Task 8, when GitHub Actions
+started no job on the then-private repos. Both cc-desk repos are now public and Actions runs.
+Every other task is done on the branch with the local gate passing and the whole-branch review
+folded. `conductor-cc-desk` relaunches the executor from
+`docs/plans/2026-11-18-desk-run-executor-prompt.txt` (it starts again at Task 8), lands the pass,
+and runs the steps after it. The timer already runs
+the branch's build, so `main`'s build isn't reinstalled before the pass lands. Then Geoff's
+sitting, then his approval of the Move design (`docs/specs/2026-11-19-move-design.md`) and its
+five questions. The session that takes it launches Move from the plan's "Start line", and 1.1's
+design (`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside it.
+Pass 6's executor is `cc-desk-desk-run`, background job `294c4d1c`, resumed 2026-11-20 at 17:00 UTC.
 
 ## Open decisions
 
-- Two stops in pass 6 would still wait for Geoff: a fix that needs a setting changed,
-  and a third live run with a prompt it didn't set up. Standing answer 38 covers the rest.
 - The drafts of the stopped dubplate design sessions are kept in
-  `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
-  give them a home in the dubplate repo first.
+  `~/.local/state/desk/kept-drafts/`. The Move design's `move-dubplate-docs` pass copies them into
+  the dubplate repo before the Retire round removes that folder.
 - A blocked session, `cairn-cms-tool-delete`, belongs to no cc-desk round and waits for Geoff.
+  The Move design's Question 1 recommends landing its pull request, cairn #260.

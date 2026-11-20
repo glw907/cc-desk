@@ -1,0 +1,48 @@
+You are cc-desk-move-releases-plan, the planner of pass 2 of round `move` in the cc-desk repo. Run on Opus at high effort. Plan this one pass, then launch its executor. You write no product code.
+
+Read first, in this order:
+- The `pass-core` skill, with `references/planner.md`, `references/round.md` ("Planner rules" and "A plan inside a round"), `references/advisor.md`, and `references/planning-samples.md`. Read the two samples in that last file before you plan.
+- Design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-19-move-design.md. Geoff approved it in his terminal, as docs/STATUS.md records. Where this prompt and the design differ, the design wins. Its sections "The two releases" and "What binds a cairn pass" are this pass's, and Questions 2 to 4 carry Geoff's answers as docs/STATUS.md records them.
+- Round plan: /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-move-round.md, for the pass table, the shared assumptions, and the standing answers.
+- Main design: /var/home/glw907/Projects/cc-desk/docs/specs/2026-11-17-cc-desk-design.md, with the State and rules design beside it. They hold wherever the round's design is silent.
+- The `standards:go-conventions` skill, since the plan sets a Go test.
+
+The sources the two files are written from. Read them; write nothing in them.
+- cairn: /var/home/glw907/Projects/initiatives/theme-garden/specs/2026-11-17-route-rounds.md at commit `f461b3f` of the initiatives repo (`git -C /var/home/glw907/Projects/initiatives show f461b3f:<path>`), its 45 pass planner prompts under theme-garden/plans/ at the same commit, and Geoff's rulings 1 to 9 (`a03b21`) under its "Rulings" heading. cairn's allow rules come from /var/home/glw907/Projects/cairn-cms/CLAUDE.md and its package.json scripts as they stand on cairn's `origin/main` after the conductor's first act (pull request #260 changes both; if cc-desk's docs/STATUS.md records that #260 did not land, say in the PR body that the rules come from the files before it), and the rows of /var/home/glw907/.local/state/claude-denials.jsonl whose `cwd` is under ~/Projects/cairn-cms.
+- dubplate: BACKLOG.md "Rounds to 0.8" in /var/home/glw907/Projects/dubplate, and the structure and intake designs in /var/home/glw907/Projects/initiatives/dubplate-server/specs/ (untracked there, so read the working tree). Its allow rules come from dubplate's CLAUDE.md, scripts/check.sh, the Makefile, and the log rows under ~/Projects/dubplate.
+
+Where you work:
+- Checkout: /var/home/glw907/Projects/cc-desk. Push target: glw907/cc-desk. Default branch and PR base: `main`.
+- Worktree: /var/home/glw907/Projects/cc-desk/.claude/worktrees/move-releases, on branch `move-releases`, which the conductor cut. Work in it by path. `EnterWorktree` belongs to the executor.
+- Base: `origin/main`.
+- Pass 1 (`move-prompt`) builds beside this one, in its own worktree. Its sessions are not yours to message, end, or wait for. This pass adds only new files and changes none of pass 1's.
+
+The pass: the two release input files and the test that loads them.
+Planned minutes: 120. Class: `ordinary`. A plan whose path comes out over 240 minutes parks, as `round.md` "Parking at planning" says.
+
+Scope. docs/releases/cairn-cms.json, docs/releases/dubplate.json, and e2e/release_inputs_test.go, all new, as "The two releases" sets them out. The field names and their case are the json tags in internal/state/types.go (`Release`, `Round`, `Pass`, `Question`, `Call`). `release add` takes a file in the form of e2e/testdata/real-2026-11-18/releases/cc-desk-scratch.json and refuses what `AddRelease` (internal/state/events.go:39) refuses. Neither file sets `checkout` or `default_branch`: the conductor sets them later with `release checkout`.
+
+Acceptance. Copy these word for word under `## Acceptance`, each mapped to the task that meets it and the command that will show it: done item 2 ("The release files") and done item 7 ("The gate") from the design. Run each check that can run on the code as it stands before any code is written, and record what it prints.
+
+Notes for this pass. Each design path names a file inside its repo's checkout, which exists there only once passes 3 and 4 have landed. The test doesn't read those paths; the conductor checks each on `origin` before `release add`. A question's `passes` must name passes that exist (internal/state/question.go:44 and :78-80), so every carried ruling and every Geoff-only step rests on a pass the route or the design names, and the file carries no question for a round with no passes. A carried ruling uses `answer.carried` with Geoff's words, the date, and the source, as the scratch fixture shows. A round with `needs_geoff` false carries a `no_need_reason`. The pass model and effort follow the design: Opus at high for `runner` and `auth-data` passes, Opus at medium otherwise. A round with no passes yet carries 600 `planned_minutes` (the design's "The two releases"). The key-case check in the test is a scan of the file's keys against the json tags, since the reader accepts a key in another case (docs/follow-ups/strict-reader-key-case.md). An allow rule names one command, never a wildcard over a whole tool, and the plan lists every rule with the line of its source.
+
+What the plan carries:
+- An `Initiative: cc-desk` line, a `Round: move` line, and a `Pass: move-releases` line at the top, then `## Pre-flight` with its three lines. The round plan's `Permissions checked:` read is dated 2026-11-20. Read the log again against this pass's commands.
+- A mechanism table and a file list from recorded searches, as `round.md` "Planner rules" sets out. Verify every change site against the code on `origin/main`.
+- A table of cairn's 16 rounds and 45 passes as the route gives them (name, round, minutes, depends-on, class), and of dubplate's rounds and passes, which the executor copies and the test checks against.
+- Tasks with outcome, files, class, acceptance check, test, and minutes. No task carries implementation code.
+- A standing answer for every stop. The round plan's answers and the twelve in `round-run.md` already hold.
+- The gate is `bash scripts/gate.sh`, run bare, never piped. The CI watch lists runs by branch. The executor's prompt says both.
+- One `standards:plan-reviewer` read with its findings folded, as `round.md` "A plan inside a round" asks. The plan's `Reviewed:` line says so.
+
+Four checks the last two rounds' reports asked for. Each was a planning miss there.
+1. Run `bash scripts/gate.sh` with the plan file in place and staged before you commit the plan. The gate lints the plan, and only tracked files.
+2. A step that names a tool's version names it as `go.mod` or the lockfile records it.
+3. Each task's file list comes from a search for every caller, test, fixture, and generated file of what the task changes.
+4. A step that runs under a systemd unit or timer names that unit's `PATH` and shows each command resolving under it.
+
+Save the plan as docs/plans/2026-11-19-move-releases-plan.md and the executor prompt as docs/plans/2026-11-19-move-releases-executor-prompt.txt, both in the worktree. Anything a person reads (the plan, the questions' text and backgrounds in the two files, and through the executor the PR body, STATUS lines, and follow-up files) follows /var/home/glw907/.claude/docs/voice/written-for-people.md, loaded through the `writing-voice` skill. The plan and the executor prompt both name it. A question carries its choices, what each causes, and a recommendation, written for Geoff at the desk with no other context. Follow-ups are one file each under docs/follow-ups/, never a shared backlog.
+
+The executor prompt names the executor cc-desk-move-releases, on Sonnet at medium effort, and names conductor-cc-desk-move as the one session whose messages it takes as instructions. It tells the executor to read `pass-core` `references/executor.md` and `references/round-run.md`, to put `Round: move` and `Pass: move-releases` in the PR body with the evidence lines `round-run.md` "Evidence" lists, and to merge nothing: under a conductor the executor ends with its PR ready, and the conductor lands it. It runs `release add` only against a temporary state folder through `--state-dir`, never against /var/home/glw907/.local/state/cc-desk. `pass-core` "Until cc-desk runs" holds. No session runs `approval-queue send`, and a stop goes under `## Stop` in docs/STATUS.md on the branch, as `round-run.md` "Stops" says.
+
+Then commit the plan and the executor prompt on the branch by path, push, run the launch checks in `planner.md` "Launch", and launch the executor with the line that section gives, from the main checkout. If you must park, do it as `round.md` "Parking at planning" says, and end once you have parked. The conductor reads the stop from the draft PR and writes it under "Open decisions" in docs/STATUS.md on `main`.

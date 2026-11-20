@@ -1,8 +1,12 @@
 # The cleanup of a release marked done
 
-The cleanup of a merged pass's session, worktree, and branch runs from a live release file. A
-release marked done is skipped by the check, so a pass merged in the same run that closes the
-release, or one whose cleanup was left with a note, may never have its worktree removed.
+The check cleans up a merged pass's session, worktree, and branch only on a live release.
+`startFree`, the launch loop, `readPulls`, `LiveSessions`, and `fillSessions` all skip a release
+marked done (`internal/sessions/decide.go:190`, `cmd/cc-desk/check.go:228`,
+`internal/state/check.go:505`). Pass 6's `cc-desk release done <project>` is the one verb that marks
+a release done. A pass merged in the run that closes the release, or one whose cleanup left a note,
+keeps its worktree and branch, and nothing removes them.
 
-Decide whether the check finishes cleanup on a done release until each pass records `cleaned`, or
-whether closing a release refuses while any cleanup is open.
+Decide in `release done` whether it refuses while a merged pass has no `cleaned` mark, or whether
+the check finishes cleanup on a done release. The refusal is recommended, since it adds no
+done-release path to the check. If pass 6's verb already refuses, this item is done.

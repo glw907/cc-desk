@@ -332,6 +332,20 @@ The twelve in `round-run.md` hold, with these changes and additions.
   the report, for the sitting. A fix that needs a setting, hook, or permission rule changed, and
   a third live run with a prompt it didn't set up, still wait for Geoff under "Open decisions",
   while everything that builds on neither goes on.
+- **39. The Move design is written overnight, before the sitting (Geoff, 2026-11-19).** Geoff
+  wrote: "Once you have the rehearsal done, I'd like you to shape both the dubplate and cairn
+  work to run in cc-desk. This should be done overnight and before my sitting, so both can launch
+  as soon as my sitting is done." This changes answer 37's timing for the Move design only. Asked
+  whether it must wait for the rehearsal, Geoff wrote: "Do we even need to wait for the
+  rehearsal?" It doesn't, so the conductor launches the Move design session at once,
+  `cc-desk-move-design`, in the background from `docs/plans/2026-11-19-move-design-prompt.txt`.
+  It writes the design, the round plan, a planner prompt for each pass, and the conductor prompt,
+  with every call that is Geoff's listed with a recommendation, so his approval after the
+  sitting is one read. It launches nothing and adds nothing to the state folder, so the sitting
+  still sees one question waiting for cc-desk. Move's conductor launches only once the sitting
+  has passed done item 10 and Geoff has approved the design. A busy-check hit in this repo that
+  names the Move design session isn't a stop for pass 6 (answer 6, changed). The 1.1 design still
+  starts after the sitting.
 
 ## Start line
 
