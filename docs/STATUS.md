@@ -46,12 +46,12 @@ reinstalled before the pass lands. Then Geoff's sitting, then his call on the Mo
 
 ## Open decisions
 
-- The Move design (`docs/specs/2026-11-19-move-design.md`) is overtaken. On 2026-11-20 Geoff
-  approved dubplate's structure, intake, and catalog designs in his terminal, and dubplate's
-  `structure` round now runs under `conductor-dubplate`. cairn #260 and #259 landed, and
-  cairn's `checks` round runs under `conductor-cairn-cms`. Both run outside cc-desk. Geoff's
-  call: should Move add their later rounds to cc-desk once these rounds end, or shrink to its
-  cc-desk passes (`move-prompt` and `move-writers`)? Recommended: shrink, and add each project
-  as a cc-desk release between rounds. The design's Questions 1 and 4 are moot either way.
-- Conductors on pavilion share one rule (agreed 2026-11-20 with `conductor-dubplate`): at most
-  four building sessions between them, and no new session past 85 percent weekly usage.
+- The Move design (`docs/specs/2026-11-19-move-design.md`) needs a rewrite before Geoff
+  approves it. dubplate's `structure` round and cairn's `checks` round run outside cc-desk,
+  under their own conductors, while this week's spare usage lasts (Geoff, 2026-11-20: "We'll
+  bring both other [initiatives] under the cc-desk regime once cc-desk is ready"). Move still
+  brings both under cc-desk, but its first act and Questions 1 and 4 must match what those
+  rounds leave behind. cairn #260 and #259 have landed.
+- `conductor-cc-desk`, `conductor-dubplate`, and `conductor-cairn-cms` share one rule (agreed
+  2026-11-20): at most four planners or executors on pavilion, no new session past 85 percent
+  weekly usage, and a message to the others before each launch.
