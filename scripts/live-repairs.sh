@@ -335,12 +335,25 @@ stop_step_logged() {
 
 merged_recorded() { [ -n "$(pass_field "$1" '.pull_request.merged // empty')" ]; }
 
+# checkout_on_base puts the scratch checkout on the run's base branch, which the check pulls
+# after a merge only when the checkout is on the release's default branch. checkout_on_main
+# puts it back, as prep requires.
+checkout_on_base() {
+  local base
+  base=$(cat "$RUN/base")
+  show git -C "$SCRATCH" switch -C "$base" "origin/$base"
+}
+checkout_on_main() {
+  try git -C "$SCRATCH" switch main
+}
+
 phase_merge() {
   [ -n "$STAMP" ] || {
     say "merge: run prep first"
     exit 1
   }
   local pass=merge-$STAMP
+  checkout_on_base
   # The release is edited under the state lock, as the mechanism table says.
   # shellcheck disable=SC2016  # $1 expands in the inner shell
   show flock "$STATE/lock" bash -c 'add_merge_to_release "$1"' _ "$RELEASE"
@@ -679,6 +692,7 @@ phase_conductor() {
     check fail "7 no second conductor started"
   fi
   cat "$RUN/conductor-ids" >>"$(known_ids)"
+  checkout_on_main
 }
 
 # ---- abort -----------------------------------------------------------------
@@ -701,6 +715,7 @@ no_live_rows() { [ -z "$(this_runs_rows)" ]; }
 phase_abort() {
   [ -x "$BIN" ] || show go build -o "$BIN" "$REPO/cmd/cc-desk"
   mkdir -p "$RUN"
+  [ "$(git -C "$SCRATCH" branch --show-current)" = main ] || checkout_on_main
   local p state
   if [ -f "$RELEASE" ]; then
     for p in $(jq -r '.passes[] | select(.name | test("^(refuse|hold|merge)-[0-9]{8}t[0-9]{6}z$")) | .name' "$RELEASE"); do
