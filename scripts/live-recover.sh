@@ -578,8 +578,18 @@ end_session() {
 }
 
 # teardown_end is end_session for close: a second refusal is a fail line, not a stop of the phase.
+# A check run may end the session between the read and the verb; "has no open session" then
+# means it is already ended, which is what the teardown wants.
 teardown_end() {
-  if ! end_session "$@"; then
+  local out
+  if out=$(end_session "$@" 2>&1); then
+    say "$out"
+    return 0
+  fi
+  say "$out"
+  if grep -q 'has no open session' <<<"$out"; then
+    say "close: a check run already ended the session"
+  else
     check fail "close: session end $* was refused twice; this is a stop (standing answer 72): the conductor ends the session"
   fi
 }

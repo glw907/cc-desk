@@ -587,10 +587,12 @@ has_release_report() { [ -n "$(release_report)" ]; }
 PAGE_DOWN=0
 # listed succeeds when the page lists the report; when the page does not answer, the snapshot
 # stands in (standing answer 78) and the first time says so.
+# The page draws in the browser, so its HTML holds no report; GET /api/state is the data it
+# draws from, and its Reports to read list is that snapshot's unread reports.
 listed() {
   local body
-  if body=$(curl -fsS --max-time 10 "$PAGE/" 2>/dev/null); then
-    grep -q "reports/$1" <<<"$body"
+  if body=$(curl -fsS --max-time 10 "$PAGE/api/state" 2>/dev/null) && jq -e '.snapshot' >/dev/null 2>&1 <<<"$body"; then
+    jq -e --arg id "$1" '[.snapshot.reports[]? | select(.id == $id and .read == null)] | length == 1' >/dev/null <<<"$body"
     return
   fi
   if [ "$PAGE_DOWN" = 0 ]; then
@@ -668,7 +670,9 @@ phase_report() {
   launches=$(log_lines conductor "$(cat "$RUN/merge-time")" | jq -s '[.[] | select(.decision == "launch" and .reason == "report_due")] | length')
   say "conductor launches since the merge: $launches"
   expect "9 two conductor launches, one for each report" test "$launches" -eq 2
-  if wait_for 300 conductor_gone; then
+  # The check ends the conductor and removes its worktree at the run after the report, so the
+  # wait covers two check runs (standing answer 76).
+  if wait_for 660 conductor_gone; then
     check pass "9 the conductor's worktree and branch are gone"
   else
     check fail "9 the conductor's worktree and branch are gone"
@@ -828,16 +832,28 @@ snapshot_line() {
 # teardown_end ends an open session through the binary. `session end` waits only 10 seconds for
 # check.lock and a check run holds it for about 40, so a refusal waits 60 seconds and tries once
 # more; a second refusal is a stop (standing answer 72).
+# A check run may end the session between the read and the verb; "has no open session" then
+# means it is already ended, which is what the teardown wants.
 teardown_end() {
+  local out
   printf '$ cc-desk session end %s\n' "$*"
-  if cc session end "$@"; then
+  if out=$(cc session end "$@" 2>&1); then
+    say "$out"
+    return 0
+  fi
+  say "$out"
+  if grep -q 'has no open session' <<<"$out"; then
+    say "close: a check run already ended the session"
     return 0
   fi
   say "session end was refused; waiting 60 seconds and trying once more"
   sleep 60
-  if ! cc session end "$@"; then
-    check fail "close: session end $* was refused twice; this is a stop (standing answer 72): the conductor ends the session"
+  if out=$(cc session end "$@" 2>&1) || grep -q 'has no open session' <<<"$out"; then
+    say "$out"
+    return 0
   fi
+  say "$out"
+  check fail "close: session end $* was refused twice; this is a stop (standing answer 72): the conductor ends the session"
 }
 
 phase_close() {
