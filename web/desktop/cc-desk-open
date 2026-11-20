@@ -4,7 +4,7 @@
 # The desktop hands this script the address unchanged, as its one argument. It runs
 # `ptyxis -x "<cc-desk> <project> <round>"` only when both names match [a-z0-9][a-z0-9._-]*, and
 # refuses every other address with exit 2. A name can't start with "-" or ".", so it can't reach
-# cc-desk as a flag.
+# cc-desk as a flag. It looks for cc-desk on PATH, then at ~/.local/share/cc-desk/bin/cc-desk.
 set -euo pipefail
 # Under a UTF-8 locale [a-z] can match accented letters. The variable is not exported, so ptyxis
 # and cc-desk keep the session's locale.
