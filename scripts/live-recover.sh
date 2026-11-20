@@ -431,6 +431,16 @@ phase_conductor_after() {
       say "conductor read $i: the list could not be read"
     fi
     [ -d "/proc/$pid" ] || old_pid_gone=yes
+    # A conductor that comes back can record its report and exit between two reads, so a
+    # finish on its record later than this step's start shows it ran again after the kill.
+    if [ -z "$first" ]; then
+      local fin
+      fin=$(conductor_field "select(.session_id == \"$sid\") | .finished // empty")
+      if [ -n "$fin" ] && [ "$(epoch "$fin")" -ge "$started" ]; then
+        mech="the supervisor: the same session ran again and recorded its report at $fin"
+        first="minute $i, $(( $(epoch "$fin") - started )) s after the step began"
+      fi
+    fi
 
     local src stopped
     src=$(page_json "$RUN/conductor/page-$i.json" || true)
