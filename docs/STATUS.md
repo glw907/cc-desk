@@ -10,49 +10,49 @@
 - The Sessions and Page rounds landed on 2026-11-18 as pull requests 7 to 16. The page serves
   main's build at http://127.0.0.1:7908/, and the check's timer runs main's binary,
   `~/.local/share/cc-desk/bin/cc-desk`, every five minutes. Follow-ups are files in
-  `docs/follow-ups/`, with no `BACKLOG.md`.
-- The usage stop is 100 percent of the week; `cc-desk usage` prints the figure.
-- The Desk and skills round (`desk`; design `docs/specs/2026-11-18-desk-skills-design.md`, round
-  plan `docs/plans/2026-11-18-desk-skills-round.md`) has landed passes 1 to 5 as pull requests 17
-  to 21: the records, the skills, the page, the desk, and the check's repairs. A fresh
-  conductor, `conductor-cc-desk`, took pass 6 (standing answer 36). It tagged `v0.1.0`, pinned
-  both skills on the workstation (workstation pull request 251), and installed `main`'s binary,
-  timer, page, and link handler. The round's report is
-  `~/Projects/initiatives/cc-desk/reports/desk-report.md`.
-- Every stop in the round has a row in `docs/follow-ups/desk-round-lessons.md`. The 1.1 round
-  answers each row, for cc-desk and `pass-core` (standing answer 34), beside Move (answer 37).
+  `docs/follow-ups/`, with no `BACKLOG.md`. The usage stop is 100 percent of the week.
+- The Desk and skills round (`desk`) landed all six passes as pull requests 17 to 22 (design
+  `docs/specs/2026-11-18-desk-skills-design.md`, round plan
+  `docs/plans/2026-11-18-desk-skills-round.md`), with the skills pinned at `v0.1.0`. Its report
+  is `~/Projects/initiatives/cc-desk/reports/desk-report.md`. Each stop in it has a row in
+  `docs/follow-ups/desk-round-lessons.md`, which the 1.1 round answers (standing answer 34).
 
-<!-- round-report sessions -->
-**The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,
-merge, and time sessions. Geoff approved 8 and 16 with every recommendation.
-
-Open documents: none.
-<!-- /round-report -->
-
-<!-- round-report page -->
-**The Page round has landed.** Pull requests 7, 9, 11, 13, and 15 build the page, its item pages,
-its service, its terminal link, and its polish. Geoff approved every call as recommended.
-
-Open documents: none.
+<!-- round-report desk -->
+**The desk round has landed all six passes, and Geoff's sitting is next.** The round builds the
+desk session that `cc-desk` opens, the two skills, the page's report pages, and the check's
+repairs, then rehearses one run with nobody tending it. In the scratch repo, one typed answer
+led to a merged pull request and a report with nothing else typed, and the recovery checks
+passed on the live page. The real release is set up, and the page shows one question waiting
+for cc-desk. Geoff's sitting finishes the round.
 <!-- /round-report -->
 
 ## Next action
 
-Pass 6 (`desk-run`, draft pull request 22) resumed at its rehearsal on 2026-11-20 at 17:01 UTC,
-after both cc-desk repos were made public so Actions runs. `conductor-cc-desk` lands the pass
-and runs the steps after it. The timer runs the branch's build, so `main`'s build isn't
-reinstalled before the pass lands. Then Geoff's sitting, then his call on the Move design
-(below), and 1.1's design (`docs/plans/2026-11-19-1.1-design-prompt.txt`).
-Pass 6's executor is `cc-desk-desk-run`, background job `294c4d1c`, resumed 2026-11-20 at 17:00 UTC.
+Geoff's sitting, with the steps below; the timer launches the `stuck-sessions` pass once he
+answers. After the sitting, the 1.1 design session runs in his terminal:
+
+```bash
+claude --model claude-opus-5-5 --effort high --name cc-desk-1.1-design "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-1.1-design-prompt.txt)"
+```
 
 ## Open decisions
 
+- Geoff's sitting. The page shows one question waiting for cc-desk.
+  1. Type `cc-desk`. The desk reads out the small design about stuck sessions and its
+     question. Answer in your words.
+  2. Look at the page and confirm the ruling shown is what you said.
+  3. Walk away. The build starts, merges, and cleans up after itself. This is the first time
+     the timed check merges into a real repo with no approve from you, as your ruling of
+     2026-11-17 allows for a change inside its approved design.
+  4. When the report appears under "Reports to read", read it and click "Mark as read".
+  5. Click the terminal link once in Chromium, the click still owed from the Page round. What
+     to look for is in `docs/follow-ups/page-link-chromium-click.md`.
+  If anything else asks for you during step 3, the run has failed its test.
 - The Move design (`docs/specs/2026-11-19-move-design.md`) needs a rewrite before Geoff
-  approves it. dubplate's `structure` round and cairn's `checks` round run outside cc-desk,
-  under their own conductors, while this week's spare usage lasts (Geoff, 2026-11-20: "We'll
-  bring both other [initiatives] under the cc-desk regime once cc-desk is ready"). Move still
-  brings both under cc-desk, but its first act and Questions 1 and 4 must match what those
-  rounds leave behind. cairn #260 and #259 have landed.
-- `conductor-cc-desk`, `conductor-dubplate`, and `conductor-cairn-cms` share one rule (agreed
+  approves it. dubplate's `structure` round and cairn's `checks` round run under their own
+  conductors for now (Geoff, 2026-11-20: "We'll bring both other [initiatives] under the cc-desk
+  regime once cc-desk is ready"), so Move's first act and Questions 1 and 4 must match what
+  those rounds leave behind. cairn #260 and #259 have landed.
+- The conductors of dubplate and cairn-cms share one rule with cc-desk's sessions (agreed
   2026-11-20): at most four planners or executors on pavilion, no new session past 85 percent
   weekly usage, and a message to the others before each launch.
