@@ -1,0 +1,26 @@
+You are the design session for cc-desk's Move round, running in Geoff's terminal on claude-opus-5-5 at high effort (pass-core "Models"; Geoff may choose Fable). The checkout is ~/Projects/cc-desk on main; push to glw907/cc-desk main.
+
+When this runs: after the 1.1 round lands (standing answer 34 of docs/plans/2026-11-18-desk-skills-round.md). If docs/STATUS.md shows 1.1 not landed, stop and tell Geoff. The 1.2 round (docs/follow-ups/scheduled-check-ins.md) may come before or after Move; that order is Geoff's call, and STATUS records his answer once he gives it. If STATUS names 1.2 as next and it hasn't landed, ask him before you start.
+
+Goal: design the Move round with Geoff, write its round plan and planner prompts, get his approval, and launch its conductor. The route (docs/plans/2026-11-17-route.md) defines the round: "cairn and `dubplate` run as releases, and cairn's first round runs under cc-desk". Its pieces as the route cuts them are the cairn release file (75 minutes), the `dubplate` release file (45), and cairn's round 1 under cc-desk, as long as that round runs. It closes the main design's done items 8 and 9, and it needs one decision session with Geoff for each reshaped release.
+
+Step 1, before any design work: read the records of Geoff's real run, the one that ended the Desk and skills round. They are the rulings log, the release file, and the check's log under ~/.local/state/cc-desk, and the report cc-desk's conductor recorded for the run. Add the evidence for that design's done items 4 and 10 (docs/specs/2026-11-18-desk-skills-design.md, "What done looks like") to the desk report, ~/Projects/initiatives/cc-desk/reports/desk-report.md, and push it to the initiatives repo's main. If anything asked for Geoff during the run beyond his sitting's five steps, the run failed its test: fix the cause, set up one more run with another small follow-up as that design's "Steps only Geoff can do" says, and finish that run before you design Move.
+
+Read next:
+1. docs/STATUS.md, the main design docs/specs/2026-11-17-cc-desk-design.md, the route, and the 1.1 design and its round report.
+2. The pass-core skill and its references planner.md, round.md, and ready.md. Run the standards:backlog-sweep scoped sweep over docs/follow-ups/ as ready.md says, and list the verdicts in the design.
+
+The Move round settles these, each with a design line or a reason to defer it:
+- Design writers that start by the timer, and what merges a design writer's pull request. The Desk and skills design's "Calls Claude made" section moved both to this round.
+- docs/follow-ups/earlier-answers-after-a-round.md.
+- A home in the dubplate repo for the drafts kept in ~/.local/state/desk/kept-drafts/.
+- The follow-ups the Desk and skills design's "Backlog" table keeps for Move: api-project-state-round.md, building-pass-without-checkout-needs-entry.md, cleanup-of-a-release-marked-done.md, cold-boot.md, desk-start-time-after-a-clock-step.md, input-before-lock.md, live-sample-of-limit-texts.md, orphan-question-forecast.md, orphan-ruling-after-a-crash.md, pull-request-closed-without-merge.md, reading-errors-and-guess-on-resume.md, resume-skips-the-limits.md, and strict-reader-key-case.md, plus the reworded launch-review-notes.md and 2026-11-17-rerun-prove-proofs.md. A file 1.1 already closed needs no line.
+
+How to work:
+- Follow standards:brainstorming: one question to Geoff at a time, two or three approaches with a recommendation, then one written design for one approval. Method and architecture calls are yours; ask Geoff only product, taste, priority, scope, and budget.
+- Price each pass from measured minutes, and list every stop the round could reach with the standing answer covering it, its conditions tested against the forecast, before Geoff approves. The 1.1 design says how.
+- Write the design to docs/specs/, the round plan and one planner prompt per pass to docs/plans/, and a conductor prompt to docs/plans/, in the shapes the 1.1 round used.
+- Every PR body and landing of the round carries the round's id.
+- Questions and reports reach Geoff in this terminal, unless 1.1 changed how they reach him; follow what pass-core says when you run.
+- Read weekly usage with `~/.local/share/cc-desk/bin/cc-desk usage` before launching the conductor; if it is at 100 percent, tell Geoff the figure and wait for his word.
+- Once Geoff approves, commit the design, plan, and prompts by path, update STATUS (60 lines or fewer, gate run bare first), push, and launch the conductor as the round plan says.
