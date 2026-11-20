@@ -79,6 +79,8 @@ letter or a digit and hold only those, `.`, `_`, and `-`, which is the rule for 
 state. It refuses every other address and runs nothing. A name that breaks the rule shows the
 command and the button, and no link.
 
-The handler looks for `cc-desk` on the `PATH` it starts with and refuses when it finds none. The
-link from the install lines above puts it there, in a session that started after the install.
-Chromium asks before it opens the link.
+The handler looks for `cc-desk` on the `PATH` it starts with, then at
+`~/.local/share/cc-desk/bin/cc-desk`, where `cc-desk timer install` copies it. A browser started
+from the desktop has no `~/.local/bin` on its `PATH`, so the second place is the one it finds. The
+handler refuses when neither holds `cc-desk`. Chromium asks before it opens the link the first
+time, and remembers an "Always allow".

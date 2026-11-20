@@ -113,6 +113,21 @@ test.describe('the handler', () => {
 		expect(run.record).toBeNull();
 	});
 
+	test('runs the installed copy when cc-desk is not on the path', () => {
+		const home = mkdtempSync(path.join(tmpdir(), 'cc-desk-home-'));
+		try {
+			const dir = path.join(home, '.local', 'share', 'cc-desk', 'bin');
+			mkdirSync(dir, { recursive: true });
+			writeFileSync(path.join(dir, 'cc-desk'), '#!/bin/sh\nexit 0\n');
+			chmodSync(path.join(dir, 'cc-desk'), 0o755);
+			const run = runHandler(['cc-desk://alpha/r1'], { withCcDesk: false, env: { HOME: home } });
+			expect(run.status).toBe(0);
+			expect(run.record).toEqual(['-x', `${dir}/cc-desk alpha r1`]);
+		} finally {
+			rmSync(home, { recursive: true, force: true });
+		}
+	});
+
 	test('refuses when cc-desk is not on the path', () => {
 		const run = runHandler(['cc-desk://alpha/r1'], { withCcDesk: false });
 		expect(run.status).toBe(2);
