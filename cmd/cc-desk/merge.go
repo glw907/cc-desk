@@ -144,12 +144,17 @@ type ended struct {
 	rows    []sessions.Row
 	stopped bool
 	gone    bool
+	// listedDone is true when the stop failed and the row stays listed done.
+	listedDone bool
 }
 
 // step names the stop in a carry-out's outcome.
 func (e ended) step(id string) string {
 	if e.stopped {
 		return "stopped session " + id
+	}
+	if e.listedDone {
+		return "session " + id + " stop failed, row stays listed done"
 	}
 	return "session " + id + " already gone"
 }
@@ -180,7 +185,8 @@ func (l *launcher) stopSession(ctx context.Context, shortID string) (ended, erro
 	if stopErr != nil && !gone {
 		return ended{rows: rows}, stopErr
 	}
-	return ended{rows: rows, stopped: stopErr == nil, gone: gone}, nil
+	listedDone := stopErr != nil && found && row.Class() == sessions.ClassDone
+	return ended{rows: rows, stopped: stopErr == nil, gone: gone, listedDone: listedDone}, nil
 }
 
 // sendBack stops the pass's session when live and relaunches it, uncounted,
