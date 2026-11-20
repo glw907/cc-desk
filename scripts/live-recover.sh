@@ -406,7 +406,33 @@ phase_conductor_after() {
   started=$(date +%s)
   say "conductor: the kill of pid $pid (session $sid) was run before $(date -u +%H:%M:%SZ); old pid $( [ -d "/proc/$pid" ] && echo 'still present' || echo gone )"
 
-  local old_pid_gone=no
+  local old_pid_gone=no j
+  # The toy conductor can record its report and exit within a minute of coming back, so the
+  # first minute reads the list every 3 seconds; the minute reads follow.
+  for ((j = 1; j <= 20; j++)); do
+    local ff=$RUN/conductor/fast-$j.json frow fsid fpid
+    if save_agents "$ff"; then
+      frow=$(jq -r --arg n "$CONDUCTOR" "[.[]? | select(.name == \$n and ($LIVE_JQ))][0] // empty
+        | \"\\(.sessionId // \"none\") \\(.pid // \"none\") \\(.state // \"none\")\"" "$ff")
+      if [ -n "$frow" ]; then
+        read -r fsid fpid _ <<<"$frow"
+        say "conductor fast read $j: live row $frow"
+        if [ -z "$first" ] && { [ "$fsid" != "$sid" ] || { [ "$fpid" != none ] && [ "$fpid" != "$pid" ]; }; }; then
+          if [ "$fsid" = "$sid" ]; then
+            mech="the supervisor: the same session id under a new pid ($pid -> $fpid)"
+          else
+            mech="the check: a new session id ($sid -> $fsid)"
+          fi
+          first="fast read $j, $(( $(date +%s) - started )) s after the step began"
+        fi
+      else
+        say "conductor fast read $j: no live $CONDUCTOR row"
+      fi
+    fi
+    [ -d "/proc/$pid" ] || old_pid_gone=yes
+    sleep 3
+  done
+
   for ((i = 1; i <= 10; i++)); do
     local f=$RUN/conductor/min-$i.json src live row rsid rpid
     if save_agents "$f"; then
@@ -431,17 +457,6 @@ phase_conductor_after() {
       say "conductor read $i: the list could not be read"
     fi
     [ -d "/proc/$pid" ] || old_pid_gone=yes
-    # A conductor that comes back can record its report and exit between two reads, so a
-    # finish on its record later than this step's start shows it ran again after the kill.
-    if [ -z "$first" ]; then
-      local fin
-      fin=$(conductor_field "select(.session_id == \"$sid\") | .finished // empty")
-      if [ -n "$fin" ] && [ "$(epoch "$fin")" -ge "$started" ]; then
-        mech="the supervisor: the same session ran again and recorded its report at $fin"
-        first="minute $i, $(( $(epoch "$fin") - started )) s after the step began"
-      fi
-    fi
-
     local src stopped
     src=$(page_json "$RUN/conductor/page-$i.json" || true)
     stopped=$(jq -r --arg n "$CONDUCTOR" '([.snapshot.sessions[]? | select(.name == $n and .stop_reason != null)] | length)
@@ -457,6 +472,7 @@ phase_conductor_after() {
     check fail "8 the conductor is running again within 10 minutes (no live row after the kill)"
   fi
   say "conductor: old pid gone: $old_pid_gone"
+  say "conductor: the record's finish for session $sid: $(conductor_field "select(.session_id == \"$sid\") | .finished // \"none\"") (the step began $(date -u -d "@$started" +%H:%M:%SZ))"
   say "the check log's conductor lines since the kill:"
   log_lines conductor "$(epoch "$killed")"
   if [ "$stops" = 0 ]; then
