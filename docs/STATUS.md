@@ -38,22 +38,21 @@ Open documents: none.
 
 ## Next action
 
-Pass 6 (`desk-run`, draft pull request 22) stopped at its rehearsal, Task 8, when GitHub Actions
-started no job on the then-private repos. Both cc-desk repos are now public and Actions runs.
-Every other task is done on the branch with the local gate passing and the whole-branch review
-folded. `conductor-cc-desk` relaunches the executor from
-`docs/plans/2026-11-18-desk-run-executor-prompt.txt` (it starts again at Task 8), lands the pass,
-and runs the steps after it. The timer already runs
-the branch's build, so `main`'s build isn't reinstalled before the pass lands. Then Geoff's
-sitting, then his approval of the Move design (`docs/specs/2026-11-19-move-design.md`) and its
-five questions. The session that takes it launches Move from the plan's "Start line", and 1.1's
-design (`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside it.
+Pass 6 (`desk-run`, draft pull request 22) resumed at its rehearsal on 2026-11-20 at 17:01 UTC,
+after both cc-desk repos were made public so Actions runs. `conductor-cc-desk` lands the pass
+and runs the steps after it. The timer runs the branch's build, so `main`'s build isn't
+reinstalled before the pass lands. Then Geoff's sitting, then his call on the Move design
+(below), and 1.1's design (`docs/plans/2026-11-19-1.1-design-prompt.txt`).
 Pass 6's executor is `cc-desk-desk-run`, background job `294c4d1c`, resumed 2026-11-20 at 17:00 UTC.
 
 ## Open decisions
 
-- The drafts of the stopped dubplate design sessions are kept in
-  `~/.local/state/desk/kept-drafts/`. The Move design's `move-dubplate-docs` pass copies them into
-  the dubplate repo before the Retire round removes that folder.
-- A blocked session, `cairn-cms-tool-delete`, belongs to no cc-desk round and waits for Geoff.
-  The Move design's Question 1 recommends landing its pull request, cairn #260.
+- The Move design (`docs/specs/2026-11-19-move-design.md`) needs a rewrite before Geoff
+  approves it. dubplate's `structure` round and cairn's `checks` round run outside cc-desk,
+  under their own conductors, while this week's spare usage lasts (Geoff, 2026-11-20: "We'll
+  bring both other [initiatives] under the cc-desk regime once cc-desk is ready"). Move still
+  brings both under cc-desk, but its first act and Questions 1 and 4 must match what those
+  rounds leave behind. cairn #260 and #259 have landed.
+- `conductor-cc-desk`, `conductor-dubplate`, and `conductor-cairn-cms` share one rule (agreed
+  2026-11-20): at most four planners or executors on pavilion, no new session past 85 percent
+  weekly usage, and a message to the others before each launch.
