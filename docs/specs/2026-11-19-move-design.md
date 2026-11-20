@@ -373,7 +373,7 @@ the ledger, `scheduled-check-ins.md` (a 1.2 feature), and the four files pass 6 
 | `orphan-question-forecast.md`, `strict-reader-key-case.md` | Keep. `move-releases`' test keeps both from biting the two release files |
 | `resume-skips-the-limits.md` | Keep for 1.1. A resume can break the new slot rule for one cycle |
 | `cleanup-of-a-release-marked-done.md` | Reword: pass 6's `release done` makes it reachable, and that verb is where it is decided |
-| `launch-review-notes.md` | Reword to item 5 alone, now naming design records |
+| `launch-review-notes.md` | Reword item 5: the fallback to `Make` now covers only conductors, and it should cover pass and design records too |
 | `2026-11-17-rerun-prove-proofs.md` | Reword: item 6 is done, and item 3 points at `live-sample-of-limit-texts.md` |
 | `live-sample-of-limit-texts.md`, `cold-boot.md` | Keep. The real timer is the chance to see them; the conductor keeps any capture |
 | `reading-errors-and-guess-on-resume.md` | Keep. A failed usage read holds every start for one cycle |

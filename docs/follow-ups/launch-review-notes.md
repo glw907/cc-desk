@@ -17,9 +17,10 @@ folder no record named, and the last commit of the branch refuses it. These item
    `Bash(approval-queue land *)`. Check, against Claude Code's rule matching, whether each also
    denies the command with no argument, since a bare `gh pr merge` merges the current branch's pull
    request. If not, the design must name the two bare rules; this pass does not change the deny list.
-5. **An ended record whose folder was removed by hand.** `Launch` in `cmd/cc-desk/launcher.go` sends
-   a `session start` over an ended record to `Reuse`, which fails with "the recorded worktree is
-   missing" as a plain error. When the folder is absent, fall back to `Make`, which still refuses a
-   leftover branch.
+5. **A pass or design record whose folder was removed by hand.** `Launch` in
+   `cmd/cc-desk/launcher.go` falls back to `Make` only for a conductor whose folder is gone
+   (`gone`). A `session start` over an ended pass or round record whose folder is absent still goes
+   to `Reuse`, which fails with "the recorded worktree is missing" as a plain error. Extend `gone`
+   to every record kind. `Make` still refuses a leftover branch.
 6. **The restart test's reach.** The restart in `TestRecoveryFinishedConductorStays` checks only the
    launch count. Assert the new short id and a cleared `ended` too.
