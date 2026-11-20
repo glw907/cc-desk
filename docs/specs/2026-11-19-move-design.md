@@ -24,7 +24,7 @@ reads true: pass 6 has landed, your sitting passed, and GitHub Actions runs agai
 
 A few names this design uses. Pass 6 is the Desk round's last pass, `desk-run`, which builds the
 real release you run in your sitting: five steps at the terminal that end with one question
-waiting for cc-desk on the page. 1.1 is cc-desk's next release, which works through the lessons
+waiting for cc-desk on the page. 1.1 is cc-desk's next version, which works through the lessons
 ledger and may build beside this round. The check is cc-desk's timed run that starts passes and
 merges pull requests, and a slot is one of the two passes it lets build at once.
 
@@ -98,8 +98,9 @@ The main question was where each release's papers live. Three shapes were weighe
    text a session was given.
 
 The second question was how Move's own passes run. They run the old way, under a Move conductor,
-as the Desk round's did. cc-desk can't run them as a release: `AddRelease` refuses a second live
-release for one project, and 1.1 shares the project `cc-desk`. The cost is that the check can't
+as the Desk round's did, and as 1.1 runs. cc-desk can't run them as a release: `AddRelease`
+refuses a second live release for one project, and the project `cc-desk` holds the release your
+sitting runs. The cost is that the check can't
 count a Move pass against its two building slots, which "The run" handles by order.
 
 ## Where each release's papers live
@@ -128,7 +129,7 @@ flags.
   `2026-11-17-structure/` folder without its `zz_*_test.go` probe, into `docs/plans/`.
 - From `~/.local/state/desk/kept-drafts/`: folders `93d87e73` and `b3c9cad7` into
   `docs/archive/kept-drafts/`, without `93d87e73/probe/dubplate-server` (a 23 MB binary the
-  repo builds). Also `818e389e/dubplate-server-data.queue.md`, the one dubplate draft in the
+  repo builds) or the two `.py` files of `b3c9cad7`. Also `818e389e/dubplate-server-data.queue.md`, the one dubplate draft in the
   cairn folder. A `README.md` there says these are unsent drafts of the stopped design sessions,
   not rulings.
 
@@ -136,12 +137,13 @@ The two kept design drafts are byte-identical to the initiatives copies (checked
 `docs/specs/` holds the one copy that counts and the archive keeps the drafts as they were left.
 The pass edits nothing it copies.
 
-One change falls outside `docs/`. dubplate's gate runs `ruff check` and `ruff format --check` on
-every tracked `.py` file (`scripts/check.sh:713`), and the kept drafts' `fold2.py` and `ruled.py`
-fail both: 109 and 8 findings under dubplate's `ruff.toml`. The pass adds the exclude pattern
-`':(exclude)docs/archive/**'` to that one `git ls-files` line. An exclude in `ruff.toml` wouldn't
-work, since ruff checks a path named on its command line unless `force-exclude` is set. The `.sh`
-files under `docs/` join no check: the `shellcheck` leg reads `scripts/` only.
+Two files of `b3c9cad7` stay out of the copy: `fold2.py` and `ruled.py`, the scripts that
+folded the old desk's answers. dubplate's gate runs `ruff check` and `ruff format --check` on
+every tracked `.py` file (`scripts/check.sh:713`), and the two fail both, with 109 and 8
+findings. Excluding them in `scripts/check.sh` would make this a change to dubplate's gate
+machinery (`scripts/check.sh:374`), which runs the full gate, for two scripts no one will run
+again. The Retire round's archive keeps them, and the README says so. The `.sh` files under
+`docs/` join no check: the `shellcheck` leg reads `scripts/` only.
 
 ## What binds a cairn pass
 
@@ -353,7 +355,7 @@ The order keeps more than two Move passes from building at once. While a Move pa
 neither release has a checkout, so the check starts nothing for them.
 
 If a 1.1 pass in flight holds a file `move-writers` needs when it would start, the conductor
-doesn't wait. It runs step 3 without the writers, and `move-writers` goes to 1.1 with its plan,
+doesn't wait. It runs steps 1 and 3 without the writers, and `move-writers` goes to 1.1 with its plan,
 written under "Open decisions" in `docs/STATUS.md`. dubplate's `catalog` round then waits for a
 writer started by hand from the desk.
 
@@ -422,7 +424,7 @@ The three rewords land with this design. A fold is removed by the pass named.
 
 ## Pass 6's state, as read
 
-Read on 2026-11-20 at 09:44 UTC, just before this design was pushed to `main`. `origin/main`
+Read on 2026-11-20 at 09:44 UTC and again at 09:52, just before this design was pushed to `main`. `origin/main`
 was at `f265ad6`, with nothing of pass 6 on it. Pass 6's branch, `desk-run`, was at `5b92f64`
 with nine commits, as draft pull request 22. Its executor, `cc-desk-desk-run`, and its
 conductor were busy. The branch has the three things this design relies on: `cc-desk release
@@ -446,7 +448,11 @@ Each call can be overturned at approval.
 - cairn's papers are copied into cairn-cms and dubplate's into dubplate, so each design path sits
   inside its checkout where the page can show it.
 - Move's passes run under a Move conductor in the old way, since cc-desk can't hold a second live
-  cc-desk release beside 1.1.
+  release for the project `cc-desk` beside the one your sitting runs.
+- Up to four passes may build at once while Move and 1.1 both run: two under each conductor, and
+  after step 3 two the check starts for cairn and dubplate in place of Move's. Answer 37 put the
+  two rounds side by side; the count is this design's reading of it. The usage stop still holds
+  every new start.
 - Design writers are built here, not in 1.1, because the Desk design placed them here and
   dubplate's `catalog` needs one. They are built last, off the path to cairn's round 1, and go to
   1.1 if a 1.1 pass holds their files.

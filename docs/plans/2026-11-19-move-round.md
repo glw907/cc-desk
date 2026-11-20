@@ -44,7 +44,7 @@ dubplate's gates ran in their repos through November with no refusal of the gate
 
 **Reviewed:** one `standards:plan-reviewer` read of the design and this plan at `1b09292`, on
 Opus at medium, 2026-11-20. Its findings are folded. 1.1's own slots are accepted in the
-design's failure line. dubplate's ruff leg gains one exclude pattern. The `foundation-7` removal
+design's failure line. dubplate's two kept `.py` scripts stay out of the copy. The `foundation-7` removal
 is spelled out with no `--force`. Answer 42 falls back when no relaunch follows. `release add`
 waits for pass 5. The `catalog` writer is watched. Pass 5's file list is complete. State 7 has a
 test, `settings.json` is written by rename, and pass 2 reads cairn's files after #260. The
@@ -82,7 +82,8 @@ worktree remove`, then its branch with `git branch -d`. Through the installed `c
 add the releases in docs/releases/cairn-cms.json and docs/releases/dubplate.json at main to
 ~/.local/state/cc-desk, record each release's checkout as its repo's main checkout, add an
 allow rule to either release that names one command a pass's steps run, write
-`usage_stop_percent` in ~/.local/state/cc-desk/settings.json, end a session of either release
+`usage_stop_percent` in ~/.local/state/cc-desk/settings.json through a temporary file in that
+folder renamed over it, end a session of either release
 with `cc-desk session end pass <project> <name>`, and reinstall the binary and the user units from that repo. For
 the projects `cairn-cms` and `dubplate`, the timed check may launch pass sessions, conductors,
 and design writers in those two repos, which may push their branches and open pull requests
@@ -104,7 +105,7 @@ request body and its STATUS lines by `~/.claude/docs/voice/written-for-people.md
 | 1 | `move-prompt` | The pass prompt names the round's design and context, and the report conductor checks earlier answers | Item 1 | `internal/launch/templates/pass.txt`, `internal/launch/templates/conductor.txt`, the template data in `internal/launch/` and its tests, `cmd/cc-desk/launcher.go`, `docs/follow-ups/earlier-answers-after-a-round.md` (removed) | `runner` | 60 | Nothing | 5 |
 | 2 | `move-releases` | The two release input files and the test that loads them | Item 2 | `docs/releases/cairn-cms.json`, `docs/releases/dubplate.json`, `e2e/release_inputs_test.go` (all new) | `ordinary` | 120 | Nothing | none |
 | 3 | `move-cairn-docs` | The route, its 45 prompts, and the regime map are in cairn-cms | Item 3 | In cairn-cms: `docs/internal/plans/route/**` (new), `docs/internal/plans/2026-11-17-foundation-7-routing-plan.md` (new), `docs/STATUS.md` (the foundation block) | `ordinary` | 60 | #260 landed | #260, on cairn's `docs/STATUS.md` |
-| 4 | `move-dubplate-docs` | dubplate's three designs, their prompts, and the kept drafts are in dubplate | Item 3 | In dubplate: `docs/specs/2026-11-17-*.md` (three new), `docs/plans/2026-11-17-intake-*`, `docs/plans/2026-11-17-structure/**`, `docs/archive/kept-drafts/**` (all new), and the ruff leg's `git ls-files` line in `scripts/check.sh` | `ordinary` | 45 | Nothing | none |
+| 4 | `move-dubplate-docs` | dubplate's three designs, their prompts, and the kept drafts are in dubplate | Item 3 | In dubplate: `docs/specs/2026-11-17-*.md` (three new), `docs/plans/2026-11-17-intake-*`, `docs/plans/2026-11-17-structure/**`, `docs/archive/kept-drafts/**` (all new) | `ordinary` | 45 | Nothing | none |
 | 5 | `move-writers` | Writers start on the timer, their pull requests merge through the check, and each project gets a slot | Item 4 | `internal/sessions/decide.go`, `internal/sessions/merge.go`, `cmd/cc-desk/merge.go`, `cmd/cc-desk/round.go`, `cmd/cc-desk/launcher.go`, `internal/state/{events,types,check,rules,commit,merge}.go`, `internal/snapshot/{snapshot,sessions}.go`, `internal/brief/brief.go`, `cmd/cc-desk/check.go`, `web/src/lib/snapshot.ts` and the page's tests and fixtures, `internal/launch/templates/design.txt`, `skills/cc-desk-work/SKILL.md`, `skills/cc-desk/SKILL.md` (the `round design` line), `README.md`, `scripts/live/` (a new writer script), their tests and fixtures, and the three folded follow-ups (removed) | `runner`, `live-account` | 250 | 1 | 1 |
 
 Pass 1 changes only the templates and the data the launcher hands them, and it lands before
@@ -199,8 +200,8 @@ round most. These are new.
 
 **40. A 1.1 pass holds a file a Move pass needs.** The Move pass waits for the 1.1 pass to
 land, and the conductor runs every step that doesn't rest on it. For pass 1, the wait has no
-limit. For pass 5, once every other step through step 2 is done and the 1.1 pass still holds
-the file, the conductor doesn't wait. It runs step 3 without the writers. Under "Open
+limit. For pass 5, once passes 1 to 4 have landed, step 2 is done, and the 1.1 pass still holds
+the file, the conductor doesn't wait. It runs steps 1 and 3 without the writers. Under "Open
 decisions" it writes that pass 5 goes to 1.1 with its planner prompt, and that dubplate's
 `catalog` round needs a writer started from the desk.
 
@@ -216,7 +217,7 @@ release. The conductor reads the prompt's command from `cc-desk snapshot`. If th
 one the pass's steps run and the release's rules should allow, the conductor adds the rule
 with `cc-desk rules add <project> <rule>`, files the gap as a follow-up, and ends the session
 with `cc-desk session end pass <project> <name>`, so the check relaunches it under the new rule.
-Pass 6's kill probe (`docs/research/2026-11-20-kill-probe.md` on its branch) records how the
+Pass 6's kill probe (`docs/research/2026-11-20-kill-probe.md` on its branch) will record how the
 check treats a session ended that way. If no relaunch follows within two check runs, the pass
 parks under "Open decisions" with the probe's reading beside it. A command the pass
 shouldn't run, or a third prompt in one pass, parks the pass under "Open decisions". The
@@ -311,8 +312,8 @@ The conductor checks the seven again before it launches the first planner.
 - Five passes against the route's two files and a round. The design gives the reasons: the
   papers must sit inside each repo for the page to show them, and the writers and the prompt
   change are this round's by the Desk design.
-- Move runs under its own conductor in the old way, since cc-desk holds one live release per
-  project and 1.1 shares the project `cc-desk`.
+- Move runs under its own conductor in the old way, as 1.1 does, since cc-desk holds one live
+  release per project and the project `cc-desk` holds the release Geoff's sitting runs.
 - The conductor is a background session on Opus at medium effort. It lands a pull request from
   the old regime, adds two real releases, and watches a real round, and each takes judgment.
 - Executors: pass 1 and pass 5 on Opus at medium, since pass 1 writes what every session is
