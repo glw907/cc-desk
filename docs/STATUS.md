@@ -38,21 +38,21 @@ Open documents: none.
 
 ## Next action
 
-`conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
-Then Geoff's sitting for the real run. After it he approves the Move design
-(`docs/specs/2026-11-19-move-design.md`, written overnight under standing answer 39) and answers
-its five questions, and the session that takes his approval adds the round plan's auto mode
-entry and launches the Move conductor with the plan's "Start line". The 1.1 design session
-(`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside Move.
+Pass 6 (`desk-run`, draft pull request 22) stopped at its rehearsal, Task 8, because GitHub
+Actions starts no job. Every other task is done on the branch with the local gate passing and the
+whole-branch review folded. `conductor-cc-desk` watches Actions. Once a job runs, it reruns
+44712820555, relaunches the executor from `docs/plans/2026-11-18-desk-run-executor-prompt.txt`
+(it starts again at Task 8), lands the pass, and runs the steps after it. The timer already runs
+the branch's build, so `main`'s build isn't reinstalled before the pass lands. Then Geoff's
+sitting, then his approval of the Move design (`docs/specs/2026-11-19-move-design.md`) and its
+five questions. The session that takes it launches Move from the plan's "Start line", and 1.1's
+design (`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside it.
 
 ## Open decisions
 
 - GitHub Actions has run no job since 09:12 UTC on 2026-11-20: "recent account payments have
   failed or your spending limit needs to be increased". Only Geoff can fix it, at
-  https://github.com/settings/billing. Until then pass 6 builds on the local gate and stops at
-  its first step that needs CI.
-- Two stops in pass 6 would still wait for Geoff: a fix that needs a setting changed,
-  and a third live run with a prompt it didn't set up. Standing answer 38 covers the rest.
+  https://github.com/settings/billing. Pass 6, every Move pass, and every merge wait on it.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Move design's `move-dubplate-docs` pass copies them into
   the dubplate repo before the Retire round removes that folder.
