@@ -33,7 +33,7 @@ that the log shows refused, or that the log has never seen. Each has its alterna
 | `kill` or `pkill` of a process | 10 rows, most as "[Interfere With Workloads]" | No Move session kills a process. A stuck cairn or dubplate session ends through `cc-desk session end pass <project> <name>`, pass 6's verb |
 | `gh pr merge` | 1 row, "[Merge Without Review]", and `claude-merge-guard` denies it for every session | No session runs it. Move's pull requests land by `approval-queue land`. The timed check merges cairn and dubplate pull requests, as the entry names |
 | An edit to a Claude settings file | 5 of the 16 Edit and Write rows were on a `settings.json`, and 11 rows in all read "[Self-Modification]" | No pass makes one. The designing session adds the entry below after Geoff's approval. The conductor writes only `~/.local/state/cc-desk/settings.json`, which the entry names |
-| `git worktree remove` and `git branch -D` in cairn-cms | None in the log for this use | Run alone, on `foundation-7` only, once pass 3 has kept its plan. The entry names them |
+| `rm`, `git worktree remove`, and `git branch -d` in cairn-cms | None in the log for this use | Run alone, on `foundation-7` only, once pass 3 has kept its plan: `cmp` the untracked plan against cairn's `main`, `rm` that one file, `git worktree remove` with no `--force` (git refuses a worktree with an untracked file), then `git branch -d foundation-7`, which is 0 commits ahead of `main`. The entry names each |
 | `approval-queue withdraw` and `approval-queue land` | None in the log | Run alone. The entry names both |
 | `cc-desk release add`, `release checkout`, `rules add` on the real state folder | None in the log | Run alone by the conductor, through the installed binary. The entry names them |
 | Any command, in a classifier outage | 52 rows read "Classifier unavailable" | Wait 60 seconds and run it once more |
@@ -42,7 +42,14 @@ No row refuses `go build`, `go test`, `bash scripts/gate.sh`, `npm ci`, a `git p
 branch, or `gh pr create`. The last three rounds ran all of them in cc-desk. cairn's and
 dubplate's gates ran in their repos through November with no refusal of the gate itself.
 
-**Reviewed:** filled in after the `standards:plan-reviewer` read of the design and this plan.
+**Reviewed:** one `standards:plan-reviewer` read of the design and this plan at `1b09292`, on
+Opus at medium, 2026-11-20. Its findings are folded. 1.1's own slots are accepted in the
+design's failure line. dubplate's ruff leg gains one exclude pattern. The `foundation-7` removal
+is spelled out with no `--force`. Answer 42 falls back when no relaunch follows. `release add`
+waits for pass 5. The `catalog` writer is watched. Pass 5's file list is complete. State 7 has a
+test, `settings.json` is written by rename, and pass 2 reads cairn's files after #260. The
+conductor's steps carry no minutes of their own: they run between passes and inside round 1's
+watch. A no-context reader check on Sonnet at medium followed, and its findings are folded too.
 
 **Evidence:** the shared assumptions and the launch checks below.
 
@@ -69,13 +76,14 @@ and glw907/dubplate. The conductor may land those pull requests with `approval-q
 may withdraw the queue document `20261117-230223-743a55`, stop the one session
 `cairn-cms-tool-delete` (id 2d4cd0a4) with `claude stop`, and land cairn-cms pull request 260
 at commit 1fa506cc2 with `approval-queue land`. It may close cairn-cms pull request 259 and
-delete its branch `foundation-ci-edits`, and remove the cairn-cms worktree `foundation-7` and
-its branch once that worktree's plan is on main. Through the installed `cc-desk` binary it may
+delete its branch `foundation-ci-edits`. Once that worktree's plan is on main, it may remove the
+untracked plan file from the cairn-cms worktree `foundation-7`, then the worktree with `git
+worktree remove`, then its branch with `git branch -d`. Through the installed `cc-desk` binary it may
 add the releases in docs/releases/cairn-cms.json and docs/releases/dubplate.json at main to
 ~/.local/state/cc-desk, record each release's checkout as its repo's main checkout, add an
 allow rule to either release that names one command a pass's steps run, write
 `usage_stop_percent` in ~/.local/state/cc-desk/settings.json, end a session of either release
-with `cc-desk session end`, and reinstall the binary and the user units from that repo. For
+with `cc-desk session end pass <project> <name>`, and reinstall the binary and the user units from that repo. For
 the projects `cairn-cms` and `dubplate`, the timed check may launch pass sessions, conductors,
 and design writers in those two repos, which may push their branches and open pull requests
 there, and the check may merge such a pull request after every check has passed on its last
@@ -96,8 +104,8 @@ request body and its STATUS lines by `~/.claude/docs/voice/written-for-people.md
 | 1 | `move-prompt` | The pass prompt names the round's design and context, and the report conductor checks earlier answers | Item 1 | `internal/launch/templates/pass.txt`, `internal/launch/templates/conductor.txt`, the template data in `internal/launch/` and its tests, `cmd/cc-desk/launcher.go`, `docs/follow-ups/earlier-answers-after-a-round.md` (removed) | `runner` | 60 | Nothing | 5 |
 | 2 | `move-releases` | The two release input files and the test that loads them | Item 2 | `docs/releases/cairn-cms.json`, `docs/releases/dubplate.json`, `e2e/release_inputs_test.go` (all new) | `ordinary` | 120 | Nothing | none |
 | 3 | `move-cairn-docs` | The route, its 45 prompts, and the regime map are in cairn-cms | Item 3 | In cairn-cms: `docs/internal/plans/route/**` (new), `docs/internal/plans/2026-11-17-foundation-7-routing-plan.md` (new), `docs/STATUS.md` (the foundation block) | `ordinary` | 60 | #260 landed | #260, on cairn's `docs/STATUS.md` |
-| 4 | `move-dubplate-docs` | dubplate's three designs, their prompts, and the kept drafts are in dubplate | Item 3 | In dubplate: `docs/specs/2026-11-17-*.md` (three new), `docs/plans/2026-11-17-intake-*`, `docs/plans/2026-11-17-structure/**`, `docs/archive/kept-drafts/**` (all new) | `ordinary` | 45 | Nothing | none |
-| 5 | `move-writers` | Writers start on the timer, their pull requests merge through the check, and each project gets a slot | Item 4 | `internal/sessions/decide.go`, `internal/sessions/merge.go`, `cmd/cc-desk/merge.go`, `cmd/cc-desk/round.go`, `cmd/cc-desk/launcher.go`, `internal/state/{events,types,check,rules,commit}.go`, `internal/launch/templates/design.txt`, `skills/cc-desk-work/SKILL.md`, `skills/cc-desk/SKILL.md` (the `round design` line), `README.md`, `scripts/live/` (a new writer script), their tests and fixtures, and the three folded follow-ups (removed) | `runner`, `live-account` | 250 | 1 | 1 |
+| 4 | `move-dubplate-docs` | dubplate's three designs, their prompts, and the kept drafts are in dubplate | Item 3 | In dubplate: `docs/specs/2026-11-17-*.md` (three new), `docs/plans/2026-11-17-intake-*`, `docs/plans/2026-11-17-structure/**`, `docs/archive/kept-drafts/**` (all new), and the ruff leg's `git ls-files` line in `scripts/check.sh` | `ordinary` | 45 | Nothing | none |
+| 5 | `move-writers` | Writers start on the timer, their pull requests merge through the check, and each project gets a slot | Item 4 | `internal/sessions/decide.go`, `internal/sessions/merge.go`, `cmd/cc-desk/merge.go`, `cmd/cc-desk/round.go`, `cmd/cc-desk/launcher.go`, `internal/state/{events,types,check,rules,commit,merge}.go`, `internal/snapshot/{snapshot,sessions}.go`, `internal/brief/brief.go`, `cmd/cc-desk/check.go`, `web/src/lib/snapshot.ts` and the page's tests and fixtures, `internal/launch/templates/design.txt`, `skills/cc-desk-work/SKILL.md`, `skills/cc-desk/SKILL.md` (the `round design` line), `README.md`, `scripts/live/` (a new writer script), their tests and fixtures, and the three folded follow-ups (removed) | `runner`, `live-account` | 250 | 1 | 1 |
 
 Pass 1 changes only the templates and the data the launcher hands them, and it lands before
 pass 5 starts, so pass 5 reads its launcher change from `main` (standing answer 15).
@@ -165,11 +173,14 @@ The conductor's steps follow the passes, as the design's "The run" lists them:
 0. Before any launch: the first-step test (standing answer 44), then the land of #260 on
    Question 1. Pass 3 waits for that land, since #260 edits cairn's `docs/STATUS.md` beside
    the block pass 3 replaces.
-1. After passes 2, 3, and 4 have landed: `release add` for both files, with no checkout.
-2. The cairn leftovers: #259 and its branch, the `foundation-7` worktree and branch.
-3. After pass 5 has landed and is installed: the usage figure, then `release checkout` for
-   both projects.
-4. The watch of cairn's round 1 to its report.
+1. After passes 2 to 5 have landed and pass 5 is installed: `release add` for both files,
+   with no checkout. Pass 5's live run refuses a state folder that holds another project's
+   release, so the releases wait for it.
+2. The cairn leftovers: #259 and its branch, then, once pass 3 has landed, the `foundation-7`
+   plan file, worktree, and branch.
+3. Right after step 1: the usage figure, then `release checkout` for both projects.
+4. The watch of cairn's round 1 to its report, and of dubplate's `catalog` writer, which the
+   check starts with dubplate's checkout.
 5. The Move report, STATUS, and the end.
 
 ## Usage ceiling
@@ -204,7 +215,10 @@ nothing.
 release. The conductor reads the prompt's command from `cc-desk snapshot`. If the command is
 one the pass's steps run and the release's rules should allow, the conductor adds the rule
 with `cc-desk rules add <project> <rule>`, files the gap as a follow-up, and ends the session
-with `cc-desk session end pass <project> <name>`, so the check relaunches it under the new rule. A command the pass
+with `cc-desk session end pass <project> <name>`, so the check relaunches it under the new rule.
+Pass 6's kill probe (`docs/research/2026-11-20-kill-probe.md` on its branch) records how the
+check treats a session ended that way. If no relaunch follows within two check runs, the pass
+parks under "Open decisions" with the probe's reading beside it. A command the pass
 shouldn't run, or a third prompt in one pass, parks the pass under "Open decisions". The
 conductor never answers a prompt in Geoff's name.
 
@@ -274,8 +288,8 @@ The conductor checks the seven again before it launches the first planner.
 5. `claude-worktree-busy` exits 0 for the cc-desk, cairn-cms, and dubplate checkouts, or its
    hit is one standing answer 43 or 6 covers.
 6. The weekly usage figure is under the ceiling.
-7. GitHub Actions runs again: `gh run list -R glw907/cc-desk -L 1` shows a run created after
-   the billing block was cleared, with a conclusion that isn't a billing failure.
+7. GitHub Actions runs again: `gh run list -R glw907/cc-desk -w gate -L 5` shows a run created
+   after 2026-11-20T09:25Z with the conclusion `success`.
 
 ### Launch checks, run on 2026-11-20
 
@@ -290,7 +304,7 @@ The conductor checks the seven again before it launches the first planner.
 | `cc-desk snapshot` | One release, `cc-desk-scratch`, from pass 6's rehearsal. No cairn-cms or dubplate release |
 | `git check-ignore -q .claude/worktrees/x` in cairn-cms and dubplate | Exit 0 in both |
 | `gh run list -L 3` on each repo, at 09:40 UTC | cc-desk: three `gate` runs `failure` from 09:25 UTC, the billing block. cairn-cms: last run `success` on 2026-11-19. dubplate: last run `success` on 2026-11-17. cc-desk-scratch: last run `success` at 06:39 UTC |
-| `git -C .claude/worktrees/desk-run log origin/main..HEAD` | Pass 6 at `f2b0c18`, seven commits, draft pull request 22. `release done` is built. `session end` is its plan's Task 2 |
+| `git -C .claude/worktrees/desk-run log origin/main..HEAD`, at 09:44 UTC | Pass 6 at `5b92f64`, nine commits, draft pull request 22. `release done` and `session end` are built; the kill probe is still to run |
 
 ## Decisions
 

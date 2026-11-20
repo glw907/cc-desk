@@ -69,12 +69,14 @@ of a design writer's pull request, to this round.
 
 ## What would make it a failure
 
-- Geoff is asked for anything during cairn's round 1 beyond the questions the release carries.
+- Geoff is asked for anything during cairn's round 1 beyond the questions the two releases carry
+  and those a design writer's merged design adds.
 - A pass session can't find its design or its brief and asks, guesses, or stops.
 - A cairn or dubplate pass stops at a permission prompt that the release's rules should have
   allowed.
-- Three passes build at once on the workstation because a pass run outside cc-desk took a slot
-  the check didn't know about.
+- The check starts a third pass for cairn or dubplate because a Move pass held a slot it
+  couldn't see. 1.1 runs under its own conductor with its own two slots, so the workstation may
+  build four passes at once while both rounds run (standing answer 37). That is accepted.
 - A Move pass edits a file that a 1.1 pass in flight also edits.
 
 ## Approaches
@@ -133,6 +135,13 @@ flags.
 The two kept design drafts are byte-identical to the initiatives copies (checked 2026-11-20), so
 `docs/specs/` holds the one copy that counts and the archive keeps the drafts as they were left.
 The pass edits nothing it copies.
+
+One change falls outside `docs/`. dubplate's gate runs `ruff check` and `ruff format --check` on
+every tracked `.py` file (`scripts/check.sh:713`), and the kept drafts' `fold2.py` and `ruled.py`
+fail both: 109 and 8 findings under dubplate's `ruff.toml`. The pass adds the exclude pattern
+`':(exclude)docs/archive/**'` to that one `git ls-files` line. An exclude in `ruff.toml` wouldn't
+work, since ruff checks a path named on its command line unless `force-exclude` is set. The `.sh`
+files under `docs/` join no check: the `shellcheck` leg reads `scripts/` only.
 
 ## What binds a cairn pass
 
@@ -317,24 +326,31 @@ That pull request edits cairn's `docs/STATUS.md` beside the block `move-cairn-do
 the docs pass waits for it. If you answer No, `move-cairn-docs` leaves cairn's STATUS alone, and
 the report lists the foundation block as stale.
 
-1. When passes 2, 3, and 4 have landed, it runs `cc-desk release add` for both files with no checkout. Nothing
-   starts: the check skips a release with no checkout (`internal/sessions/decide.go:321`). Both
-   releases and their questions now show on the page, which is done item 9.
+1. When passes 2 to 5 have landed, it runs `cc-desk release add` for both files with no
+   checkout. It waits for pass 5 because pass 5's live run refuses a state folder that holds
+   another project's release, as every live script does. Nothing starts: the check skips a
+   release with no checkout (`internal/sessions/decide.go:321`). Both releases and their
+   questions now show on the page, which is main item 9.
 2. It closes cairn pull request #259 and deletes branch `foundation-ci-edits`. It removes the
-   `foundation-7` worktree and its branch, now that pass 3 has kept the plan. It lists the stash
+   `foundation-7` worktree and its branch, now that pass 3 has kept the plan: a `cmp` of the
+   untracked plan against the copy on cairn's `main`, an `rm` of that one file, `git worktree
+   remove` with no `--force`, and `git branch -d foundation-7`. It lists the stash
    `foundation3-task3-wip` and the 110 `agent-*` worktrees in the round report for Geoff, and
    removes neither.
-3. When pass 5 has landed and is installed, it writes the usage figure to `settings.json`
+3. Right after step 1, with pass 5 installed, it writes the usage figure to `settings.json`
    (Question 2) and runs `cc-desk release checkout` for both projects. From the next check,
    cairn's `checks-1` starts. dubplate's passes rest on questions, so they wait for the desk.
-4. It watches round 1 to its report, reading `cc-desk snapshot` at each wait. It starts and
+4. It watches round 1 to its report, reading `cc-desk snapshot` at each wait. The check also
+   starts a writer for dubplate's `catalog` round, two rounds ahead of `structure`. The conductor
+   reads the writer's pull request when it merges and names the questions its design adds in the
+   report. It starts and
    ends no cairn session itself, outside the round plan's standing answers. The check starts a
    conductor for cairn when round 1's report is due, and that conductor writes the report.
 5. It writes the Move report, with what Geoff's desk session settled and the evidence for done
    item 8, and ends.
 
-The order keeps three passes from building at once. While a Move pass builds, neither release has
-a checkout, so the check starts nothing for them.
+The order keeps more than two Move passes from building at once. While a Move pass builds,
+neither release has a checkout, so the check starts nothing for them.
 
 If a 1.1 pass in flight holds a file `move-writers` needs when it would start, the conductor
 doesn't wait. It runs step 3 without the writers, and `move-writers` goes to 1.1 with its plan,
@@ -406,12 +422,13 @@ The three rewords land with this design. A fold is removed by the pass named.
 
 ## Pass 6's state, as read
 
-Read on 2026-11-20 at 09:40 UTC, just before this design was pushed to `main`. `origin/main`
-was at `f265ad6`, with nothing of pass 6 on it. Pass 6's branch, `desk-run`, was at `f2b0c18`
-with seven commits, as draft pull request 22. Its executor, `cc-desk-desk-run`, and its
-conductor were busy. The branch already has `cc-desk release done <project>` and the shared live
-library `scripts/live/lib.sh`. Its plan's Task 2 still has to build `cc-desk session end pass
-<project> <name>` and `session end conductor <project>`, which this design relies on.
+Read on 2026-11-20 at 09:44 UTC, just before this design was pushed to `main`. `origin/main`
+was at `f265ad6`, with nothing of pass 6 on it. Pass 6's branch, `desk-run`, was at `5b92f64`
+with nine commits, as draft pull request 22. Its executor, `cc-desk-desk-run`, and its
+conductor were busy. The branch has the three things this design relies on: `cc-desk release
+done <project>`, `cc-desk session end pass <project> <name>` with `session end conductor
+<project>`, and the shared live library `scripts/live/lib.sh`. Its kill probe, which records how
+the check treats a session ended that way, hadn't run.
 
 GitHub Actions has run no job on glw907/cc-desk since 09:12 UTC that day, because of a billing
 block that only you can clear (`docs/STATUS.md`, "Open decisions"). Pass 6 builds on the local
@@ -436,6 +453,9 @@ Each call can be overturned at approval.
 - No release gets a checkout until `move-writers` lands, so no pass the check starts shares the
   host with a Move pass.
 - A writer counts as a building slot.
+- dubplate's `catalog` writer starts with the checkout and runs beside cairn's round 1. Holding
+  dubplate's checkout until round 1 reports would keep dubplate idle for a round to protect a
+  test about cairn, so the failure line counts a writer's questions as the release's.
 - The release input files live in the cc-desk repo, so they are reviewed and tested before they
   are added.
 - A pass that touches sign-in or data code merges like any other change inside its design, under
