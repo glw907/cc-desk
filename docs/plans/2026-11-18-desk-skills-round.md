@@ -299,6 +299,14 @@ The twelve in `round-run.md` hold, with these changes and additions.
   hand-over writes the design prompt for a 1.1 round that answers each row, for cc-desk and
   `pass-core` together, and names it as the next round. The Move design prompt is still written,
   and it runs after 1.1 lands. Pass 5's third verdict (answer 29) stays in this round.
+- **35. Pass 6's estimate, past the clock (Geoff, 2026-11-19).** Answer 28 can't raise an
+  estimate once the round is past its clock, and it already is, so pass 6's plan would park on
+  its estimate and wait for Geoff. Asked before the launch, he chose "Raise to the plan's path
+  (Recommended)". When pass 6's plan parks only because its path is over 180 minutes, its scope
+  matches the design, and the planner trimmed nothing, the conductor sets the pass's estimate to
+  the plan's path and launches the executor. The executor's stop is then twice that path. The
+  conductor records the raise under `## Rulings` in the pass's plan and in the report. A plan
+  whose scope grew still waits for Geoff.
 
 ## Start line
 
