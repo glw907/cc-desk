@@ -27,16 +27,16 @@ that the log shows refused, or that the log has never seen. Each has its alterna
 
 | Command | Refusals in the log | Alternative |
 | --- | --- | --- |
-| `claude stop <id>` | 4 rows, two of them chained, as "[Interfere With Workloads]", "[Undermining Oversight]", and "[Destructive or Unwanted Actions]" | The conductor stops one session, `2d4cd0a4` (`cairn-cms-tool-delete`), run alone. The entry below names it. A refusal is standing answer 41's |
+| `claude stop <id>` | 6 rows, from 2026-11-10 to 2026-11-18, as "[Interfere With Workloads]", "[Undermining Oversight]", and "[Destructive or Unwanted Actions]" | The conductor stops one session, `2d4cd0a4` (`cairn-cms-tool-delete`), run alone. The entry below names it. A refusal is standing answer 41's |
 | `git push origin --delete <branch>` | 1 row, "[Git Destructive]" | `gh pr close 259 -R glw907/cairn-cms --delete-branch`, run alone, which the entry names |
-| `git stash drop` | 2 rows | Nobody drops the stash `foundation3-task3-wip`. The report lists it |
-| `kill` or `pkill` of a process | 9 rows | No Move session kills a process. A stuck cairn or dubplate session ends through `cc-desk session end`, pass 6's verb |
-| `gh pr merge` | 2 rows, "[Merge Without Review]", and `claude-merge-guard` denies it for every session | No session runs it. Move's pull requests land by `approval-queue land`. The timed check merges cairn and dubplate pull requests, as the entry names |
-| An edit to a Claude settings file | 14 rows across Edit and Write, most "[Self-Modification]" | No pass makes one. The designing session adds the entry below after Geoff's approval. The conductor writes only `~/.local/state/cc-desk/settings.json`, which the entry names |
+| `git stash drop` | 10 rows, from 2026-11-17 to 2026-11-20, as "[Destructive or Unwanted Actions]" | Nobody drops the stash `foundation3-task3-wip`. The report lists it |
+| `kill` or `pkill` of a process | 10 rows, most as "[Interfere With Workloads]" | No Move session kills a process. A stuck cairn or dubplate session ends through `cc-desk session end`, pass 6's verb |
+| `gh pr merge` | 1 row, "[Merge Without Review]", and `claude-merge-guard` denies it for every session | No session runs it. Move's pull requests land by `approval-queue land`. The timed check merges cairn and dubplate pull requests, as the entry names |
+| An edit to a Claude settings file | 5 of the 16 Edit and Write rows were on a `settings.json`, and 11 rows in all read "[Self-Modification]" | No pass makes one. The designing session adds the entry below after Geoff's approval. The conductor writes only `~/.local/state/cc-desk/settings.json`, which the entry names |
 | `git worktree remove` and `git branch -D` in cairn-cms | None in the log for this use | Run alone, on `foundation-7` only, once pass 3 has kept its plan. The entry names them |
 | `approval-queue withdraw` and `approval-queue land` | None in the log | Run alone. The entry names both |
 | `cc-desk release add`, `release checkout`, `rules add` on the real state folder | None in the log | Run alone by the conductor, through the installed binary. The entry names them |
-| Any command, in a classifier outage | 25 rows read "Classifier unavailable" | Wait 60 seconds and run it once more |
+| Any command, in a classifier outage | 52 rows read "Classifier unavailable" | Wait 60 seconds and run it once more |
 
 No row refuses `go build`, `go test`, `bash scripts/gate.sh`, `npm ci`, a `git push` of a pass
 branch, or `gh pr create`. The last three rounds ran all of them in cc-desk. cairn's and
@@ -95,7 +95,7 @@ request body and its STATUS lines by `~/.claude/docs/voice/written-for-people.md
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `move-prompt` | The pass prompt names the round's design and context, and the report conductor checks earlier answers | Item 1 | `internal/launch/templates/pass.txt`, `internal/launch/templates/conductor.txt`, the template data in `internal/launch/` and its tests, `cmd/cc-desk/launcher.go`, `docs/follow-ups/earlier-answers-after-a-round.md` (removed) | `runner` | 60 | Nothing | 5 |
 | 2 | `move-releases` | The two release input files and the test that loads them | Item 2 | `docs/releases/cairn-cms.json`, `docs/releases/dubplate.json`, `e2e/release_inputs_test.go` (all new) | `ordinary` | 120 | Nothing | none |
-| 3 | `move-cairn-docs` | The route, its 45 prompts, and the regime map are in cairn-cms | Item 3 | In cairn-cms: `docs/internal/plans/route/**` (new), `docs/internal/plans/2026-11-17-foundation-7-routing-plan.md` (new), `docs/STATUS.md` (the foundation block) | `ordinary` | 60 | Nothing | none |
+| 3 | `move-cairn-docs` | The route, its 45 prompts, and the regime map are in cairn-cms | Item 3 | In cairn-cms: `docs/internal/plans/route/**` (new), `docs/internal/plans/2026-11-17-foundation-7-routing-plan.md` (new), `docs/STATUS.md` (the foundation block) | `ordinary` | 60 | #260 landed | #260, on cairn's `docs/STATUS.md` |
 | 4 | `move-dubplate-docs` | dubplate's three designs, their prompts, and the kept drafts are in dubplate | Item 3 | In dubplate: `docs/specs/2026-11-17-*.md` (three new), `docs/plans/2026-11-17-intake-*`, `docs/plans/2026-11-17-structure/**`, `docs/archive/kept-drafts/**` (all new) | `ordinary` | 45 | Nothing | none |
 | 5 | `move-writers` | Writers start on the timer, their pull requests merge through the check, and each project gets a slot | Item 4 | `internal/sessions/decide.go`, `internal/sessions/merge.go`, `cmd/cc-desk/merge.go`, `cmd/cc-desk/round.go`, `cmd/cc-desk/launcher.go`, `internal/state/{events,types,check,rules,commit}.go`, `internal/launch/templates/design.txt`, `skills/cc-desk-work/SKILL.md`, `skills/cc-desk/SKILL.md` (the `round design` line), `README.md`, `scripts/live/` (a new writer script), their tests and fixtures, and the three folded follow-ups (removed) | `runner`, `live-account` | 250 | 1 | 1 |
 
@@ -122,13 +122,13 @@ doesn't: every cairn round arrives designed.
 | The page refuses a design path outside the project's checkout | 2, 3, 4 | `web/src/lib/server/design.ts:58-60`: `realpath` of the checkout and of the file, then `within` |
 | The check starts nothing for a release with no checkout | conductor | `internal/sessions/decide.go:321`: `if rf.Done \|\| rf.Checkout == ""` skips the release |
 | `release add` takes passes not started, questions only with a carried answer or none, and refuses a second live release for one project | 2 | `internal/state/events.go:39`, `AddRelease`. cc-desk's live release blocks no Move pass: Move runs under its conductor, not as a release |
-| A question must name a pass that exists | 2 | `internal/state/question.go:45` (`DecodeQuestion` needs `passes`) and `:78-80` (`AddQuestion` checks each) |
-| A pass waits on its round's `after` rounds, and an undesigned round blocks the rounds after it | 2, 5 | `internal/state/rules.go`, `eachRoundAfter` |
+| A question must name a pass that exists | 2 | `internal/state/question.go:44` (`DecodeQuestion` needs `passes`) and `:78-80` (`AddQuestion` checks each) |
+| A pass waits on its round's `after` rounds, and an undesigned round blocks the rounds after it | 2, 5 | `internal/state/rules.go:76`, `eachRoundAfter` |
 | `round design` refuses a round already written, and its file needs format, passes, context, and calls | 5 | `cmd/cc-desk/round.go`, `DecodeDesign`, and `DesignRound` at `internal/state/events.go:110` |
-| A design writer's prompt tells it to `question add` on its round, which has no pass yet, so the line always fails | 5 | `internal/launch/templates/design.txt` and `internal/state/question.go:78` |
+| A design writer's prompt tells it to add a question on a pass of its round, which has no pass yet, so the line always fails | 5 | `internal/launch/templates/design.txt:15` and `internal/state/question.go:78` |
 | The merge waits with `no_check` until a check registers, and stops on a failed check | 5, conductor | `internal/sessions/merge.go:148-151`, and the reasons `checks_failed` and `merge_failed` |
-| A pull request closed without a merge is read as an open one | 5 | `internal/sessions/merge.go:125` |
-| Release order in `startFree` is name order, so `cairn-cms` comes before `dubplate` | 5 | `internal/sessions/decide.go:318`, which walks releases as they load |
+| A pull request closed without a merge clears its pass's wait and leaves the pass building | 5 | `internal/sessions/merge.go:125` |
+| Release order in `startFree` is name order, so `cairn-cms` comes before `dubplate` | 5 | `internal/sessions/decide.go:318`, which walks releases in the order `os.ReadDir` returns their files (`internal/state/read.go:125`) |
 | `cc-desk` reads one usage figure from `settings.json`, and the file is absent, so the stop is 100 | conductor | `internal/state/read.go:224-234` and `DefaultUsageStop`. `types.go:512` says the file is edited by hand |
 | cairn-cms is on `main` at `79d326bed`, and its pull request 260 is open at `1fa506cc2` with every check passed | 3, conductor | `gh pr view 260` on 2026-11-20: `OPEN`, `MERGEABLE`, three checks `SUCCESS` |
 | cairn-cms pull request 259 is open on branch `foundation-ci-edits` | conductor | `gh pr view 259` on 2026-11-20 |
@@ -148,7 +148,7 @@ Two passes build at once, and never more. Pass 1 and pass 2 start together.
 | --- | --- | --- | --- | --- |
 | 1 `move-prompt` | `2026-11-19-move-1-planner-prompt.txt` | Nothing | 60 | no |
 | 2 `move-releases` | `2026-11-19-move-2-planner-prompt.txt` | Nothing | 120 | no |
-| 3 `move-cairn-docs` | `2026-11-19-move-3-planner-prompt.txt` | Nothing (order: after 2) | 45 to 60 | no |
+| 3 `move-cairn-docs` | `2026-11-19-move-3-planner-prompt.txt` | #260 landed (order: after 2) | 60 | no |
 | 4 `move-dubplate-docs` | `2026-11-19-move-4-planner-prompt.txt` | Nothing (order: after 3) | 45 | no |
 | 5 `move-writers` | `2026-11-19-move-5-planner-prompt.txt` | 1 | 250 | no |
 
@@ -162,8 +162,10 @@ the 1.1 pass lands (standing answer 40). Only passes 1 and 5 touch files a 1.1 p
 
 The conductor's own steps follow the passes, as the design's "The run" lists them:
 
-1. After passes 2, 3, and 4 have landed and #260 has landed: `release add` for both files,
-   with no checkout.
+0. Before any launch: the first-step test (standing answer 44), then the land of #260 on
+   Question 1. Pass 3 waits for that land, since #260 edits cairn's `docs/STATUS.md` beside
+   the block pass 3 replaces.
+1. After passes 2, 3, and 4 have landed: `release add` for both files, with no checkout.
 2. The cairn leftovers: #259 and its branch, the `foundation-7` worktree and branch.
 3. After pass 5 has landed and is installed: the usage figure, then `release checkout` for
    both projects.
@@ -194,7 +196,8 @@ decisions" it writes that pass 5 goes to 1.1 with its planner prompt, and that d
 **41. Auto mode refuses a step the entry names.** The conductor runs the step once more, with
 a line that cites the entry and this answer. A second refusal goes under "Open decisions", and
 the conductor goes on with every step that doesn't rest on it. A refused land of #260 holds
-`release checkout` for cairn-cms only. A refused cleanup of #259 or `foundation-7` holds
+`release checkout` for cairn-cms, and pass 3 then runs with cairn's STATUS left alone, as a No
+to Question 1 has it. A refused cleanup of #259 or `foundation-7` holds
 nothing.
 
 **42. A cairn or dubplate session stops at a permission prompt.** This is answer 18 on a real

@@ -127,7 +127,8 @@ The regime map tells a cairn pass session which parts of the old papers still bi
 
 - The route's round sections, pass tables, acceptance runs, and assumptions bind, with Geoff's
   rulings 1 to 9 (`a03b21`).
-- A pass's prompt file binds in its "For this pass" and "Rules the plan carries" paragraphs. Its
+- A pass's prompt file is `prompts/<pass>.txt` beside the map, and it binds in its "For this
+  pass" and "Rules the plan carries" paragraphs. Its
   hand-over, its executor launch, its approval-packet step, and every `decide` page are void.
   The pass plans and builds in one session and reports by `cc-desk-work`.
 - Standing answers 15 to 19, 23, and 24 hold as written.
@@ -150,8 +151,8 @@ The regime map tells a cairn pass session which parts of the old papers still bi
 `glw907/cairn-cms`. It holds:
 
 - The 16 rounds `checks` to `release`, each with `design_written` true and `design` set to
-  `docs/internal/plans/route/README.md`. `context` names the round's section in
-  `route-rounds.md`.
+  `docs/internal/plans/route/README.md`. Its one `context` paragraph names the round's section
+  in `route-rounds.md` and the folder of its pass prompts.
 - Each round's `after` edges: the round before it in route order, which is ruling 7, plus its
   own builds-on rounds from the route table.
 - The 45 passes, with the route's minutes and depends-on, model and effort from the route's
@@ -163,7 +164,7 @@ The regime map tells a cairn pass session which parts of the old papers still bi
   the Cloudflare sign-in and the npm trusted publisher (`setup-3`), the test site and 907.life
   (the `owner` leg, on the pass the route names), and "cut" (`release-3`).
 - Allow rules for what cairn's gate and lanes run, from cairn's `CLAUDE.md`, its
-  `package.json` scripts, and the denials log at `~/.claude/logs/denied.jsonl` for rows under
+  `package.json` scripts, and the denials log at `~/.local/state/claude-denials.jsonl` for rows whose `cwd` is under
   `~/Projects/cairn-cms`.
 
 Round 1, `checks`, rests on no unanswered question. Its `no_need_reason` cites `a03b21`.
@@ -184,7 +185,7 @@ round, so each unwritten round carries 600 planned minutes until its writer's de
 The structure passes carry 390, 360, and 340 path minutes, and intake's five carry 2,610.
 
 The questions the two designs asked that cc-desk now settles are dropped, each with its reason
-written in the release's notes. Structure's 2 and intake's 9 asked round size: under cc-desk
+written as a call (`calls`) on the round whose design asked it. Structure's 2 and intake's 9 asked round size: under cc-desk
 Geoff reads a design only when it asks something. Structure's 3 asked the merge rule: the check
 merges a change inside its design. Intake's 10 asked the same for passes that touch sign-in and
 data, which Geoff's merge ruling of 2026-11-17 settles ("Calls Claude made"). Structure's 4 and intake's 12 asked the usage
@@ -250,10 +251,11 @@ releases each have a free pass, each gets at most one slot. This is Question 3. 
 after a usage stop skips the limits (`resume-skips-the-limits.md`), so a resume can put two cairn
 passes building for one cycle. That is accepted and stays filed for 1.1.
 
-**The launch prompt names the design.** `move-prompt` adds the round's `design` path, and each
-`context` path, to `pass.txt` when the round records them, and the line "the round's design is in
-the repo under docs/" names them instead. A cairn pass reads the regime map and its prompt file
-from there.
+**The launch prompt names the design.** `move-prompt` adds the round's `design` path to
+`pass.txt` when the round records one, in place of the line "the round's design is in the repo
+under docs/". The round's `context` paragraphs follow it. They are the paragraphs a desk reads
+before it asks (`internal/state/types.go:236`), and for cairn each one names the round's section
+of the route. A cairn pass then reads the regime map, which says where its prompt file is.
 
 **Earlier answers after a round** (`earlier-answers-after-a-round.md`). `move-prompt` adds one
 step to the conductor's prompt for a report. Before it records the report, the conductor reads
@@ -274,7 +276,7 @@ them blocks this round's outcome.
 Five passes, in two lines of work that never share a file. The measured Desk passes ran 906
 minutes against 630 planned, a ratio of 1.44, and the figures below already carry it.
 
-| Pass | Outcome | Repo | Done items | Minutes |
+| Pass | Outcome | Repo | Main design items | Minutes |
 | --- | --- | --- | --- | --- |
 | 1. `move-prompt` | The pass prompt names the round's design and context, and the report conductor checks earlier answers | cc-desk | 8 | 60 |
 | 2. `move-releases` | The two release input files and the test that loads them | cc-desk | 9 | 120 |
@@ -296,8 +298,12 @@ two docs passes copy files and run a gate.
 The Move conductor runs these steps after the passes it waits on have landed. The round plan
 gives each one's check.
 
-1. When passes 2, 3, and 4 have landed, and cairn's `tool-delete` pull request (#260) has
-   landed (Question 1), it runs `cc-desk release add` for both files with no checkout. Nothing
+Its first act, before any pass, lands cairn's `tool-delete` pull request (#260) on Question 1.
+That pull request edits cairn's `docs/STATUS.md` beside the block `move-cairn-docs` replaces, so
+the docs pass waits for it. If you answer No, `move-cairn-docs` leaves cairn's STATUS alone, and
+the report lists the foundation block as stale.
+
+1. When passes 2, 3, and 4 have landed, it runs `cc-desk release add` for both files with no checkout. Nothing
    starts: the check skips a release with no checkout (`internal/sessions/decide.go:321`). Both
    releases and their questions now show on the page, which is done item 9.
 2. It closes cairn pull request #259 and deletes branch `foundation-ci-edits`. It removes the
@@ -337,7 +343,7 @@ the terminal screens, the Cloudflare sign-in, the npm trusted publisher, the tes
 ## What done looks like
 
 1. **The prompt.** A pass launched from a fixture release whose round names a design and two
-   context paths has all three paths in its prompt. The conductor template for a report holds
+   context paragraphs has the path and both paragraphs in its prompt. The conductor template for a report holds
    the earlier-answers step. `bash scripts/gate.sh` passes.
 2. **The release files.** `e2e/release_inputs_test.go` loads both files into a temporary state
    folder with no error. The snapshot shows cairn with 16 rounds and 45 passes whose names,
