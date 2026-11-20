@@ -20,6 +20,7 @@ What the design must carry:
 How to work:
 - Follow standards:brainstorming: one question to Geoff at a time, two or three approaches with a recommendation, then one written design for one approval. Method and architecture calls are yours; ask Geoff only product, taste, priority, scope, and budget.
 - Write the design to docs/specs/, the round plan and one planner prompt per pass to docs/plans/, and a conductor prompt to docs/plans/, in the shapes the Desk and skills round used (docs/plans/2026-11-18-desk-skills-round.md and its prompts).
+- Geoff asked on 2026-11-20 for "a gentle sidebar session as part of the 1.1 brainstorm": the sidebar's section names don't read as headings, and the cc-desk title should be more prominent (docs/follow-ups/sidebar-headings-and-title.md). During the brainstorm, run standards:design-refinement on the live page at http://127.0.0.1:7908/ for those two points, one probe at a time for Geoff to look at in Chromium, and carry the result into the round as a small page pass. Keep it gentle: the sidebar and the title only.
 - Every PR body and landing of the round carries the round's id.
 - Questions and reports reach Geoff in this terminal; nothing runs approval-queue send ("Until cc-desk runs" in pass-core).
 - Read weekly usage with `~/.local/share/cc-desk/bin/cc-desk usage` before launching the conductor; if it is at 100 percent, tell Geoff the figure and wait for his word.
