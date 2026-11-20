@@ -156,9 +156,11 @@ func (e ended) step(id string) string {
 
 // stopSession reads the list, stops the session's row when it is working,
 // blocked, or done, and reads the list again. The session is gone when the
-// second read has no row for it or a stopped or failed one. A failed stop on
-// a session that is gone counts as ended; otherwise its error stands. A row
-// that is already stopped or failed takes no stop.
+// second read has no row for it, or a stopped, failed, or done one: a done
+// row runs nothing, so it counts as ended whether the stop exited 0 or
+// failed. A row still working or blocked after a failed stop returns the
+// stop's error together with the list read after the stop. A row that is
+// already stopped or failed takes no stop.
 func (l *launcher) stopSession(ctx context.Context, shortID string) (ended, error) {
 	rows, err := sessions.List(ctx, l.runner.Claude)
 	if err != nil {
@@ -174,7 +176,7 @@ func (l *launcher) stopSession(ctx context.Context, shortID string) (ended, erro
 		return ended{}, err
 	}
 	row, found = sessions.Find(rows, shortID)
-	gone := !found || row.Class() == sessions.ClassNone
+	gone := !found || row.Class() == sessions.ClassNone || row.Class() == sessions.ClassDone
 	if stopErr != nil && !gone {
 		return ended{rows: rows}, stopErr
 	}

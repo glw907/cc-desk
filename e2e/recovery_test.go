@@ -226,17 +226,49 @@ func TestRecoveryStopConfirmLaunch(t *testing.T) {
 	}
 }
 
-func TestRecoveryStopFailsNoLaunch(t *testing.T) {
-	r := newLaunchRig(t)
-	idlePass(t, r)
-	r.control(t, "stop-fails", true)
-
-	got := r.run(t, minutes(t, 30), "check")
-	if got.code != 2 {
-		t.Errorf("check exit %d, want 2; stderr: %s", got.code, got.stderr)
-	}
-	if n := len(r.launches(t)); n != 1 {
-		t.Errorf("%d launches after a failed stop, want only the first", n)
+// TestRecoveryStopThatLeavesTheRow relaunches an idle pass whose stop fails
+// or is ignored. A row that stays done counts as ended, so the relaunch goes
+// ahead; a row that reads working after the stop keeps the error or the
+// "not relaunched" outcome, and the pass launches nothing.
+func TestRecoveryStopThatLeavesTheRow(t *testing.T) {
+	for _, tc := range []struct {
+		name, control string
+		working       bool
+		wantCode      int
+		wantLaunches  int
+	}{
+		{"failed stop, done row stays listed", "stop-fails", false, 0, 2},
+		{"ignored stop, done row stays listed", "stop-ignored", false, 0, 2},
+		{"failed stop, working row stays listed", "stop-fails", true, 2, 1},
+		{"ignored stop, working row stays listed", "stop-ignored", true, 0, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := newLaunchRig(t)
+			idlePass(t, r)
+			r.control(t, tc.control, true)
+			if tc.working {
+				// The check's read and the stop step's first read find the
+				// idle row; the read after the stop finds it working.
+				rows := r.readRows(t)
+				idle := rows[0]
+				busy := map[string]any{}
+				for k, v := range idle {
+					busy[k] = v
+				}
+				busy["state"], busy["status"] = "working", "working"
+				n := r.reads(t)
+				r.setList(t, n+1, idle)
+				r.setList(t, n+2, idle)
+				r.setList(t, n+3, busy)
+			}
+			got := r.run(t, minutes(t, 30), "check")
+			if got.code != tc.wantCode {
+				t.Errorf("check exit %d, want %d; stderr: %s", got.code, tc.wantCode, got.stderr)
+			}
+			if n := len(r.launches(t)); n != tc.wantLaunches {
+				t.Errorf("%d launches, want %d", n, tc.wantLaunches)
+			}
+		})
 	}
 }
 

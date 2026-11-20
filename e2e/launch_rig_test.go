@@ -33,6 +33,7 @@ type launchRig struct {
 //	needs-prompt  the new row carries needs "send a prompt to start"
 //	fail-bg       --bg exits 1 after logging
 //	stop-fails    stop exits 1 and changes nothing, unless stop-marks is set
+//	stop-ignored  stop exits 0 and changes nothing
 //	stop-marks    with stop-fails, stop first marks the row stopped, as a
 //	              stop that did its work and then failed to report it
 //	lists/<n>.json  the n-th list read prints this file, and a later read
@@ -113,6 +114,9 @@ elif cmd == "--bg":
         sys.stdout.write("backgrounded · %%s · %%s\n" %% (sid, name))
 elif cmd == "stop":
     rows = load()
+    if has("stop-ignored"):
+        sys.stdout.write("stopped %%s\n" %% a[1])
+        sys.exit(0)
     if has("stop-fails") and not has("stop-marks"):
         sys.stderr.write("claude: could not stop the session\n")
         sys.exit(1)

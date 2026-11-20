@@ -77,10 +77,10 @@ func (l *launcher) carry(ctx context.Context, r sessions.Result) (string, error)
 			return "", fmt.Errorf("no session record to end")
 		}
 		e, err := l.stopSession(ctx, sess.ShortID)
-		if err != nil && !finishedRow(e.rows, sess.ShortID) {
+		if err != nil {
 			return "", err
 		}
-		if err == nil && !e.gone && !finishedRow(e.rows, sess.ShortID) {
+		if !e.gone {
 			return "", fmt.Errorf("session %s is still live after claude stop", sess.ShortID)
 		}
 		out := "ended " + sess.ShortID
@@ -295,12 +295,4 @@ func (l *launcher) commit(ev state.Event) error {
 func (l *launcher) recordOutcomes(outcomes []string) error {
 	_, err := state.Commit(l.dir, l.now, state.LockWait, state.RecordOutcomes(outcomes), snapshot.Render)
 	return err
-}
-
-// finishedRow reports whether the session's row is done in the list. A done
-// session runs nothing and refuses claude stop, so ending its record needs no
-// stop to have worked.
-func finishedRow(rows []sessions.Row, shortID string) bool {
-	row, found := sessions.Find(rows, shortID)
-	return found && row.Class() == sessions.ClassDone
 }

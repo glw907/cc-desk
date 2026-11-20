@@ -90,24 +90,41 @@ func TestMergeStopsSession(t *testing.T) {
 			t.Errorf("outcome = %q, want one starting %q", got, want)
 		}
 	})
-	t.Run("a failed stop on a live session", func(t *testing.T) {
-		m := newMergeRig(t, "sl")
-		m.control(t, "stop-fails", true)
-		id, run := m.mergeOne(t, "sl", "done")
-		if run.code != 2 || !strings.Contains(run.stderr, "claude stop "+id) {
-			t.Errorf("run = exit %d, %q; want exit 2 naming claude stop %s", run.code, run.stderr, id)
-		}
-		pr := m.pullOf(t, "sl")
-		if pr["merged"] == nil || pr["cleaned"] != nil {
-			t.Errorf("pull request = %v, want merged and not cleaned", pr)
-		}
-		if got := m.stops(t); !slices.Equal(got, []string{id}) {
-			t.Errorf("stops = %v, want [%s]", got, id)
-		}
-		if _, err := os.Stat(m.worktree("sl")); err != nil {
-			t.Errorf("the worktree went with its session still listed: %v", err)
-		}
-	})
+	for _, tc := range []struct {
+		name, control, row string
+		wantEnded          bool
+	}{
+		{"a failed stop, done row stays listed", "stop-fails", "done", true},
+		{"an ignored stop, done row stays listed", "stop-ignored", "done", true},
+		{"a failed stop, working row stays listed", "stop-fails", "working", false},
+		{"an ignored stop, working row stays listed", "stop-ignored", "working", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			m := newMergeRig(t, "sl")
+			m.control(t, tc.control, true)
+			id, run := m.mergeOne(t, "sl", tc.row)
+			pr := m.pullOf(t, "sl")
+			if got := m.stops(t); !slices.Equal(got, []string{id}) {
+				t.Errorf("stops = %v, want [%s]", got, id)
+			}
+			if tc.wantEnded {
+				requireRun(t, run)
+				if pr["cleaned"] == nil {
+					t.Error("a done row that stayed listed left the pass uncleaned")
+				}
+				return
+			}
+			if run.code != 2 || !strings.Contains(run.stderr, id) {
+				t.Errorf("run = exit %d, %q; want exit 2 naming %s", run.code, run.stderr, id)
+			}
+			if pr["merged"] == nil || pr["cleaned"] != nil {
+				t.Errorf("pull request = %v, want merged and not cleaned", pr)
+			}
+			if _, err := os.Stat(m.worktree("sl")); err != nil {
+				t.Errorf("the worktree went with its session still listed: %v", err)
+			}
+		})
+	}
 }
 
 // TestEndStopsSession ends a finished conductor whose row is in each state.
@@ -115,14 +132,17 @@ func TestEndStopsSession(t *testing.T) {
 	for _, tc := range []struct {
 		name, row  string
 		fails, got bool
+		ignored    bool
 		wantStops  int
 		wantEnded  bool
 	}{
-		{"done row", "done", false, false, 1, true},
-		{"stopped row", "stopped", false, false, 0, true},
-		{"failed stop, session gone", "done", true, true, 1, true},
-		{"failed stop, done row stays listed", "done", true, false, 1, true},
-		{"failed stop, live row stays listed", "working", true, false, 1, false},
+		{"done row", "done", false, false, false, 1, true},
+		{"stopped row", "stopped", false, false, false, 0, true},
+		{"failed stop, session gone", "done", true, true, false, 1, true},
+		{"failed stop, done row stays listed", "done", true, false, false, 1, true},
+		{"ignored stop, done row stays listed", "done", false, false, true, 1, true},
+		{"failed stop, live row stays listed", "working", true, false, false, 1, false},
+		{"ignored stop, live row stays listed", "working", false, false, true, 1, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := newLaunchRig(t)
@@ -136,6 +156,7 @@ func TestEndStopsSession(t *testing.T) {
 			r.setRows(t, rows...)
 			r.control(t, "stop-fails", tc.fails)
 			r.control(t, "stop-marks", tc.got)
+			r.control(t, "stop-ignored", tc.ignored)
 			got := r.run(t, minutes(t, 1), "check")
 			wantCode := 2
 			if tc.wantEnded {

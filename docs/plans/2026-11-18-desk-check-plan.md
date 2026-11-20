@@ -91,7 +91,7 @@ and decisions this pass adds reuse words the page has (`usage`, `relaunch_limit`
 | The usage reset | `early` gains `now`, and so do `Watched` (`internal/sessions/decide.go:102`) and its caller (`cmd/cc-desk/check.go:181`). For a record stopped on usage (a pass's `StopReason`, or a session record's for the conductor), a narrow parser reads the reset from the stop's detail: `resets <Mon> <D>, <H>[:<MM>]am\|pm (<Zone>)`, or `resets <H>[:<MM>]am\|pm (<Zone>)` with no date, read in `time.LoadLocation(<Zone>)`. The binary imports `time/tzdata`, so a zone loads with no system database. A dated reset is read in the stop's year, and in the next year when that falls more than 180 days before the stop began. A time alone takes its next occurrence after the stop began. While `now` is before the reset, the decision is `wait_usage` with the detail "waits for the reset at <time>". At or after it, the relaunch runs uncounted | `internal/sessions/decide.go` `early`, `resetText`; the recorded texts in `docs/follow-ups/live-sample-of-limit-texts.md` and `e2e/testdata/usage40.sh` |
 | No readable time | The usage carry-out already writes `Relaunch{Cause, Counted}` through `RecordLaunch` (`cmd/cc-desk/carryout.go:91`). The rule is in the decision: a usage relaunch whose stop gave no readable time is counted when the record already holds a `Relaunch` with cause `usage`, and uncounted otherwise. A stop that gives a readable time waits for it and relaunches uncounted, whatever came before. Counted usage relaunches share the limit of two with every other counted relaunch | Design "A model limit holds the relaunch" and its failure row |
 | The fourth stop | At the limit of two counted relaunches the decision is `stop` with reason `relaunch_limit`. The pass is already stopped on usage and `StopPass` refuses a pass that isn't building, so a new event `RestopPass(project, pass, reason, detail)` changes the open stop's reason and detail and adds no stop interval. `applyRecorded` calls it when the pass is already stopped. The decision comes from the count, after `blockedRow`'s `stop usage` (`decide.go:435`) would otherwise give `usage` again | `internal/state/checkrun.go:98`; `internal/state/events.go:337` |
-| The stop step | `cleanup` and the `End` and `EndAndRelaunch` carry-outs read the list (`sessions.List`, which runs `claude agents --json --all`) and stop a row for the session whose state is working, blocked, or done, through `runner.Stop`. Then they read the list again. The session is gone when the second read shows no row for the id or a row whose `Class()` is `ClassNone` (stopped or failed). A failed stop on a session gone by that rule counts as ended; otherwise the error stands. A row already stopped or failed takes no stop. Task 3 first runs `claude stop` once on an id that is already stopped and records its exit code and text, so the rig's `stop-fails` control copies the real CLI | `cmd/cc-desk/merge.go:229`, `sessionLive` at `:92`; `internal/sessions/read.go:26`, `list.go`; `internal/launch/run.go:175`; `docs/follow-ups/launch-review-notes.md` item 1 |
+| The stop step | `cleanup` and the `End` and `EndAndRelaunch` carry-outs read the list (`sessions.List`, which runs `claude agents --json --all`) and stop a row for the session whose state is working, blocked, or done, through `runner.Stop`. Then they read the list again. The session is gone when the second read shows no row for the id or a row whose `Class()` is `ClassNone` (stopped or failed). After the stop and the second read, a row that is gone, `ClassNone`, or still `ClassDone` counts as ended, whether the stop exited 0 or failed; a row still working or blocked keeps the error. One helper, `stopSession`, holds the rule for all three. A row already stopped or failed takes no stop. Task 3 first runs `claude stop` once on an id that is already stopped and records its exit code and text, so the rig's `stop-fails` control copies the real CLI | `cmd/cc-desk/merge.go:229`, `sessionLive` at `:92`; `internal/sessions/read.go:26`, `list.go`; `internal/launch/run.go:175`; `docs/follow-ups/launch-review-notes.md` item 1 |
 | The step in the log | The cleanup outcome names it: "merged pull request <n>; stopped session <id>; cleaned up", or "...; session <id> already gone; cleaned up" | `internal/state/launch.go:207` `RecordOutcomes` |
 | The 60-second limit | `callMerge`, the fetch, and the pull each run under their own `context.WithTimeout(ctx, limit)`. `internal/launch/worktree.go`'s `git` gains a context form, and `Pull(ctx, cwds)` gives each call its own context. Each limited `exec.Cmd` sets `SysProcAttr.Setpgid` and a `Cancel` that kills the process group, so a grandchild holding the pipe dies with it, and `WaitDelay` of 5 seconds as a backstop. A probe in review showed `WaitDelay` alone returns at the delay with the grandchild still running. An error after the context's deadline reads "stopped at the <limit> limit". A hidden `check` flag `--call-limit` (default `60s`) lets a test shorten it | `cmd/cc-desk/merge.go:71`; `internal/launch/worktree.go:19`, `:93` to `:123`; `cmd/cc-desk/check.go` hidden flags |
 | The stand-ins that sleep | The e2e `gh` stand-in and a `git` stand-in on the test's `PATH` start a child `sleep 120` that holds stdout, when a control file says so, and write its process id to a file. The `git` stand-in passes every other call to the real `git` by absolute path | `--gh-command`; `PATH` for `git`; `e2e/launch_rig_test.go` control files |
@@ -314,8 +314,10 @@ already shows as stopped, and record its exit code and text in the task's report
 stops it (the `claude` stand-in's log holds `stop <id>`) and the outcome names the stop. A row
 already `stopped` takes no stop, and the outcome says "already gone". With `stop-fails` set and
 the stand-in marking the row stopped, the cleanup counts it ended and finishes. With
-`stop-fails` set and the row still `done`, the cleanup's error stands and the pass keeps no
-`cleaned` time. `End` takes the same cases. Test: `go test ./e2e -run 'TestMerge|TestEnd'`.
+`stop-fails` or `stop-ignored` (exit 0, row unchanged) set and the row still `done`, the
+session counts as ended and the cleanup finishes. With either set and the row `working`, the
+cleanup's error stands and the pass keeps no `cleaned` time. `End` and `EndAndRelaunch`
+take the same cases. Test: `go test ./e2e -run 'TestMerge|TestEnd'`.
 
 ### Task 4: the merge call, the fetch, and the pull are limited (45 minutes)
 
@@ -472,6 +474,12 @@ clear of the numbers the round's other plans use.
 
 ## Decisions
 
+- [advisor] A row that stays `done` after the stop counts as ended, whether the stop exited 0 or
+  failed, for `End`, the merge cleanup, and `EndAndRelaunch`, in the one helper `stopSession`.
+  The live run showed a done conductor row that stays listed after a clean stop, and the
+  design's failure row says "`claude stop` fails for a session already gone: the session counts
+  as ended". The plan's earlier line ("otherwise the error stands") said the opposite.
+
 - [advisor] The pass parks at planning on its estimate alone. Its scope is the design's section
   and standing answer 29, and nothing was trimmed. Answer 28's raise would be about 175, but
   the 315-minute path runs past the round's 12:55 UTC cutoff, so its proviso fails. The stop
@@ -525,6 +533,8 @@ clear of the numbers the round's other plans use.
   listing beside the conductor phase, and the pre-code controls.
 
 ## Rulings
+
+- **Fix past 350 (Geoff, 2026-11-19).** After the conductor's whole-branch review returned escalate on the stop rule, Geoff ruled "Fix it now, go past 350 (Recommended)". Pass 5's stop is now about 400 minutes.
 
 - **The estimate (Geoff, 2026-11-19).** The plan parked with a 315-minute path against 100, and answer 28's proviso failed on the round's clock. Geoff chose "Raise to 175, go (Recommended)": the estimate is 175 minutes and the stop is 350, and pass 5 may start and run past the conductor's 03:55 cutoff, as answer 31 lets pass 6.
 - **The orphaned scratch sessions (Geoff, 2026-11-19).** Geoff chose "Stop both (Recommended)". The conductor stopped `f0402e97` and `781526f0` before the executor launched, so the live steps don't wait on them.
