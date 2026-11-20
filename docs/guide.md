@@ -56,9 +56,9 @@ reason with the one thing to do. The common ones:
 | The page says | What to do |
 | --- | --- |
 | A permission prompt | Open the desk and say yes or no. The desk passes on your answer and restarts the session. |
-| The sign-in ran out | Sign in to Claude Code again, then tell the desk to start the pass again. |
+| The sign-in ran out | Sign in to Claude Code again. The check sees the new sign-in and starts the work again by itself. After it has done that twice for one pass, the page names the command to give the desk instead. |
 | Usage limit reached | Wait for the reset, or reset your usage early. The work starts again after the reset. |
-| The session would not start, or Restarted twice already | Read the error or the session's log, then tell the desk to start the pass again. |
+| The session would not start, The stop could not be read, or Restarted twice already | Read the error or the session's log, then tell the desk to run the command the page names, such as `cc-desk pass start proj a`. |
 | An irreversible step, a secret, a sign-in or data change, or a change of scope | Read the session's log, deal with it, then tell the desk to start the pass again. |
 
 ## Fix a wrong ruling

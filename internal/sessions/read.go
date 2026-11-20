@@ -1,12 +1,14 @@
 package sessions
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"time"
 )
 
@@ -15,6 +17,51 @@ const (
 	ReadTimeout  = 10 * time.Second
 	ProbeTimeout = 10 * time.Second
 )
+
+// SignInLimit is how long the sign-in read may run.
+const SignInLimit = 30 * time.Second
+
+// SignedIn runs `<claude> auth status --json` and gives when the stored
+// sign-in was last written: the modification time of .credentials.json in
+// the configDirectory the command names. "loggedIn": true alone is no
+// evidence of a new sign-in, since it reads the stored credentials and can
+// stay true after they expire. The zero time means the read isn't good: a
+// failed exit, output it can't decode, "loggedIn" false, a loginExpiresAt
+// already past, no credentials file, or a run past the limit. At the limit
+// the command's process group is killed, so a child holding the output pipe
+// dies with it.
+func SignedIn(ctx context.Context, claude string, limit time.Duration) time.Time {
+	if claude == "" {
+		return time.Time{}
+	}
+	ctx, cancel := context.WithTimeout(ctx, limit)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, claude, "auth", "status", "--json")
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) }
+	cmd.WaitDelay = time.Second
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if cmd.Run() != nil {
+		return time.Time{}
+	}
+	var status struct {
+		LoggedIn        bool      `json:"loggedIn"`
+		ConfigDirectory string    `json:"configDirectory"`
+		LoginExpiresAt  time.Time `json:"loginExpiresAt"`
+	}
+	if json.Unmarshal(out.Bytes(), &status) != nil || !status.LoggedIn || status.ConfigDirectory == "" {
+		return time.Time{}
+	}
+	if !status.LoginExpiresAt.IsZero() && !status.LoginExpiresAt.After(time.Now()) {
+		return time.Time{}
+	}
+	fi, err := os.Stat(filepath.Join(status.ConfigDirectory, ".credentials.json"))
+	if err != nil {
+		return time.Time{}
+	}
+	return fi.ModTime().UTC()
+}
 
 // List runs `<claude> agents --json --all` and decodes its rows.
 func List(ctx context.Context, claude string) ([]Row, error) {

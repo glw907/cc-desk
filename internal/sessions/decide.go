@@ -72,6 +72,9 @@ type Evidence struct {
 	Probe   ProbeResult
 	// Pulls holds the pull request read of each pass that had one.
 	Pulls map[Key]PullRead
+	// SignedIn is when the sign-in read found the stored sign-in last
+	// written. It is zero when the read didn't run or wasn't good.
+	SignedIn time.Time
 }
 
 // Observed is what a decision asks the record to remember of what the check
@@ -140,6 +143,11 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 			out = append(out, mr)
 			return
 		}
+		if r, decided := signInRow(rf, base, sess, pass, ev.SignedIn, hold); decided {
+			r.Merge = info
+			out = append(out, r)
+			return
+		}
 		if r, decided := early(rf, record, sess, hold, now); decided {
 			r.Merge = info
 			out = append(out, r)
@@ -164,7 +172,7 @@ func Decide(s *state.State, ev Evidence, now time.Time) []Result {
 
 // Plan runs the record steps of a check on s, in this order: Decide on the
 // folded state before any settle, a resume through StartPass for each
-// usage relaunch on a release with a checkout, settle, a start for
+// usage or sign-in relaunch on a release with a checkout, settle, a start for
 // each free pass the limits allow, then one launch decision for each building pass with no session record (wait_usage
 // under the usage hold). The caller folds the usage reading into s first and
 // records the results. The dry run calls Plan on its in-memory copy.
@@ -172,7 +180,8 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 	results := Decide(s, ev, now)
 	for _, r := range results {
 		name, isPass := strings.CutPrefix(r.Record, "pass:")
-		if r.Decision.Decision != Relaunch || r.Reason != string(state.StopUsage) || !isPass || !hasCheckout(s, r.Project) {
+		resume := r.Reason == string(state.StopUsage) || r.Reason == string(state.StopSignInExpired)
+		if r.Decision.Decision != Relaunch || !resume || !isPass || !hasCheckout(s, r.Project) {
 			continue
 		}
 		if err := state.StartPass(r.Project, name)(s, now); err != nil {
@@ -393,6 +402,34 @@ func replacedRow(base state.Decision, sess *state.Session, p *state.Pass, e Reco
 	}
 	no := false
 	base.Decision, base.Reason, base.Counted = EndAndRelaunch, ReasonReplaced, &no
+	return Result{Decision: base}, true
+}
+
+// NeedsSignInRead reports whether a live release holds a pass that a new
+// sign-in would resume, so the check reads the sign-in only then.
+func NeedsSignInRead(s *state.State) bool {
+	need := false
+	s.LiveSessions(func(rf *state.ReleaseFile, record string, sess *state.Session) {
+		need = need || state.SignInResumes(rf, findPass(rf, record), sess)
+	})
+	return need
+}
+
+// signInRow resumes a pass stopped on the sign-in once the read finds a
+// sign-in written after the stop began: an uncounted relaunch. Under the
+// usage hold it waits. With no such sign-in, or no resume left, the early
+// rows decide.
+func signInRow(rf *state.ReleaseFile, base state.Decision, sess *state.Session, p *state.Pass, signedIn time.Time, hold bool) (Result, bool) {
+	if !state.SignInResumes(rf, p, sess) || len(p.Stops) == 0 || !signedIn.After(p.Stops[len(p.Stops)-1].Start) {
+		return Result{}, false
+	}
+	base.Reason = string(state.StopSignInExpired)
+	if hold {
+		base.Decision = WaitUsage
+		return Result{Decision: base}, true
+	}
+	uncounted := false
+	base.Decision, base.Counted = Relaunch, &uncounted
 	return Result{Decision: base}, true
 }
 
