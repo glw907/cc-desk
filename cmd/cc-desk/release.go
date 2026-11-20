@@ -99,7 +99,7 @@ func newReleaseDoneCmd(f *rootFlags) *cobra.Command {
 			}
 			var held string
 			s.LiveSessions(func(o *state.ReleaseFile, record string, sess *state.Session) {
-				if row, ok := sessions.Find(rows, sess.ShortID); o == rf && ok && row.Live() && held == "" {
+				if row, ok := sessions.Find(rows, sess.ShortID); o == rf && ok && holdsRelease(row) && held == "" {
 					held = fmt.Sprintf("%s/%s holds a live session, %s", project, record, sess.Name)
 				}
 			})
@@ -114,4 +114,15 @@ func newReleaseDoneCmd(f *rootFlags) *cobra.Command {
 			return nil
 		},
 	}
+}
+
+// holdsRelease reports whether a listed row keeps its release live. Only a
+// stopped, done, or failed row lets the release end: a state Claude Code adds
+// later, such as one for a session still starting, holds it.
+func holdsRelease(row sessions.Row) bool {
+	switch row.State {
+	case "stopped", "done", "failed":
+		return false
+	}
+	return true
 }

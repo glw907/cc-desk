@@ -68,6 +68,7 @@ func TestReadFailures(t *testing.T) {
 		{"unknown field", "releases/alpha.json", strings.Replace(goodRelease, `"format": 1,`, `"format": 1, "extra": 1,`, 1), `releases/alpha.json: json: unknown field "extra"`},
 		{"missing format", "releases/alpha.json", strings.Replace(goodRelease, `"format": 1,`, ``, 1), `releases/alpha.json: missing required field "format"`},
 		{"wrong format", "releases/alpha.json", strings.Replace(goodRelease, `"format": 1`, `"format": 2`, 1), "releases/alpha.json: format 2 is not supported"},
+		{"release name with a slash", "releases/alpha.json", strings.Replace(goodRelease, `"name": "v1",`, `"name": "../v1",`, 1), `releases/alpha.json: release name "../v1" holds a path separator`},
 		{"missing project", "releases/alpha.json", strings.Replace(goodRelease, `"project": "alpha",`, ``, 1), `releases/alpha.json: missing required field "project"`},
 		{"missing pass minutes", "releases/alpha.json", strings.Replace(goodRelease, `"planned_minutes": 60,`, ``, 1), `releases/alpha.json: pass "p1": missing required field "planned_minutes"`},
 		{"name mismatch", "releases/beta.json", goodRelease, `releases/beta.json: the file name does not match project "alpha"`},

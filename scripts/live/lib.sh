@@ -6,7 +6,8 @@
 
 # LISTING_SCRIPT is the script whose `listing-loop` phase is the background reader.
 LISTING_SCRIPT=${LISTING_SCRIPT:-$REPO/scripts/live-repairs.sh}
-SCRATCH_ROOT=${SCRATCH_CHECKOUT:-$HOME/Projects/cc-desk-scratch}
+# SCRATCH_ROOT is fixed, never read from the environment: kill_target's folder guards rest on it.
+SCRATCH_ROOT=$HOME/Projects/cc-desk-scratch
 
 # listing_reads counts the reads the reader has written to listing.out.
 listing_reads() {

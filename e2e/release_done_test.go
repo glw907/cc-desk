@@ -86,6 +86,7 @@ func TestReleaseDoneRefuses(t *testing.T) {
 		}, "", "no live release"},
 		{"a working row", launchedRig, "working", "pass:a"},
 		{"a blocked row", launchedRig, "blocked", "pass:a"},
+		{"a row in a state the check does not know", launchedRig, "starting", "pass:a"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -39,6 +39,9 @@ func validateRelease(r *Release) error {
 	if r.Name == "" {
 		return errors.New(`missing required field "name"`)
 	}
+	if strings.ContainsAny(r.Name, "/\\\x00") {
+		return fmt.Errorf("release name %q holds a path separator", r.Name)
+	}
 	if r.Repo == "" {
 		return errors.New(`missing required field "repo"`)
 	}
