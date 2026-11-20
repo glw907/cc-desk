@@ -546,4 +546,9 @@ The round plan's 13 to 38 hold. These add to them.
 
 ## Rulings
 
-None yet. The conductor records the answer 35 raise here.
+- **Estimate raised to 675 minutes (conductor-cc-desk, 2026-11-20, standing answer 35).** The
+  plan parked only because its path is over 180 minutes. Its scope matches the designs: `release
+  done` carries out the State and rules design's move to `releases/done/`, `session end` carries
+  out the round entry's "end those sessions by the binary", and the report's release name carries
+  out design line 378. The planner trimmed nothing. The executor's stop is 1350 minutes, and
+  answer 38 gives one relaunch from the branch with its stop at 2025.
