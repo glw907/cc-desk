@@ -99,7 +99,8 @@ count a Move pass against its two building slots, which "The run" handles by ord
   section, written for a pass session.
 
 The same pull request does two cleanups the checks conductor left. It copies the `foundation-7`
-plan to `docs/internal/plans/`, and it replaces the foundation block in cairn's `docs/STATUS.md`
+plan, `2026-11-17-foundation-7-routing-plan.md`, an untracked file in that worktree, to
+`docs/internal/plans/`, and it replaces the foundation block in cairn's `docs/STATUS.md`
 with a pointer to the cc-desk release. `docs/internal/` is outside cairn's published-docs gates
 (`scripts/checks/check-stable-source.mjs:83`). The pass runs cairn's gate and lists anything it
 flags.
@@ -301,14 +302,16 @@ gives each one's check.
    releases and their questions now show on the page, which is done item 9.
 2. It closes cairn pull request #259 and deletes branch `foundation-ci-edits`. It removes the
    `foundation-7` worktree and its branch, now that pass 3 has kept the plan. It lists the stash
-   `foundation3-task3-wip` and the 106 `agent-*` worktrees in the round report for Geoff, and
+   `foundation3-task3-wip` and the 110 `agent-*` worktrees in the round report for Geoff, and
    removes neither.
 3. When pass 5 has landed and is installed, it writes the usage figure to `settings.json`
    (Question 2) and runs `cc-desk release checkout` for both projects. From the next check,
    cairn's `checks-1` starts. dubplate's passes rest on questions, so they wait for the desk.
-4. It ends. The check starts a conductor for cairn when round 1's report is due, and that
-   conductor writes the report. The Move round's report adds what Geoff's desk session settled
-   and the evidence for done item 8.
+4. It watches round 1 to its report, reading `cc-desk snapshot` at each wait. It starts and
+   ends no cairn session itself, outside the round plan's standing answers. The check starts a
+   conductor for cairn when round 1's report is due, and that conductor writes the report.
+5. It writes the Move report, with what Geoff's desk session settled and the evidence for done
+   item 8, and ends.
 
 The order keeps three passes from building at once. While a Move pass builds, neither release has
 a checkout, so the check starts nothing for them.
@@ -446,9 +449,9 @@ recommends itself first, since it moves the store and the settings that intake t
 - **Intake first.** The uploader page comes sooner, and structure's moves come after it.
 
 **5. Approve the round plan's proposed standing answers 40 to 45?** They cover the stops this
-round can foresee that no earlier answer covers: an estimate park, a 1.1 pass holding a file, an
-auto mode refusal of a listed step, a missing allow rule in a cairn or dubplate pass, the busy
-check meeting a 1.1 session, and the conductor's first-step test. The round plan gives each
+round can foresee that no earlier answer covers: a 1.1 pass holding a file, an auto mode refusal of a
+listed step, a permission prompt in a cairn or dubplate pass, the busy check meeting a 1.1
+session, the conductor's first-step test, and cairn's round 1 running past twice its plan. The round plan gives each
 one's text.
 
 - **Yes, as written** (recommended). The conductor acts on them and names each use in the report.
