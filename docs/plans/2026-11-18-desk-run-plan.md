@@ -78,6 +78,13 @@ landed, and no pass builds beside this one, so this pass owns `cmd/`, `internal/
 - Reviewed: one `standards:plan-reviewer` read (Opus, medium) on 2026-11-20, which returned 3
   blockers, 13 fixes, and 8 minor findings. Each is folded, and the `[review]` lines under
   `## Decisions` say how.
+- Evidence: the mechanism table, the recorded searches, the pre-code runs under
+  `## Acceptance`, the clearing probe on a copy of the state folder (the third line above), the
+  `sleep` probe of 2026-11-20 in the mechanism table, and the refused-commands table below. The
+  tasks take no credential and write no setting. Their remote writes are pushes to `desk-run` and
+  to stamped `glw907/cc-desk-scratch` branches, and the timed check's merges there, all under the
+  round's auto mode entry. The new public surface is the two verbs, `release done` and `session
+  end`, which the designs name.
 
 ### Refused commands and their alternatives
 
