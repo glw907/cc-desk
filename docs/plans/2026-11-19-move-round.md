@@ -266,18 +266,18 @@ conductor. Once a run passes again, the conductor reads each waiting pull reques
 | A leftover scratch session | 33 |
 | A 1.1 pass holds a file | 40 |
 | The first step finds the sitting failed | 44 |
-| GitHub Actions runs no job | 46; at the start, the start line's state 7 |
+| GitHub Actions runs no job | 46; at the start, the start line's states 7 and 8 |
 
 ## Start line
 
 The session that takes Geoff's approval launches the conductor from the main checkout, with
-this line run alone, once the seven states read true:
+this line run alone, once the eight states read true:
 
 ```text
 claude --bg --model claude-opus-5-5 --effort medium --name conductor-cc-desk-move "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-move-conductor-prompt.txt)"
 ```
 
-The conductor checks the seven again before it launches the first planner.
+The conductor checks the eight again before it launches the first planner.
 
 1. `docs/STATUS.md` on `origin/main` says pass 6 has landed, that Geoff's sitting passed done
    item 10, and that he approved this design. It names the conductor prompt as the next action.
@@ -293,6 +293,10 @@ The conductor checks the seven again before it launches the first planner.
 6. The weekly usage figure is under the ceiling.
 7. GitHub Actions runs again: `gh run list -R glw907/cc-desk -w gate -L 5` shows a run created
    after 2026-11-20T09:25Z with the conclusion `success`.
+8. `gh repo view <repo> --json visibility` prints `PUBLIC` for `glw907/cc-desk`,
+   `glw907/cc-desk-scratch`, `glw907/cairn-cms`, and `glw907/dubplate`. A private repo's CI
+   draws on paid minutes, and a billing failure stopped every run on 2026-11-20 (Geoff: "That
+   repo need to be public").
 
 ### Launch checks, run on 2026-11-20
 
