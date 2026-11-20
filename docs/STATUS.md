@@ -38,21 +38,20 @@ Open documents: none.
 
 ## Next action
 
-Pass 6 (`desk-run`, draft pull request 22) stopped at its rehearsal, Task 8, when GitHub Actions
-started no job on the then-private repos. Both cc-desk repos are now public and Actions runs.
-Every other task is done on the branch with the local gate passing and the whole-branch review
-folded. `conductor-cc-desk` relaunches the executor from
-`docs/plans/2026-11-18-desk-run-executor-prompt.txt` (it starts again at Task 8), lands the pass,
-and runs the steps after it. The timer already runs
-the branch's build, so `main`'s build isn't reinstalled before the pass lands. Then Geoff's
-sitting, then his approval of the Move design (`docs/specs/2026-11-19-move-design.md`) and its
-five questions. The session that takes it launches Move from the plan's "Start line", and 1.1's
-design (`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside it.
+Pass 6 (`desk-run`, draft pull request 22) resumed at its rehearsal on 2026-11-20 at 17:01 UTC,
+after both cc-desk repos were made public so Actions runs. `conductor-cc-desk` lands the pass
+and runs the steps after it. The timer runs the branch's build, so `main`'s build isn't
+reinstalled before the pass lands. Then Geoff's sitting, then his call on the Move design
+(below), and 1.1's design (`docs/plans/2026-11-19-1.1-design-prompt.txt`).
 
 ## Open decisions
 
-- The drafts of the stopped dubplate design sessions are kept in
-  `~/.local/state/desk/kept-drafts/`. The Move design's `move-dubplate-docs` pass copies them into
-  the dubplate repo before the Retire round removes that folder.
-- A blocked session, `cairn-cms-tool-delete`, belongs to no cc-desk round and waits for Geoff.
-  The Move design's Question 1 recommends landing its pull request, cairn #260.
+- The Move design (`docs/specs/2026-11-19-move-design.md`) is overtaken. On 2026-11-20 Geoff
+  approved dubplate's structure, intake, and catalog designs in his terminal, and dubplate's
+  `structure` round now runs under `conductor-dubplate`. cairn #260 and #259 landed, and
+  cairn's `checks` round runs under `conductor-cairn-cms`. Both run outside cc-desk. Geoff's
+  call: should Move add their later rounds to cc-desk once these rounds end, or shrink to its
+  cc-desk passes (`move-prompt` and `move-writers`)? Recommended: shrink, and add each project
+  as a cc-desk release between rounds. The design's Questions 1 and 4 are moot either way.
+- Conductors on pavilion share one rule (agreed 2026-11-20 with `conductor-dubplate`): at most
+  four building sessions between them, and no new session past 85 percent weekly usage.
