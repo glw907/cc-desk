@@ -460,8 +460,12 @@ type Miss struct {
 // it does. Read is null until Geoff marks it read. Calls and Misses are
 // written as [] when empty.
 type Report struct {
-	ID      string     `json:"id"`
-	Project string     `json:"project"`
+	ID      string `json:"id"`
+	Project string `json:"project"`
+	// Release is the name of the release the report belongs to. A report
+	// recorded before releases could end has none, and matches a release of
+	// its project by round alone.
+	Release string     `json:"release,omitempty"`
 	Round   string     `json:"round,omitempty"`
 	Title   string     `json:"title"`
 	Summary string     `json:"summary"`
@@ -469,6 +473,13 @@ type Report struct {
 	Misses  []Miss     `json:"misses"`
 	Sent    time.Time  `json:"sent"`
 	Read    *time.Time `json:"read"`
+}
+
+// Matches reports whether r is the report of the round (the release's own
+// when round is empty) of the named release of the project. A report with no
+// release name matches any release of the project.
+func (r Report) Matches(project, release, round string) bool {
+	return r.Project == project && r.Round == round && (r.Release == "" || r.Release == release)
 }
 
 // Reports is reports.json.
@@ -529,6 +540,9 @@ type ReleaseFile struct {
 	Done bool
 	// Dirty marks a release an event changed, so commit writes it.
 	Dirty bool
+	// moved is the path the release left, which Commit removes once the
+	// release is written at Path.
+	moved string
 	Release
 }
 

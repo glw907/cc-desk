@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -105,43 +106,62 @@ func (s *State) nextReportID() string {
 	}
 }
 
-// reportable checks that some release of the project, live or done, holds
-// the round, or exists when round is empty.
-func (s *State) reportable(project, round string) error {
+// ReportRelease gives the name of the release a report of the project
+// belongs to: the live release, when it holds the round or the report is the
+// release's, else the newest done release that holds the round. It names a
+// project or round that does not exist.
+func (s *State) ReportRelease(project, round string) (string, error) {
 	known := false
-	for _, r := range s.Releases {
-		if r.Project != project {
+	var newest *ReleaseFile
+	for _, rf := range s.Releases {
+		if rf.Project != project {
 			continue
 		}
 		known = true
-		if round == "" || slices.ContainsFunc(r.Rounds, func(rd Round) bool { return rd.Name == round }) {
-			return nil
+		if round != "" && !slices.ContainsFunc(rf.Rounds, func(rd Round) bool { return rd.Name == round }) {
+			continue
+		}
+		if !rf.Done {
+			return rf.Name, nil
+		}
+		if newest == nil || doneStamp(rf.Path) >= doneStamp(newest.Path) {
+			newest = rf
 		}
 	}
-	if known {
-		return fmt.Errorf("round %q not found in project %q", round, project)
+	switch {
+	case newest != nil:
+		return newest.Name, nil
+	case known && round != "":
+		return "", fmt.Errorf("round %q not found in project %q", round, project)
 	}
-	return fmt.Errorf("project %q not found", project)
+	return "", fmt.Errorf("project %q not found", project)
+}
+
+// doneStamp is the time stamp in a done release's file name.
+func doneStamp(file string) string {
+	base := strings.TrimSuffix(filepath.Base(file), ".json")
+	return base[max(0, len(base)-len(doneStampLayout)):]
 }
 
 // AddReport records the report file as the round's report, or as the
-// release's when round is empty. A release that is done takes one as a live
-// release does. It refuses a second report for the same project and round,
-// and names a project or round that does not exist. When id is not nil it
+// release's when round is empty, tagged with the release it belongs to
+// (ReportRelease). A release that is done takes one as a live release does.
+// It refuses a second report for the same release and round, and names a project or round that does not exist. When id is not nil it
 // receives the new report's id.
 func AddReport(project, round string, rf *ReportFile, id *string) Event {
 	return func(s *State, now time.Time) error {
-		if err := s.reportable(project, round); err != nil {
+		release, err := s.ReportRelease(project, round)
+		if err != nil {
 			return err
 		}
-		if slices.ContainsFunc(s.Reports.Reports, func(r Report) bool { return r.Project == project && r.Round == round }) {
+		if slices.ContainsFunc(s.Reports.Reports, func(r Report) bool { return r.Matches(project, release, round) }) {
 			if round == "" {
 				return Refuse(fmt.Sprintf("project %q already has a release report", project))
 			}
 			return Refuse(fmt.Sprintf("round %q of project %q already has a report", round, project))
 		}
 		rep := Report{
-			ID: s.nextReportID(), Project: project, Round: round, Title: rf.Title, Summary: rf.Summary,
+			ID: s.nextReportID(), Project: project, Release: release, Round: round, Title: rf.Title, Summary: rf.Summary,
 			Calls: slices.Clone(rf.Calls), Misses: slices.Clone(rf.Misses), Sent: now.UTC(),
 		}
 		s.Reports.Reports = append(s.Reports.Reports, rep)

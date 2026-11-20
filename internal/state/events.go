@@ -74,6 +74,32 @@ func AddRelease(r *Release) Event {
 	}
 }
 
+// doneStampLayout is the UTC time layout in the name of a done release's file.
+const doneStampLayout = "20060102T150405Z"
+
+// ReleaseDone moves the project's live release to
+// releases/done/<name>-<UTC stamp>.json and marks it done. Commit writes the
+// new file and then removes releases/<project>.json. It refuses a project
+// with no live release. When path is not nil it receives the new file's path
+// relative to the state folder.
+func ReleaseDone(project string, path *string) Event {
+	return func(s *State, now time.Time) error {
+		rf, err := s.liveRelease(project)
+		if err != nil {
+			return Refuse(fmt.Sprintf("project %q has no live release", project))
+		}
+		to := "releases/done/" + rf.Name + "-" + now.UTC().Format(doneStampLayout) + ".json"
+		if slices.ContainsFunc(s.Releases, func(o *ReleaseFile) bool { return o.Path == to }) {
+			return Refuse(fmt.Sprintf("%s already exists", to))
+		}
+		rf.moved, rf.Path, rf.Done, rf.Dirty = rf.Path, to, true, true
+		if path != nil {
+			*path = to
+		}
+		return nil
+	}
+}
+
 // Design is a round's passes and questions, as a planning session writes
 // them.
 type Design struct {
