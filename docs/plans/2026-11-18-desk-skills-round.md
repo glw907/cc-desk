@@ -307,6 +307,13 @@ The twelve in `round-run.md` hold, with these changes and additions.
   the plan's path and launches the executor. The executor's stop is then twice that path. The
   conductor records the raise under `## Rulings` in the pass's plan and in the report. A plan
   whose scope grew still waits for Geoff.
+- **36. Stop after pass 5; pass 6 in a fresh session (Geoff, 2026-11-19).** Geoff wrote, with his spelling corrected, "Let's
+  stop after pass five." and then "We can launch six in a fresh session." The second conductor
+  lands pass 5, puts main's build back on the timer, writes the report through pass 5 and the
+  hand-over, and ends. A fresh conductor, launched from
+  `docs/plans/2026-11-19-desk-pass-6-conductor-prompt.txt`, does the steps after pass 5 (the
+  skills read, the `v0.1.0` tag, the dotfiles PR, the install), then pass 6, the steps after it,
+  and the round's last hand-over.
 
 ## Start line
 
