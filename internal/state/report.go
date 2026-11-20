@@ -146,8 +146,9 @@ func doneStamp(file string) string {
 // AddReport records the report file as the round's report, or as the
 // release's when round is empty, tagged with the release it belongs to
 // (ReportRelease). A release that is done takes one as a live release does.
-// It refuses a second report for the same release and round, and names a project or round that does not exist. When id is not nil it
-// receives the new report's id.
+// It refuses a second report for the same release and round, and names a
+// project or round that does not exist. When id is not nil it receives the
+// new report's id.
 func AddReport(project, round string, rf *ReportFile, id *string) Event {
 	return func(s *State, now time.Time) error {
 		release, err := s.ReportRelease(project, round)

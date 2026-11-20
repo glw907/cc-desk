@@ -39,6 +39,7 @@ Open documents: none.
 ## Next action
 
 `conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
+Pass 6's executor is `cc-desk-desk-run`, background job `b8782b33`, started 2026-11-20 at 09:26 UTC.
 After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
 (`docs/plans/2026-11-19-1.1-design-prompt.txt`) and the Move design session
 (`docs/plans/2026-11-19-move-design-prompt.txt`). Move starts once cc-desk reaches 1.0, after
