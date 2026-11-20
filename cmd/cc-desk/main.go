@@ -21,6 +21,10 @@ func exitCode(err error) int {
 }
 
 func main() {
+	// ~/.local/secrets exports ANTHROPIC_API_KEY for scripts that call the API.
+	// Every claude that cc-desk starts, the desk and the usage reading included,
+	// would bill that key ahead of the claude.ai login, so none of them gets it.
+	os.Unsetenv("ANTHROPIC_API_KEY")
 	if err := newRootCmd().Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(exitCode(err))

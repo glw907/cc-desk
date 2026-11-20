@@ -134,3 +134,24 @@ func TestUsageNoTime(t *testing.T) {
 		t.Errorf("needs_you_now = %v, want one relaunch_limit entry", needs)
 	}
 }
+
+// TestUsageWithoutAPIKey runs the usage verb with ANTHROPIC_API_KEY set and a
+// usage command that fails while it sees the key, as Claude Code bills the key
+// ahead of the claude.ai login.
+func TestUsageWithoutAPIKey(t *testing.T) {
+	t.Setenv("ANTHROPIC_API_KEY", "leaked")
+	dir := t.TempDir()
+	resultFile := filepath.Join(dir, "result.json")
+	if err := os.WriteFile(resultFile, []byte(usageResult(40)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := filepath.Join(dir, "usage.sh")
+	script := "#!/bin/sh\nif [ -n \"$ANTHROPIC_API_KEY\" ]; then echo 'Credit balance too low' >&2; exit 1; fi\ncat '" + resultFile + "'\n"
+	if err := os.WriteFile(cmd, []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	got := runWith(t, cmd, newState(t), "2026-11-20T20:00:00Z", "usage")
+	if got.code != 0 || !strings.Contains(got.stdout, "40% used") {
+		t.Errorf("usage = %d %q %q, want 40%% used", got.code, got.stdout, got.stderr)
+	}
+}

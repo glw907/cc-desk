@@ -22,7 +22,7 @@ type openRig struct {
 }
 
 // scrubbedVars are the variables the open must drop before it starts claude.
-var scrubbedVars = []string{"CLAUDECODE", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_ENTRYPOINT"}
+var scrubbedVars = []string{"CLAUDECODE", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_ENTRYPOINT", "ANTHROPIC_API_KEY"}
 
 func newOpenRig(t *testing.T) openRig {
 	t.Helper()
