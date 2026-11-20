@@ -43,7 +43,13 @@ if [ -e "$STATE/releases/$PROJECT.json" ]; then
   exit 1
 fi
 
-tmp=$(mktemp -d)
+# A background job's own tmp folder keeps parallel jobs off each other's files in /tmp.
+if [ -n "${CLAUDE_JOB_DIR:-}" ]; then
+  mkdir -p "$CLAUDE_JOB_DIR/tmp"
+  tmp=$(mktemp -d "$CLAUDE_JOB_DIR/tmp/setup-release.XXXXXX")
+else
+  tmp=$(mktemp -d)
+fi
 trap 'rm -rf "$tmp"' EXIT
 
 jq --arg repo "$GH_REPO" --arg branch "$ROUND" \

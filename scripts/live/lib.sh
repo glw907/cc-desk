@@ -43,9 +43,11 @@ save_agents() {
 
 # kill_target prints the process id of a record's session, given its session id ($1) and a
 # list saved by save_agents ($2), and only when the row is one of this suite's own claude
-# processes. The name and cwd checks keep it off a real session, and the comm and cmdline
-# checks keep it off a background host or spare, which also read `claude`. It prints nothing
-# and fails otherwise. It never runs kill; the caller's executor does, alone.
+# processes. The name and cwd checks keep it off a real session. A background session runs as
+# a claimed `claude bg-spare` process under a `bg-pty-host`, and every one of them, a real
+# session's included, reads `claude` too, so the process's own working folder must also sit
+# under the scratch checkout, and a pty host is refused. It prints nothing and fails
+# otherwise. It never runs kill; the caller's executor does, alone.
 kill_target() {
   local sid=$1 list=$2 name cwd pid
   name=$(jq -r --arg s "$sid" '[.[]? | select(.sessionId == $s)][0].name // empty' "$list")
@@ -79,10 +81,19 @@ kill_target() {
     say "kill_target: /proc/$pid/comm does not read claude" >&2
     return 1
   fi
-  if tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q -e '--bg-spare'; then
-    say "kill_target: /proc/$pid/cmdline holds --bg-spare" >&2
+  if tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q -e '--bg-pty-host'; then
+    say "kill_target: /proc/$pid/cmdline holds --bg-pty-host" >&2
     return 1
   fi
+  local pcwd
+  pcwd=$(readlink "/proc/$pid/cwd" 2>/dev/null || true)
+  case $pcwd in
+    "$SCRATCH_ROOT" | "$SCRATCH_ROOT"/*) ;;
+    *)
+      say "kill_target: /proc/$pid/cwd '${pcwd:-unreadable}' is not under $SCRATCH_ROOT" >&2
+      return 1
+      ;;
+  esac
   printf '%s\n' "$pid"
 }
 
