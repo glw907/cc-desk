@@ -14,13 +14,13 @@
 - The usage stop is 100 percent of the week; `cc-desk usage` prints the figure.
 - The Desk and skills round (`desk`; design `docs/specs/2026-11-18-desk-skills-design.md`, round
   plan `docs/plans/2026-11-18-desk-skills-round.md`) has landed passes 1 to 5 as pull requests 17
-  to 21: the records, the skills, the page, the desk, and the check's repairs. Geoff stopped the
-  round after pass 5 and gave pass 6 to a fresh conductor (standing answer 36). Nothing after
-  pass 5 has run: no `v0.1.0` tag, no dotfiles PR, and the two skills aren't installed. The
-  round's report is `~/Projects/initiatives/cc-desk/reports/desk-report.md`.
+  to 21: the records, the skills, the page, the desk, and the check's repairs. A fresh
+  conductor, `conductor-cc-desk`, took pass 6 (standing answer 36). It tagged `v0.1.0`, pinned
+  both skills on the workstation (workstation pull request 251), and installed `main`'s binary,
+  timer, page, and link handler. The round's report is
+  `~/Projects/initiatives/cc-desk/reports/desk-report.md`.
 - Every stop in the round has a row in `docs/follow-ups/desk-round-lessons.md`. The 1.1 round
   answers each row, for cc-desk and `pass-core` (standing answer 34), beside Move (answer 37).
-- The fresh conductor (`conductor-cc-desk`) runs the steps after pass 5: `v0.1.0` is tagged.
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,
@@ -38,13 +38,7 @@ Open documents: none.
 
 ## Next action
 
-Geoff launches the fresh conductor. It reads the skills, tags `v0.1.0`, lands the dotfiles PR,
-installs the skills, then runs pass 6 and the steps after it. Launch it from `~/Projects/cc-desk`:
-
-```text
-claude --bg --model claude-opus-5-5 --effort high --name conductor-cc-desk "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-desk-pass-6-conductor-prompt.txt)"
-```
-
+`conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
 After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
 (`docs/plans/2026-11-19-1.1-design-prompt.txt`) and the Move design session
 (`docs/plans/2026-11-19-move-design-prompt.txt`). Move starts once cc-desk reaches 1.0, after
@@ -53,7 +47,13 @@ Move is Geoff's call, asked at the end of the 1.1 design.
 
 ## Open decisions
 
-- When to launch the pass 6 conductor (above).
+- Pass 6's uncovered stops, asked on 2026-11-19 before its launch. No standing answer covers
+  four stops pass 6 could reach: its executor spends twice its plan's path, its pull request
+  flags a call for Geoff, a third live run meets a permission prompt it didn't set up, or a fix
+  needs a setting, hook, or permission rule changed. Recommended: relaunch a spent executor once
+  from its branch with the stop at three times the path, and land a pull request whose calls
+  all stay inside the design with no open finding, naming each call in the report for the
+  sitting. The other two wait for Geoff. Until he answers, all four wait here.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.
