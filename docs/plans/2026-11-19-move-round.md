@@ -16,7 +16,7 @@ the design wins. A planner writes each pass's plan just before the pass runs.
   `dubplate-conductor`
 - Conductor prompt: `docs/plans/2026-11-19-move-conductor-prompt.txt`
 - Chain: 310 planned minutes on the longest path, 535 over all five passes. The round starts
-  no Move pass past 1,070. cairn's round 1 runs on its own clock, under standing answer 45.
+  no Move pass past 1,070. cairn's round 1 runs outside this clock, under standing answer 45.
 
 ## Pre-flight
 
@@ -160,7 +160,7 @@ Before each launch the conductor reads `claude agents --json` into a file and re
 A 1.1 session there whose pass shares a file with the Move pass due next holds that pass until
 the 1.1 pass lands (standing answer 40). Only passes 1 and 5 touch files a 1.1 pass might.
 
-The conductor's own steps follow the passes, as the design's "The run" lists them:
+The conductor's steps follow the passes, as the design's "The run" lists them:
 
 0. Before any launch: the first-step test (standing answer 44), then the land of #260 on
    Question 1. Pass 3 waits for that land, since #260 edits cairn's `docs/STATUS.md` beside

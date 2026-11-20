@@ -51,8 +51,8 @@ of a design writer's pull request, to this round.
   answer 37). Where a point below belongs to 1.1, its line says so.
 - The overrun budget as a release field. cairn's ruling 9 (the ceiling is twice the plan) has no
   mechanism in cc-desk, so the conductor of each cairn round watches it until 1.1 builds one.
-- Retire's work. The cairn and desk drafts in `kept-drafts/818e389e/` stay where they are, and
-  Retire's encrypted archive keeps them with the rest of `~/.local/state/desk/`.
+- The Retire round's work. The cairn and desk drafts in `kept-drafts/818e389e/` stay where they
+  are, and the Retire round's encrypted archive keeps them with the rest of `~/.local/state/desk/`.
 
 ## What would make it a failure
 
@@ -170,7 +170,7 @@ The regime map tells a cairn pass session which parts of the old papers still bi
 Round 1, `checks`, rests on no unanswered question. Its `no_need_reason` cites `a03b21`.
 
 **`docs/releases/dubplate.json`.** Project `dubplate`, release name `0.8`, repo `glw907/dubplate`.
-Its rounds are BACKLOG's "Rounds to 0.8" from round 3, with the round the
+Its rounds are the "Rounds to 0.8" section of `BACKLOG.md` from round 3, with the round the
 structure design adds, in a chain:
 
 | Round | Design | Passes |
@@ -220,9 +220,9 @@ stop holds it as it holds a pass.
 **What a writer finishes with.** The writer commits its design, its pass plans, and a design file
 for `round design`'s format at `docs/designs/<round>.json`. It then runs a new verb, `cc-desk round
 ready <project> <round> --pr <n> --commit <sha> --verdict <v> --design-file <path>`. The verb
-reads the design file at that commit and refuses one that `DecodeDesign` refuses, so a design
-that can't load never merges. Its questions travel in the design file, which `DesignRound`
-already adds. The `question add` line leaves the writer's prompt, since `AddQuestion` needs passes
+reads the design file at that commit and refuses one that `DecodeDesign` refuses. A design that
+can't load never merges. The writer's questions travel in the design file, and `DesignRound`
+already adds them. The `question add` line leaves the writer's prompt: `AddQuestion` needs passes
 the round doesn't have yet (`internal/state/question.go:78`).
 
 **The merge.** A round gains a pull request record like a pass's. The check's merge table reads
@@ -430,9 +430,9 @@ Each call can be overturned at approval.
   for an `auth-data` pass is void, and the regime map says so. A question in such a pass still
   stops, as does a closing review short of accept on an `auth-data` finding (`advisor.md`).
 - cairn's project name is `cairn-cms`, matching its repo and its old session names.
-- dubplate's intake is one round of five passes, the design's own recommendation for its
+- dubplate's intake is one round of five passes, the design's recommendation for its
   question 9.
-- The cairn and desk drafts in `kept-drafts/818e389e/` stay for Retire's archive.
+- The cairn and desk drafts in `kept-drafts/818e389e/` stay for the Retire round's archive.
 
 ## Questions for Geoff
 
