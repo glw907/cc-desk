@@ -103,6 +103,10 @@ def one(text):
             below = i == len(ls) - 1 or ls[i + 1] == ""
             ok = ok or (above and below)
     check("one", "puts the plain question on a separate line", ok, "no such line")
+    bare = [re.sub(r"[*_]", "", l).strip().lower() for l in ls]
+    labels = [a for a in ("yes", "no") if any(re.fullmatch(a + r"( \(recommended\))?", b) for b in bare)]
+    check("one", "puts each answer's label on its own line", labels == ["yes", "no"],
+          "own-line labels: " + (", ".join(labels) or "none"))
 
 def two(text):
     low = text.lower()
