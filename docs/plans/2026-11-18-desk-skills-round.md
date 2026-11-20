@@ -335,8 +335,9 @@ The twelve in `round-run.md` hold, with these changes and additions.
 - **39. The Move design is written overnight, before the sitting (Geoff, 2026-11-19).** Geoff
   wrote: "Once you have the rehearsal done, I'd like you to shape both the dubplate and cairn
   work to run in cc-desk. This should be done overnight and before my sitting, so both can launch
-  as soon as my sitting is done." This changes answer 37's timing for the Move design only. Once
-  pass 6's rehearsal has passed, the conductor launches the Move design session,
+  as soon as my sitting is done." This changes answer 37's timing for the Move design only. Asked
+  whether it must wait for the rehearsal, Geoff wrote: "Do we even need to wait for the
+  rehearsal?" It doesn't, so the conductor launches the Move design session at once,
   `cc-desk-move-design`, in the background from `docs/plans/2026-11-19-move-design-prompt.txt`.
   It writes the design, the round plan, a planner prompt for each pass, and the conductor prompt,
   with every call that is Geoff's listed with a recommendation, so his approval after the
