@@ -199,3 +199,26 @@ func TestSignInReadThatSleeps(t *testing.T) {
 		t.Errorf("%d launches, want 1", n)
 	}
 }
+
+// TestSignInResumeStopFails resumes a pass whose old row won't stop. The
+// relaunch takes the usage relaunch's branch, so nothing launches over the
+// live row and the pass stops as a failed launch.
+func TestSignInResumeStopFails(t *testing.T) {
+	r := newLaunchRig(t)
+	signInStopped(t, r)
+	r.control(t, "stop-fails", true)
+	r.signIn(t, 3)
+	if got := r.run(t, minutes(t, 4), "check"); got.code != 2 {
+		t.Errorf("check exit %d, want 2 for the stop that failed; stderr: %s", got.code, got.stderr)
+	}
+
+	if !slices.Contains(r.kinds(t), "stop") {
+		t.Errorf("calls %v: want a claude stop", r.kinds(t))
+	}
+	if n := len(r.launches(t)); n != 1 {
+		t.Errorf("%d launches, want none over the live row", n)
+	}
+	if p := r.passRecord(t, "a"); p["state"] != "stopped" || p["stop_reason"] != "launch_failed" {
+		t.Errorf("pass = %v, want stopped as launch_failed", p)
+	}
+}

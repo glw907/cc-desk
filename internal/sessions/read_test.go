@@ -6,8 +6,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -168,7 +170,8 @@ echo '{"loggedIn": true, "configDirectory": "@DIR@", "loginExpiresAt": "2099-01-
 	t.Run("a child holding the output past the limit", func(t *testing.T) {
 		// The sleep is a child of the shell and holds stdout, so only a
 		// kill of the process group ends the read at its limit.
-		claude := standIn(t, `sleep 20; echo '{"loggedIn": true, "configDirectory": "@DIR@"}'`)
+		pidFile := filepath.Join(t.TempDir(), "child.pid")
+		claude := standIn(t, `sleep 20 & echo $! > `+pidFile+`; wait; echo '{"loggedIn": true, "configDirectory": "@DIR@"}'`)
 		start := time.Now()
 		got := SignedIn(context.Background(), claude, 200*time.Millisecond)
 		if took := time.Since(start); took > 3*time.Second {
@@ -176,6 +179,23 @@ echo '{"loggedIn": true, "configDirectory": "@DIR@", "loginExpiresAt": "2099-01-
 		}
 		if !got.IsZero() {
 			t.Errorf("a read past the limit read as signed in at %s", got)
+		}
+		// WaitDelay alone would end the read but leave the sleep running.
+		b, err := os.ReadFile(pidFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pid, err := strconv.Atoi(strings.TrimSpace(string(b)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		deadline := time.Now().Add(3 * time.Second)
+		for syscall.Kill(pid, 0) == nil {
+			if time.Now().After(deadline) {
+				_ = syscall.Kill(pid, syscall.SIGKILL)
+				t.Fatalf("the sleep child %d outlived the read", pid)
+			}
+			time.Sleep(20 * time.Millisecond)
 		}
 	})
 }
