@@ -1,20 +1,32 @@
 # cc-desk Move: the round design
 
-This is the sixth round of the cc-desk route. After it, cairn and dubplate are releases on the
-page, each with the rounds and passes their reshaping wrote down. cairn's first round, `checks`,
-then runs under cc-desk from its desk session to its report, and Geoff launches nothing.
+This is the sixth round of the cc-desk route. After it, cairn and dubplate each show on the
+cc-desk page with their rounds and passes. cairn's first round, `checks`, then runs under
+cc-desk from its desk session to its report, and Geoff launches nothing.
 
 The main design is [2026-11-17-cc-desk-design.md](2026-11-17-cc-desk-design.md). This round closes
 its done items 8 and 9. The rounds it builds on are in
 [2026-11-18-desk-skills-design.md](2026-11-18-desk-skills-design.md) and the designs that file
 names. Where this file is silent, those hold.
 
-**What this asks of you.** One approval, of this design and the round plan beside it
-([2026-11-19-move-round.md](../plans/2026-11-19-move-round.md)). Approving starts five passes
-planned at 535 minutes of session time. It also approves the auto mode entry in that plan, and
-the cleanup of cairn's leftover branches listed under "The run". Five questions come with it,
-under "Questions for Geoff" at the end. Each has a recommendation, and this design is written on
-those recommendations. To change anything, name it before you approve.
+**What this asks of you.** Two things, once you have run your sitting for the Desk round:
+
+1. Approve this design and the round plan beside it
+   ([2026-11-19-move-round.md](../plans/2026-11-19-move-round.md)). That approves five passes
+   planned at 535 minutes of session time, the auto mode entry in the plan, and the cleanup of
+   cairn's leftover pull request, branches, and worktree in step 2 of "The run".
+2. Answer the five questions under "Questions for Geoff" at the end. Each has a recommendation,
+   and this design is written on those recommendations. To change anything, name it before you
+   approve.
+
+Approving starts nothing at once. The Move conductor launches when the round plan's start line
+reads true: pass 6 has landed, your sitting passed, and GitHub Actions runs again.
+
+A few names this design uses. Pass 6 is the Desk round's last pass, `desk-run`, which builds the
+real release you run in your sitting: five steps at the terminal that end with one question
+waiting for cc-desk on the page. 1.1 is cc-desk's next release, which works through the lessons
+ledger and may build beside this round. The check is cc-desk's timed run that starts passes and
+merges pull requests, and a slot is one of the two passes it lets build at once.
 
 ## Why this round
 
@@ -50,7 +62,8 @@ of a design writer's pull request, to this round.
 - The 1.1 round's work. 1.1 answers the lessons ledger and runs beside this round (standing
   answer 37). Where a point below belongs to 1.1, its line says so.
 - The overrun budget as a release field. cairn's ruling 9 (the ceiling is twice the plan) has no
-  mechanism in cc-desk, so the conductor of each cairn round watches it until 1.1 builds one.
+  mechanism in cc-desk. The Move conductor watches round 1 (standing answer 45), and the
+  conductor of each later cairn round watches its own until 1.1 builds one.
 - The Retire round's work. The cairn and desk drafts in `kept-drafts/818e389e/` stay where they
   are, and the Retire round's encrypted archive keeps them with the rest of `~/.local/state/desk/`.
 
@@ -333,7 +346,7 @@ writer started by hand from the desk.
 Before the round starts: approve, which approves the auto mode entry in the round plan and the
 cleanup in step 2 of "The run". Claude adds the entry after the approval.
 
-Once the releases are added, one desk session. The page shows the questions waiting for cairn and
+Once the releases are added, one desk session, separate from your Desk round sitting. The page shows the questions waiting for cairn and
 dubplate. Type `cc-desk` and answer them in your words. cairn's round 1 doesn't wait for this
 sitting.
 
@@ -405,9 +418,9 @@ block that only you can clear (`docs/STATUS.md`, "Open decisions"). Pass 6 build
 gate until then. Every Move pass and every cairn and dubplate merge needs CI, so the round plan's
 start line waits for Actions to run again.
 
-Every Move pass starts after your sitting, which follows pass 6's landing, so no Move pass races
-pass 6 for a file. Pass 6 changes `internal/sessions/decide.go` and `internal/state/{events,
-types,commit}.go`, which `move-writers` changes after it from `main`.
+No Move pass races pass 6 for a file: every Move pass starts after your sitting, and your
+sitting follows pass 6's landing. `move-writers` changes `internal/sessions/decide.go` and
+`internal/state/` after pass 6 has changed them, starting from `main`.
 
 ## Calls Claude made
 
@@ -436,16 +449,20 @@ Each call can be overturned at approval.
 
 ## Questions for Geoff
 
-**1. Land cairn's `tool-delete` pull request?** cairn's round 1 builds on it. Pull request #260
-is open at `1fa506cc2` with an accept from its review and its security read. Its session has
-waited on a queue document since 2026-11-17.
+**1. Land cairn's `tool-delete` pull request?** Pull request #260 removes the Go `cairn` tool and
+the `create-cairn-site` launcher from cairn's `main`, with their workflows, checks, and doc lines.
+cairn's round 1 builds on it. It is open at `1fa506cc2` with an accept from its review and its
+security read. Its session has waited since 2026-11-17 on a document in the old approval queue,
+which this round retires. It comes first because it edits cairn's `docs/STATUS.md` beside the
+block the cairn docs pass replaces.
 
 - **Yes** (recommended). The conductor withdraws queue document `743a55`, stops the waiting
   session, and lands #260 by `approval-queue land`. Round 1 can start once `move-writers` lands.
 - **No.** cairn's release is added with no checkout, and round 1 waits for your word.
 
-**2. Which usage figure stops new work?** cc-desk has one figure for every release. Your ruling 8
-for cairn says 85 percent. cc-desk's own rounds have run to 100.
+**2. Which usage figure stops new work?** cc-desk has one figure for every release: past it, the
+check starts no new session. Your ruling 8 for cairn says 85 percent. cc-desk's own rounds have
+run to 100. The week stood at 15 percent on 2026-11-20.
 
 - **85 percent for everything** (recommended). It keeps your latest ruling. cc-desk's own work,
   1.1 included, also stops starting at 85.
@@ -462,14 +479,24 @@ for cairn says 85 percent. cc-desk's own rounds have run to 100.
 recommends itself first, since it moves the store and the settings that intake then builds on.
 
 - **Structure first** (recommended).
-- **Intake first.** The uploader page comes sooner, and structure's moves come after it.
+- **Intake first.** The uploader page, where you add music to dubplate, comes sooner, and
+  structure's moves come after it.
 
 **5. Approve the round plan's proposed standing answers 40 to 46?** They cover the stops this
-round can foresee that no earlier answer covers: a 1.1 pass holding a file, an auto mode refusal of a
-listed step, a permission prompt in a cairn or dubplate pass, the busy check meeting a 1.1
-session, the conductor's first-step test, cairn's round 1 running past twice its plan, and CI
-that stops running mid-round. The round plan gives each
-one's text.
+round can foresee that no earlier answer covers. The round plan gives each in full.
+
+- 40: a 1.1 pass holds a file a Move pass needs. The Move pass waits; `move-writers` goes to 1.1
+  rather than hold up cairn's round 1.
+- 41: auto mode refuses a listed step. The conductor tries once more, then writes it under "Open
+  decisions" and goes on.
+- 42: a cairn or dubplate session stops at a permission prompt. The conductor adds the rule if
+  the pass's steps need it and restarts the session; otherwise the pass parks for you.
+- 43: the busy check names a 1.1 session. It's no stop unless the two passes share a file.
+- 44: the first step finds you were asked for more than your sitting's five steps. The
+  conductor launches nothing and writes what asked you.
+- 45: cairn's round 1 runs past twice its plan, your ruling 9. The conductor writes the overrun
+  for you and stops nothing.
+- 46: CI stops running mid-round. Nothing lands without its checks; every other step goes on.
 
 - **Yes, as written** (recommended). The conductor acts on them and names each use in the report.
 - **No.** Each stop waits for you under "Open decisions".
