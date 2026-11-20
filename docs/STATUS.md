@@ -47,6 +47,10 @@ Move is Geoff's call, asked at the end of the 1.1 design.
 
 ## Open decisions
 
+- GitHub Actions has run no job since 09:12 UTC on 2026-11-20: "recent account payments have
+  failed or your spending limit needs to be increased". Only Geoff can fix it, at
+  https://github.com/settings/billing. Until then pass 6 builds on the local gate and stops at
+  its first step that needs CI.
 - Two stops in pass 6 would still wait for Geoff: a fix that needs a setting changed,
   and a third live run with a prompt it didn't set up. Standing answer 38 covers the rest.
 - The drafts of the stopped dubplate design sessions are kept in
