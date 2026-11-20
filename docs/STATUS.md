@@ -39,11 +39,11 @@ Open documents: none.
 ## Next action
 
 `conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
-After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
-(`docs/plans/2026-11-19-1.1-design-prompt.txt`) and the Move design session
-(`docs/plans/2026-11-19-move-design-prompt.txt`). Move starts once cc-desk reaches 1.0, after
-the sitting, and 1.1 runs beside it (standing answer 37). Whether 1.2 comes before or after
-Move is Geoff's call, asked at the end of the 1.1 design.
+Then Geoff's sitting for the real run. After it he approves the Move design
+(`docs/specs/2026-11-19-move-design.md`, written overnight under standing answer 39) and answers
+its five questions, and the session that takes his approval adds the round plan's auto mode
+entry and launches the Move conductor with the plan's "Start line". The 1.1 design session
+(`docs/plans/2026-11-19-1.1-design-prompt.txt`) runs beside Move.
 
 ## Open decisions
 
@@ -54,6 +54,7 @@ Move is Geoff's call, asked at the end of the 1.1 design.
 - Two stops in pass 6 would still wait for Geoff: a fix that needs a setting changed,
   and a third live run with a prompt it didn't set up. Standing answer 38 covers the rest.
 - The drafts of the stopped dubplate design sessions are kept in
-  `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
-  give them a home in the dubplate repo first.
+  `~/.local/state/desk/kept-drafts/`. The Move design's `move-dubplate-docs` pass copies them into
+  the dubplate repo before the Retire round removes that folder.
 - A blocked session, `cairn-cms-tool-delete`, belongs to no cc-desk round and waits for Geoff.
+  The Move design's Question 1 recommends landing its pull request, cairn #260.

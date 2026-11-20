@@ -287,7 +287,9 @@ The conductor checks the seven again before it launches the first planner.
 4. The main checkout is on `main`, and `git rev-list --count HEAD..origin/main` prints 0 after
    a fetch.
 5. `claude-worktree-busy` exits 0 for the cc-desk, cairn-cms, and dubplate checkouts, or its
-   hit is one standing answer 43 or 6 covers.
+   hit is one standing answer 43 or 6 covers. A hit on the cairn-cms checkout that names
+   `cairn-cms-tool-delete` (`2d4cd0a4`) is expected: the run's first act stops that session,
+   and on Question 1's No it stays and the cairn release gets no checkout.
 6. The weekly usage figure is under the ceiling.
 7. GitHub Actions runs again: `gh run list -R glw907/cc-desk -w gate -L 5` shows a run created
    after 2026-11-20T09:25Z with the conclusion `success`.
