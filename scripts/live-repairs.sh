@@ -40,6 +40,10 @@ try() {
 
 cc() { "$BIN" --state-dir "$STATE" "$@"; }
 
+# lib.sh holds start_listing and the kill-target guards, shared with the other live scripts.
+# shellcheck source=live/lib.sh
+. "$REPO/scripts/live/lib.sh"
+
 # check prints the verdict of one live check and records it for the result line.
 check() {
   local verdict=$1 name=$2
@@ -367,6 +371,8 @@ phase_merge() {
     return 0
   fi
   check pass "7 the merge pass started a session"
+  # A new merge starts a new listing, so an earlier merge's reads are not taken for this one's.
+  rm -f "$RUN/listing.out" "$RUN/listing.pid"
   printf '%s\n%s\n' "$sid" "$short" >"$RUN/merge-ids"
   printf '%s\n%s\n' "$sid" "$short" >>"$(known_ids)"
   say "merge session: id $short, session id $sid"
@@ -401,17 +407,6 @@ phase_merge() {
 }
 
 # ---- listing ---------------------------------------------------------------
-
-# start_listing runs the reader in the background from the merge, so the conductor phase
-# runs beside it. The reader's pid is recorded; abort ends it by that pid alone.
-start_listing() {
-  [ -f "$RUN/merge-ids" ] || return 0
-  [ -f "$RUN/listing.pid" ] && kill -0 "$(cat "$RUN/listing.pid")" 2>/dev/null && return 0
-  : >"$RUN/listing.out"
-  setsid nohup bash "$REPO/scripts/live-repairs.sh" listing-loop >>"$RUN/listing.out" 2>&1 </dev/null &
-  echo $! >"$RUN/listing.pid"
-  say "listing: started in the background, pid $(cat "$RUN/listing.pid"), one read a minute for 10 minutes"
-}
 
 # session_rows counts the rows of the default list that name the session, by either id.
 session_rows() {
@@ -712,15 +707,15 @@ this_runs_rows() {
 
 no_live_rows() { [ -z "$(this_runs_rows)" ]; }
 
-# Abort stops sessions through the binary alone: `pass stop` for a pass still building or
-# waiting, `session finish` for the conductor, and the next check's carry-out ends each
-# stopped or finished session. No verb ends a session directly, so the wait below is on
-# the timer's check. The only kill is of the listing reader's recorded pid.
+# Abort stops each pass still building or waiting, so the check does not relaunch it, then
+# ends every open session through `session end`, which stops it whatever reason the stop
+# carried (the check leaves a stopped pass's session alone). The only kill is of the listing
+# reader's recorded pid.
 phase_abort() {
   [ -x "$BIN" ] || show go build -o "$BIN" "$REPO/cmd/cc-desk"
   mkdir -p "$RUN"
   [ "$(git -C "$SCRATCH" branch --show-current)" = main ] || checkout_on_main
-  local p state
+  local p state open
   if [ -f "$RELEASE" ]; then
     for p in $(jq -r '.passes[] | select(.name | test("^(refuse|hold|merge)-[0-9]{8}t[0-9]{6}z$")) | .name' "$RELEASE"); do
       state=$(pass_field "$p" '.state')
@@ -730,12 +725,17 @@ phase_abort() {
           ;;
         *) say "$p reads $state" ;;
       esac
+      open=$(pass_field "$p" 'select(.session != null and .session.ended == null) | .session.session_id // empty')
+      if [ -n "$open" ]; then
+        try cc session end pass "$PROJECT" "$p"
+      fi
     done
   else
     say "abort: no $PROJECT release in the state folder"
   fi
   if [ -s "$RUN/conductor-ids" ] && [ -n "$(this_runs_rows | grep -F "$PROJECT-conductor" || true)" ]; then
     try cc session finish conductor "$PROJECT"
+    try cc session end conductor "$PROJECT"
   fi
 
   if [ -f "$RUN/listing.pid" ] && kill -0 "$(cat "$RUN/listing.pid")" 2>/dev/null; then
@@ -757,12 +757,12 @@ phase_abort() {
 
 # ---- evidence --------------------------------------------------------------
 
-# restore_line prints the command that puts main's build back after prep's timer install.
+# restore_line prints the warning that stands where the line putting main's build back was.
+# Once a run writes a report that carries a release name, main's v0.1.0 build cannot load the
+# state folder, so reinstalling it before the pass lands would break the timer and the page.
 restore_line() {
-  local main
-  main=$(dirname "$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir)")
-  say "put main's build back on the timer (run from main, after this branch's pull request lands):"
-  say "  git -C $main switch main && git -C $main pull --ff-only && (cd $main && go build -o /tmp/cc-desk-main ./cmd/cc-desk && /tmp/cc-desk-main timer install)"
+  say "warning: main's v0.1.0 build can't load the state folder once a report carries a release name."
+  say "do not put main's build back on the timer; the conductor reinstalls main after the pass lands."
 }
 
 result_line() {

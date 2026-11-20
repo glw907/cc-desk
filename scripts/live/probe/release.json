@@ -1,0 +1,15 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "cc-desk-scratch-probe",
+  "repo": "glw907/cc-desk-scratch",
+  "rounds": [
+    {"name": "probe", "summary": "One pass that keeps working, for the kill probe.", "needs_geoff": false, "no_need_reason": "A fixture run in the scratch repo, with nothing to decide.", "design_written": true, "design": "docs/plans/work-plan.md"}
+  ],
+  "passes": [
+    {"name": "probe-work", "summary": "Run the scratch gate step after step until killed.", "round": "probe", "planned_minutes": 60, "model": "sonnet", "effort": "medium", "state": "not_started"}
+  ],
+  "allow_rules": [
+    "Bash(bash scripts/gate.sh)"
+  ]
+}

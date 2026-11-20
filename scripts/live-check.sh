@@ -44,37 +44,42 @@ pass_field() {
   jq -r --arg p "$1" ".passes[] | select(.name == \$p) | $2" "$RELEASE"
 }
 
-# transcripts lists the transcript files of a session id.
+# transcripts lists the transcript files of a session id, or of a short id, which is a
+# prefix of the id the files are named by.
 transcripts() {
   local f
-  for f in "$HOME"/.claude/projects/*/"$1".jsonl; do
+  for f in "$HOME"/.claude/projects/*/"$1"*.jsonl; do
     [ -e "$f" ] && printf '%s\n' "$f"
   done
   return 0
 }
 
-# session_ids prints every session id of a pass: the one watch saved before
-# the stop, and the one on the record now.
+# session_ids prints every session id of a pass, so no transcript escapes the count: the one
+# watch saved, every session_id the pass's record holds, and each short id the check log
+# names on the pass's lines (a relaunch or a hand resume leaves ids the record no longer holds).
 session_ids() {
   {
     [ -f "$RUN/$1.first-session-id" ] && cat "$RUN/$1.first-session-id"
-    pass_field "$1" '.session.session_id // empty'
+    jq -r --arg p "$1" '.passes[] | select(.name == $p) | [.. | objects | .session_id? // empty] | .[]' "$RELEASE"
+    if [ -f "$STATE/check-log.jsonl" ]; then
+      jq -r --arg p "$1" 'select((.record // "") | endswith($p)) | "\(.outcome // "") \(.detail // "")"' \
+        "$STATE/check-log.jsonl" 2>/dev/null | grep -oE '\b[0-9a-f]{8}\b' || true
+    fi
   } | sort -u
 }
 
 # merge_calls counts the Bash tool calls of a pass's transcripts whose command
 # holds "gh pr merge". Reading the tool_use input keeps text in a tool's output
-# from counting.
+# from counting. A transcript reached by both a short and a full id is read once.
 merge_calls() {
-  local id f n total=0
-  for id in $(session_ids "$1"); do
-    for f in $(transcripts "$id"); do
-      n=$(jq -r '(.message.content? // []) | if type == "array" then .[] else empty end
-        | select(.type == "tool_use" and .name == "Bash") | .input.command // empty
-        | select(contains("gh pr merge"))' "$f" | wc -l)
-      say "  transcript $f: $n merge call(s)"
-      total=$((total + n))
-    done
+  local id f n total=0 files
+  files=$(for id in $(session_ids "$1"); do transcripts "$id"; done | sort -u)
+  for f in $files; do
+    n=$(jq -r '(.message.content? // []) | if type == "array" then .[] else empty end
+      | select(.type == "tool_use" and .name == "Bash") | .input.command // empty
+      | select(contains("gh pr merge"))' "$f" | wc -l)
+    say "  transcript $f: $n merge call(s)"
+    total=$((total + n))
   done
   say "  $1: $total Bash call(s) holding gh pr merge"
 }
@@ -106,9 +111,24 @@ prep_refuse() {
   fi
 }
 
+# prep_failed runs when prep exits before its last line. A failure after `timer install`, such
+# as the gh probe or the push, would otherwise leave the timer enabled and a half-cut base
+# branch, so it prints the state and puts the timer back as abort does.
+prep_failed() {
+  local rc=$?
+  [ "$rc" -eq 0 ] && return 0
+  say "prep failed (exit $rc); the state it left:"
+  try git -C "$SCRATCH" status --short --branch
+  try git -C "$SCRATCH" branch --list "$BASE"
+  try cc timer status
+  try systemctl --user disable --now cc-desk-check.timer
+  say "prep: the timer is disabled; the scratch branch $BASE, if listed above, is half cut"
+}
+
 phase_prep() {
   prep_refuse
   mkdir -p "$RUN"
+  trap prep_failed EXIT
   say "prep: the scratch checkout is clean on main, and the state folder holds no other release"
 
   show go build -o "$RUN/cc-desk" "$REPO/cmd/cc-desk"
@@ -144,6 +164,9 @@ phase_prep() {
 
   say "usage reading:"
   show cc usage --raw "$RUN/usage.raw"
+  trap - EXIT
+  say "warning: main's v0.1.0 build can't load the state folder once a report carries a release name."
+  say "do not put main's build back on the timer; the conductor reinstalls main after the pass lands."
 }
 
 # ---- start -----------------------------------------------------------------
@@ -238,28 +261,55 @@ echo "backgrounded · probe"
 EOF
   chmod +x "$standin"
   path=$(unit_path)
+  # The probe's sleep lasts 901 seconds, so a failure of the outer systemd-run must still stop
+  # its scope. The stop is allowed to find no scope.
+  trap 'systemctl --user stop cc-desk-scope-probe-sleep.scope 2>/dev/null || true' EXIT
   show systemd-run --user --wait --unit=cc-desk-scope-probe -p Type=oneshot -p KillMode=process \
     -p "Environment=PATH=$path" systemd-run --user --scope -q --unit=cc-desk-scope-probe-sleep "$standin"
   try systemctl --user is-active cc-desk-scope-probe.service
   try systemctl --user is-active cc-desk-scope-probe-sleep.scope
   show systemctl --user stop cc-desk-scope-probe-sleep.scope
+  trap - EXIT
 }
 
 # ---- abort -----------------------------------------------------------------
 
+# wait_service_idle reads the check service's state until it is not running, so no check run
+# is writing the folder while the stops are carried out. It reads only: it starts, stops, and
+# restarts no unit. A fixture session still running can call `pass ready`, which kicks one
+# more check, so the wait has to follow the timer's disable.
+wait_service_idle() {
+  local i state=unknown
+  for ((i = 0; i < 60; i++)); do
+    state=$(systemctl --user is-active cc-desk-check.service || true)
+    case $state in
+      active | activating | deactivating | reloading) ;;
+      *) break ;;
+    esac
+    sleep 10
+  done
+  say "cc-desk-check.service reads $state"
+  case $state in
+    active | activating | deactivating | reloading) return 1 ;;
+  esac
+}
+
 phase_abort() {
   try systemctl --user disable --now cc-desk-check.timer
-  local p state short
+  wait_service_idle || say "abort: the check service is still running; the stops below may race it"
+  local p state open
   for p in "${PASSES[@]}"; do
     state=$(pass_field "$p" '.state' 2>/dev/null || echo unknown)
     if [ "$state" = building ] || [ "$state" = waiting ]; then
-      say "still $state: run alone: $BIN --state-dir $STATE pass stop $PROJECT $p --reason scope"
-      short=$(pass_field "$p" 'select(.session.ended == null) | .session.short_id // empty')
-      if [ -n "$short" ]; then
-        say "then, alone: claude stop $short"
-      fi
+      try cc pass stop "$PROJECT" "$p" --reason scope
     else
       say "$p reads $state"
+    fi
+    # A pass the check marked stopped can still hold a live session, so every pass whose
+    # record holds an open session gets the end, not only one that read building or waiting.
+    open=$(pass_field "$p" 'select(.session != null and .session.ended == null) | .session.session_id // empty' 2>/dev/null || true)
+    if [ -n "$open" ]; then
+      try cc session end pass "$PROJECT" "$p"
     fi
   done
 }
