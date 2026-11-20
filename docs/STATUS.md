@@ -47,13 +47,8 @@ Move is Geoff's call, asked at the end of the 1.1 design.
 
 ## Open decisions
 
-- Pass 6's uncovered stops, asked on 2026-11-19 before its launch. No standing answer covers
-  four stops pass 6 could reach: its executor spends twice its plan's path, its pull request
-  flags a call for Geoff, a third live run meets a permission prompt it didn't set up, or a fix
-  needs a setting, hook, or permission rule changed. Recommended: relaunch a spent executor once
-  from its branch with the stop at three times the path, and land a pull request whose calls
-  all stay inside the design with no open finding, naming each call in the report for the
-  sitting. The other two wait for Geoff. Until he answers, all four wait here.
+- Two stops in pass 6 would still wait for Geoff: a fix that needs a setting changed,
+  and a third live run with a prompt it didn't set up. Standing answer 38 covers the rest.
 - The drafts of the stopped dubplate design sessions are kept in
   `~/.local/state/desk/kept-drafts/`. The Retire round removes that folder, so the Move round must
   give them a home in the dubplate repo first.

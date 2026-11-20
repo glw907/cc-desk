@@ -322,6 +322,16 @@ The twelve in `round-run.md` hold, with these changes and additions.
   passing done item 10. After the sitting, the 1.1 design and the Move design can both start,
   and the hand-over names both. Everything else in answer 34 holds: the dotfiles PR carries only
   the two skills, and the 1.1 round answers each row of the lessons ledger.
+- **38. Pass 6 runs overnight (Geoff, 2026-11-19).** The conductor asked under "Open decisions"
+  about four stops no answer covered. Geoff wrote: "I'd like this effort to run overnight." The
+  conductor reads that as the recommended answers to the two stops that only need a ruling. An
+  executor that reaches twice its plan's path stops as usual, and the conductor relaunches it
+  once from its branch with the stop at three times the path; a second stop waits for Geoff. A
+  pull request whose `Calls:` line counts one or more lands by the rest of the usual test when
+  every call stays inside the design and no finding is open; the conductor names each call in
+  the report, for the sitting. A fix that needs a setting, hook, or permission rule changed, and
+  a third live run with a prompt it didn't set up, still wait for Geoff under "Open decisions",
+  while everything that builds on neither goes on.
 
 ## Start line
 
