@@ -42,17 +42,30 @@ Open documents: none.
 
 ## Stop
 
-Pass 5 (desk-check, pull request 21) stops before its live evidence. The relaunch ran
-`bash scripts/live-repairs.sh` on `e5017f2`. Two checks failed, and the run left two scratch
-sessions live that block the next `prep`: `757f73c4` (`cc-desk-scratch-refuse-20261119t221850z`,
-blocked) and `cedbf0db` (`cc-desk-scratch-hold-20261119t221850z`, working). Stop both, then
-relaunch `cc-desk-desk-check`; it runs the script again on the last commit and marks the pull
-request ready.
+Pass 5 (desk-check, pull request 21) stops with its live clause unmet, and nothing is marked
+ready. The relaunch ran `bash scripts/live-repairs.sh` twice more, which spent the two reruns it
+allowed. Run 3, on `9271b50`, passed every check but two, and the unit of both is the leftover
+scratch state of my own failed runs, not a defect in the check:
 
-The first failure was the script's own: it looked for the hook's input only under
-`hook-unmatched/`, and matched input lands on the session record. The second was real: a
-finished conductor's session reads `done`, which `claude stop` refuses, so the end failed on
-every check and its worktree stayed. Commit `70e3b15` fixes both.
+- "the next check started cc-desk-scratch-conductor": the rounds of runs 1 and 2 were done and
+  had no report, and the check names the first such round, so it never reached this run's.
+  I recorded reports `rep-0002` and `rep-0003` for them with `cc report add`, and the conductor
+  launched on the next tick (`ceb3e1c9`).
+- "no second conductor started": the script counted `7870b697`, the finished conductor of an
+  earlier run, still in the `--all` list. The script now counts only rows started since the run's
+  merge.
+
+Two product defects surfaced and are fixed: a done conductor row that stays listed after a clean
+`claude stop` blocked the end (`9271b50`), and a run on main never let the check pull the
+checkout, so the conductor's branch stayed and the next launch failed (`405130e`, the script now
+switches the checkout to the base branch for the merge and conductor phases). The refuse probe's
+plan also says the scratch stash is nobody's work, because the probe session declined the step
+once without a refusal.
+
+No cc-desk-scratch session is live: I stopped `b2818683`, `9f9efe3b`, `a14bac73`, and `aea1e689`,
+each launched by my own runs. Recommendation: relaunch `cc-desk-desk-check` for one run of the
+script on the last commit. The state is clean, so it should end `result: pass`; then it replaces
+this section with the evidence and marks the pull request ready.
 
 ## Next action
 

@@ -618,7 +618,11 @@ conductor_launches() {
 # prints how many distinct ids the list holds.
 conductor_seen() {
   claude agents --json --all >"$RUN/agents.json" 2>/dev/null || true
-  jq -r --arg n "$PROJECT-conductor" '.[]? | select(.name == $n) | .id' "$RUN/agents.json" >>"$RUN/conductor-ids"
+  # A finished conductor of an earlier run stays in the --all list, so only rows started
+  # since this run's merge count.
+  local since=0
+  [ -f "$RUN/merge-start" ] && since=$(date -d "$(cat "$RUN/merge-start")" +%s)
+  jq -r --arg n "$PROJECT-conductor" --argjson s "$since" '.[]? | select(.name == $n and (.startedAt // 0) >= $s * 1000) | .id' "$RUN/agents.json" >>"$RUN/conductor-ids"
   sort -u "$RUN/conductor-ids" | grep -c . || true
 }
 
