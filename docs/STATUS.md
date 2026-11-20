@@ -36,6 +36,33 @@ its service, its terminal link, and its polish. Geoff approved every call as rec
 Open documents: none.
 <!-- /round-report -->
 
+## Stop
+
+Pass 6 (`desk-run`) stopped on 2026-11-20 at Task 8, the rehearsal. GitHub Actions starts no
+job on either repo: each run ends in seconds with "The job was not started because recent
+account payments have failed or your spending limit needs to be increased." The newest are
+glw907/cc-desk run 44716215247 on `main` and 44712820555 on `desk-run`. The rehearsal and
+the recovery checks need the scratch repo's CI to pass before the check merges, so they can't
+run. Only Geoff can fix this, in GitHub's "Billing & plans" settings.
+
+What was tried: I checked both repos' newest runs before Task 8, and again after the last push
+(`4123d1d`). Every run since 09:20 UTC is blocked, and the pushes after `5b92f64` started no run.
+
+What is done on `desk-run`, each with the bare local gate passing:
+
+- Tasks 1 to 3 and 5: the two verbs and the report's release name.
+- Task 4, the kill probe: a kill comes back, so deaths go through `session end`
+  (`docs/research/2026-11-20-kill-probe.md`).
+- Tasks 6, 7, and 9: the two live scripts and the README and follow-ups.
+- Task 10: the whole-branch review, folded in `afa640c` and `4123d1d`.
+
+Pull request 22 is still a draft.
+
+Recommendation: once Actions runs again, rerun the blocked run with `gh run rerun 44712820555`.
+Then relaunch the executor from `docs/plans/2026-11-18-desk-run-executor-prompt.txt`, which
+starts again at Task 8. The timer runs this branch's build and the state folder holds
+`releases/done/`, so don't reinstall `main`'s build before the pass lands.
+
 ## Next action
 
 `conductor-cc-desk` runs pass 6 (`desk-run`) and the steps after it, then writes the hand-over.
