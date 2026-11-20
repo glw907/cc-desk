@@ -106,10 +106,10 @@ landed, and no pass builds beside this one, so this pass owns `cmd/`, `internal/
 | A killed process | The Sessions design says Claude Code's supervisor brings a killed process back within about 20 seconds, and proof 6 saw one kill come back as `working busy` under a new PID. Whether a kill ever gives a row the check reads as ended is unproved, so Task 4 probes it before any death is scripted | `docs/specs/2026-11-17-sessions-design.md:161`; `docs/research/2026-11-17-prove-findings.md:220` to `:263` |
 | The kill target | `state.Session` holds no process id. A script reads the list into a file, takes the row whose `sessionId` equals the record's `session_id`, and checks that the row's name starts `cc-desk-scratch-`, its `cwd` is at or under `~/Projects/cc-desk-scratch`, `/proc/<pid>/comm` reads `claude`, and `/proc/<pid>/cmdline` holds no `--bg-spare` (every background host and spare process also reads `claude`). Only then does it print the PID. The executor runs `kill <pid>` alone | `internal/sessions/list.go`; `internal/state/types.go` `Session` |
 | Recovery: the conductor | The recovery release's first round has one pass whose pull request the script writes itself, as `live-repairs.sh` does with `scripts/live/repairs/merge-plan.md`. Its merge makes the round's report due, and the check launches `cc-desk-scratch-conductor` for it. The script prints its PID within the conductor's first minute, the executor kills it, and the script lists it each minute for 10 minutes. It prints which brought it back: the same session id under a new PID (the supervisor), or a new id from the check. A conductor killed before any check has seen it comes back on the check's uncounted `launch_again`, the usual case; one already seen comes back on a counted `relaunch`. Item 8 asks for one death here, so either path passes, and the script names which ran. The page at `http://127.0.0.1:7908/`, fetched each minute, shows no stop for it | `internal/sessions/decide.go:274`, `:299` (the conductor's limit), `:505` to `:510`; design "The conductor starts when a report is due" |
-| Recovery: the pass | The second round holds a pass on a new fixture, `scripts/live/recover/work-plan.md`, that keeps working: 90 steps, each running `sleep 50` and nothing else, resumed at the next step after a relaunch, with `Bash(sleep 50)` in the release's allow rules. Each death waits until the record's `last_seen` is later than its `launched`, so it reaches a counted relaunch. The pass on `hold-plan.md` replies `ready` and goes idle within a minute, so the idle rule would relaunch it with no death at all, and three "deaths" on it would prove nothing. Each death's pass condition is the order in the check log and the saved lists: a check saw the row `working` after the previous launch, then the kill or end line, then the death's decision. After the second relaunch, the next death gives `stop` `relaunch_limit`, and the page reads "Needs you now" with the round's name. A list saved every 30 seconds through the run never shows two live rows for the pass. A row counts as the pass's when its name, short id, or session id is on the pass's records, or its `cwd` is under the pass's worktree, since proof 6's revived copy carried another name | `decide.go:511` to `:512`, `:547` to `:548`; `docs/research/2026-11-17-prove-findings.md:220` to `:263` |
+| Recovery: the pass | The second round holds a pass on a new fixture, `scripts/live/recover/work-plan.md`, that keeps working: 300 steps, each running the scratch gate (`bash scripts/gate.sh`), resumed at the next step after a relaunch. It keeps `hold-plan.md`'s lines that say not to plan the pass again, run a review, or update STATUS. The gate is already a scratch allow rule, and the release carries it. A foreground `sleep` can't serve: Claude Code's Bash tool blocks it (probed 2026-11-20: "Blocked: sleep 50"), and a session refused its one command goes idle, which brings back the death that proves nothing. Task 4 measures a step's minutes, and the executor sizes the step count so each launch works at least 15 minutes. Each death waits until the record's `last_seen` is later than its `launched`, so it reaches a counted relaunch. The pass on `hold-plan.md` replies `ready` and goes idle within a minute, so the idle rule would relaunch it with no death at all, and three "deaths" on it would prove nothing. Each death's pass condition is the order in the check log and the saved lists: a check saw the row `working` after the previous launch, then the kill or end line, then the death's decision. After the second relaunch, the next death gives `stop` `relaunch_limit`, and the page reads "Needs you now" with the round's name. A list saved every 30 seconds through the run never shows two live rows for the pass. A row counts as the pass's when its name, short id, or session id is on the pass's records, or its `cwd` is under the pass's worktree, since proof 6's revived copy carried another name | `decide.go:511` to `:512`, `:547` to `:548`; `docs/research/2026-11-17-prove-findings.md:220` to `:263` |
 | Recovery: the ask | The release's `ask_rules` holds one rule, `Bash(cksum ask-probe.txt)`. No session runs `cksum` unprompted, and only the third round's plan, `scripts/live/recover/ask-plan.md`, runs that exact command. Its prompt goes through the `PermissionRequest` hook onto the record, the session blocks, and within 10 minutes the page reads "Needs you now" and the line names `cksum ask-probe.txt`. Then the script ends the session through `session end` (standing answer 18) | `internal/launch/settings.go` `WriteSettings`; `decide.go:557` `lastPrompt` |
-| One recovery release | `ask_rules` are release-wide, but only the ask pass runs `cksum`, so one release holds all three rounds. The two-pass limit orders them: the merge pass and the hold pass first, the ask pass once the merge frees a slot | Sessions design, "Limits on a relaunch" |
-| The rehearsal's desk | `scripts/live-run.sh` reuses `live-desk.sh`'s `phase_open` and `phase_rule` shapes: a `tmux` session `cc-desk-scratch-desk-<stamp>` runs the installed binary with no arguments and no `--skill-file`, so the installed `cc-desk` skill loads. It opens with `-c` set to the run folder under `$CLAUDE_JOB_DIR/tmp`, never the scratch checkout: the cleanup's `Pull` skips while a live row's `cwd` sits in the checkout outside `.claude/worktrees` (`internal/launch/worktree.go:129` to `:134`), and the branch would then stay. The run ends the desk by its PID right after the ruling line. Prep also checks that `refs/heads/conductor` and `.claude/worktrees/conductor` are absent from the scratch checkout, since a left `conductor` branch makes the conductor's `Make` fail three times (`worktree.go:56` to `:57`, `launcher.go:107`). The script types one answer with `tmux send-keys -l` and checks `rulings.jsonl`. It saves `tmux pipe-pane` output and counts its typed entries | `scripts/live-desk.sh` `phase_open`, `phase_rule`, `type_in` |
+| One recovery release | `ask_rules` are release-wide, but only the ask pass runs `cksum`, so one release holds all three rounds. The two-pass limit orders them: the merge pass and the working pass first, the ask pass once the merge frees a slot | Sessions design, "Limits on a relaunch" |
+| The rehearsal's desk | `scripts/live-run.sh` reuses `live-desk.sh`'s `phase_open` and `phase_rule` shapes: a `tmux` session `cc-desk-scratch-desk-<stamp>` runs the installed binary with no arguments and no `--skill-file`, so the installed `cc-desk` skill loads. It opens with `-c` set to the run folder under `$CLAUDE_JOB_DIR/tmp`, never the scratch checkout: the cleanup's `Pull` skips while a live row's `cwd` sits in the checkout outside `.claude/worktrees` (`internal/launch/worktree.go:129` to `:134`), and the branch would then stay. The run ends the desk right after the ruling line with `tmux kill-session -t cc-desk-scratch-desk-<stamp>`, run alone. `lib.sh`'s kill guards cover pass and conductor sessions only, and the desk's `cwd` is outside the scratch checkout. Prep also checks that `refs/heads/conductor` and `.claude/worktrees/conductor` are absent from the scratch checkout, since a left `conductor` branch makes the conductor's `Make` fail three times (`worktree.go:56` to `:57`, `launcher.go:107`). The script types one answer with `tmux send-keys -l` and checks `rulings.jsonl`. It saves `tmux pipe-pane` output and counts its typed entries | `scripts/live-desk.sh` `phase_open`, `phase_rule`, `type_in` |
 | The rehearsal's pass | A release `run-<stamp>` with one round and one pass whose question the typed answer settles. The check starts the pass with the real `pass.txt` prompt, so the session loads `pass-core` and `cc-desk-work` from `~/.claude/skills/`, plans from the scratch base's `docs/`, adds one function and its test to `toy.go` and `toy_test.go`, runs the scratch gate, opens its pull request, and runs `pass ready`. The timed check merges after the scratch CI passes. This is the first full `pass-core` session the runs have launched, so its minutes are unmeasured. The toy plan says to start no background subagent or watch and to watch CI in the foreground, since a turn that ends to wait reads `done` and meets the idle rule. Task 8's first run measures it | `internal/launch/templates/pass.txt`; `~/Projects/cc-desk-scratch/scripts/gate.sh` |
 | The scratch base | Prep cuts `run-base-<stamp>` from the scratch `main`, adds `docs/specs/` and `docs/plans/` for the toy change from `scripts/live/run/`, pushes it, records it as the release's default branch, and switches the scratch checkout to it, alone, after checking the checkout is clean. The cleanup pulls only a checkout on the default branch, and only a pulled checkout gets `git branch -d` (PR 21's miss). Close switches the checkout back to `main` | `internal/launch/worktree.go` `Remove`; `cmd/cc-desk/merge.go` cleanup |
 | Gone within 10 minutes | A listing each minute from the merge for 10 minutes. The session is gone when its row is missing or reads `stopped`, `done`, or `failed`. The worktree is gone when `git worktree list` lacks its path, and the branch when `git branch --list` lacks it. The remote branch stays, since nothing deletes it | `docs/specs/2026-11-17-sessions-design.md:159` |
@@ -197,23 +197,23 @@ it:
 
 | Clause | Task | Command | Pass when |
 | --- | --- | --- | --- |
-| 8: the conductor is killed and running again within 10 minutes | 4, 7, 11 | `bash scripts/live-recover.sh` | The kill line, then a listing each minute shows a live conductor row within 10 minutes, with the mechanism named |
-| 8: the page shows no stop | 7, 11 | the same | The page at `http://127.0.0.1:7908/`, fetched each minute, shows no stop for the conductor |
-| 8: a pass killed three times; "Needs you now" with the round's name after the second relaunch | 4, 7, 11 | the same | For each death in turn: a check saw the row `working` after the previous launch, then the death line, then its decision. Two counted relaunches, then `relaunch_limit`, and the page's text holds "Needs you now" and the round's name |
-| 8: never two sessions for that pass | 7, 11 | the same | Every saved list holds at most one live row for the pass, by the mechanism table's row key |
-| 8: the ask reads "Needs you now" within 10 minutes and names the command | 7, 11 | the same | The page's line holds "Needs you now" and `cksum ask-probe.txt` within 10 minutes of the launch |
-| 9: from one typed answer, the pass starts | 6, 11 | `bash scripts/live-run.sh` | One ruling line, then a `start` decision for the pass |
-| 9: it opens a pull request and the timed check merges it | 6, 11 | the same | A `merged pull request <n>` outcome from a run of `cc-desk-check.service`, and no merge by the script |
-| 9: within 10 minutes the session, worktree, and branch are gone | 3, 6, 11 | the same | The minute-by-minute listing, from the merge, shows all three gone |
-| 9: the conductor starts by itself and records one report, which the page lists | 1, 6, 11 | the same | A `launch` `report_due` decision, then exactly one report recorded by that conductor, listed on the page |
-| 9: no permission prompt for the pass; each refused command listed | 6, 11 | the same | `prompts` 0 on every record of the pass; each refusal printed, and the record's refusal count equals the denials log's count for the run's ids |
-| 9: no merge command in the transcripts | 3, 6, 11 | the same | The ids read and 0 matches |
-| 9: nothing typed after the answer | 6, 11 | the same | One typed entry in the pane log |
-| 10: the setup script on a copy gives one question waiting for `cc-desk` | 5, 11 | `bash scripts/setup-release-check.sh` | Each of its lines reads ok |
-| 10: the rehearsal passed with the allow rules that release carries | 5, 6, 11 | the same, and `live-run.sh`'s rules line | The two filled rule lists match |
+| 8: the conductor is killed and running again within 10 minutes | 4, 7, 8, 11 | `bash scripts/live-recover.sh` | The kill line, then a listing each minute shows a live conductor row within 10 minutes, with the mechanism named |
+| 8: the page shows no stop | 7, 8, 11 | the same | The page at `http://127.0.0.1:7908/`, fetched each minute, shows no stop for the conductor |
+| 8: a pass killed three times; "Needs you now" with the round's name after the second relaunch | 4, 7, 8, 11 | the same | For each death in turn: a check saw the row `working` after the previous launch, then the death line, then its decision. Two counted relaunches, then `relaunch_limit`, and the page's text holds "Needs you now" and the round's name |
+| 8: never two sessions for that pass | 7, 8, 11 | the same | Every saved list holds at most one live row for the pass, by the mechanism table's row key |
+| 8: the ask reads "Needs you now" within 10 minutes and names the command | 7, 8, 11 | the same | The page's line holds "Needs you now" and `cksum ask-probe.txt` within 10 minutes of the launch |
+| 9: from one typed answer, the pass starts | 6, 8, 11 | `bash scripts/live-run.sh` | One ruling line, then a `start` decision for the pass |
+| 9: it opens a pull request and the timed check merges it | 6, 8, 11 | the same | A `merged pull request <n>` outcome from a run of `cc-desk-check.service`, and no merge by the script |
+| 9: within 10 minutes the session, worktree, and branch are gone | 3, 6, 8, 11 | the same | The minute-by-minute listing, from the merge, shows all three gone |
+| 9: the conductor starts by itself and records one report, which the page lists | 1, 6, 8, 11 | the same | A `launch` `report_due` decision, then exactly one report recorded by that conductor, listed on the page |
+| 9: no permission prompt for the pass; each refused command listed | 6, 8, 11 | the same | `prompts` 0 on every record of the pass; each refusal printed, and the record's refusal count equals the denials log's count for the run's ids |
+| 9: no merge command in the transcripts | 3, 6, 8, 11 | the same | The ids read and 0 matches |
+| 9: nothing typed after the answer | 6, 8, 11 | the same | One typed entry in the pane log |
+| 10: the setup script on a copy gives one question waiting for `cc-desk` | 5, 8, 11 | `bash scripts/setup-release-check.sh` | Each of its lines reads ok |
+| 10: the rehearsal passed with the allow rules that release carries | 5, 6, 8, 11 | the same, and `live-run.sh`'s rules line | The two filled rule lists match |
 | 11: the gate passes with no skip | 10 | `bash scripts/gate.sh` | `gate: ok` |
-| 11: each live script prints one line per check and its result; the PR holds the output from the last commit | 11, 12 | the three scripts | Each ends with one result line; the PR holds the output whole |
-| Each run ends with no question waiting, no report unread, and no session running (answer 21) | 6, 7, 11 | each script's `close` | Its snapshot line reads 0, 0, and 0, and `release done` moved the run's release |
+| 11: each live script prints one line per check and its result; the PR holds the output from the last commit | 8, 11, 12 | the three scripts | Each ends with one result line; the PR holds the output whole |
+| Each run ends with no question waiting, no report unread, and no session running (answer 21) | 6, 7, 8, 11 | each script's `close` | Its snapshot line reads 0, 0, and 0, and `release done` moved the run's release |
 
 ### Pre-code runs on `d7279c7`
 
@@ -245,7 +245,7 @@ it:
 
 Lane A is Tasks 1 and 2, and lane B is Tasks 3 and 5. Each lane runs as a pair per
 `executor.md` "Pairs" (Sonnet, medium, descriptions `desk-run task <n>`). Task 4 is the
-executor's, once Tasks 1 to 3 are on the branch. Tasks 6 and 7 start once Task 4 has settled
+executor's, once both lanes (Tasks 1, 2, 3, and 5) are on the branch. Tasks 6 and 7 start once Task 4 has settled
 standing answer 70's branch, Task 6 on lane B and Task 7 on lane A. Then the executor runs
 Tasks 9, 10, 8, 11, and 12, in that order. The docs and the review come before the live runs,
 so a clean Task 8 run is already on the last commit.
@@ -296,8 +296,9 @@ Class `runner`, live. Order, each step run alone:
    release done cc-desk-scratch`. The snapshot reads 0 needs, 0 waits, and 0 unread.
 3. Cut `probe-base-<stamp>` from the scratch `main`, copy `work-plan.md` into its
    `docs/plans/` as `live-desk.sh` does at line 212, push it, and add the probe release from
-   `scripts/live/probe/release.json` on that base. Wait for the check to start the pass, then
-   for a later check to see it: its `last_seen` later than its `launched`.
+   `scripts/live/probe/release.json` on that base, which carries the gate's allow rule. Wait
+   for the check to start the pass, then for a later check to see its row reading `working`,
+   with `last_seen` later than `launched`. Record a gate step's minutes.
 4. Print the pass's PID through the guards, then run `kill <pid>` alone. Save the list every 5
    seconds for 90 seconds, then once a minute through the next check run. Record the row's
    state, PID, and session id at each read, and the check's decision.
@@ -329,8 +330,8 @@ Class `runner`. Outcome: `scripts/live-run.sh` with phases `prep`, `open`, `rule
 `merge`, `listing`, `report`, `evidence`, and `close`, and a `run` that chains them. Each phase
 prints one line per check, and the script ends with one result line. `prep` refuses a dirty
 scratch checkout, any live `cc-desk-scratch-` session, or a left `conductor` branch or
-worktree. `rule` ends the desk's process by its recorded PID, alone, right after the ruling
-line. `close` ends any session the run's records hold through `session end`, marks every
+worktree. `rule` ends the desk with `tmux kill-session` on its recorded name, alone, right after the
+ruling line. `close` ends any session the run's records hold through `session end`, marks every
 report read, runs `release done`, switches the scratch checkout back to `main`, and prints the
 snapshot line. Check: `bash -n`, then the live run in Task 8. Test: `bash -n
 scripts/live-run.sh`.
@@ -360,10 +361,12 @@ It is the pass's one whole-branch read (standing answer 81). `bash scripts/gate.
 
 ### Task 8: the live runs and the fixes they show (215 minutes)
 
-Class `runner`, live. Run `live-run.sh run`, then `live-recover.sh` phase by phase. Each
+Class `runner`, live. Run `live-run.sh run`, then `setup-release-check.sh`, so its rules line
+compares the final lists, then `live-recover.sh` phase by phase. Each
 finding is fixed inside the design with a test, or filed, by standing answers 18, 19, 71, 75,
 and 81. A rule a run needed goes into the shared source and the scratch release (`cc-desk
-rules add`). Priced at 60 minutes for the rehearsal, 125 for the recovery, and 30 for fixes.
+rules add`). Priced at 60 minutes for the rehearsal, 5 for the setup check, 125 for the recovery, and 25
+for fixes.
 The rehearsal waits up to 5 minutes for the timer before each of the pass's start, its merge,
 and the two conductor starts, about 15 for the pass's build and CI, and 10 for the listing.
 The recovery takes about 15 to reach the merge, 10 for the conductor's watch, about 25 for
@@ -506,7 +509,7 @@ The round plan's 13 to 38 hold. These add to them.
   would make the recovery release read as reported, and the real project's second release could
   never record its own. This carries out design line 378, so it is inside the design.
 - `[planner]` The ask rule is `Bash(cksum ask-probe.txt)`, a command no session runs
-  unprompted, so the merge and hold passes of the same release never block on it.
+  unprompted, so the merge and working passes of the same release never block on it.
 - `[planner]` The staging rule in the shared source is `Bash(git add *)`, so the rehearsal and
   the real pass carry one list.
 - `[planner]` "The real conductor" is a conductor the binary launched for the scratch release,
@@ -533,7 +536,7 @@ The round plan's 13 to 38 hold. These add to them.
   `report` verb, the carry-out, and `buildReports`, with a tag rule and a snapshot test. The
   scripts warn that `main`'s build can't read the folder until the pass lands.
 - `[review]` The desk opens outside the scratch checkout, so the cleanup's pull isn't skipped,
-  and prep checks for a left `conductor` branch. Task 4 waits for Tasks 1 to 3, and item 10's
+  and prep checks for a left `conductor` branch. Task 4 waits for both lanes, and item 10's
   live check runs once `release done` is on the branch.
 - `[review]` Ending a pass by `session end` costs about 25 minutes a death, so Task 8's recovery
   is 125 and the probe's cutoff 30. The refusals clause cross-checks the denials log. Answer 72
@@ -543,6 +546,12 @@ The round plan's 13 to 38 hold. These add to them.
 - `[review]` The minor findings are folded: the cites, the `--bg-spare` guard, the page's URL,
   the kind-first `session end` shape, the copy under the check's lock, the unit writes in the
   pre-flight, and the dirty-checkout refusal proved live in Task 8.
+- `[advisor]` The final advisor read found four gaps, all folded. The reviewer's `sleep 50`
+  fixture is blocked by Claude Code's Bash tool, so the working pass repeats the scratch gate. Task 4 waits
+  for both lanes, since step 2 runs Task 5's script. Task 8 runs `setup-release-check.sh`, so
+  item 10 has output on the last commit when no fix follows. The desk ends through `tmux
+  kill-session`, outside the kill guards. Task 8's fix minutes absorb the setup check, so the
+  path stays at the 675 the conductor raised to.
 
 ## Rulings
 
