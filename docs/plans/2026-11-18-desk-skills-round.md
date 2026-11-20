@@ -314,6 +314,14 @@ The twelve in `round-run.md` hold, with these changes and additions.
   `docs/plans/2026-11-19-desk-pass-6-conductor-prompt.txt`, does the steps after pass 5 (the
   skills read, the `v0.1.0` tag, the dotfiles PR, the install), then pass 6, the steps after it,
   and the round's last hand-over.
+- **37. Move starts at 1.0, beside 1.1 (Geoff, 2026-11-19).** Geoff wrote to the third conductor:
+  "I'd like to start the work on both cairn and dubplate once we hit the cc-desk version 1.0. We
+  can work on cc-desk 1.1 concurrently with those efforts." This changes answer 34's order. The
+  Move round, which puts cairn and dubplate under cc-desk, no longer waits for 1.1 to land. The
+  conductor reads 1.0 as the release this round finishes: pass 6 landed and Geoff's sitting
+  passing done item 10. After the sitting, the 1.1 design and the Move design can both start,
+  and the hand-over names both. Everything else in answer 34 holds: the dotfiles PR carries only
+  the two skills, and the 1.1 round answers each row of the lessons ledger.
 
 ## Start line
 

@@ -19,7 +19,8 @@
   pass 5 has run: no `v0.1.0` tag, no dotfiles PR, and the two skills aren't installed. The
   round's report is `~/Projects/initiatives/cc-desk/reports/desk-report.md`.
 - Every stop in the round has a row in `docs/follow-ups/desk-round-lessons.md`. The 1.1 round
-  answers each row, for cc-desk and `pass-core` (standing answer 34).
+  answers each row, for cc-desk and `pass-core` (standing answer 34), beside Move (answer 37).
+- The fresh conductor (`conductor-cc-desk`) runs the steps after pass 5: `v0.1.0` is tagged.
 
 <!-- round-report sessions -->
 **The Sessions round has landed.** Pull requests 8, 10, 12, 14, and 16 record, start, answer,
@@ -45,8 +46,9 @@ claude --bg --model claude-opus-5-5 --effort high --name conductor-cc-desk "$(ca
 ```
 
 After pass 6 come Geoff's sitting for the real run, then the 1.1 design session in his terminal
-(`docs/plans/2026-11-19-1.1-design-prompt.txt`). Move follows 1.1
-(`docs/plans/2026-11-19-move-design-prompt.txt`). Whether the 1.2 round comes before or after
+(`docs/plans/2026-11-19-1.1-design-prompt.txt`) and the Move design session
+(`docs/plans/2026-11-19-move-design-prompt.txt`). Move starts once cc-desk reaches 1.0, after
+the sitting, and 1.1 runs beside it (standing answer 37). Whether 1.2 comes before or after
 Move is Geoff's call, asked at the end of the 1.1 design.
 
 ## Open decisions
