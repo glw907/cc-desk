@@ -1,0 +1,10 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "cc-desk-scratch-run-{{stamp}}",
+  "repo": "glw907/cc-desk-scratch",
+  "rounds": [
+    {"name": "run-{{stamp}}", "summary": "One toy change, from one typed answer to a merged pull request.", "needs_geoff": true, "design": "docs/specs/run-{{stamp}}-design.md"}
+  ],
+  "allow_rules": []
+}

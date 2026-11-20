@@ -19,6 +19,19 @@ hook`. The hook records each command that auto mode refuses on the session's rec
 nothing and exits 0, so the session carries on. A failure is one line in `refusal-hook.log` under
 the state folder.
 
+`cc-desk release done <project>` ends a project's live release. Its file moves to
+`releases/done/`, so the project can take a new release, and each report names the release it
+belongs to. The command refuses while one of the release's records holds a live session.
+`cc-desk session end pass <project> <name>` and `cc-desk session end conductor <project>` end the
+record's open session. Both commands wait for the check's lock first.
+
+`bash scripts/setup-release.sh` adds the cc-desk release that the real run starts from, and
+`bash scripts/setup-release-check.sh` checks it on a copy of the state folder. Two scripts run
+cc-desk for real against the scratch repo. `scripts/live-run.sh` rehearses a whole release, from
+the desk's ruling to the release report. `scripts/live-recover.sh` checks that the check brings
+back a conductor and a pass after each death, stops the pass at its relaunch limit, and stops a
+pass at an `ask` rule. Each runs one phase per call; `live-run.sh` with no phase runs them all.
+
 `cc-desk timer install` puts the binary and a systemd user timer in place to run the
 check every five minutes, and `cc-desk timer status` says when it last ran. `bash scripts/gate.sh`
 runs the checks, and fails on any skipped test.

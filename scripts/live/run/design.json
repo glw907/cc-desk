@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "passes": [
+    {
+      "name": "run-{{stamp}}",
+      "summary": "Add Double to the toy package with its test, run the gate, and open a pull request.",
+      "round": "run-{{stamp}}",
+      "planned_minutes": 15,
+      "model": "sonnet",
+      "effort": "medium",
+      "questions": ["rq1"],
+      "state": "not_started"
+    }
+  ],
+  "questions": [
+    {
+      "id": "rq1",
+      "text": "Should the toy package gain a Double function?",
+      "options": ["yes", "no"],
+      "recommended": "yes",
+      "background": ["The toy package has one function, Add. Double is a one-line function with a one-line test, and nothing else calls it."],
+      "causes": {
+        "yes": "The pass adds Double and its test, runs the gate, and opens a pull request that the timed check merges.",
+        "no": "The package stays as it is and the pass has nothing to build."
+      },
+      "reason": "The change is tiny and the gate covers it."
+    }
+  ]
+}

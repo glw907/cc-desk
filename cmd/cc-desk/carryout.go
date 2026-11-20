@@ -236,7 +236,7 @@ func (l *launcher) removeConductorWorktree(ctx context.Context, project string, 
 	if err != nil {
 		return "", err
 	}
-	if sess.Worktree == "" || !sessions.ReportRecorded(s, project, sess.ForReport) {
+	if sess.Worktree == "" || !sessions.ReportRecorded(s, project, rf.Name, sess.ForReport) {
 		return "", nil
 	}
 	rows, err := sessions.List(ctx, l.runner.Claude)

@@ -17,9 +17,10 @@ asking how the round was going.
 
 What should change:
 
-1. **cc-desk.** A live script, or the check, needs a way to end a session that cc-desk launched
-   and whose pass is stopped. The Fable review's "sessions nobody owns" item is the page half of
-   this. The Move design should settle whether the desk, a verb, or the check ends one.
+1. **cc-desk.** Pass 6 (`desk-run`) added `cc-desk session end`, which ends the open session
+   of a pass or conductor record through the binary, so a live script no longer waits on the
+   check. The Move design settles whether the desk or the page offers it to Geoff. The Fable
+   review's "sessions nobody owns" item is the page half of this.
 2. **The plan.** A plan whose live script waits on the check should name the check's rule that
    ends the wait, quoted from the code. This plan didn't, and its plan review didn't catch it.
 3. **The conductor.** A watch on a building pass ends on either the pull request turning ready or

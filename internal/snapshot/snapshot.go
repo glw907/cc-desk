@@ -84,9 +84,10 @@ func closedOf(p *state.Pass) *Closed {
 }
 
 // buildReports folds each report's passes from s.Releases, which holds the
-// done releases the rest of the snapshot skips. A release report covers every
-// pass of the project's first release; a round's covers that round's passes
-// in the first release that has the round.
+// done releases the rest of the snapshot skips. A report names its release, so
+// a release report covers every pass of that release and a round's covers that
+// round's passes in it. A report with no release name reads the project's first
+// release, or for a round the first that has the round.
 func buildReports(s *state.State) []ReportEntry {
 	out := []ReportEntry{}
 	for _, r := range s.Reports.Reports {
@@ -97,7 +98,7 @@ func buildReports(s *state.State) []ReportEntry {
 			e.Round = &round
 		}
 		for _, rf := range s.Releases {
-			if rf.Project != r.Project || (r.Round != "" && !slices.ContainsFunc(rf.Rounds, func(rd state.Round) bool { return rd.Name == r.Round })) {
+			if rf.Project != r.Project || (r.Release != "" && rf.Name != r.Release) || (r.Round != "" && !slices.ContainsFunc(rf.Rounds, func(rd state.Round) bool { return rd.Name == r.Round })) {
 				continue
 			}
 			for i := range rf.Passes {

@@ -12,9 +12,9 @@ import (
 func newSessionCmd(f *rootFlags) *cobra.Command {
 	cmd := group(&cobra.Command{
 		Use:   "session",
-		Short: "Start or finish a conductor or design writer session",
+		Short: "Start, finish, or end a session",
 	})
-	cmd.AddCommand(newSessionStartCmd(f), newSessionFinishCmd(f))
+	cmd.AddCommand(newSessionStartCmd(f), newSessionFinishCmd(f), newSessionEndCmd(f))
 	return cmd
 }
 
@@ -109,4 +109,62 @@ func newSessionFinishCmd(f *rootFlags) *cobra.Command {
 			return err
 		},
 	}
+}
+
+// endRecord gives the record place a pass or conductor stands for.
+func endRecord(args []string) (project, record string) {
+	if args[0] == "pass" {
+		return args[1], "pass:" + args[2]
+	}
+	return args[1], "conductor"
+}
+
+func newSessionEndCmd(f *rootFlags) *cobra.Command {
+	var lf launchFlags
+	cmd := &cobra.Command{
+		Use:   "end pass <project> <name> | conductor <project>",
+		Short: "Stop the open session of a pass or conductor record",
+		Long: "Stop the record's open session and print what happened: stopped, already gone, or\n" +
+			"listed done. The command refuses a record with no open session, so it acts only on a\n" +
+			"session this binary launched and recorded. It takes check.lock first, so no check run can\n" +
+			"relaunch past it, and it records nothing: the next check reads the ended row.",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("%s needs a kind, pass or conductor", cmd.CommandPath())
+			}
+			want := map[string]int{"pass": 3, "conductor": 2}[args[0]]
+			if want == 0 {
+				return fmt.Errorf("unknown session kind %q: use pass or conductor", args[0])
+			}
+			return cobra.ExactArgs(want)(cmd, args)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			project, record := endRecord(args)
+			l, err := newLauncher(f, &lf)
+			if err != nil {
+				return err
+			}
+			unlock, err := state.LockFile(l.dir, state.CheckLockFile, state.LockWait)
+			if err != nil {
+				return err
+			}
+			defer unlock()
+			s, _, err := l.liveRelease(project)
+			if err != nil {
+				return err
+			}
+			sess := recordOf(s, project, record)
+			if sess == nil || sess.Ended != nil {
+				return state.Refuse(fmt.Sprintf("%s/%s has no open session", project, record))
+			}
+			e, err := l.stopSession(context.Background(), sess.ShortID)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), e.step(sess.ShortID))
+			return nil
+		},
+	}
+	lf.register(cmd)
+	return cmd
 }

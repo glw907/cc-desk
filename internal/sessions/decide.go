@@ -214,22 +214,22 @@ func Plan(s *state.State, ev Evidence, now time.Time) ([]Result, error) {
 // report. A round's report names the round.
 const ReleaseReport = "release"
 
-// hasReport reports whether a report is recorded for the project and round,
+// hasReport reports whether a report is recorded for the release's round,
 // the release's own when round is empty.
-func hasReport(s *state.State, project, round string) bool {
-	return slices.ContainsFunc(s.Reports.Reports, func(r state.Report) bool { return r.Project == project && r.Round == round })
+func hasReport(s *state.State, project, release, round string) bool {
+	return slices.ContainsFunc(s.Reports.Reports, func(r state.Report) bool { return r.Matches(project, release, round) })
 }
 
 // ReportRecorded reports whether the report a conductor was started for is
 // recorded. A conductor with no ForReport has none.
-func ReportRecorded(s *state.State, project, forReport string) bool {
+func ReportRecorded(s *state.State, project, release, forReport string) bool {
 	switch forReport {
 	case "":
 		return false
 	case ReleaseReport:
-		return hasReport(s, project, "")
+		return hasReport(s, project, release, "")
 	}
-	return hasReport(s, project, forReport)
+	return hasReport(s, project, release, forReport)
 }
 
 // ReportDue names the report a live release is waiting on: the first round,
@@ -256,11 +256,11 @@ func ReportDue(s *state.State, rf *state.ReleaseFile) (string, bool) {
 		switch {
 		case !has:
 			empty = true
-		case done && !hasReport(s, rf.Project, round.Name):
+		case done && !hasReport(s, rf.Project, rf.Name, round.Name):
 			return round.Name, true
 		}
 	}
-	if allDone && !empty && !hasReport(s, rf.Project, "") {
+	if allDone && !empty && !hasReport(s, rf.Project, rf.Name, "") {
 		return ReleaseReport, true
 	}
 	return "", false

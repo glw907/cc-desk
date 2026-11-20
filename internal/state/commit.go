@@ -117,6 +117,11 @@ func Commit(dir string, now time.Time, wait time.Duration, ev Event, render Rend
 		if err := atomicfile.WriteFile(full, data, 0o644); err != nil {
 			return nil, fmt.Errorf("write %s: %w", rf.Path, err)
 		}
+		if rf.moved != "" {
+			if err := os.Remove(filepath.Join(dir, rf.moved)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+				return nil, fmt.Errorf("remove %s: %w", rf.moved, err)
+			}
+		}
 	}
 
 	if s.usageDirty {

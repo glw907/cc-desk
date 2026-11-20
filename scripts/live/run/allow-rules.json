@@ -1,0 +1,9 @@
+[
+  "Bash(bash scripts/gate.sh)",
+  "Bash(go test ./...)",
+  "Bash(git add *)",
+  "Bash(git commit -m *)",
+  "Bash(git push origin {{branch}})",
+  "Bash(gh pr create --repo {{repo}} *)",
+  "Bash(git rev-parse HEAD)"
+]

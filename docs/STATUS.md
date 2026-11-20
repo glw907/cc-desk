@@ -43,6 +43,7 @@ after both cc-desk repos were made public so Actions runs. `conductor-cc-desk` l
 and runs the steps after it. The timer runs the branch's build, so `main`'s build isn't
 reinstalled before the pass lands. Then Geoff's sitting, then his call on the Move design
 (below), and 1.1's design (`docs/plans/2026-11-19-1.1-design-prompt.txt`).
+Pass 6's executor is `cc-desk-desk-run`, background job `294c4d1c`, resumed 2026-11-20 at 17:00 UTC.
 
 ## Open decisions
 

@@ -1,0 +1,14 @@
+{
+  "format": 1,
+  "project": "cc-desk-scratch",
+  "name": "cc-desk-scratch-recover",
+  "repo": "glw907/cc-desk-scratch",
+  "rounds": [],
+  "passes": [],
+  "allow_rules": [
+    "Bash(bash scripts/gate.sh)"
+  ],
+  "ask_rules": [
+    "Bash(cksum ask-probe.txt)"
+  ]
+}
