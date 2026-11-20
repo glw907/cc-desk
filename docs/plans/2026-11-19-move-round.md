@@ -30,7 +30,7 @@ that the log shows refused, or that the log has never seen. Each has its alterna
 | `claude stop <id>` | 6 rows, from 2026-11-10 to 2026-11-18, as "[Interfere With Workloads]", "[Undermining Oversight]", and "[Destructive or Unwanted Actions]" | The conductor stops one session, `2d4cd0a4` (`cairn-cms-tool-delete`), run alone. The entry below names it. A refusal is standing answer 41's |
 | `git push origin --delete <branch>` | 1 row, "[Git Destructive]" | `gh pr close 259 -R glw907/cairn-cms --delete-branch`, run alone, which the entry names |
 | `git stash drop` | 10 rows, from 2026-11-17 to 2026-11-20, as "[Destructive or Unwanted Actions]" | Nobody drops the stash `foundation3-task3-wip`. The report lists it |
-| `kill` or `pkill` of a process | 10 rows, most as "[Interfere With Workloads]" | No Move session kills a process. A stuck cairn or dubplate session ends through `cc-desk session end`, pass 6's verb |
+| `kill` or `pkill` of a process | 10 rows, most as "[Interfere With Workloads]" | No Move session kills a process. A stuck cairn or dubplate session ends through `cc-desk session end pass <project> <name>`, pass 6's verb |
 | `gh pr merge` | 1 row, "[Merge Without Review]", and `claude-merge-guard` denies it for every session | No session runs it. Move's pull requests land by `approval-queue land`. The timed check merges cairn and dubplate pull requests, as the entry names |
 | An edit to a Claude settings file | 5 of the 16 Edit and Write rows were on a `settings.json`, and 11 rows in all read "[Self-Modification]" | No pass makes one. The designing session adds the entry below after Geoff's approval. The conductor writes only `~/.local/state/cc-desk/settings.json`, which the entry names |
 | `git worktree remove` and `git branch -D` in cairn-cms | None in the log for this use | Run alone, on `foundation-7` only, once pass 3 has kept its plan. The entry names them |
@@ -204,7 +204,7 @@ nothing.
 release. The conductor reads the prompt's command from `cc-desk snapshot`. If the command is
 one the pass's steps run and the release's rules should allow, the conductor adds the rule
 with `cc-desk rules add <project> <rule>`, files the gap as a follow-up, and ends the session
-with `cc-desk session end`, so the check relaunches it under the new rule. A command the pass
+with `cc-desk session end pass <project> <name>`, so the check relaunches it under the new rule. A command the pass
 shouldn't run, or a third prompt in one pass, parks the pass under "Open decisions". The
 conductor never answers a prompt in Geoff's name.
 
@@ -220,6 +220,13 @@ decisions" in `docs/STATUS.md`, and ends.
 cc-desk has no field for. The conductor writes the overrun under "Open decisions" with each
 session's first forecast, and the report names it. It ends no session for it, and the check
 carries on with the pass in flight.
+
+**46. CI stops running mid-round.** A GitHub Actions block, such as the billing block of
+2026-11-20, leaves a pull request with no check, and the merge waits with `no_check`. The
+conductor lands nothing without its checks. It writes the block under "Open decisions" with the
+first run that failed and the message GitHub gave, and goes on with every step that rests on no
+merge. The check's merges in cairn and dubplate wait the same way, which needs nothing from the
+conductor. Once a run passes again, the conductor reads each waiting pull request afresh.
 
 ### Every stop and its answer
 
@@ -244,17 +251,18 @@ carries on with the pass in flight.
 | A leftover scratch session | 33 |
 | A 1.1 pass holds a file | 40 |
 | The first step finds the sitting failed | 44 |
+| GitHub Actions runs no job | 46; at the start, the start line's state 7 |
 
 ## Start line
 
 The session that takes Geoff's approval launches the conductor from the main checkout, with
-this line run alone, once the six states read true:
+this line run alone, once the seven states read true:
 
 ```text
 claude --bg --model claude-opus-5-5 --effort medium --name conductor-cc-desk-move "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-move-conductor-prompt.txt)"
 ```
 
-The conductor checks the six again before it launches the first planner.
+The conductor checks the seven again before it launches the first planner.
 
 1. `docs/STATUS.md` on `origin/main` says pass 6 has landed, that Geoff's sitting passed done
    item 10, and that he approved this design. It names the conductor prompt as the next action.
@@ -266,6 +274,8 @@ The conductor checks the six again before it launches the first planner.
 5. `claude-worktree-busy` exits 0 for the cc-desk, cairn-cms, and dubplate checkouts, or its
    hit is one standing answer 43 or 6 covers.
 6. The weekly usage figure is under the ceiling.
+7. GitHub Actions runs again: `gh run list -R glw907/cc-desk -L 1` shows a run created after
+   the billing block was cleared, with a conclusion that isn't a billing failure.
 
 ### Launch checks, run on 2026-11-20
 
@@ -279,6 +289,8 @@ The conductor checks the six again before it launches the first planner.
 | `git -C ~/Projects/cairn-cms stash list` | `stash@{0}: On worktree-agent-a373c1844f2b29bf4: foundation3-task3-wip` |
 | `cc-desk snapshot` | One release, `cc-desk-scratch`, from pass 6's rehearsal. No cairn-cms or dubplate release |
 | `git check-ignore -q .claude/worktrees/x` in cairn-cms and dubplate | Exit 0 in both |
+| `gh run list -L 3` on each repo, at 09:40 UTC | cc-desk: three `gate` runs `failure` from 09:25 UTC, the billing block. cairn-cms: last run `success` on 2026-11-19. dubplate: last run `success` on 2026-11-17. cc-desk-scratch: last run `success` at 06:39 UTC |
+| `git -C .claude/worktrees/desk-run log origin/main..HEAD` | Pass 6 at `f2b0c18`, seven commits, draft pull request 22. `release done` is built. `session end` is its plan's Task 2 |
 
 ## Decisions
 

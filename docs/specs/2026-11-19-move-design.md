@@ -263,7 +263,8 @@ each answered question of the release's later rounds. Where the round's findings
 answer, it writes a new question with `question add` that quotes the earlier ruling and says what
 changed. The follow-up is then done.
 
-**`session end` belongs to the desk.** Pass 6 adds `cc-desk session end <project> <record>`. The
+**`session end` belongs to the desk.** Pass 6 adds `cc-desk session end pass <project> <name>`
+and `session end conductor <project>`. The
 desk skill offers it when Geoff asks to end a stuck session, and the page shows the command in
 words, as it shows every other. Main design done item 3 keeps the page free of controls, so the
 page gets no button. Pass 6's rewording of `leftover-live-session-parks-a-pass.md` points here.
@@ -392,12 +393,21 @@ The three rewords land with this design. A fold is removed by the pass named.
 
 ## Pass 6's state, as read
 
-Read on 2026-11-20 before this design was committed. Pass 6's `desk-run` worktree sat at
-`d7279c7` with no commits. Its plan, `docs/plans/2026-11-18-desk-run-plan.md`, was untracked
-there, and its planner session was busy. Nothing of pass 6 was on `origin/main`. This design
-relies on two things that plan builds: `cc-desk session end` and `cc-desk release done`. Every
-Move pass starts after Geoff's sitting, which follows pass 6's landing, so no Move pass races
-pass 6 for a file.
+Read on 2026-11-20 at 09:40 UTC, just before this design was pushed to `main`. `origin/main`
+was at `f265ad6`, with nothing of pass 6 on it. Pass 6's branch, `desk-run`, was at `f2b0c18`
+with seven commits, as draft pull request 22. Its executor, `cc-desk-desk-run`, and its
+conductor were busy. The branch already has `cc-desk release done <project>` and the shared live
+library `scripts/live/lib.sh`. Its plan's Task 2 still has to build `cc-desk session end pass
+<project> <name>` and `session end conductor <project>`, which this design relies on.
+
+GitHub Actions has run no job on glw907/cc-desk since 09:12 UTC that day, because of a billing
+block that only you can clear (`docs/STATUS.md`, "Open decisions"). Pass 6 builds on the local
+gate until then. Every Move pass and every cairn and dubplate merge needs CI, so the round plan's
+start line waits for Actions to run again.
+
+Every Move pass starts after your sitting, which follows pass 6's landing, so no Move pass races
+pass 6 for a file. Pass 6 changes `internal/sessions/decide.go` and `internal/state/{events,
+types,commit}.go`, which `move-writers` changes after it from `main`.
 
 ## Calls Claude made
 
@@ -454,10 +464,11 @@ recommends itself first, since it moves the store and the settings that intake t
 - **Structure first** (recommended).
 - **Intake first.** The uploader page comes sooner, and structure's moves come after it.
 
-**5. Approve the round plan's proposed standing answers 40 to 45?** They cover the stops this
+**5. Approve the round plan's proposed standing answers 40 to 46?** They cover the stops this
 round can foresee that no earlier answer covers: a 1.1 pass holding a file, an auto mode refusal of a
 listed step, a permission prompt in a cairn or dubplate pass, the busy check meeting a 1.1
-session, the conductor's first-step test, and cairn's round 1 running past twice its plan. The round plan gives each
+session, the conductor's first-step test, cairn's round 1 running past twice its plan, and CI
+that stops running mid-round. The round plan gives each
 one's text.
 
 - **Yes, as written** (recommended). The conductor acts on them and names each use in the report.
