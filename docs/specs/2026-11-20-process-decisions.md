@@ -120,10 +120,25 @@ Proposed, and not yet ruled on:
   the third spec.
 - Budget caps ask nothing: no new task past twice its planned minutes, and none at 85 percent
   of weekly usage.
-- His sitting opens to four groups: "Ready to merge", "Read before merging", "Couldn't finish",
-  and "Held for you".
 - He gets three lists he can overrule line by line: the lessons, his standing rules, and the
   infrastructure.
+
+## The four groups
+
+Decided on 2026-11-20: "yes, take the four names as they are." His sitting opens on agent
+view's groups, in its order: `Ready for review`, `Needs input`, `Working`, and `Completed`. The
+names are documented, and the mapping below is assembled.
+
+- `Ready for review` holds every task with an open pull request. A row is marked `Important`,
+  Code Review's word, only when the reviewer found a bug that should be fixed before merging. A
+  pull request that carries a sign-in or data decision gets a plain "decision" note.
+- `Needs input` holds finished work with a refused step listed for him. No session waits there.
+- `Working` holds what is still running.
+- `Completed` holds merged, failed, and stopped tasks together, as agent view does. A failed
+  task carries agent view's state word `Failed` and sorts to the top of the group.
+
+These replace the earlier proposal ("Ready to merge", "Read before merging", "Couldn't finish",
+"Held for you").
 
 ## What the process spec owes
 
