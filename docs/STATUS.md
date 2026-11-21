@@ -26,23 +26,20 @@
 
 ## Next action
 
-The core design (`docs/specs/2026-11-20-core-design.md`) is being built in the dotfiles
-worktree `~/.dotfiles/.claude/worktrees/cc-desk-core`, on branch `cc-desk-core`. Pull request
-254 in `glw907/workstation` landed the build's auto-mode entry, and the entry is live. The
-settings edits are commit 8a24900 on the branch, made by the session `cc-desk-core-spec`.
+The core design (`docs/specs/2026-11-20-core-design.md`) is live. Geoff approved pull request
+255 in `glw907/workstation` on 2026-11-20 and it is merged. Steps 4 to 7 of the design's "How
+it lands" are done: the settings are applied, every item under "What done looks like" holds,
+and both auto-mode outputs are in a comment on the pull request. What the reviews left is
+items 101 to 108 in the dotfiles `BACKLOG.md`; item 108 is the look at one week of refusals,
+due 2026-11-27. Pull request 253 is closed unmerged, because 255 carries its sentence.
 
-The background session `cc-desk-core-build` built the rest there under `/goal` and opened pull
-request 255 in `glw907/workstation`, which deletes the entry. Two subagents reviewed it, and
-the dotfiles gate passes at its head, 902b572. It waits for Geoff's approval by number. On his
-approval `cc-desk-core-spec` merges it with `approval-queue land`, runs steps 4 to 7 of the
-design's "How it lands", and closes pull request 253, whose sentence 255 already carries.
-
-The brainstorm of the process spec runs beside the build, from
-`docs/specs/2026-11-20-process-decisions.md`. Geoff ruled on 2026-11-20 that his sitting opens
-on four groups named in Claude Code's words. The proposed names (agent view's groups, Code
-Review's severities) wait for his answer. Nine research reports on what the spec owes are in
-`~/.cache/cc-desk-process-research/`. The other-skills spec follows. Pull request 253 in the
-dotfiles repo, which exempts cc-desk's spec work from the pass process, is still open.
+The brainstorm of the process spec is next, from `docs/specs/2026-11-20-process-decisions.md`,
+with nine research reports in `~/.cache/cc-desk-process-research/`. Two questions are open
+with Geoff. He ruled that his sitting opens on four groups named in Claude Code's words, and
+the proposed names wait for his answer. He asked why `approval-queue` is still in use; the
+proposal is an `ask` rule on `gh pr merge` and `dontAsk` mode for background sessions, which
+retires `approval-queue land`. The other-skills spec follows. A fresh session picks this up
+from `docs/plans/2026-11-20-process-spec-prompt.txt`.
 
 ## Open decisions
 
