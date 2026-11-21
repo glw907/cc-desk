@@ -39,10 +39,10 @@ it with `approval-queue land` and runs steps 4 to 7 of the design's "How it land
 
 The brainstorm of the process spec runs beside the build, from
 `docs/specs/2026-11-20-process-decisions.md`. Geoff ruled on 2026-11-20 that his sitting opens
-on four groups: "Ready to merge", "Read before merging", "Couldn't finish", and "Held for
-you". Nine read-only research agents are gathering what the spec owes. The other-skills spec
-follows. Pull request 253 in the dotfiles repo is still open. It adds the sentence to the
-global `CLAUDE.md` that exempts cc-desk's spec work from the pass process.
+on four groups named in Claude Code's words. The proposed names (agent view's groups, Code
+Review's severities) wait for his answer. Nine research reports on what the spec owes are in
+`~/.cache/cc-desk-process-research/`. The other-skills spec follows. Pull request 253 in the
+dotfiles repo, which exempts cc-desk's spec work from the pass process, is still open.
 
 ## Open decisions
 
