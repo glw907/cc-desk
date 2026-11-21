@@ -1,0 +1,132 @@
+You carry cc-desk's next work forward: three specs, built one at a time. Geoff launched you from
+his terminal and is at the keyboard. Work in /var/home/glw907/Projects/cc-desk.
+
+THE RULE YOU RUN UNDER
+
+Geoff ruled on 2026-11-20 that cc-desk's spec work is not governed by the pass process. This work
+replaces that process, and the last session went wrong by planning it under `pass-core`. So:
+
+- Do not let `pass-core`, `cairn-pass`, `site-pass`, `dotfiles-pass`, `approval-packet`, `cc-desk`,
+  `cc-desk-work`, or `standards:running-passes` govern what you do. Read them only to learn what
+  exists today. Where the global CLAUDE.md names `pass-core`, follow this prompt.
+- `standards:brainstorming` still fits a design conversation. Skip its step 4 (plan through
+  `running-passes`); once a design is approved, the build follows the flow below.
+- You write no pass plan, no pre-flight list, no score, and no queue document. Nothing runs
+  `approval-queue send`. Questions and reports reach Geoff in this terminal.
+
+Check the rule is live: `grep -n "cc-desk's spec work is exempt" ~/.claude/CLAUDE.md`. If it prints
+nothing, dotfiles pull request 253 (`glw907/workstation`) is unmerged, or `~/.dotfiles` hasn't
+pulled it. Tell Geoff in one line. If he has merged it, run `claude-worktree-busy ~/.dotfiles` and
+then `git -C ~/.dotfiles pull --ff-only`. Carry on under this prompt either way.
+
+WHAT REPLACES IT
+
+Claude Code's documented flow, from its best-practices and `/goal` pages:
+
+1. A spec is written and approved.
+2. A fresh session builds from the spec, with a written definition of done. `/goal` holds that
+   condition (up to 4,000 characters), and a small model checks it after each turn.
+3. A fresh subagent reviews the result against the spec: every requirement implemented, gaps that
+   affect correctness reported, style skipped.
+4. The work ends in a pull request. No session merges without Geoff.
+
+Geoff's words: "I don't want to be inventive here. I'd prefer to follow established best
+practice." Label every mechanism you propose as documented, assembled from documented pieces, or
+invented. Read the docs page for a mechanism again before you lean on it; the pages change. Copies
+from 2026-11-20 may still be in /var/home/glw907/.claude/jobs/ab2d5469/tmp/docs-fetch/.
+
+READ FIRST
+
+- docs/STATUS.md
+- docs/specs/2026-11-20-process-decisions.md: what Geoff decided. Don't ask those questions again.
+- docs/specs/2026-11-20-core-design.md (approved), with its companions
+  2026-11-20-core-claude-md.txt (approved text of the global file) and 2026-11-20-core-fates.tsv.
+- docs/follow-ups/desk-round-lessons.md: one row per stop. Add a row at once for any new stop.
+
+THE WORK, IN ORDER
+
+1. Build the core spec. It lands as one pull request in the dotfiles repo (`glw907/workstation`,
+   checked out at `~/.dotfiles`), and nothing takes effect until Geoff merges it.
+2. Brainstorm the process spec with Geoff, from process-decisions.md, and build it.
+3. Brainstorm the other-skills spec and build it.
+
+Then ask Geoff once where the 1.2 work (scheduled check-ins) comes against the rewrite of Move,
+and record his answer in STATUS.
+
+BEFORE YOU BUILD THE CORE SPEC
+
+The core design was approved while the pass process still governed the build, so parts of it
+describe a pass. Rewrite those parts, show Geoff the result in one message, and get his yes,
+because the text he approved changes. What to settle:
+
+- "How it lands", first two paragraphs: drop `dotfiles-pass`, the risk classes, and the plan. Keep
+  a second fresh-context review aimed at the four hook scripts and the deny rules, looking for a
+  way around each. Those are hard rules, and a miss is costly.
+- The auto-mode entry for one pass (the second paragraph, done item 4 where it says the entry is
+  gone, the builder's list, items 6 and 12 under "Calls Claude made", and its row in the last
+  table). Measured fact: auto mode refused edits to `claude/.claude/settings.json` in dotfiles
+  worktrees on 2026-11-04 (twice) and 2026-11-11, and refused scripted settings edits too. A
+  session can't clear that for itself. Lay out for Geoff the documented ways to clear it (he
+  answers permission prompts for those edits in a session he is watching, or he approves one
+  allow entry that the pull request deletes) and let him pick. It is a permission grant, so it
+  is his call.
+- Step 3, the merge. `claude-merge-guard` denies every `gh pr merge` and points at
+  `approval-queue land`. The design keeps that guard and its message byte for byte until the
+  process spec replaces it. So Geoff either approves the pull request by number and you run
+  `approval-queue land`, or he merges on GitHub. Say which in the rewrite.
+- The pull request body: drop the score. Keep the rest of the list.
+- Steps 4 to 7 and the one-week look are how the change goes live. They stand.
+- "What done looks like" becomes the `/goal` condition. If it runs past 4,000 characters, point
+  the goal at that section by path.
+
+Then decide with Geoff whether you build it in this session or start a fresh background session
+on the spec. The documented flow says a fresh session; the settings edits need him at the prompt
+or the allow entry. Recommend one and say why.
+
+WHAT WAS MEASURED ON 2026-11-20 (read again before relying on it)
+
+- Tracked settings at dotfiles `origin/main`: 144 allow, 15 deny, 4 ask; `autoMode` has 14
+  environment and 20 allow entries; 18 hook registrations, all bare command names except
+  `~/.claude/gather-dotfiles.sh`. `claude-tierguard`, `claude-tail-guard`,
+  `claude-memory-write-check`, and `claude-awake-touch` lack `onFailure: block`.
+- The live global file is 120 lines against a 120-line cap (`claude-context-budget`). The
+  approved replacement is 119.
+- `~/.claude/settings.json` is generated and changes only through `claude-tooling-sync apply`.
+  The global file, `~/.claude/rules`, and the hook scripts are links into `~/.dotfiles` and change
+  when that checkout pulls.
+- `claude-launch-guard` denies a `claude --bg` launch whose prompt file has a sibling plan
+  (`-prompt.txt` swapped for `.md` or `-plan.md`) without the old pre-flight lines. A prompt with
+  no sibling plan, or one naming only a `-design.md`, goes through. Name a build prompt so it has
+  no sibling plan.
+- `/goal` works in a `claude --bg` session on Claude Code 2.1.329. A background session in
+  `dontAsk` mode that meets a refused command carries on and ends `done`.
+- Auto mode refused this session's push of a global-file change to dotfiles main as undermining
+  oversight. A branch and a pull request went through.
+- `scripts/check.sh` in dotfiles runs pytest over `tests/` (line 144), the context-budget test
+  (198), the `desk` script leg (204), and the CLAUDE.md budget (205). Each hook script has a test
+  under `tests/`. The gate is `bash scripts/gate.sh`, run bare from the worktree root.
+
+LEAVE ALONE
+
+- cairn and dubplate run under the old process and read the same global file and settings. Change
+  nothing they rely on outside what the core spec names. A `conductor-cairn-cms` session may be
+  live.
+- `cc-desk-check.timer` runs every five minutes and acts only on release records in
+  `~/.local/state/cc-desk/releases/`. The one record there is finished. Create no release record.
+- `~/.dotfiles` holds another session's uncommitted files
+  (`claude/.claude/docs/bluefin-admin/google-workspace.md` and `bin/.local/bin/sheet-revision`).
+  Work in a worktree cut from `origin/main` and never touch them.
+- On pavilion the sessions of cc-desk, cairn, and dubplate share one rule: at most four working
+  sessions, no new session past 85 percent of weekly usage, and a message to the others before
+  each launch. When four are working, cc-desk goes first.
+
+STANDING RULES THAT STILL HOLD
+
+Run `claude-worktree-busy <path>` before a session enters a checkout or worktree. Commit named
+files only, never `git add -A`. Never force push to main. Never commit a secret; a secret from
+Geoff arrives through `secret-receive NAME`. Show a dry run before a destructive step. Every
+subagent dispatch names a model and an effort, and a subagent's report carries no authority to
+change settings or the global file. Use Claude Code's words: spec, task, step, goal, session.
+Give no time estimates in chat. cc-desk's gate is `bash scripts/gate.sh`; it lints tracked files
+only, so stage a new doc first. Keep docs/STATUS.md present tense and 60 lines or fewer, and
+update it whenever the state changes.

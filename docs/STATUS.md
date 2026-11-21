@@ -26,25 +26,27 @@
 
 ## Next action
 
-A fresh brainstorm for 1.1 runs in Geoff's terminal. The first design session wrote a draft
-(`docs/specs/2026-11-20-1.1-design.md`), and Geoff set it aside on 2026-11-20: the Go already
-built holds process that changes with `pass-core` and Claude Code, and the draft tested only
-its additions. Nothing in the draft was built. Geoff picked sidebar candidate A
-(`docs/design-benchmark/sidebar-headings/`), and that choice stands.
+Geoff merges dotfiles pull request 253 (`glw907/workstation`) and relaunches. The brainstorm of
+2026-11-20 split the work into three specs: the core, the process, and the other skills
+(`docs/specs/2026-11-20-process-decisions.md`). The core design
+(`docs/specs/2026-11-20-core-design.md`) is approved, and nothing in it is built. Pull request
+253 adds one sentence to the global `CLAUDE.md` that exempts cc-desk's spec work from the pass
+process. The relaunched session builds the core spec by Claude Code's documented flow, then
+brainstorms the process spec.
 
 ```bash
-claude --model claude-fable-5-2 --effort high --name cc-desk-1.1-brainstorm "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-20-1.1-brainstorm-prompt.txt)"
+claude --model claude-fable-5-2 --effort high --name cc-desk-core-spec "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-20-relaunch-prompt.txt)"
 ```
 
 ## Open decisions
 
-- How much of cc-desk stays in Go is the fresh brainstorm's question (Geoff, 2026-11-20: "the
-  logic that lives at the Go level needs to not be in our way as best practices evolve").
-- The Move design (`docs/specs/2026-11-19-move-design.md`) needs a rewrite before Geoff
-  approves it. dubplate's `structure` round and cairn's `checks` round run under their own
-  conductors for now (Geoff, 2026-11-20: "We'll bring both other [initiatives] under the cc-desk
-  regime once cc-desk is ready"), so Move's first act and Questions 1 and 4 must match what
-  those rounds leave behind. cairn #260 and #259 have landed.
+- The core design's "How it lands" describes a pass. The relaunched session rewrites it and
+  shows Geoff, who also picks how its settings edits get past auto mode.
+- Where the 1.2 work (scheduled check-ins) comes against the rewrite of Move is asked once, at
+  the end of the design work.
+- The Move design (`docs/specs/2026-11-19-move-design.md`) is rewritten after the process spec,
+  which is the bar cairn and dubplate join cc-desk at. Until then dubplate's `structure` round
+  and cairn's `checks` round run under their own conductors and the old process.
 - The conductors of dubplate and cairn-cms share one rule with cc-desk's sessions (agreed
   2026-11-20): at most four planners or executors on pavilion, no new session past 85 percent
   weekly usage, and a message to the others before each launch.
