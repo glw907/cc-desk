@@ -1,0 +1,50 @@
+You are the design session for cc-desk's next round, running in Geoff's terminal on Fable at high effort. The checkout is ~/Projects/cc-desk on main; push to glw907/cc-desk main. This is a fresh brainstorm. An earlier session wrote a full draft design for a 1.1 round, and Geoff set it aside on 2026-11-20. Start from what cc-desk is for, and treat the draft as reference material.
+
+Why the draft was set aside. Geoff said four things on 2026-11-20, in this order:
+- "I do want to make sure that cc-desk remains streamlined and easy to maintain as claude-code evolves."
+- "And especially as claude code best practices evolved. A lot of complex Go code tied to an evolving process could be a risk. That's the primary reason I asked the size question."
+- "Skill and claude infastructure is easy to maintain and update. Go tools, less so. That the logic that lives at the Go level needs to not be in our way as best practices evolve. We don't want a brittle solution."
+- "I feel like a fresh brainstorm might be a good idea..."
+
+The draft answered the first two with a test: if `pass-core` changed this rule next month, would the Go have to change? It applied that test only to what 1.1 would add. It never applied it to the Go already built, and that Go fails it. This is the mistake to avoid: test what exists first, show Geoff what you find, and design after.
+
+What an audit of the built Go found, at commit 43c0669:
+- About 11,650 lines of Go outside tests and 18,300 lines of tests. `internal/state` holds 3,987, `cmd/cc-desk` 3,491, `internal/sessions` 1,459, `internal/snapshot` 1,255.
+- `internal/sessions/merge.go` is the `pass-core` landing test written in Go. It reads the review's verdict, whether the change is inside the design, the calls left for Geoff, and a fix limit (lines 139, 168, 182). The `pass-core` edit the draft proposed changes that test, so the Go would have been behind on the day the edit merged.
+- The seven launch templates are text, and `internal/launch/prompt.go:11` compiles them into the binary. Changing a sentence takes a build, a tag, and an install. The two skills are pinned by tag in the workstation's manifest, so a skill edit takes a tag and a pin move.
+- `internal/sessions/classify.go` matches Claude Code's screen wording with regular expressions ("Login expired", "You've hit your ... limit").
+- Rounds, rulings, reports, design sessions, conductors, and relaunch counts are Go types with rules on them, and `internal/snapshot/estimate.go` is a 481-line forecast.
+This audit took a few commands. Read the code yourself before you rely on it, and extend it: for each package, say what a script must do with no model and what is process a model could read.
+
+Read first:
+1. docs/STATUS.md, the main design docs/specs/2026-11-17-cc-desk-design.md, and the route docs/plans/2026-11-17-route.md, for what cc-desk was meant to do for Geoff.
+2. The Go itself, package by package, and the two skills under skills/.
+3. Claude Code's current features, through the claude-code-guide agent or the docs: background sessions, `claude agents`, hooks, scheduled tasks, and anything else that now does part of cc-desk's work. Geoff's concern is cc-desk falling behind Claude Code, so find out what Claude Code already ships before you design.
+4. The lessons ledger, docs/follow-ups/desk-round-lessons.md, whole, and the Fable review at ~/Projects/initiatives/cc-desk/reports/desk-failure-review.md.
+5. The parked draft, docs/specs/2026-11-20-1.1-design.md, and its companion, docs/specs/2026-11-20-1.1-pass-core-edits.md. The companion is exact `pass-core` text with no Go in it, and most of it should survive. In the draft, reuse the measured minutes under "The passes", the `pass-core` column of "Every stop, answered", "Stops the rounds can reach", and the backlog verdicts. Test every cc-desk cell again: many name a pass that adds rules to Go.
+6. The first design prompt, docs/plans/2026-11-19-1.1-design-prompt.txt. Its "What the design must carry" and "How to work" lists still hold for whatever design Geoff approves, except where this file differs.
+
+What Geoff has decided. Each holds unless he reopens it:
+- 1.1 is the bar that cairn and dubplate join cc-desk at, and the Move design is rewritten afterwards.
+- Standing answer 34: every row of the ledger gets an answer on the cc-desk side and the `pass-core` side, a change or a reason to reject it.
+- The sidebar is candidate A (docs/design-benchmark/sidebar-headings/arc-log.md), carried into the round as a small page pass.
+- A round's budget is "Twice the plan", counted in worked minutes.
+- On pavilion, "cc-desk goes first" when four planners or executors are working.
+- A timer does the routine watching and a model does the judging. He accepted this in a playback ("Nothing wrong, keep going").
+
+What is open again: the approach (he picked two rounds, a conductor's and then cc-desk's own, before he raised this concern), how much of cc-desk stays compiled, where the landing test, the templates, the classifier, and the forecast live, and the round's size. The earlier session asked him one question and he hasn't answered it: picture cc-desk a few months on, after Claude Code and `pass-core` have each changed several times; what do you still want it doing for you that a skill and an ordinary session couldn't? Open with that question or a better one of your own.
+
+How to work:
+- Follow `standards:brainstorming` from its start, and load `writing-voice` before you draft. Ask Geoff one question at a time and play back as you go.
+- When you lay out approaches, give each one its Go: the lines it keeps, the lines it moves to text, and the lines it deletes. Consider at least these three and add your own: answering the ledger in text with the Go frozen apart from bug fixes; shrinking the Go to a kernel that launches, ends, records, and shows, with every judgment made by a model reading text that isn't compiled in; and replacing the orchestration with what Claude Code ships, keeping a small page.
+- Method and architecture calls are yours. What cc-desk is for, and how much of it Geoff wants to maintain, are his.
+- Nothing gets built before he approves a design. The draft's cleanup hasn't run and needs his approval too.
+
+State on 2026-11-20, for your pre-flight. Read each again before you rely on it:
+- Weekly usage read 29 percent, resetting at 10:59 pm Alaska time.
+- Two finished sessions sit in the checkout, `conductor-cc-desk` and `cc-desk-desk`. The release `cc-desk-stuck-sessions` shows a `relaunch_limit` stop on its conductor, which is ledger row 24's false alarm and holds nothing for Geoff.
+- The repo has 19 `agent-*` worktrees. Sixteen are merged. Three hold one unmerged commit each: `worktree-agent-a2124cb20ae232c1b`, `-a6d29795ac4775f3a`, and `-a987a84ab7244b5a8`.
+- `conductor-cairn-cms` and `conductor-dubplate` are running rounds, under the shared pavilion rule in STATUS.
+- `glw907/cc-desk`, `glw907/workstation`, and `glw907/cc-desk-scratch` are public.
+- The ~/.dotfiles checkout holds another session's uncommitted files. Leave them alone.
+- The earlier session's transcript holds its reads in full: ~/.claude/projects/-var-home-glw907-Projects-cc-desk/ab2d5469-a0e3-4ac8-a12d-75a1165918c4.jsonl.

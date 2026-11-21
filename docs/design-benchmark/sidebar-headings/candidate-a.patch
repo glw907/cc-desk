@@ -1,0 +1,355 @@
+--- a/web/src/app.css
++++ b/web/src/app.css
+@@ -505,3 +505,108 @@
+ .figure-list dt {
+ 	color: var(--color-muted);
+ }
++
++/* The rail from daisyUI navbar, stat, menu, and badge (candidate A, kept 2026-11-20). */
++.rail-bar {
++	min-height: 0;
++	padding: var(--spacing-4px) 0 var(--spacing-16px) var(--spacing-12px);
++}
++.rail .wordmark {
++	display: inline-flex;
++	align-items: baseline;
++	font-size: var(--text-step-13);
++	line-height: 1.1;
++}
++.rail .btn-ghost {
++	font-weight: 500;
++}
++.forecast.stats {
++	display: grid;
++	width: 100%;
++	border: var(--border) solid var(--site-field-border);
++	background-color: var(--color-base-100);
++}
++.forecast .stat {
++	row-gap: var(--spacing-2px);
++	padding: var(--spacing-12px) var(--spacing-14px);
++}
++.forecast :is(.stat-title, .stat-desc) {
++	white-space: normal;
++	font-size: var(--text-step-4);
++	color: var(--color-muted);
++}
++.forecast .stat-value {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: var(--spacing-8px);
++	white-space: normal;
++	font-family: var(--font-display);
++	font-weight: var(--font-weight-heading);
++	font-size: var(--text-step-12);
++	line-height: 1.25;
++	margin-bottom: var(--spacing-3px);
++}
++.rail .badge {
++	font-family: var(--font-body);
++	font-weight: 600;
++}
++.rail .rail-section {
++	margin-top: var(--spacing-20px);
++}
++.rail .menu {
++	padding: 0;
++	font-size: var(--text-step-9);
++	line-height: 1.35;
++}
++.rail .menu .sub {
++	display: block;
++	margin-top: var(--spacing-3px);
++	font-size: var(--text-step-4);
++	color: var(--color-muted);
++}
++/* The heading outranks its rows: ink, weight, and a step up in size. */
++.rail .menu-title {
++	padding-block: var(--spacing-4px) var(--spacing-6px);
++	color: var(--color-base-content);
++	font-size: var(--text-step-11);
++	font-weight: 600;
++	line-height: 1.3;
++}
++.rail .menu li > .rail-static {
++	display: block;
++	cursor: default;
++}
++.rail .menu li > .rail-static:hover {
++	background-color: transparent;
++}
++.rail .menu li.waiting-row {
++	flex-flow: row wrap;
++	align-items: center;
++	justify-content: space-between;
++}
++.rail .menu li.waiting-row > a:first-child {
++	flex: 1 1 auto;
++}
++.rail .menu .term-link {
++	padding-inline: var(--spacing-8px);
++	font-size: var(--text-step-4);
++	color: var(--color-muted);
++}
++.rail .menu .release-head {
++	display: flex;
++	align-items: center;
++	gap: var(--spacing-8px);
++}
++.rail .menu .release + .release {
++	margin-top: var(--spacing-8px);
++}
++.rail .menu .round-link {
++	display: block;
++}
++.rail .menu .round-link .figures {
++	display: flex;
++}
++.rail .menu li.release {
++	padding: 0;
++}
+--- a/web/src/routes/+layout.svelte
++++ b/web/src/routes/+layout.svelte
+@@ -28,8 +28,14 @@
+ 
+ <div class="frame">
+ 	<nav class="rail" aria-label="Status">
+-		<a href="/" class="wordmark block px-3 pb-6 pt-2 text-xl">cc-desk</a>
+-		<a href="/rulings" class="rail-row">Rulings</a>
++		<div class="navbar rail-bar">
++			<div class="navbar-start">
++				<a href="/" class="wordmark"><span class="site-benchmark" aria-hidden="true"></span>cc-desk</a>
++			</div>
++			<div class="navbar-end">
++				<a href="/rulings" class="btn btn-ghost">Rulings</a>
++			</div>
++		</div>
+ 		{#if poll.answer?.snapshot}
+ 			<Sidebar snapshot={poll.answer.snapshot} now={poll.now} />
+ 		{/if}
+--- a/web/src/lib/Sidebar.svelte
++++ b/web/src/lib/Sidebar.svelte
+@@ -27,45 +27,55 @@
+ <NextSession next={snapshot.next_session} {now} />
+ 
+ <section class="rail-section" aria-labelledby="waiting-heading">
+-	<h2 class="rail-heading" id="waiting-heading">Waiting for you</h2>
+-	{#each snapshot.waits_for_geoff as wait (`${wait.project}/${wait.round}`)}
+-		{@const href = terminalLink(wait.project, wait.round)}
+-		<div class="rail-row waiting-row">
+-			<a href="/{wait.project}/{wait.round}">
+-				{wait.project}/{wait.round}
+-				<span class="sub">{count(wait.questions, 'question')}</span>
+-			</a>
+-			{#if href}
+-				<a class="term-link" {href}>Open {wait.project}/{wait.round} in a terminal</a>
+-			{/if}
+-		</div>
+-	{:else}
+-		<p class="rail-row muted">Nothing</p>
+-	{/each}
++	<ul class="menu w-full">
++		<li class="menu-title"><h2 id="waiting-heading">Waiting for you</h2></li>
++		{#each snapshot.waits_for_geoff as wait (`${wait.project}/${wait.round}`)}
++			{@const href = terminalLink(wait.project, wait.round)}
++			<li class="waiting-row">
++				<a href="/{wait.project}/{wait.round}">
++					<span>
++						{wait.project}/{wait.round}
++						<span class="sub">{count(wait.questions, 'question')}</span>
++					</span>
++				</a>
++				{#if href}
++					<a class="btn btn-ghost btn-sm term-link" {href}>Open {wait.project}/{wait.round} in a terminal</a>
++				{/if}
++			</li>
++		{:else}
++			<li><p class="rail-static muted">Nothing</p></li>
++		{/each}
++	</ul>
+ </section>
+ 
+ <section class="rail-section" aria-labelledby="reports-heading">
+-	<h2 class="rail-heading" id="reports-heading">Reports to read</h2>
+-	{#each unread as report (report.id)}
+-		<div class="rail-row">
+-			<a href="/reports/{report.id}">
+-				{report.project}: {report.title}
+-				<span class="sub">
+-					{countOrNo(report.calls.length, 'judgment call')}, {countOrNo(
+-						report.misses.length,
+-						'planning miss'
+-					)}. {formatWhen(report.sent, now)}
+-				</span>
+-			</a>
+-		</div>
+-	{:else}
+-		<p class="rail-row muted">Nothing</p>
+-	{/each}
++	<ul class="menu w-full">
++		<li class="menu-title"><h2 id="reports-heading">Reports to read</h2></li>
++		{#each unread as report (report.id)}
++			<li>
++				<a href="/reports/{report.id}">
++					<span>
++						{report.project}: {report.title}
++						<span class="sub">
++							{countOrNo(report.calls.length, 'judgment call')}, {countOrNo(
++								report.misses.length,
++								'planning miss'
++							)}. {formatWhen(report.sent, now)}
++						</span>
++					</span>
++				</a>
++			</li>
++		{:else}
++			<li><p class="rail-static muted">Nothing</p></li>
++		{/each}
++	</ul>
+ </section>
+ 
+ <section class="rail-section" aria-labelledby="running-heading">
+-	<h2 class="rail-heading" id="running-heading">Running</h2>
+-	{#each snapshot.releases as release (`${release.project}/${release.name}`)}
+-		<ReleaseBlock {release} />
+-	{/each}
++	<ul class="menu w-full">
++		<li class="menu-title"><h2 id="running-heading">Running</h2></li>
++		{#each snapshot.releases as release (`${release.project}/${release.name}`)}
++			<ReleaseBlock {release} />
++		{/each}
++	</ul>
+ </section>
+--- a/web/src/lib/NextSession.svelte
++++ b/web/src/lib/NextSession.svelte
+@@ -22,34 +22,36 @@
+ 	const words = $derived(sessionWords(next, now));
+ </script>
+ 
+-<section class="session" aria-label="Next decision session">
+-	<span class="session-label">Next decision session</span>
+-	{#if words !== null}
+-		<span class="session-time">
+-			<span data-testid="session-state">{words}</span>
+-			{#if next.rough}<span class="rough">Rough</span>{/if}
+-		</span>
+-	{/if}
+-	{#if next.state !== 'nothing_waiting'}
+-		<span class="session-sub" data-testid="session-range">
+-			{#if next.range}{formatRange(next.range.low, next.range.high)}{:else}<span aria-hidden="true"
+-					>{DASH}</span
+-				><span class="sr-only">{NONE}</span>{/if}
+-		</span>
+-	{/if}
+-	{#if next.question_count !== null && next.question_count > 0}
+-		<span class="session-sub">
+-			{count(next.question_count, 'question')} from {count(next.rounds.length, 'round')}, in {list(
+-				next.projects
+-			)}
+-		</span>
+-	{/if}
+-	{#if next.not_designed.length > 0}
+-		<span class="session-sub">Not designed yet: {list(next.not_designed)}</span>
+-	{/if}
+-	{#if next.state === 'needs_you_now' && next.reasons.length > 0}
+-		<ul class="session-sub reasons">
+-			{#each next.reasons as reason (reason)}<li>{reason}</li>{/each}
+-		</ul>
+-	{/if}
++<section class="stats stats-vertical forecast" aria-label="Next decision session">
++	<div class="stat">
++		<div class="stat-title">Next decision session</div>
++		{#if words !== null}
++			<div class="stat-value">
++				<span data-testid="session-state">{words}</span>
++				{#if next.rough}<span class="badge badge-soft badge-secondary badge-sm">Rough</span>{/if}
++			</div>
++		{/if}
++		{#if next.state !== 'nothing_waiting'}
++			<div class="stat-desc" data-testid="session-range">
++				{#if next.range}{formatRange(next.range.low, next.range.high)}{:else}<span aria-hidden="true"
++						>{DASH}</span
++					><span class="sr-only">{NONE}</span>{/if}
++			</div>
++		{/if}
++		{#if next.question_count !== null && next.question_count > 0}
++			<div class="stat-desc">
++				{count(next.question_count, 'question')} from {count(next.rounds.length, 'round')}, in {list(
++					next.projects
++				)}
++			</div>
++		{/if}
++		{#if next.not_designed.length > 0}
++			<div class="stat-desc">Not designed yet: {list(next.not_designed)}</div>
++		{/if}
++		{#if next.state === 'needs_you_now' && next.reasons.length > 0}
++			<ul class="stat-desc reasons">
++				{#each next.reasons as reason (reason)}<li>{reason}</li>{/each}
++			</ul>
++		{/if}
++	</div>
+ </section>
+--- a/web/src/lib/ReleaseBlock.svelte
++++ b/web/src/lib/ReleaseBlock.svelte
+@@ -21,30 +21,33 @@
+ 	);
+ </script>
+ 
+-<article class="release" data-release="{release.project}/{release.name}">
+-	<p class="release-head">
+-		<span><strong>{release.project}</strong> to {release.name}</span>
+-		{#if release.rough}<span class="rough">Rough</span>{/if}
+-	</p>
+-	<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} words="roundState" />
+-	<p class="figures">
+-		<span>{roundsDone}</span>
+-		<span>{percentDone(release.rounds)}% of the work</span>
+-	</p>
+-
+-	<ul class="branch">
+-		{#each buildingRounds(release) as round (round.name)}
+-			{@const passesDone = `${doneCount(round.passes)} of ${round.passes.length} passes done`}
+-			<li data-round="{release.project}/{round.name}">
+-				<p class="branch-head">
+-					<a class="branch-title" href="/{release.project}/{round.name}">{round.name}</a>
+-				</p>
+-				<ScaleBar parts={passParts(round.passes)} label={passesDone} words="passState" slim />
+-				<p class="figures">
+-					<span>{passesDone}</span>
+-					<span class="state {round.state}">{word('roundState', round.state)}</span>
+-				</p>
+-			</li>
+-		{/each}
+-	</ul>
+-</article>
++<li class="release" data-release="{release.project}/{release.name}">
++	<div class="rail-static release-summary">
++		<p class="release-head">
++			<span><strong>{release.project}</strong> to {release.name}</span>
++			{#if release.rough}<span class="badge badge-soft badge-secondary badge-sm">Rough</span>{/if}
++		</p>
++		<ScaleBar parts={roundParts(release.rounds)} label={roundsDone} words="roundState" />
++		<p class="figures">
++			<span>{roundsDone}</span>
++			<span>{percentDone(release.rounds)}% of the work</span>
++		</p>
++	</div>
++	{#if buildingRounds(release).length > 0}
++		<ul>
++			{#each buildingRounds(release) as round (round.name)}
++				{@const passesDone = `${doneCount(round.passes)} of ${round.passes.length} passes done`}
++				<li data-round="{release.project}/{round.name}">
++					<a class="round-link" href="/{release.project}/{round.name}">
++						<span class="branch-title">{round.name}</span>
++						<ScaleBar parts={passParts(round.passes)} label={passesDone} words="passState" slim />
++						<span class="figures">
++							<span>{passesDone}</span>
++							<span class="state {round.state}">{word('roundState', round.state)}</span>
++						</span>
++					</a>
++				</li>
++			{/each}
++		</ul>
++	{/if}
++</li>

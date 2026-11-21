@@ -26,15 +26,20 @@
 
 ## Next action
 
-The 1.1 design session runs in Geoff's terminal. Its prompt now also carries his sidebar notes
-(`docs/follow-ups/sidebar-headings-and-title.md`):
+A fresh brainstorm for 1.1 runs in Geoff's terminal. The first design session wrote a draft
+(`docs/specs/2026-11-20-1.1-design.md`), and Geoff set it aside on 2026-11-20: the Go already
+built holds process that changes with `pass-core` and Claude Code, and the draft tested only
+its additions. Nothing in the draft was built. Geoff picked sidebar candidate A
+(`docs/design-benchmark/sidebar-headings/`), and that choice stands.
 
 ```bash
-claude --model claude-opus-5-5 --effort high --name cc-desk-1.1-design "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-19-1.1-design-prompt.txt)"
+claude --model claude-fable-5-2 --effort high --name cc-desk-1.1-brainstorm "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-20-1.1-brainstorm-prompt.txt)"
 ```
 
 ## Open decisions
 
+- How much of cc-desk stays in Go is the fresh brainstorm's question (Geoff, 2026-11-20: "the
+  logic that lives at the Go level needs to not be in our way as best practices evolve").
 - The Move design (`docs/specs/2026-11-19-move-design.md`) needs a rewrite before Geoff
   approves it. dubplate's `structure` round and cairn's `checks` round run under their own
   conductors for now (Geoff, 2026-11-20: "We'll bring both other [initiatives] under the cc-desk
