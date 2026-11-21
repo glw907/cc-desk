@@ -29,21 +29,20 @@ and both auto-mode outputs are in a comment on the pull request. What the review
 items 101 to 108 in the dotfiles `BACKLOG.md`; item 108 is the look at one week of refusals,
 due 2026-11-27. Pull request 253 is closed unmerged, because 255 carries its sentence.
 
-The brainstorm of the process spec is under way. Its documents live in the initiatives repo,
-because the work crosses every repo. The decisions record is
-`~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md`, with nine research
-reports in `../research/2026-11-20-process/`, and both specs get written beside it. Each ruling
-goes into the record as Geoff gives it.
+Geoff set the scope on 2026-11-20: the workstation's Claude configuration is aligned with
+Anthropic's docs and well-cited community practice first, and how cc-desk works is decided
+afterward. That work has a record of its own, `claude-config-alignment`, proposed in pull
+request 180 of `glw907/initiatives`. The rulings, the research, a status file, and a launch
+prompt sit in `~/Projects/initiatives/claude-config-alignment/` once it merges, and a fresh
+session in that repo writes the alignment spec.
 
-He ruled that the workstation comes first: the process pieces, then its other skills, agents,
-and docs. The page, the removal of the Go, and the repos wait behind them, and his sitting
-opens in agent view meanwhile.
+Four audits are running from this session: the personal skills outside the process, the
+`standards` plugin, the remaining configuration, and community practice. Each lands in the new
+record's `research/2026-11-20-workstation/` after a check for secrets.
 
-He took agent view's four group names, and the `ask` rule on `gh pr merge` with one confirmation
-per pull request, provided it follows Anthropic's standards. He dropped the 85 percent usage check
-from the new process, where each task's goal carries a time clause. Next is whether a task builds
-on a parent whose review found faults. The rest are in
-`docs/plans/2026-11-20-process-spec-prompt.txt`, where a fresh session picks up.
+His earlier rulings stand: agent view's four group names, the `ask` rule on `gh pr merge`, and
+no 85 percent usage check in the new process. The questions still open are parked in the
+rulings file. The page, the removal of the Go, and the repos wait for the alignment.
 
 ## Open decisions
 

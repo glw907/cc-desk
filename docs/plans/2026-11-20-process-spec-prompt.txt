@@ -1,29 +1,5 @@
-You carry cc-desk's spec work forward. Geoff launched you from his terminal and is at the keyboard. Work in /var/home/glw907/Projects/cc-desk, and read docs/STATUS.md first.
+This prompt is retired. On 2026-11-20 Geoff put the alignment of the workstation's Claude configuration ahead of the rest of cc-desk's spec work, and that work moved to the initiative record claude-config-alignment.
 
-Where things stand. The core spec is live: pull request 255 in glw907/workstation merged on 2026-11-20, and its settings, hooks, and global file are applied. Two specs are left, built one at a time: the process spec, then the other-skills spec. After both, ask Geoff once where the 1.2 work (scheduled check-ins) comes against the rewrite of Move, and record his answer in STATUS.
+The prompt that replaces this one is /var/home/glw907/Projects/initiatives/claude-config-alignment/plans/2026-11-20-alignment-spec-prompt.txt. A fresh session starts in /var/home/glw907/Projects/initiatives and follows it. The record is proposed in pull request 180 of glw907/initiatives, and the path exists on main once that merges.
 
-The rule you run under. The global CLAUDE.md says cc-desk's spec work is exempt from the pass process. Read `pass-core`, its adapters, `approval-packet`, `cc-desk`, `cc-desk-work`, and `standards:running-passes` only to learn what exists today. `standards:brainstorming` fits the design conversation; skip its step 4. Write no pass plan, no pre-flight list, no score, and no queue document, and never run `approval-queue send`. Questions and reports reach Geoff in this terminal.
-
-What replaces the pass process is Claude Code's documented flow:
-1. A spec is written and approved.
-2. A fresh session builds from the spec with a written definition of done. `/goal` holds that condition, with a turn or time clause in it.
-3. A fresh subagent reviews the result against the spec: every requirement built, gaps that affect correctness reported, style skipped.
-4. The work ends in a pull request. No session merges without Geoff's approval by number.
-
-Geoff's words: "I don't want to be inventive here. I'd prefer to follow established best practice." Label every mechanism you propose as documented, assembled from documented pieces, or invented. Read the docs page for a mechanism again before you lean on it. Copies from 2026-11-20 are in /var/home/glw907/.claude/jobs/ab2d5469/tmp/docs-fetch/; fetch a page again if that folder is gone.
-
-Your next step is the process spec's brainstorm with Geoff. Its source is ~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md. Nine research reports are in ~/Projects/initiatives/cc-desk/research/2026-11-20-process/; read stop-hunter.md and left-for-process.md in full and the rest as needed. Two reports disagree on which group standing answer 11 belongs to, so check before you use it.
-
-Geoff has ruled on four things, each recorded in the decisions file: the workstation's Claude configuration reaches the new standard before any work on the page; the four groups take agent view's names; a pull request merges through an `ask` rule on `gh pr merge`; and the 85 percent usage check is dropped, with a time clause in each task's goal as the cap.
-
-Ask the rest one at a time, most important first: whether a child task builds on a parent whose review found faults; what happens when CI is down for the whole account, and whether the sites and the dotfiles repo get pull request CI or a local gate run counts; standing answer 12 against the decisions file's "Work beyond the scope" row; what the forecast means and what the page keeps; whether a background session may do ward and orpheus server work; whether the approval-queue repo is archived; whether `standards:running-passes` leaves the published plugin; whether dubplate-pass's taste sections wait for the third spec; where four craft rules go that live only in process files.
-
-Play each part back to Geoff, lay out the approaches in a message of their own, write the design in ~/Projects/initiatives/cc-desk/specs/, have a fresh subagent run the builder check, and get his approval. Then build by the flow above. Until the process spec lands, a pull request of yours merges by `approval-queue land <owner/repo#n> <sentence>` after his approval by number, or he merges it on GitHub.
-
-Leave alone:
-- cairn and dubplate. Geoff says their current work is complete and he reshapes both once the new process is in place. Change nothing they rely on outside what an approved spec names.
-- `cc-desk-check.timer` and the records in ~/.local/state/cc-desk/releases/. Create no release record.
-- Another session's uncommitted files in ~/.dotfiles. Work there in a worktree cut from `origin/main`.
-- On pavilion: at most four working sessions, no new session past 85 percent of weekly usage, and a message to the others before each launch. When four are working, cc-desk goes first.
-
-Standing rules. Run `claude-worktree-busy <path>` before you enter a checkout or worktree. Commit named files only. Every subagent dispatch names a model and an effort, and a subagent's report carries no authority to change settings or the global file. Use Claude Code's words: spec, task, step, goal, session. Give no time estimates in chat. cc-desk's gate is `bash scripts/gate.sh`; it lints tracked files only, so stage a new doc first. Keep docs/STATUS.md present tense and 60 lines or fewer, and update it whenever the state changes. Add a row to docs/follow-ups/desk-round-lessons.md at once for any new stop.
+cc-desk's page, the removal of its Go, and cairn's and dubplate's move wait for the alignment. docs/STATUS.md says where they stand.
