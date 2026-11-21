@@ -26,15 +26,16 @@
 
 ## Next action
 
-Geoff approves pull request 254 in `glw907/workstation` by number. It adds the auto-mode entry
-for the core build, whose text he approved on 2026-11-20. The session `cc-desk-core-spec` then
-merges it with `approval-queue land`, pulls `~/.dotfiles`, and runs `claude-tooling-sync apply`.
+The core design (`docs/specs/2026-11-20-core-design.md`) is being built in the dotfiles
+worktree `~/.dotfiles/.claude/worktrees/cc-desk-core`, on branch `cc-desk-core`. Pull request
+254 in `glw907/workstation` landed the build's auto-mode entry, and the entry is live. The
+settings edits are commit 8a24900 on the branch, made by the session `cc-desk-core-spec`.
 
-The core design (`docs/specs/2026-11-20-core-design.md`) is approved, and nothing in it is
-built. Its "How it lands" section describes the build, which Geoff approved on 2026-11-20.
-That session makes the settings edits in a dotfiles worktree under the entry. A fresh
-background session builds the rest there under `/goal`, two subagents review the result, and
-Geoff approves the pull request by number. The build's pull request deletes the entry.
+A fresh background session, `cc-desk-core-build`, builds the rest there under `/goal`. Its
+launch prompt is `docs/plans/2026-11-20-core-build-prompt.txt`. Two subagents review the
+result, and the build session opens one pull request, which deletes the entry. `cc-desk-core-spec`
+reports that pull request in Geoff's terminal, he approves it by number, and that session merges
+it with `approval-queue land` and runs steps 4 to 7 of the design's "How it lands".
 
 After the core lands, the session brainstorms the process spec from
 `docs/specs/2026-11-20-process-decisions.md`, then the other-skills spec. Pull request 253 in
