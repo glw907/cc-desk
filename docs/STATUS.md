@@ -30,20 +30,20 @@ items 101 to 108 in the dotfiles `BACKLOG.md`; item 108 is the look at one week 
 due 2026-11-27. Pull request 253 is closed unmerged, because 255 carries its sentence.
 
 The brainstorm of the process spec is under way. Its documents live in the initiatives repo,
-which Geoff raised on 2026-11-20 because the work crosses every repo. The decisions record is
+because the work crosses every repo. The decisions record is
 `~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md`, with nine research
-reports in `../research/2026-11-20-process/`, and both specs get written beside it. Each
-ruling goes into the record as he gives it. He took agent view's four group names as they are.
+reports in `../research/2026-11-20-process/`, and both specs get written beside it. Each ruling
+goes into the record as Geoff gives it.
 
-He ruled that the workstation comes first: its Claude configuration reaches the new standard
-in full, and only then does work on the page begin. The process pieces land first, then the
-workstation's other skills, agents, and docs. The page, the removal of the Go, and the repos
-wait behind them, and his sitting opens in agent view meanwhile.
+He ruled that the workstation comes first: the process pieces, then its other skills, agents,
+and docs. The page, the removal of the Go, and the repos wait behind them, and his sitting
+opens in agent view meanwhile.
 
-He took the `ask` rule on `gh pr merge`, with one confirmation per pull request, provided it
-follows Anthropic's standards. Background sessions run in `dontAsk` mode, and
-`approval-queue land` retires when the rule lands. The budget caps are the next question. The
-rest are in `docs/plans/2026-11-20-process-spec-prompt.txt`, where a fresh session picks up.
+He took agent view's four group names, and the `ask` rule on `gh pr merge` with one confirmation
+per pull request, provided it follows Anthropic's standards. He dropped the 85 percent usage check
+from the new process, where each task's goal carries a time clause. Next is whether a task builds
+on a parent whose review found faults. The rest are in
+`docs/plans/2026-11-20-process-spec-prompt.txt`, where a fresh session picks up.
 
 ## Open decisions
 
