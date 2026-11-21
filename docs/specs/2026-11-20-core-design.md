@@ -18,7 +18,7 @@ Two files sit beside this one:
   new deny rules, one row each, with the outcome and the reason.
 
 The second spec replaces the development process. What Geoff decided about it is recorded in
-[2026-11-20-process-decisions.md](2026-11-20-process-decisions.md).
+`~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md`.
 
 ## What is wrong today
 

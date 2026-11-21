@@ -16,7 +16,6 @@
   `docs/plans/2026-11-18-desk-skills-round.md`), with the skills pinned at `v0.1.0`. Its report
   is `~/Projects/initiatives/cc-desk/reports/desk-report.md`. Each stop in it has a row in
   `docs/follow-ups/desk-round-lessons.md`, which the 1.1 round answers (standing answer 34).
-
 - Geoff's sitting of 2026-11-20 finished the desk round. One answer launched the
   `stuck-sessions` pass, and the timed check merged its pull request 24 with no approve from
   him, then started a conductor that recorded the round's report, which he has read. The desk
@@ -33,14 +32,18 @@ and both auto-mode outputs are in a comment on the pull request. What the review
 items 101 to 108 in the dotfiles `BACKLOG.md`; item 108 is the look at one week of refusals,
 due 2026-11-27. Pull request 253 is closed unmerged, because 255 carries its sentence.
 
-The brainstorm of the process spec is next, from `docs/specs/2026-11-20-process-decisions.md`,
-with nine research reports in `~/.cache/cc-desk-process-research/`. The brainstorm is under
-way, and each ruling goes into the decisions file as Geoff gives it. He took agent view's four
-group names as they are. The question in front of him is how a pull request merges: he asked
-why `approval-queue` is still in use, and the proposal is an `ask` rule on `gh pr merge` and
-`dontAsk` mode for background sessions, which retires `approval-queue land`. The rest of the
-questions are listed in `docs/plans/2026-11-20-process-spec-prompt.txt`, which a fresh session
-picks this up from. The other-skills spec follows.
+The brainstorm of the process spec is under way. Its documents live in the initiatives repo,
+which Geoff raised on 2026-11-20 because the work crosses every repo. The decisions record is
+`~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md`, with nine research
+reports in `../research/2026-11-20-process/`, and both specs get written beside it. Each
+ruling goes into the record as he gives it. He took agent view's four group names as they are.
+
+Two questions are in front of him. He said the workstation's Claude configuration is updated
+in full before anything else changes, and he is asked how far that reaches: the process
+pieces only, or every workstation skill, agent, and doc ahead of any repo. The merge question
+waits behind it: an `ask` rule on `gh pr merge` and `dontAsk` mode for background sessions,
+which retires `approval-queue land`. The rest are listed in
+`docs/plans/2026-11-20-process-spec-prompt.txt`, which a fresh session picks this up from.
 
 ## Open decisions
 

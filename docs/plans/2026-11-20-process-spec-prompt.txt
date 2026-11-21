@@ -12,7 +12,7 @@ What replaces the pass process is Claude Code's documented flow:
 
 Geoff's words: "I don't want to be inventive here. I'd prefer to follow established best practice." Label every mechanism you propose as documented, assembled from documented pieces, or invented. Read the docs page for a mechanism again before you lean on it. Copies from 2026-11-20 are in /var/home/glw907/.claude/jobs/ab2d5469/tmp/docs-fetch/; fetch a page again if that folder is gone.
 
-Your next step is the process spec's brainstorm with Geoff. Its source is docs/specs/2026-11-20-process-decisions.md. Nine research reports are in ~/.cache/cc-desk-process-research/; read stop-hunter.md and left-for-process.md in full and the rest as needed. Two reports disagree on which group standing answer 11 belongs to, so check before you use it.
+Your next step is the process spec's brainstorm with Geoff. Its source is ~/Projects/initiatives/cc-desk/specs/2026-11-20-process-decisions.md. Nine research reports are in ~/Projects/initiatives/cc-desk/research/2026-11-20-process/; read stop-hunter.md and left-for-process.md in full and the rest as needed. Two reports disagree on which group standing answer 11 belongs to, so check before you use it.
 
 Two questions are already open with Geoff. Take them first, one at a time:
 - The names of the four groups his sitting opens on. He ruled they use Claude Code's words. The proposal is agent view's groups (`Ready for review`, `Needs input`, `Working`, `Completed`), with Code Review's `Important` severity marking what to read first.
