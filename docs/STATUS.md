@@ -26,9 +26,9 @@
 
 ## Next action
 
-Geoff approves the text of one auto-mode entry for the core build. The session
-`cc-desk-core-spec` then lands the entry as a pull request of its own in `glw907/workstation`,
-pulls, and runs `claude-tooling-sync apply`.
+Geoff approves pull request 254 in `glw907/workstation` by number. It adds the auto-mode entry
+for the core build, whose text he approved on 2026-11-20. The session `cc-desk-core-spec` then
+merges it with `approval-queue land`, pulls `~/.dotfiles`, and runs `claude-tooling-sync apply`.
 
 The core design (`docs/specs/2026-11-20-core-design.md`) is approved, and nothing in it is
 built. Its "How it lands" section describes the build, which Geoff approved on 2026-11-20.
