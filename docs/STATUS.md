@@ -37,10 +37,12 @@ result, and the build session opens one pull request, which deletes the entry. `
 reports that pull request in Geoff's terminal, he approves it by number, and that session merges
 it with `approval-queue land` and runs steps 4 to 7 of the design's "How it lands".
 
-After the core lands, the session brainstorms the process spec from
-`docs/specs/2026-11-20-process-decisions.md`, then the other-skills spec. Pull request 253 in
-the dotfiles repo is still open. It adds the sentence to the global `CLAUDE.md` that exempts
-cc-desk's spec work from the pass process.
+The brainstorm of the process spec runs beside the build, from
+`docs/specs/2026-11-20-process-decisions.md`. Geoff ruled on 2026-11-20 that his sitting opens
+on four groups: "Ready to merge", "Read before merging", "Couldn't finish", and "Held for
+you". Nine read-only research agents are gathering what the spec owes. The other-skills spec
+follows. Pull request 253 in the dotfiles repo is still open. It adds the sentence to the
+global `CLAUDE.md` that exempts cc-desk's spec work from the pass process.
 
 ## Open decisions
 
