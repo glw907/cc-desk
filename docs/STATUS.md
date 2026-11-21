@@ -16,12 +16,9 @@
   `docs/plans/2026-11-18-desk-skills-round.md`), with the skills pinned at `v0.1.0`. Its report
   is `~/Projects/initiatives/cc-desk/reports/desk-report.md`. Each stop in it has a row in
   `docs/follow-ups/desk-round-lessons.md`, which the 1.1 round answers (standing answer 34).
-- Geoff's sitting of 2026-11-20 finished the desk round. One answer launched the
-  `stuck-sessions` pass, and the timed check merged its pull request 24 with no approve from
-  him, then started a conductor that recorded the round's report, which he has read. The desk
-  now lays out every question with each answer on its own line (pull request 25, skill tag
-  `v0.1.1`). The terminal link's "Always allow" held in Chromium, and pull request 26 lets its
-  handler find `cc-desk` from the desktop's `PATH`.
+- Geoff's sitting of 2026-11-20 finished the desk round, and he has read its report. The
+  `stuck-sessions` pass landed as pull request 24, the desk's question layout as 25 (skill tag
+  `v0.1.1`), and the terminal link's `PATH` fix as 26.
 
 ## Next action
 
@@ -38,12 +35,15 @@ which Geoff raised on 2026-11-20 because the work crosses every repo. The decisi
 reports in `../research/2026-11-20-process/`, and both specs get written beside it. Each
 ruling goes into the record as he gives it. He took agent view's four group names as they are.
 
-Two questions are in front of him. He said the workstation's Claude configuration is updated
-in full before anything else changes, and he is asked how far that reaches: the process
-pieces only, or every workstation skill, agent, and doc ahead of any repo. The merge question
-waits behind it: an `ask` rule on `gh pr merge` and `dontAsk` mode for background sessions,
-which retires `approval-queue land`. The rest are listed in
-`docs/plans/2026-11-20-process-spec-prompt.txt`, which a fresh session picks this up from.
+He ruled that the workstation comes first: its Claude configuration reaches the new standard
+in full, and only then does work on the page begin. The process pieces land first, then the
+workstation's other skills, agents, and docs. The page, the removal of the Go, and the repos
+wait behind them, and his sitting opens in agent view meanwhile.
+
+He took the `ask` rule on `gh pr merge`, with one confirmation per pull request, provided it
+follows Anthropic's standards. Background sessions run in `dontAsk` mode, and
+`approval-queue land` retires when the rule lands. The budget caps are the next question. The
+rest are in `docs/plans/2026-11-20-process-spec-prompt.txt`, where a fresh session picks up.
 
 ## Open decisions
 
