@@ -49,7 +49,9 @@ cc-desk's spec work from the pass process.
 - The Move design (`docs/specs/2026-11-19-move-design.md`) is rewritten after the process spec,
   which is the bar cairn and dubplate join cc-desk at. Geoff said on 2026-11-20 that both
   projects' current work is complete: dubplate's `structure` round is paused at his request,
-  and cairn's `checks` round is closing on pull request 262.
+  and cairn's `checks` round is closing on pull request 262. Both hold new work, and he
+  reshapes them once the new process is in place, so the process spec replaces the old process
+  outright and keeps no second set of rules alive.
 - The conductors of dubplate and cairn-cms share one rule with cc-desk's sessions (agreed
   2026-11-20): at most four planners or executors on pavilion, no new session past 85 percent
   weekly usage, and a message to the others before each launch.
