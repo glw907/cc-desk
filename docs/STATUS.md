@@ -31,11 +31,11 @@ worktree `~/.dotfiles/.claude/worktrees/cc-desk-core`, on branch `cc-desk-core`.
 254 in `glw907/workstation` landed the build's auto-mode entry, and the entry is live. The
 settings edits are commit 8a24900 on the branch, made by the session `cc-desk-core-spec`.
 
-A fresh background session, `cc-desk-core-build`, builds the rest there under `/goal`. Its
-launch prompt is `docs/plans/2026-11-20-core-build-prompt.txt`. Two subagents review the
-result, and the build session opens one pull request, which deletes the entry. `cc-desk-core-spec`
-reports that pull request in Geoff's terminal, he approves it by number, and that session merges
-it with `approval-queue land` and runs steps 4 to 7 of the design's "How it lands".
+The background session `cc-desk-core-build` built the rest there under `/goal` and opened pull
+request 255 in `glw907/workstation`, which deletes the entry. Two subagents reviewed it, and
+the dotfiles gate passes at its head, 902b572. It waits for Geoff's approval by number. On his
+approval `cc-desk-core-spec` merges it with `approval-queue land`, runs steps 4 to 7 of the
+design's "How it lands", and closes pull request 253, whose sentence 255 already carries.
 
 The brainstorm of the process spec runs beside the build, from
 `docs/specs/2026-11-20-process-decisions.md`. Geoff ruled on 2026-11-20 that his sitting opens
