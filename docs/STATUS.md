@@ -36,9 +36,9 @@ request 180 of `glw907/initiatives`. The rulings, the research, a status file, a
 prompt sit in `~/Projects/initiatives/claude-config-alignment/` once it merges, and a fresh
 session in that repo writes the alignment spec.
 
-Four audits are running from this session: the personal skills outside the process, the
-`standards` plugin, the remaining configuration, and community practice. Each lands in the new
-record's `research/2026-11-20-workstation/` after a check for secrets.
+Four audits are done and sit in the same pull request, under the record's
+`research/2026-11-20-workstation/`: the personal skills outside the process, the `standards`
+plugin, the remaining configuration, and community practice. This session's work ends there.
 
 His earlier rulings stand: agent view's four group names, the `ask` rule on `gh pr merge`, and
 no 85 percent usage check in the new process. The questions still open are parked in the
