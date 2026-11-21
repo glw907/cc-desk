@@ -360,33 +360,41 @@ stays as it is.
 
 ## How it lands
 
-After approving this design, Geoff ruled on 2026-11-20 that cc-desk's spec work no longer runs
-under the pass process. The global file says so once dotfiles pull request 253 merges, and
-[2026-11-20-core-claude-md.txt](2026-11-20-core-claude-md.txt) carries the same sentence. The
-rest of this section was written for a pass and hasn't been rewritten. The build session
-rewrites it with Geoff before it builds, from the list in
-`docs/plans/2026-11-20-relaunch-prompt.txt`. Steps 4 to 7 and the one-week look describe how
-the change goes live, and they hold either way.
+cc-desk's spec work doesn't run under the pass process (Geoff, 2026-11-20). This spec is built
+by the flow on Claude Code's best-practices page. A fresh session builds from this file in a
+worktree of `~/.dotfiles` cut from `origin/main`. `/goal` holds the definition of done, which
+is "What done looks like" read against the worktree. There is no plan. The launch prompt lives
+in cc-desk's `docs/plans/` and names this file.
 
-The work is one pass under today's `dotfiles-pass`, in a worktree of `~/.dotfiles`. Its paths
-fall in the `runner` and `auth-data` risk classes, so the review carries the `auth-data` bar.
-The plan and the launch prompt live in cc-desk's `docs/plans/`. The pull request body names
-this file.
+Two fresh subagents read the result before the pull request opens. The first checks the diff
+against this spec: every requirement built, gaps that affect correctness reported, style
+skipped. The second reads the four hook scripts and the deny rules and looks for a way around
+each. The build session fixes what they find or lists it in the pull request.
 
-Auto mode treats a session's edits to its own hooks and settings as self-modification. It
-refused three edits to `settings.json` in dotfiles worktrees between 2026-11-01 and 2026-11-20.
-The standing entries clear only allow rules, skill text, and `CLAUDE.md` text. The pass needs
-one more grant, and it gets it the way the last three cc-desk rounds did. The plan's pre-flight
-list carries the text of one auto-mode entry that clears those edits for this pass, inside its
-worktree and for the files this spec names. Geoff approves that text with the plan, and the
-planning session commits it before the build starts. The pull request's diff deletes the entry,
-so the grant ends at the merge it served. The counts in this spec are the counts after that
-merge.
+`claude/.claude/settings.json` sits in a `.claude` directory, which Claude Code protects. In
+auto mode every write there goes to the classifier, and no allow rule can approve it ahead of
+time. The classifier refused such edits in dotfiles worktrees between 2026-11-01 and
+2026-11-20. The standing entries clear only allow rules, skill text, and `CLAUDE.md` text.
+Geoff picked one auto-mode entry that clears the build's edits, inside its worktree and for
+the files this spec names (2026-11-20). He approves its text in his terminal. The entry reaches
+the settings through a pull request of its own, which lands before the build starts. The
+build's pull request deletes it, so the grant ends at the merge it served. The classifier still
+decides each edit. If it refuses one with the entry in place, Geoff answers a permission
+prompt for that edit. The counts in this spec are the counts after the build's merge.
 
-1. The session builds in the worktree and runs `bash scripts/gate.sh` there.
-2. It opens the pull request and reports to Geoff in his terminal.
-3. Geoff approves the pull request by number. The session lands it with
-   `approval-queue land`, which is today's process.
+The build's pull request body names this file and the cc-desk commit that holds the approved
+global-file text. It lists what each review found and what was done about it, carries the
+one-time check from done item 2, and lists steps 4 to 7 under "After the merge". It has no
+"Before merge" heading, because `approval-queue land` refuses a pull request that has one.
+
+1. The session Geoff is talking to cuts the worktree, makes the settings edits there under the
+   entry, and commits them. A fresh background session then builds the rest in that worktree
+   under `/goal` and runs `bash scripts/gate.sh` there.
+2. The two reviews run. The build session opens the pull request, and the session Geoff is
+   talking to reports it in his terminal.
+3. Geoff approves the pull request by number in his terminal, and that session merges it with
+   `approval-queue land`. `claude-merge-guard` refuses every other merge command from a
+   session, and this spec keeps the guard and its message. He can merge on GitHub instead.
 4. The session runs `claude-worktree-busy ~/.dotfiles`. When no other session is writing
    there, it pulls. The hook scripts are now live in every session, and the global file and
    the path rule in every session that starts from then on. The other session's two files aren't in this pull request, so the pull leaves them
@@ -397,7 +405,7 @@ merge.
 6. It runs `claude auto-mode critique` and `claude auto-mode config` and posts both outputs on
    the pull request, with the allow and environment counts read at that moment. Anything the
    critique flags becomes a backlog item in the dotfiles repo.
-7. It runs one `gitleaks git` scan, as every dotfiles pass does at close.
+7. It runs one `gitleaks git` scan.
 
 Between steps 4 and 5 the new hook scripts run under the old registrations. That is safe,
 because no script is renamed and the old registrations name the same files.
@@ -405,7 +413,7 @@ because no script is renamed and the old registrations name the same files.
 One week after step 5, a session reads `~/.local/state/claude-denials.jsonl` and every refusal
 the two new checks made, found in the session records. It marks each refusal right or wrong.
 A check with more wrong refusals than right ones gets a backlog item to narrow or remove it.
-The pass files this look as a dated backlog item when it closes.
+The session files this look as a dated backlog item in the dotfiles repo after step 7.
 
 ## When something goes wrong
 
@@ -443,7 +451,7 @@ that does no harm if the hook misses it.
    and 13. By content: none of the nine removed grants is present in the settings,
    `automode-initiatives.json` no longer names the clean-room grant, the `setup-tooling-sweep` grant is present, the phrases "this
    never tells a session to seek approval in chat" and "and merging PRs" are gone, and "by the
-   PID it recorded at start" is present. The pass's pre-flight entry is gone too.
+   PID it recorded at start" is present. The build's auto-mode entry is gone too.
 5. Every hook `command` in `~/.claude/settings.json` starts with `~/`, and there are 16 of
    them. `jq` shows `onFailure: block` on `claude-tierguard`, `async` on both
    `claude-awake-touch` registrations, no `args` key on any hook, and no
@@ -478,7 +486,7 @@ that does no harm if the hook misses it.
   out.
 - The exact wording of each new refusal message, as long as it names what to run instead.
 - The harmless command used to probe each new deny rule.
-- The exact text of the pass's pre-flight auto-mode entry, which Geoff reads in the plan.
+- The exact text of the build's auto-mode entry, which Geoff reads in his terminal.
 - The order of commits inside the pull request, within two rules: the hook and its text change
   share a commit, and the `~/` hook paths land no later than `onFailure: block` on
   `claude-tierguard`.
@@ -546,8 +554,8 @@ the design session's. The first six change something Geoff sees or does.
 3. **Date markers leave the global file.** His rulings stay; the "(Geoff, 2026-…)" tags go.
 4. **The Google Workspace connector skill is turned off** in Claude Code.
 5. **One finished-pass grant is kept** until his live-setup sitting.
-6. **The pass gets one auto-mode entry.** Geoff reads its text in the plan, and the pull
-   request deletes it.
+6. **The build gets one auto-mode entry.** Geoff picked it over answering permission prompts
+   (2026-11-20). He reads its text in his terminal, and the build's pull request deletes it.
 7. The 120-line cap stays, and the file lands as one rewrite.
 8. The new checks go into `claude-merge-guard`, and no new hook script is written.
 9. `claude-tail-guard` is widened and its text line is kept, where the review had suggested
@@ -556,7 +564,7 @@ the design session's. The first six change something Geoff sees or does.
     dubplate tracks 28 allow-listed token fixtures a content scan would refuse.
 11. The writing-voice pointer stays in the global file, because subagents don't get the output
     style.
-12. The plan lives in cc-desk's `docs/plans/`, and the pass runs under `dotfiles-pass`.
+12. The launch prompt lives in cc-desk's `docs/plans/`. There is no plan and no pass.
 13. `~/.dotfiles/.claude/settings.local.json` and `claude-approval-queue-reminder` are left
     alone.
 
@@ -603,7 +611,11 @@ means it is ours.
 | Path rules for one kind of file | Documented | Memory page |
 | `skillOverrides` set to `"off"` | Documented | Skills page. Whether it reaches an `anthropic-skills:` name is checked at the build |
 | `claude auto-mode critique` and `config` | Documented | Auto-mode configuration page |
-| An `autoMode.allow` entry for one pass | Assembled | The entry is documented on the permission-modes page; writing it into a plan's pre-flight list and deleting it in the same pull request is today's process |
+| A fresh session builds from the spec under `/goal`, and a subagent reviews the diff against the spec | Documented | Best-practices page and the `/goal` page |
+| A second review that attacks the hooks and the deny rules | Assembled | The subagent review is documented; its aim is ours |
+| An `autoMode.allow` entry for one build | Assembled | The entry is documented on the permission-modes page; adding it in one pull request and deleting it in the next is ours |
+| Geoff answers a permission prompt when the classifier refuses an edit the entry names | Documented | Permission-modes page: leave auto mode to run a step the classifier won't clear |
+| Settings edits made first, by the session Geoff is talking to | Assembled | Both halves are documented; the split is ours |
 | One outcome for every line | Assembled | The docs name the moves; the row-by-row pass is ours |
 | Hook commands that start with `~/` | Assembled | The hooks guide gives a full path as the fix for "command not found". The hooks reference says a command with no `args` runs through `sh -c`, which expands `~/`. The SessionStart hook is registered this way today |
 | The 120-line cap | Assembled | Stricter than the documented 200 |

@@ -26,22 +26,23 @@
 
 ## Next action
 
-Geoff merges dotfiles pull request 253 (`glw907/workstation`) and relaunches. The brainstorm of
-2026-11-20 split the work into three specs: the core, the process, and the other skills
-(`docs/specs/2026-11-20-process-decisions.md`). The core design
-(`docs/specs/2026-11-20-core-design.md`) is approved, and nothing in it is built. Pull request
-253 adds one sentence to the global `CLAUDE.md` that exempts cc-desk's spec work from the pass
-process. The relaunched session builds the core spec by Claude Code's documented flow, then
-brainstorms the process spec.
+Geoff approves the text of one auto-mode entry for the core build. The session
+`cc-desk-core-spec` then lands the entry as a pull request of its own in `glw907/workstation`,
+pulls, and runs `claude-tooling-sync apply`.
 
-```bash
-claude --model claude-fable-5-2 --effort high --name cc-desk-core-spec "$(cat /var/home/glw907/Projects/cc-desk/docs/plans/2026-11-20-relaunch-prompt.txt)"
-```
+The core design (`docs/specs/2026-11-20-core-design.md`) is approved, and nothing in it is
+built. Its "How it lands" section describes the build, which Geoff approved on 2026-11-20.
+That session makes the settings edits in a dotfiles worktree under the entry. A fresh
+background session builds the rest there under `/goal`, two subagents review the result, and
+Geoff approves the pull request by number. The build's pull request deletes the entry.
+
+After the core lands, the session brainstorms the process spec from
+`docs/specs/2026-11-20-process-decisions.md`, then the other-skills spec. Pull request 253 in
+the dotfiles repo is still open. It adds the sentence to the global `CLAUDE.md` that exempts
+cc-desk's spec work from the pass process.
 
 ## Open decisions
 
-- The core design's "How it lands" describes a pass. The relaunched session rewrites it and
-  shows Geoff, who also picks how its settings edits get past auto mode.
 - Where the 1.2 work (scheduled check-ins) comes against the rewrite of Move is asked once, at
   the end of the design work.
 - The Move design (`docs/specs/2026-11-19-move-design.md`) is rewritten after the process spec,
