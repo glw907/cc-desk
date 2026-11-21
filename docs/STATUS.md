@@ -31,14 +31,10 @@ due 2026-11-27. Pull request 253 is closed unmerged, because 255 carries its sen
 
 Geoff set the scope on 2026-11-20: the workstation's Claude configuration is aligned with
 Anthropic's docs and well-cited community practice first, and how cc-desk works is decided
-afterward. That work has a record of its own, `claude-config-alignment`, proposed in pull
-request 180 of `glw907/initiatives`. The rulings, the research, a status file, and a launch
-prompt sit in `~/Projects/initiatives/claude-config-alignment/` once it merges, and a fresh
-session in that repo writes the alignment spec.
-
-Four audits are done and sit in the same pull request, under the record's
-`research/2026-11-20-workstation/`: the personal skills outside the process, the `standards`
-plugin, the remaining configuration, and community practice. This session's work ends there.
+afterward. That work has a record of its own, `claude-config-alignment`, which he approved as
+pull request 180 of `glw907/initiatives`. The rulings, 13 research reports, a status file, and
+a launch prompt sit in `~/Projects/initiatives/claude-config-alignment/`, and a fresh session
+in that repo writes the alignment spec. No cc-desk session has work until it lands.
 
 His earlier rulings stand: agent view's four group names, the `ask` rule on `gh pr merge`, and
 no 85 percent usage check in the new process. The questions still open are parked in the

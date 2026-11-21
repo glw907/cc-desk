@@ -1,5 +1,5 @@
 This prompt is retired. On 2026-11-20 Geoff put the alignment of the workstation's Claude configuration ahead of the rest of cc-desk's spec work, and that work moved to the initiative record claude-config-alignment.
 
-The prompt that replaces this one is /var/home/glw907/Projects/initiatives/claude-config-alignment/plans/2026-11-20-alignment-spec-prompt.txt. A fresh session starts in /var/home/glw907/Projects/initiatives and follows it. The record is proposed in pull request 180 of glw907/initiatives, and the path exists on main once that merges.
+The prompt that replaces this one is /var/home/glw907/Projects/initiatives/claude-config-alignment/plans/2026-11-20-alignment-spec-prompt.txt. A fresh session starts in /var/home/glw907/Projects/initiatives and follows it. Geoff approved the record as pull request 180 of glw907/initiatives.
 
 cc-desk's page, the removal of its Go, and cairn's and dubplate's move wait for the alignment. docs/STATUS.md says where they stand.
